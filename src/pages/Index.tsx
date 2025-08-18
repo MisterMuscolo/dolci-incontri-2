@@ -49,7 +49,7 @@ export default function Index({ session }: IndexProps) {
                     <SelectTrigger className="w-full pl-10">
                       <SelectValue placeholder="Città" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-72">
                       <SelectItem value="tutte">Tutte le città</SelectItem>
                       {italianProvinces.map((province) => (
                         <SelectItem key={province.value} value={province.label}>
