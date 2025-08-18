@@ -12,6 +12,7 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
 
   useEffect(() => {
     const tab = searchParams.get('tab');
@@ -20,11 +21,13 @@ export default function Auth() {
     } else {
       setActiveTab('login');
     }
+    setIsResettingPassword(false);
   }, [searchParams]);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     setSearchParams({ tab: value });
+    setIsResettingPassword(false);
   };
 
   const handleLogin = async () => {
@@ -52,6 +55,25 @@ export default function Auth() {
     }
   };
 
+  const handlePasswordReset = async () => {
+    if (!email) {
+      showError('Inserisci il tuo indirizzo email.');
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin,
+    });
+    setLoading(false);
+    
+    if (error) {
+      showError(error.message);
+    } else {
+      showSuccess('Controlla la tua email per il link di recupero.');
+      setIsResettingPassword(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-rose-100 via-white to-sky-100">
       <div className="w-full max-w-md p-8 space-y-6 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg">
@@ -62,37 +84,79 @@ export default function Auth() {
           </TabsList>
           
           <TabsContent value="login">
-            <div className="space-y-4 pt-6">
-              <Input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <Input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <Button 
-                className="w-full bg-rose-500 hover:bg-rose-600" 
-                onClick={handleLogin}
-                disabled={loading}
-              >
-                {loading ? 'Caricamento...' : 'Accedi'}
-              </Button>
-              <p className="text-center text-sm text-gray-600 pt-2">
-                Non hai un account?{' '}
-                <button
-                  type="button"
-                  onClick={() => handleTabChange('register')}
-                  className="font-semibold text-rose-500 hover:text-rose-600 focus:outline-none"
+            {isResettingPassword ? (
+              <div className="space-y-4 pt-6">
+                <h3 className="text-center font-semibold text-gray-700">Recupera la tua password</h3>
+                <p className="text-center text-sm text-gray-600">
+                  Inserisci la tua email e ti invieremo un link per reimpostare la password.
+                </p>
+                <Input
+                  type="email"
+                  placeholder="La tua email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <Button 
+                  className="w-full bg-rose-500 hover:bg-rose-600" 
+                  onClick={handlePasswordReset}
+                  disabled={loading}
                 >
-                  Registrati
-                </button>
-              </p>
-            </div>
+                  {loading ? 'Invio in corso...' : 'Invia link di recupero'}
+                </Button>
+                <p className="text-center text-sm text-gray-600 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsResettingPassword(false)}
+                    className="font-semibold text-rose-500 hover:text-rose-600 focus:outline-none"
+                  >
+                    Torna al login
+                  </button>
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4 pt-6">
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <div className="space-y-1">
+                  <Input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <div className="text-right">
+                    <button
+                      type="button"
+                      onClick={() => setIsResettingPassword(true)}
+                      className="text-sm font-semibold text-rose-500 hover:text-rose-600 focus:outline-none"
+                    >
+                      Hai dimenticato la password?
+                    </button>
+                  </div>
+                </div>
+                <Button 
+                  className="w-full bg-rose-500 hover:bg-rose-600" 
+                  onClick={handleLogin}
+                  disabled={loading}
+                >
+                  {loading ? 'Caricamento...' : 'Accedi'}
+                </Button>
+                <p className="text-center text-sm text-gray-600 pt-2">
+                  Non hai un account?{' '}
+                  <button
+                    type="button"
+                    onClick={() => handleTabChange('register')}
+                    className="font-semibold text-rose-500 hover:text-rose-600 focus:outline-none"
+                  >
+                    Registrati
+                  </button>
+                </p>
+              </div>
+            )}
           </TabsContent>
           
           <TabsContent value="register">
