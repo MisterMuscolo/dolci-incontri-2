@@ -33,6 +33,7 @@ export default function Index({ session }: IndexProps) {
                       <SelectValue placeholder="Categoria" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="tutte">Tutte le categorie</SelectItem>
                       <SelectItem value="donna-cerca-uomo">👩‍❤️‍👨 Donna cerca Uomo</SelectItem>
                       <SelectItem value="uomo-cerca-donna">👨‍❤️‍👩 Uomo cerca Donna</SelectItem>
                       <SelectItem value="coppie">👩‍❤️‍💋‍👨 Coppie</SelectItem>
@@ -49,8 +50,9 @@ export default function Index({ session }: IndexProps) {
                       <SelectValue placeholder="Città" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="tutte">Tutte le città</SelectItem>
                       {italianProvinces.map((province) => (
-                        <SelectItem key={province.value} value={province.value}>
+                        <SelectItem key={province.value} value={province.label}>
                           {province.label}
                         </SelectItem>
                       ))}
