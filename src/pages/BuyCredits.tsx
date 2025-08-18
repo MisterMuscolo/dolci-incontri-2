@@ -1,3 +1,4 @@
+import React from 'react'; // Aggiunto questo import
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
