@@ -16,9 +16,15 @@ import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast
 
 const listingSchema = z.object({
   category: z.string({ required_error: 'La categoria è obbligatoria.' }),
+  city: z.string({ required_error: 'La città è obbligatoria.' }),
+  zone: z.string().optional(),
+  age: z.string()
+    .min(1, "L'età è obbligatoria.")
+    .refine((val) => !isNaN(parseInt(val, 10)), { message: "L'età deve essere un numero." })
+    .refine((val) => parseInt(val, 10) >= 18, { message: "Devi avere almeno 18 anni." }),
   title: z.string().min(5, 'Il titolo deve avere almeno 5 caratteri.').max(100, 'Il titolo non può superare i 100 caratteri.'),
   description: z.string().min(20, 'La descrizione deve avere almeno 20 caratteri.'),
-  city: z.string({ required_error: 'La città è obbligatoria.' }),
+  email: z.string().email("L'email non è valida.").optional().or(z.literal('')),
   phone: z.string().optional(),
 });
 
@@ -30,6 +36,11 @@ const NewListing = () => {
 
   const form = useForm<z.infer<typeof listingSchema>>({
     resolver: zodResolver(listingSchema),
+    defaultValues: {
+      zone: '',
+      email: '',
+      phone: '',
+    }
   });
 
   const onSubmit = async (values: z.infer<typeof listingSchema>) => {
@@ -44,10 +55,17 @@ const NewListing = () => {
         throw new Error('Devi caricare almeno una foto.');
       }
 
+      const { age, ...restOfValues } = values;
+      const submissionData = {
+        ...restOfValues,
+        age: parseInt(age, 10),
+        user_id: user.id,
+      };
+
       // 1. Insert listing data
       const { data: listingData, error: listingError } = await supabase
         .from('listings')
-        .insert({ ...values, user_id: user.id })
+        .insert(submissionData)
         .select('id')
         .single();
 
@@ -85,7 +103,6 @@ const NewListing = () => {
       const { error: photosError } = await supabase.from('listing_photos').insert(photoPayloads);
 
       if (photosError) {
-        // Cleanup: delete listing if photo insert fails
         await supabase.from('listings').delete().eq('id', listingId);
         throw new Error(photosError.message || 'Errore nel salvataggio delle foto.');
       }
@@ -112,28 +129,72 @@ const NewListing = () => {
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Categoria</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger><SelectValue placeholder="Seleziona una categoria" /></SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="donna-cerca-uomo">👩‍❤️‍👨 Donna cerca Uomo</SelectItem>
-                          <SelectItem value="uomo-cerca-donna">👨‍❤️‍👩 Uomo cerca Donna</SelectItem>
-                          <SelectItem value="coppie">👩‍❤️‍💋‍👨 Coppie</SelectItem>
-                          <SelectItem value="uomo-cerca-uomo">👨‍❤️‍👨 Uomo cerca Uomo</SelectItem>
-                          <SelectItem value="donna-cerca-donna">👩‍❤️‍👩 Donna cerca Donna</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Categoria</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger><SelectValue placeholder="Seleziona una categoria" /></SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="donna-cerca-uomo">👩‍❤️‍👨 Donna cerca Uomo</SelectItem>
+                            <SelectItem value="uomo-cerca-donna">👨‍❤️‍👩 Uomo cerca Donna</SelectItem>
+                            <SelectItem value="coppie">👩‍❤️‍💋‍👨 Coppie</SelectItem>
+                            <SelectItem value="uomo-cerca-uomo">👨‍❤️‍👨 Uomo cerca Uomo</SelectItem>
+                            <SelectItem value="donna-cerca-donna">👩‍❤️‍👩 Donna cerca Donna</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Città</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger><SelectValue placeholder="Seleziona una città" /></SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {italianProvinces.map((p) => <SelectItem key={p.value} value={p.label}>{p.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <FormField
+                    control={form.control}
+                    name="zone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Zona (Opzionale)</FormLabel>
+                        <FormControl><Input placeholder="Es. Centro Storico" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="age"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Età</FormLabel>
+                        <FormControl><Input type="number" placeholder="La tua età" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 <FormField
                   control={form.control}
                   name="title"
@@ -159,18 +220,11 @@ const NewListing = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <FormField
                     control={form.control}
-                    name="city"
+                    name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Città</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger><SelectValue placeholder="Seleziona una città" /></SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {italianProvinces.map((p) => <SelectItem key={p.value} value={p.label}>{p.label}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
+                        <FormLabel>Email (Opzionale)</FormLabel>
+                        <FormControl><Input type="email" placeholder="La tua email di contatto" {...field} /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
