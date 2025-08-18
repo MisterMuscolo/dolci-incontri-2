@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, CalendarDays } from "lucide-react";
+import { Pencil, Trash2, CalendarDays, Camera } from "lucide-react";
 import { format } from 'date-fns';
 import { Link } from "react-router-dom";
 
@@ -21,15 +21,21 @@ interface ListingListItemProps {
 }
 
 export const ListingListItem = ({ listing, showControls = false }: ListingListItemProps) => {
-  const primaryPhoto = listing.listing_photos.find(p => p.is_primary)?.url || listing.listing_photos[0]?.url || '/placeholder.svg';
+  const primaryPhoto = listing.listing_photos.find(p => p.is_primary)?.url || listing.listing_photos[0]?.url;
 
   return (
     <Card className="w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row">
       <Link to={`/listing/${listing.id}`} className="flex-grow block hover:bg-gray-50/50">
         <div className="flex flex-col sm:flex-row">
-          <div className="sm:w-1/4 lg:w-1/5 flex-shrink-0">
-            <img src={primaryPhoto} alt={listing.title} className="object-cover w-full h-48 sm:h-full" />
-          </div>
+          {primaryPhoto ? (
+            <div className="sm:w-1/4 lg:w-1/5 flex-shrink-0">
+              <img src={primaryPhoto} alt={listing.title} className="object-cover w-full h-48 sm:h-full" />
+            </div>
+          ) : (
+            <div className="sm:w-1/4 lg:w-1/5 flex-shrink-0 bg-gray-200 flex items-center justify-center h-48 sm:h-full text-gray-500">
+              <Camera className="h-12 w-12" />
+            </div>
+          )}
           <div className="p-4 flex flex-col flex-grow">
             <h3 className="text-xl font-semibold mb-2 text-gray-800 line-clamp-2">{listing.title}</h3>
             <div className="flex flex-wrap gap-2 mb-3">
