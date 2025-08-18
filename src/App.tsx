@@ -14,6 +14,7 @@ import NewListing from "./pages/NewListing";
 import BuyCredits from "./pages/BuyCredits";
 import ProfileSettings from "./pages/ProfileSettings";
 import Layout from "./components/Layout";
+import SearchResults from "./pages/SearchResults";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => {
           <Routes>
             <Route element={<Layout session={session} />}>
               <Route path="/" element={<Index session={session} />} />
+              <Route path="/search" element={<SearchResults />} />
               <Route 
                 path="/auth" 
                 element={!session ? <Auth /> : <Navigate to="/dashboard" />} 

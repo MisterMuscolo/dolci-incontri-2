@@ -4,7 +4,6 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { ImageIcon, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
-// Definiamo un tipo per l'oggetto annuncio per avere un codice più pulito e sicuro
 export interface Listing {
   id: string;
   title: string;
@@ -15,10 +14,10 @@ export interface Listing {
 
 interface ListingCardProps {
   listing: Listing;
+  showControls?: boolean;
 }
 
-export const ListingCard = ({ listing }: ListingCardProps) => {
-  // Troviamo la foto principale tra quelle caricate
+export const ListingCard = ({ listing, showControls = false }: ListingCardProps) => {
   const primaryPhoto = listing.listing_photos.find(p => p.is_primary)?.url || listing.listing_photos[0]?.url;
 
   return (
@@ -41,16 +40,18 @@ export const ListingCard = ({ listing }: ListingCardProps) => {
           <Badge variant="outline">{listing.city}</Badge>
         </div>
       </CardContent>
-      <CardFooter className="flex justify-end gap-2">
-        <Button variant="outline" size="sm">
-          <Pencil className="h-4 w-4 mr-2" />
-          Modifica
-        </Button>
-        <Button variant="destructive" size="sm">
-          <Trash2 className="h-4 w-4 mr-2" />
-          Elimina
-        </Button>
-      </CardFooter>
+      {showControls && (
+        <CardFooter className="flex justify-end gap-2">
+          <Button variant="outline" size="sm">
+            <Pencil className="h-4 w-4 mr-2" />
+            Modifica
+          </Button>
+          <Button variant="destructive" size="sm">
+            <Trash2 className="h-4 w-4 mr-2" />
+            Elimina
+          </Button>
+        </CardFooter>
+      )}
     </Card>
   );
 };
