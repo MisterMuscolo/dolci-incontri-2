@@ -11,7 +11,7 @@ interface CreditPackage {
   price: number; // This is the discounted price
   originalPrice?: number; // Original price for discount calculation
   description: string;
-  features: string[];
+  features: string[]; // Keeping this for data structure, but not rendering
 }
 
 const creditPackages: CreditPackage[] = [
@@ -117,20 +117,7 @@ const BuyCredits = () => {
                   <p className="text-2xl font-extrabold text-gray-900 mb-3 text-left">
                     {pkg.credits} <span className="text-rose-500">crediti</span>
                   </p>
-                  <ul className="text-left text-gray-700 space-y-1 mb-4 w-full">
-                    {pkg.features.map((feature, index) => (
-                      <li key={index} className="flex items-center text-sm">
-                        <CheckCircle className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                    {discountPercentage && (
-                      <li className="flex items-center text-sm text-green-700 font-medium">
-                        <CheckCircle className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                        <span>Risparmio del {discountPercentage}%</span>
-                      </li>
-                    )}
-                  </ul>
+                  {/* Removed the features list as requested */}
                   <Button
                     className="w-full bg-rose-500 hover:bg-rose-600 text-sm py-3"
                     onClick={() => handlePurchase(pkg.name, pkg.price)}
