@@ -72,25 +72,37 @@ const ListingDetails = () => {
   const onSubmit = async (values: z.infer<typeof replySchema>) => {
     setIsSubmitting(true);
     const toastId = showLoading('Invio del messaggio...');
-    try {
-      const { error } = await supabase.functions.invoke('send-reply', {
-        body: {
-          listingId: id,
-          ...values,
-        },
-      });
 
-      if (error) throw new Error(error.message);
+    const { error } = await supabase.functions.invoke('send-reply', {
+      body: {
+        listingId: id,
+        ...values,
+      },
+    });
 
-      dismissToast(toastId);
+    dismissToast(toastId);
+
+    if (error) {
+      let errorMessage = 'Impossibile inviare il messaggio. Riprova più tardi.';
+      // @ts-ignore
+      if (error.context && typeof error.context.body === 'string') {
+        try {
+          // @ts-ignore
+          const errorBody = JSON.parse(error.context.body);
+          if (errorBody.error) {
+            errorMessage = errorBody.error;
+          }
+        } catch (e) {
+          console.error("Could not parse error response from edge function:", e);
+        }
+      }
+      showError(errorMessage);
+    } else {
       showSuccess('Messaggio inviato con successo!');
       form.reset();
-    } catch (error: any) {
-      dismissToast(toastId);
-      showError(error.message || 'Impossibile inviare il messaggio.');
-    } finally {
-      setIsSubmitting(false);
     }
+
+    setIsSubmitting(false);
   };
 
   if (loading) {
