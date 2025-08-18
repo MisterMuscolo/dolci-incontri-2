@@ -4,14 +4,15 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ListFilter } from "lucide-react";
+import { ListFilter, Wallet } from "lucide-react";
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [totalListingsCount, setTotalListingsCount] = useState(0);
+  const [currentCredits, setCurrentCredits] = useState<number | null>(null); // State for current credits
 
   useEffect(() => {
-    const fetchListingsCount = async () => {
+    const fetchData = async () => {
       setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -19,7 +20,8 @@ const Dashboard = () => {
         return;
       }
 
-      const { count, error: countError } = await supabase
+      // Fetch listings count
+      const { count: listingsCount, error: countError } = await supabase
         .from('listings')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
@@ -27,13 +29,27 @@ const Dashboard = () => {
 
       if (countError) {
         console.error("Errore nel conteggio degli annunci:", countError);
-      } else if (count !== null) {
-        setTotalListingsCount(count);
+      } else if (listingsCount !== null) {
+        setTotalListingsCount(listingsCount);
       }
+
+      // Fetch current credits from profiles table
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('credits')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) {
+        console.error("Errore nel recupero dei crediti:", profileError);
+      } else if (profileData) {
+        setCurrentCredits(profileData.credits);
+      }
+
       setLoading(false);
     };
 
-    fetchListingsCount();
+    fetchData();
   }, []);
 
   return (
@@ -70,13 +86,25 @@ const Dashboard = () => {
           </div>
 
           <div className="space-y-6">
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-lg font-semibold mb-4">Portafoglio crediti</h2>
-              <p className="text-gray-600 mb-4">Crediti disponibili: 0</p>
-              <Link to="/buy-credits" className="w-full">
-                <Button className="w-full bg-rose-500 hover:bg-rose-600">Acquista crediti</Button>
-              </Link>
-            </div>
+            <Link to="/credit-history"> {/* Make the entire card clickable */}
+              <Card className="w-full transition-shadow hover:shadow-lg cursor-pointer bg-white hover:bg-gray-50">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                    <Wallet className="h-5 w-5 text-rose-500" />
+                    <span>Portafoglio crediti</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loading ? (
+                    <Skeleton className="h-6 w-1/2" />
+                  ) : (
+                    <p className="text-gray-600 text-xl">
+                      Crediti disponibili: <span className="font-bold text-rose-500">{currentCredits !== null ? currentCredits : 'N/A'}</span>
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </Link>
             
             <div className="bg-white p-6 rounded-lg shadow">
               <h2 className="text-lg font-semibold mb-4">Impostazioni account</h2>
