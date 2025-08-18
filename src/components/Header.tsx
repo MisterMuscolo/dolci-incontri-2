@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart, LogOut, User, PlusCircle } from 'lucide-react';
+import { Heart, LogOut, User, PlusCircle, Shield } from 'lucide-react'; // Aggiunto Shield per l'icona admin
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -13,9 +13,10 @@ import {
 
 interface HeaderProps {
   session: any;
+  isAdmin: boolean; // Aggiunto isAdmin
 }
 
-export const Header = ({ session }: HeaderProps) => {
+export const Header = ({ session, isAdmin }: HeaderProps) => { // Accetta isAdmin
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -61,6 +62,12 @@ export const Header = ({ session }: HeaderProps) => {
                   <DropdownMenuItem onClick={() => navigate('/profile-settings')}>
                     Settings
                   </DropdownMenuItem>
+                  {isAdmin && ( // Mostra solo se l'utente è admin
+                    <DropdownMenuItem onClick={() => navigate('/admin')}>
+                      <Shield className="mr-2 h-4 w-4" />
+                      <span>Dashboard Admin</span>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />

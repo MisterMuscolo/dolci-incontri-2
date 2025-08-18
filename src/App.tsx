@@ -83,7 +83,7 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route element={<Layout session={session} />}>
+            <Route element={<Layout session={session} isAdmin={isAdmin} />}>
               <Route path="/" element={<Index session={session} />} />
               <Route path="/search" element={<SearchResults />} />
               <Route path="/listing/:id" element={<ListingDetails />} />
