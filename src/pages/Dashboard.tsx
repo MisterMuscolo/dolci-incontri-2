@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ListFilter, Wallet } from "lucide-react";
+import { ListFilter, Wallet, Settings } from "lucide-react"; // Import Settings icon
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -97,23 +97,32 @@ const Dashboard = () => {
                 </Link>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between flex-wrap gap-2"> {/* Added flex container */}
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <p className="text-gray-600 text-xl">
                     Crediti disponibili: <span className="font-bold text-rose-500">{currentCredits !== null ? currentCredits : 0}</span>
                   </p>
-                  <Link to="/buy-credits"> {/* Removed w-full from Link */}
-                    <Button className="bg-rose-500 hover:bg-rose-600">Acquista crediti</Button> {/* Removed w-full from Button */}
+                  <Link to="/buy-credits">
+                    <Button className="bg-rose-500 hover:bg-rose-600">Acquista crediti</Button>
                   </Link>
                 </div>
               </CardContent>
             </Card>
             
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-lg font-semibold mb-4">Impostazioni account</h2>
-              <Link to="/profile-settings" className="w-full">
-                <Button className="w-full bg-rose-500 hover:bg-rose-600">Modifica profilo</Button>
-              </Link>
-            </div>
+            <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50"> {/* Wrapped in Card */}
+              <CardHeader>
+                <Link to="/profile-settings" className="block"> {/* Link the header/title */}
+                  <CardTitle className="text-lg font-semibold flex items-center gap-2 cursor-pointer">
+                    <Settings className="h-5 w-5 text-rose-500" /> {/* Added Settings icon */}
+                    <span>Impostazioni account</span>
+                  </CardTitle>
+                </Link>
+              </CardHeader>
+              <CardContent>
+                <Link to="/profile-settings" className="w-full">
+                  <Button className="w-full bg-rose-500 hover:bg-rose-600">Modifica profilo</Button>
+                </Link>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
