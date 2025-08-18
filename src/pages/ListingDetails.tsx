@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
-import { MapPin, Tag, User, Mail, ImageIcon, BookText } from 'lucide-react';
+import { MapPin, Tag, User, Mail, BookText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const replySchema = z.object({
@@ -100,15 +100,8 @@ const ListingDetails = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2 space-y-4">
             <Skeleton className="w-full aspect-video" />
-            <div className="flex gap-2">
-              <Skeleton className="h-20 w-20" />
-              <Skeleton className="h-20 w-20" />
-              <Skeleton className="h-20 w-20" />
-            </div>
           </div>
           <div className="space-y-4">
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-3/4" />
             <Skeleton className="h-40 w-full" />
           </div>
         </div>
@@ -120,37 +113,30 @@ const ListingDetails = () => {
     return <div className="text-center py-20">Annuncio non trovato.</div>;
   }
 
+  const hasPhotos = listing.listing_photos && listing.listing_photos.length > 0;
+
   return (
     <div className="bg-gray-50">
       <div className="container mx-auto p-4 sm:p-6 md:p-8">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          <div className="lg:col-span-3">
-            {listing.listing_photos && listing.listing_photos.length > 0 ? (
-              <>
-                <AspectRatio ratio={16 / 10} className="bg-gray-100 rounded-lg overflow-hidden mb-4">
-                  <img src={activePhoto!} alt={listing.title} className="w-full h-full object-cover" />
-                </AspectRatio>
-                {listing.listing_photos.length > 1 && (
-                  <div className="flex gap-2 overflow-x-auto pb-2">
-                    {listing.listing_photos.map((photo) => (
-                      <button key={photo.id} onClick={() => setActivePhoto(photo.url)} className={cn("w-24 h-24 rounded-md overflow-hidden flex-shrink-0 ring-offset-2 ring-offset-gray-50", activePhoto === photo.url && 'ring-2 ring-rose-500')}>
-                        <img src={photo.url} alt="Thumbnail" className="w-full h-full object-cover" />
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </>
-            ) : (
-              <Card className="flex items-center justify-center min-h-[400px]">
-                <CardContent className="text-center text-gray-500 p-6">
-                  <ImageIcon className="mx-auto h-16 w-16 mb-4" />
-                  <p className="font-medium">Nessuna fotografia disponibile</p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+        <div className={cn("grid grid-cols-1 gap-8", hasPhotos && "lg:grid-cols-5")}>
+          {hasPhotos && (
+            <div className="lg:col-span-3">
+              <AspectRatio ratio={16 / 10} className="bg-gray-100 rounded-lg overflow-hidden mb-4">
+                <img src={activePhoto!} alt={listing.title} className="w-full h-full object-cover" />
+              </AspectRatio>
+              {listing.listing_photos.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                  {listing.listing_photos.map((photo) => (
+                    <button key={photo.id} onClick={() => setActivePhoto(photo.url)} className={cn("w-24 h-24 rounded-md overflow-hidden flex-shrink-0 ring-offset-2 ring-offset-gray-50", activePhoto === photo.url && 'ring-2 ring-rose-500')}>
+                      <img src={photo.url} alt="Thumbnail" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
-          <div className="lg:col-span-2 space-y-6">
+          <div className={cn("space-y-6", hasPhotos ? "lg:col-span-2" : "lg:col-span-5")}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-3xl font-bold text-gray-800">{listing.title}</CardTitle>

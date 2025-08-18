@@ -23,28 +23,53 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { data: listing, error } = await supabaseAdmin
+    const { data: listing, error: listingError } = await supabaseAdmin
       .from('listings')
-      .select('email')
+      .select('email, title')
       .eq('id', listingId)
       .single();
 
-    if (error || !listing) {
+    if (listingError || !listing) {
       throw new Error('Listing not found or could not retrieve author email.');
     }
     
     const toEmail = listing.email;
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
 
-    // In a real application, you would integrate an email service like Resend, SendGrid, or Postmark here.
-    // For now, we'll simulate the email sending process.
-    console.log(`--- SIMULATING EMAIL SEND ---`);
-    console.log(`Recipient: ${toEmail}`);
-    console.log(`Sender: ${fromEmail}`);
-    console.log(`Listing ID: ${listingId}`);
-    console.log(`Message: ${message}`);
-    console.log(`-----------------------------`);
+    if (!resendApiKey) {
+      throw new Error('RESEND_API_KEY is not set in environment variables. Cannot send email.');
+    }
 
-    return new Response(JSON.stringify({ success: true, message: 'Reply sent successfully (simulated).' }), {
+    const emailHtml = `
+      <p>Hai ricevuto una nuova risposta per il tuo annuncio: "<strong>${listing.title}</strong>"</p>
+      <p><strong>Da:</strong> ${fromEmail}</p>
+      <hr>
+      <p><strong>Messaggio:</strong></p>
+      <p style="white-space: pre-wrap; border-left: 2px solid #eee; padding-left: 1em;">${message}</p>
+    `;
+
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${resendApiKey}`,
+      },
+      body: JSON.stringify({
+        from: 'Dolci Incontri <onboarding@resend.dev>',
+        to: [toEmail],
+        subject: `Nuova risposta per il tuo annuncio: "${listing.title}"`,
+        html: emailHtml,
+        reply_to: fromEmail,
+      }),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      console.error('Resend API Error:', errorData);
+      throw new Error('Failed to send email via Resend.');
+    }
+
+    return new Response(JSON.stringify({ success: true, message: 'Reply sent successfully.' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });

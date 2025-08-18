@@ -1,7 +1,7 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { ImageIcon, Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export interface Listing {
@@ -22,17 +22,13 @@ export const ListingCard = ({ listing, showControls = false }: ListingCardProps)
 
   return (
     <Card className="flex flex-col h-full">
-      <CardHeader className="p-0">
-        <AspectRatio ratio={16 / 9} className="rounded-t-lg overflow-hidden">
-          {primaryPhoto ? (
+      {primaryPhoto && (
+        <CardHeader className="p-0">
+          <AspectRatio ratio={16 / 9} className="rounded-t-lg overflow-hidden">
             <img src={primaryPhoto} alt={listing.title} className="object-cover w-full h-full" />
-          ) : (
-            <div className="bg-gray-100 flex flex-col items-center justify-center h-full text-gray-400">
-              <ImageIcon className="h-12 w-12" />
-            </div>
-          )}
-        </AspectRatio>
-      </CardHeader>
+          </AspectRatio>
+        </CardHeader>
+      )}
       <CardContent className="flex-grow p-4">
         <CardTitle className="text-lg mb-2 line-clamp-2">{listing.title}</CardTitle>
         <div className="flex flex-wrap gap-2">
