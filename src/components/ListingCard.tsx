@@ -21,27 +21,27 @@ export const ListingCard = ({ listing, showControls = false }: ListingCardProps)
   const primaryPhoto = listing.listing_photos.find(p => p.is_primary)?.url || listing.listing_photos[0]?.url;
 
   return (
-    <Card className="flex flex-col">
-      <CardHeader>
-        <AspectRatio ratio={16 / 9}>
+    <Card className="flex flex-col h-full">
+      <CardHeader className="p-0">
+        <AspectRatio ratio={16 / 9} className="rounded-t-lg overflow-hidden">
           {primaryPhoto ? (
-            <img src={primaryPhoto} alt={listing.title} className="rounded-t-lg object-cover w-full h-full" />
+            <img src={primaryPhoto} alt={listing.title} className="object-cover w-full h-full" />
           ) : (
-            <div className="bg-gray-100 rounded-t-lg flex items-center justify-center h-full">
-              <ImageIcon className="h-12 w-12 text-gray-400" />
+            <div className="bg-gray-100 flex flex-col items-center justify-center h-full text-gray-400">
+              <ImageIcon className="h-12 w-12" />
             </div>
           )}
         </AspectRatio>
       </CardHeader>
-      <CardContent className="flex-grow">
-        <CardTitle className="text-lg mb-2">{listing.title}</CardTitle>
-        <div className="flex gap-2">
-          <Badge variant="secondary">{listing.category.replace(/-/g, ' ')}</Badge>
+      <CardContent className="flex-grow p-4">
+        <CardTitle className="text-lg mb-2 line-clamp-2">{listing.title}</CardTitle>
+        <div className="flex flex-wrap gap-2">
+          <Badge variant="secondary" className="capitalize">{listing.category.replace(/-/g, ' ')}</Badge>
           <Badge variant="outline">{listing.city}</Badge>
         </div>
       </CardContent>
       {showControls && (
-        <CardFooter className="flex justify-end gap-2">
+        <CardFooter className="flex justify-end gap-2 p-4 pt-0">
           <Button variant="outline" size="sm">
             <Pencil className="h-4 w-4 mr-2" />
             Modifica

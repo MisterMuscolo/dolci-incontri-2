@@ -125,24 +125,28 @@ const ListingDetails = () => {
       <div className="container mx-auto p-4 sm:p-6 md:p-8">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           <div className="lg:col-span-3">
-            <AspectRatio ratio={16 / 10} className="bg-gray-100 rounded-lg overflow-hidden mb-4">
-              {activePhoto ? (
-                <img src={activePhoto} alt={listing.title} className="w-full h-full object-cover" />
-              ) : (
-                <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                  <ImageIcon className="h-16 w-16 mb-2" />
-                  <span>Nessuna foto</span>
-                </div>
-              )}
-            </AspectRatio>
-            {listing.listing_photos.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto pb-2">
-                {listing.listing_photos.map((photo) => (
-                  <button key={photo.id} onClick={() => setActivePhoto(photo.url)} className={cn("w-24 h-24 rounded-md overflow-hidden flex-shrink-0 ring-offset-2 ring-offset-gray-50", activePhoto === photo.url && 'ring-2 ring-rose-500')}>
-                    <img src={photo.url} alt="Thumbnail" className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
+            {listing.listing_photos && listing.listing_photos.length > 0 ? (
+              <>
+                <AspectRatio ratio={16 / 10} className="bg-gray-100 rounded-lg overflow-hidden mb-4">
+                  <img src={activePhoto!} alt={listing.title} className="w-full h-full object-cover" />
+                </AspectRatio>
+                {listing.listing_photos.length > 1 && (
+                  <div className="flex gap-2 overflow-x-auto pb-2">
+                    {listing.listing_photos.map((photo) => (
+                      <button key={photo.id} onClick={() => setActivePhoto(photo.url)} className={cn("w-24 h-24 rounded-md overflow-hidden flex-shrink-0 ring-offset-2 ring-offset-gray-50", activePhoto === photo.url && 'ring-2 ring-rose-500')}>
+                        <img src={photo.url} alt="Thumbnail" className="w-full h-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <Card className="flex items-center justify-center min-h-[400px]">
+                <CardContent className="text-center text-gray-500 p-6">
+                  <ImageIcon className="mx-auto h-16 w-16 mb-4" />
+                  <p className="font-medium">Nessuna fotografia disponibile</p>
+                </CardContent>
+              </Card>
             )}
           </div>
 
