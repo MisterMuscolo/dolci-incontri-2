@@ -87,21 +87,22 @@ const Dashboard = () => {
           </div>
 
           <div className="space-y-6">
-            <Link to="/credit-history"> {/* Make the entire card clickable */}
-              <Card className="w-full transition-shadow hover:shadow-lg cursor-pointer bg-white hover:bg-gray-50">
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                    <Wallet className="h-5 w-5 text-rose-500" />
-                    <span>Portafoglio crediti</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 text-xl">
-                    Crediti disponibili: <span className="font-bold text-rose-500">{currentCredits !== null ? currentCredits : 0}</span>
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
+            <Card className="w-full transition-shadow hover:shadow-lg cursor-pointer bg-white hover:bg-gray-50">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                  <Wallet className="h-5 w-5 text-rose-500" />
+                  <span>Portafoglio crediti</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 text-xl mb-4">
+                  Crediti disponibili: <span className="font-bold text-rose-500">{currentCredits !== null ? currentCredits : 0}</span>
+                </p>
+                <Link to="/buy-credits" className="w-full">
+                  <Button className="w-full bg-rose-500 hover:bg-rose-600">Acquista più crediti</Button>
+                </Link>
+              </CardContent>
+            </Card>
             
             <div className="bg-white p-6 rounded-lg shadow">
               <h2 className="text-lg font-semibold mb-4">Impostazioni account</h2>
