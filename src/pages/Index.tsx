@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { italianProvinces } from '@/data/provinces';
 
@@ -20,7 +21,7 @@ export default function Index({ session }: IndexProps) {
           <div className="mb-8">
             <h2 className="text-xl font-semibold mb-4">Cerca annunci</h2>
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Categoria" />
@@ -46,9 +47,11 @@ export default function Index({ session }: IndexProps) {
                     ))}
                   </SelectContent>
                 </Select>
-                
-                <Button className="w-full">Cerca</Button>
+
+                <Input type="text" placeholder="Parola chiave..." />
+                <Input type="text" placeholder="Zona (es. Centro, Stazione...)" />
               </div>
+              <Button className="w-full">Cerca</Button>
             </div>
           </div>
 
