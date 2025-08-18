@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface IndexProps {
   session: any;
@@ -18,7 +20,33 @@ export default function Index({ session }: IndexProps) {
           <div className="mb-8">
             <h2 className="text-xl font-semibold mb-4">Cerca annunci</h2>
             <div className="space-y-4">
-              {/* Qui andrà il form di ricerca */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Select>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="donne">Donne</SelectItem>
+                    <SelectItem value="uomini">Uomini</SelectItem>
+                    <SelectItem value="coppie">Coppie</SelectItem>
+                    <SelectItem value="trans">Trans</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Select>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Città" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="roma">Roma</SelectItem>
+                    <SelectItem value="milano">Milano</SelectItem>
+                    <SelectItem value="napoli">Napoli</SelectItem>
+                    <SelectItem value="torino">Torino</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Button className="w-full">Cerca</Button>
+              </div>
             </div>
           </div>
 
