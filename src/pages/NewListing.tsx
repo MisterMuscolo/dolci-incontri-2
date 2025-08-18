@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -24,7 +24,7 @@ const listingSchema = z.object({
     .refine((val) => parseInt(val, 10) >= 18, { message: "Devi avere almeno 18 anni." }),
   title: z.string().min(5, 'Il titolo deve avere almeno 5 caratteri.').max(100, 'Il titolo non può superare i 100 caratteri.'),
   description: z.string().min(20, 'La descrizione deve avere almeno 20 caratteri.'),
-  email: z.string().email("L'email non è valida.").optional().or(z.literal('')),
+  email: z.string({ required_error: "L'email è obbligatoria." }).email("L'email non è valida."),
   phone: z.string().optional(),
 });
 
@@ -42,6 +42,16 @@ const NewListing = () => {
       phone: '',
     }
   });
+
+  useEffect(() => {
+    const fetchUserEmail = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email) {
+        form.setValue('email', user.email);
+      }
+    };
+    fetchUserEmail();
+  }, [form]);
 
   const onSubmit = async (values: z.infer<typeof listingSchema>) => {
     setIsLoading(true);
@@ -62,7 +72,6 @@ const NewListing = () => {
         user_id: user.id,
       };
 
-      // 1. Insert listing data
       const { data: listingData, error: listingError } = await supabase
         .from('listings')
         .insert(submissionData)
@@ -75,7 +84,6 @@ const NewListing = () => {
 
       const listingId = listingData.id;
 
-      // 2. Upload images
       const uploadPromises = files.map(async (file, index) => {
         const fileName = `${Date.now()}-${file.name}`;
         const filePath = `${user.id}/${listingId}/${fileName}`;
@@ -99,7 +107,6 @@ const NewListing = () => {
 
       const photoPayloads = await Promise.all(uploadPromises);
 
-      // 3. Insert photo data
       const { error: photosError } = await supabase.from('listing_photos').insert(photoPayloads);
 
       if (photosError) {
@@ -129,13 +136,14 @@ const NewListing = () => {
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <p className="text-sm text-gray-500 -mb-4">I campi contrassegnati con * sono obbligatori.</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <FormField
                     control={form.control}
                     name="category"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Categoria</FormLabel>
+                        <FormLabel>Categoria *</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger><SelectValue placeholder="Seleziona una categoria" /></SelectTrigger>
@@ -157,7 +165,7 @@ const NewListing = () => {
                     name="city"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Città</FormLabel>
+                        <FormLabel>Città *</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger><SelectValue placeholder="Seleziona una città" /></SelectTrigger>
@@ -188,7 +196,7 @@ const NewListing = () => {
                     name="age"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Età</FormLabel>
+                        <FormLabel>Età *</FormLabel>
                         <FormControl><Input type="number" placeholder="La tua età" {...field} /></FormControl>
                         <FormMessage />
                       </FormItem>
@@ -200,7 +208,7 @@ const NewListing = () => {
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Titolo</FormLabel>
+                      <FormLabel>Titolo *</FormLabel>
                       <FormControl><Input placeholder="Es. Incontro speciale a Roma" {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
@@ -211,7 +219,7 @@ const NewListing = () => {
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Descrizione</FormLabel>
+                      <FormLabel>Descrizione *</FormLabel>
                       <FormControl><Textarea placeholder="Descrivi cosa cerchi..." className="min-h-[120px]" {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
@@ -223,8 +231,8 @@ const NewListing = () => {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email (Opzionale)</FormLabel>
-                        <FormControl><Input type="email" placeholder="La tua email di contatto" {...field} /></FormControl>
+                        <FormLabel>Email *</FormLabel>
+                        <FormControl><Input type="email" {...field} readOnly className="bg-gray-100 cursor-not-allowed" /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -242,7 +250,7 @@ const NewListing = () => {
                   />
                 </div>
                 <div>
-                  <FormLabel>Fotografie</FormLabel>
+                  <FormLabel>Fotografie *</FormLabel>
                   <p className="text-sm text-gray-500 mb-2">Carica almeno una foto. La prima sarà la foto principale.</p>
                   <ImageUploader onFilesChange={setFiles} onPrimaryIndexChange={setPrimaryIndex} />
                 </div>
