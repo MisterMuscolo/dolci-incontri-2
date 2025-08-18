@@ -10,6 +10,9 @@ import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
+import NewListing from "./pages/NewListing";
+import BuyCredits from "./pages/BuyCredits";
+import ProfileSettings from "./pages/ProfileSettings";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +55,18 @@ const App = () => {
             <Route 
               path="/admin" 
               element={session?.user?.email === 'admin@example.com' ? <AdminDashboard /> : <Navigate to="/" />} 
+            />
+            <Route 
+              path="/new-listing" 
+              element={session ? <NewListing /> : <Navigate to="/auth" />} 
+            />
+            <Route 
+              path="/buy-credits" 
+              element={session ? <BuyCredits /> : <Navigate to="/auth" />} 
+            />
+            <Route 
+              path="/profile-settings" 
+              element={session ? <ProfileSettings /> : <Navigate to="/auth" />} 
             />
             <Route path="*" element={<NotFound />} />
           </Routes>
