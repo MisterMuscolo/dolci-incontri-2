@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ListFilter, Wallet, Settings } from "lucide-react"; // Import Settings icon
+import { ListFilter, Wallet, Settings } from "lucide-react";
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -108,19 +108,17 @@ const Dashboard = () => {
               </CardContent>
             </Card>
             
-            <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50"> {/* Wrapped in Card */}
+            <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
               <CardHeader>
-                <Link to="/profile-settings" className="block"> {/* Link the header/title */}
+                <Link to="/profile-settings" className="block">
                   <CardTitle className="text-lg font-semibold flex items-center gap-2 cursor-pointer">
-                    <Settings className="h-5 w-5 text-rose-500" /> {/* Added Settings icon */}
+                    <Settings className="h-5 w-5 text-rose-500" />
                     <span>Impostazioni account</span>
                   </CardTitle>
                 </Link>
               </CardHeader>
               <CardContent>
-                <Link to="/profile-settings" className="w-full">
-                  <Button className="w-full bg-rose-500 hover:bg-rose-600">Modifica profilo</Button>
-                </Link>
+                {/* Il pulsante "Modifica profilo" è stato rimosso in quanto il titolo della card è già cliccabile */}
               </CardContent>
             </Card>
           </div>
