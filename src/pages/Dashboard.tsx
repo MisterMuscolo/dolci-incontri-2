@@ -89,7 +89,7 @@ const Dashboard = () => {
           <div className="space-y-6">
             <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
               <CardHeader>
-                <Link to="/credit-history" className="block"> {/* Link only the header/title */}
+                <Link to="/credit-history" className="block">
                   <CardTitle className="text-lg font-semibold flex items-center gap-2 cursor-pointer">
                     <Wallet className="h-5 w-5 text-rose-500" />
                     <span>Portafoglio crediti</span>
@@ -97,12 +97,14 @@ const Dashboard = () => {
                 </Link>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 text-xl mb-4">
-                  Crediti disponibili: <span className="font-bold text-rose-500">{currentCredits !== null ? currentCredits : 0}</span>
-                </p>
-                <Link to="/buy-credits" className="w-full">
-                  <Button className="w-full bg-rose-500 hover:bg-rose-600">Acquista più crediti</Button>
-                </Link>
+                <div className="flex items-center justify-between flex-wrap gap-2"> {/* Added flex container */}
+                  <p className="text-gray-600 text-xl">
+                    Crediti disponibili: <span className="font-bold text-rose-500">{currentCredits !== null ? currentCredits : 0}</span>
+                  </p>
+                  <Link to="/buy-credits"> {/* Removed w-full from Link */}
+                    <Button className="bg-rose-500 hover:bg-rose-600">Acquista crediti</Button> {/* Removed w-full from Button */}
+                  </Link>
+                </div>
               </CardContent>
             </Card>
             
