@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { italianProvinces } from '@/data/provinces';
+import { Heart, MapPin, Search } from 'lucide-react';
 
 interface IndexProps {
   session: any;
@@ -10,20 +11,24 @@ interface IndexProps {
 
 export default function Index({ session }: IndexProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-purple-100">
+    <div className="min-h-screen bg-gradient-to-br from-rose-100 via-white to-sky-100">
       <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-4xl font-bold text-purple-800 mb-6">
-          Incontri Birichini Anonimi
-        </h1>
         
-        <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
-          {/* Campo di ricerca */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold mb-4">Cerca annunci</h2>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <h1 className="text-5xl font-bold text-rose-600 mb-4">
+          Dolci Incontri
+        </h1>
+        <p className="text-xl text-gray-600 mb-12">
+          Trova la tua complice avventura.
+        </p>
+        
+        <div className="max-w-2xl mx-auto bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-8">
+          <h2 className="text-2xl font-semibold mb-6 text-gray-700">Cerca il tuo incontro ideale</h2>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="relative">
+                <Heart className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <Select>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full pl-10">
                     <SelectValue placeholder="Categoria" />
                   </SelectTrigger>
                   <SelectContent>
@@ -34,9 +39,12 @@ export default function Index({ session }: IndexProps) {
                     <SelectItem value="donna-cerca-donna">👩‍❤️‍👩 Donna cerca Donna</SelectItem>
                   </SelectContent>
                 </Select>
-                
+              </div>
+              
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <Select>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full pl-10">
                     <SelectValue placeholder="Città" />
                   </SelectTrigger>
                   <SelectContent>
@@ -47,27 +55,35 @@ export default function Index({ session }: IndexProps) {
                     ))}
                   </SelectContent>
                 </Select>
-
-                <Input type="text" placeholder="Parola chiave o zona..." className="md:col-span-2" />
               </div>
-              <Button className="w-full">Cerca</Button>
-            </div>
-          </div>
 
-          {/* Pulsanti login/registrazione */}
-          <div className="flex justify-center space-x-4 pt-4">
+              <div className="relative md:col-span-2">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Input type="text" placeholder="Parola chiave o zona..." className="w-full pl-10" />
+              </div>
+            </div>
+            <Button className="w-full bg-rose-500 hover:bg-rose-600 text-white text-lg py-6">
+              Cerca
+            </Button>
+          </div>
+          
+          <div className="mt-8 text-center">
             {!session ? (
-              <>
-                <Link to="/auth?tab=login">
-                  <Button variant="outline">Accedi</Button>
+              <p className="text-gray-600">
+                Hai già un account?{' '}
+                <Link to="/auth?tab=login" className="font-semibold text-rose-500 hover:text-rose-600">
+                  Accedi
                 </Link>
-                <Link to="/auth?tab=register">
-                  <Button>Registrati</Button>
+                {' '}o{' '}
+                <Link to="/auth?tab=register" className="font-semibold text-rose-500 hover:text-rose-600">
+                  Registrati
                 </Link>
-              </>
+              </p>
             ) : (
               <Link to="/dashboard">
-                <Button>La tua Dashboard</Button>
+                <Button variant="outline" className="border-rose-500 text-rose-500 hover:bg-rose-50 hover:text-rose-600">
+                  Vai alla tua Dashboard
+                </Button>
               </Link>
             )}
           </div>
