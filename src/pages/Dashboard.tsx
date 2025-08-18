@@ -78,7 +78,7 @@ const Dashboard = () => {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">La tua Dashboard</h1>
           <Link to="/new-listing">
-            <Button>Crea nuovo annuncio</Button>
+            <Button className="bg-rose-500 hover:bg-rose-600">Crea nuovo annuncio</Button>
           </Link>
         </div>
 
@@ -118,7 +118,7 @@ const Dashboard = () => {
               <div className="text-center py-12 bg-white rounded-lg shadow">
                 <p className="text-gray-600">Non hai ancora creato nessun annuncio.</p>
                 <Link to="/new-listing" className="mt-4 inline-block">
-                  <Button>Pubblica il tuo primo annuncio</Button>
+                  <Button className="bg-rose-500 hover:bg-rose-600">Pubblica il tuo primo annuncio</Button>
                 </Link>
               </div>
             )}
@@ -129,14 +129,14 @@ const Dashboard = () => {
               <h2 className="text-lg font-semibold mb-4">Portafoglio crediti</h2>
               <p className="text-gray-600 mb-4">Crediti disponibili: 0</p>
               <Link to="/buy-credits" className="w-full">
-                <Button className="w-full">Acquista crediti</Button>
+                <Button className="w-full bg-rose-500 hover:bg-rose-600">Acquista crediti</Button>
               </Link>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow">
               <h2 className="text-lg font-semibold mb-4">Impostazioni account</h2>
               <Link to="/profile-settings" className="w-full">
-                <Button variant="outline" className="w-full">Modifica profilo</Button>
+                <Button className="w-full bg-rose-500 hover:bg-rose-600">Modifica profilo</Button>
               </Link>
             </div>
           </div>
