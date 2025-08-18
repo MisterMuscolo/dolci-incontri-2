@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { italianProvinces } from '@/data/provinces';
 
 interface IndexProps {
   session: any;
@@ -39,10 +39,11 @@ export default function Index({ session }: IndexProps) {
                     <SelectValue placeholder="Città" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="roma">Roma</SelectItem>
-                    <SelectItem value="milano">Milano</SelectItem>
-                    <SelectItem value="napoli">Napoli</SelectItem>
-                    <SelectItem value="torino">Torino</SelectItem>
+                    {italianProvinces.map((province) => (
+                      <SelectItem key={province.value} value={province.value}>
+                        {province.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 
