@@ -1,4 +1,4 @@
-import React from 'react'; // Aggiunto questo import
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -72,7 +72,7 @@ const BuyCredits = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 flex flex-col items-center">
-      <div className="w-full max-w-3xl"> {/* Ridotto da max-w-6xl a max-w-3xl */}
+      <div className="w-full max-w-3xl">
         <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">Acquista Crediti</h1>
         <p className="text-lg text-gray-600 mb-10 text-center">
           Scegli il pacchetto di crediti più adatto alle tue esigenze e sblocca tutte le funzionalità!
@@ -80,28 +80,28 @@ const BuyCredits = () => {
 
         <div className="flex flex-col gap-6 mb-10">
           {creditPackages.map((pkg) => (
-            <Card key={pkg.id} className="w-full flex flex-col justify-between p-5 shadow-lg hover:shadow-xl transition-shadow duration-300"> {/* Ridotto padding a p-5 */}
-              <CardHeader className="pb-3 text-center"> {/* Ridotto padding a pb-3 */}
-                <CardTitle className="text-xl font-bold text-rose-600">{pkg.name}</CardTitle> {/* Ridotto a text-xl */}
+            <Card key={pkg.id} className="w-full flex flex-col justify-between p-5 shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <CardHeader className="pb-3 text-center">
+                <CardTitle className="text-xl font-bold text-rose-600">{pkg.name}</CardTitle>
                 <CardDescription className="text-gray-600">{pkg.description}</CardDescription>
               </CardHeader>
-              <CardContent className="flex-grow flex flex-col items-center justify-center py-3"> {/* Ridotto padding a py-3 */}
-                <p className="text-4xl font-extrabold text-gray-900 mb-2"> {/* Ridotto a text-4xl */}
+              <CardContent className="flex-grow flex flex-col items-center justify-center py-3">
+                <p className="text-4xl font-extrabold text-gray-900 mb-2">
                   {pkg.credits} <span className="text-rose-500">crediti</span>
                 </p>
-                <p className="text-2xl font-bold text-gray-700 mb-5"> {/* Ridotto a text-2xl e mb-5 */}
+                <p className="text-2xl font-bold text-gray-700 mb-5">
                   €{pkg.price.toFixed(2)}
                 </p>
-                <ul className="text-left text-gray-700 space-y-1 mb-5 w-full"> {/* Ridotto space-y-1 e mb-5 */}
+                <ul className="text-left text-gray-700 space-y-1 mb-5 w-full">
                   {pkg.features.map((feature, index) => (
-                    <li key={index} className="flex items-center text-sm"> {/* Aggiunto text-sm */}
-                      <CheckCircle className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" /> {/* Ridotto icone a h-4 w-4 */}
+                    <li key={index} className="flex items-center text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
                       <span>{feature}</span>
                     </li>
                   ))}
                 </ul>
                 <Button
-                  className="w-full bg-rose-500 hover:bg-rose-600 text-base py-4" {/* Ridotto a text-base e py-4 */}
+                  className="w-full bg-rose-500 hover:bg-rose-600 text-base py-4"
                   onClick={() => handlePurchase(pkg.name, pkg.price)}
                 >
                   Acquista Ora
