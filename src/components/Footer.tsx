@@ -8,7 +8,10 @@ export const Footer = () => {
           <Heart className="h-5 w-5 text-rose-500" />
           <p className="font-semibold">Dolci Incontri</p>
         </div>
-        <p className="text-sm">
+        <p className="text-sm mb-1">
+          Il portale per chi cerca emozioni autentiche.
+        </p>
+        <p className="text-xs text-gray-500">
           © {new Date().getFullYear()} Dolci Incontri. Tutti i diritti riservati.
         </p>
       </div>
