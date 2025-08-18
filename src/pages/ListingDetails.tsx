@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
-import { Calendar, MapPin, Tag, User, Mail } from 'lucide-react';
+import { MapPin, Tag, User, Mail, ImageIcon, BookText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const replySchema = z.object({
@@ -129,7 +129,10 @@ const ListingDetails = () => {
               {activePhoto ? (
                 <img src={activePhoto} alt={listing.title} className="w-full h-full object-cover" />
               ) : (
-                <div className="flex items-center justify-center h-full text-gray-400">Nessuna foto</div>
+                <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                  <ImageIcon className="h-16 w-16 mb-2" />
+                  <span>Nessuna foto</span>
+                </div>
               )}
             </AspectRatio>
             {listing.listing_photos.length > 1 && (
@@ -144,15 +147,25 @@ const ListingDetails = () => {
           </div>
 
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h1 className="text-3xl font-bold text-gray-800 mb-3">{listing.title}</h1>
-              <div className="flex flex-wrap gap-2 mb-4">
-                <Badge variant="secondary" className="capitalize"><Tag className="h-4 w-4 mr-1.5" />{listing.category.replace(/-/g, ' ')}</Badge>
-                <Badge variant="outline"><MapPin className="h-4 w-4 mr-1.5" />{listing.city}{listing.zone && `, ${listing.zone}`}</Badge>
-                <Badge variant="outline"><User className="h-4 w-4 mr-1.5" />{listing.age} anni</Badge>
-              </div>
-              <p className="text-gray-600 whitespace-pre-wrap">{listing.description}</p>
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-3xl font-bold text-gray-800">{listing.title}</CardTitle>
+                <div className="flex flex-wrap gap-2 pt-4">
+                  <Badge variant="secondary" className="capitalize"><Tag className="h-4 w-4 mr-1.5" />{listing.category.replace(/-/g, ' ')}</Badge>
+                  <Badge variant="outline"><MapPin className="h-4 w-4 mr-1.5" />{listing.city}{listing.zone && `, ${listing.zone}`}</Badge>
+                  <Badge variant="outline"><User className="h-4 w-4 mr-1.5" />{listing.age} anni</Badge>
+                </div>
+              </CardHeader>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl"><BookText className="h-5 w-5 text-rose-500" /> Descrizione</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 whitespace-pre-wrap">{listing.description}</p>
+              </CardContent>
+            </Card>
 
             <Card>
               <CardHeader>
