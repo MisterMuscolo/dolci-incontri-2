@@ -2,20 +2,44 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ListingCard, Listing } from "@/components/ListingCard";
+import { ListingListItem, Listing } from "@/components/ListingListItem";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+
+const LISTINGS_PER_PAGE = 10;
 
 const Dashboard = () => {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
 
   useEffect(() => {
     const fetchListings = async () => {
+      setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         setLoading(false);
         return;
       }
+
+      const { count, error: countError } = await supabase
+        .from('listings')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      if (countError) {
+        console.error("Errore nel conteggio degli annunci:", countError);
+        setLoading(false);
+        return;
+      }
+
+      if (count) {
+        setTotalPages(Math.ceil(count / LISTINGS_PER_PAGE));
+      }
+
+      const from = (currentPage - 1) * LISTINGS_PER_PAGE;
+      const to = from + LISTINGS_PER_PAGE - 1;
 
       const { data, error } = await supabase
         .from('listings')
@@ -24,10 +48,12 @@ const Dashboard = () => {
           title,
           category,
           city,
+          created_at,
           listing_photos ( url, is_primary )
         `)
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(from, to);
 
       if (error) {
         console.error("Errore nel recupero degli annunci:", error);
@@ -38,7 +64,13 @@ const Dashboard = () => {
     };
 
     fetchListings();
-  }, []);
+  }, [currentPage]);
+
+  const handlePageChange = (page: number) => {
+    if (page > 0 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
   return (
     <div className="bg-gray-50 p-6 flex-grow">
@@ -54,15 +86,33 @@ const Dashboard = () => {
           <div className="lg:col-span-2">
             <h2 className="text-2xl font-semibold mb-4 border-b pb-2">I tuoi annunci</h2>
             {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Skeleton className="h-64 w-full" />
-                <Skeleton className="h-64 w-full" />
+              <div className="space-y-4">
+                {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
               </div>
             ) : listings.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
                 {listings.map((listing) => (
-                  <ListingCard key={listing.id} listing={listing} showControls={true} />
+                  <ListingListItem key={listing.id} listing={listing} showControls={true} />
                 ))}
+                {totalPages > 1 && (
+                  <Pagination className="pt-4">
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious href="#" onClick={(e) => { e.preventDefault(); handlePageChange(currentPage - 1); }} />
+                      </PaginationItem>
+                      {[...Array(totalPages)].map((_, i) => (
+                        <PaginationItem key={i}>
+                          <PaginationLink href="#" isActive={currentPage === i + 1} onClick={(e) => { e.preventDefault(); handlePageChange(i + 1); }}>
+                            {i + 1}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ))}
+                      <PaginationItem>
+                        <PaginationNext href="#" onClick={(e) => { e.preventDefault(); handlePageChange(currentPage + 1); }} />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                )}
               </div>
             ) : (
               <div className="text-center py-12 bg-white rounded-lg shadow">
