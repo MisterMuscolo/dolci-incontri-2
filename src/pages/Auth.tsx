@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
+import { PasswordValidator, isPasswordValid } from '@/components/PasswordValidator';
 
 export default function Auth() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -44,6 +45,10 @@ export default function Auth() {
   };
 
   const handleSignUp = async () => {
+    if (!isPasswordValid(password)) {
+      showError('La password non rispetta i requisiti.');
+      return;
+    }
     setLoading(true);
     const { error } = await supabase.auth.signUp({ email, password });
     setLoading(false);
@@ -173,10 +178,11 @@ export default function Auth() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
+              <PasswordValidator password={password} />
               <Button 
                 className="w-full bg-rose-500 hover:bg-rose-600" 
                 onClick={handleSignUp}
-                disabled={loading}
+                disabled={loading || !isPasswordValid(password)}
               >
                 {loading ? 'Caricamento...' : 'Registrati'}
               </Button>
