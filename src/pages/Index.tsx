@@ -2,6 +2,9 @@ import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 
 const categories = [
   { value: "woman_man", label: "Donna cerca Uomo 👩❤️👨", emoji: "👩❤️👨" },
@@ -11,7 +14,31 @@ const categories = [
   { value: "woman_woman", label: "Donna cerca Donna 👩❤️👩", emoji: "👩❤️👩" },
 ];
 
+const cities = [
+  "Roma", "Milano", "Napoli", "Torino", "Palermo", 
+  "Genova", "Bologna", "Firenze", "Bari", "Catania"
+];
+
 const Index = () => {
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [session, setSession] = useState(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+  }, []);
+
+  const handleSearch = () => {
+    // Implementeremo la ricerca vera più    console.log({
+      category: selectedCategory,
+      city: selectedCity,
+      query: searchQuery
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-purple-50">
       <div className="container mx-auto px-4 py-12">
@@ -24,7 +51,7 @@ const Index = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Categoria</label>
-                <Select>
+                <Select onValueChange={setSelectedCategory}>
                   <SelectTrigger>
                     <SelectValue placeholder="Tutte le categorie" />
                   </SelectTrigger>
@@ -40,29 +67,53 @@ const Index = () => {
               
               <div>
                 <label className="block text-sm font-medium mb-1">Città</label>
-                <Select>
+                <Select onValueChange={setSelectedCity}>
                   <SelectTrigger>
                     <SelectValue placeholder="Tutte le città" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Tutte le città</SelectItem>
-                    <SelectItem value="milano">Milano</SelectItem>
-                    <SelectItem value="roma">Roma</SelectItem>
-                    {/* Aggiungeremo altre città */}
+                    {cities.map(city => (
+                      <SelectItem key={city} value={city}>{city}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               
               <div>
                 <label className="block text-sm font-medium mb-1">Parole chiave</label>
-                <Input placeholder="Cosa cerchi?" />
+                <Input 
+                  placeholder="Cosa cerchi?" 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
               </div>
             </div>
             
-            <Button className="w-full bg-pink-600 hover:bg-pink-700">
+            <Button 
+              className="w-full bg-pink-600 hover:bg-pink-700"
+              onClick={handleSearch}
+            >
               <Search className="mr-2 h-4 w-4" />
               Cerca annunci
             </Button>
+
+            <div className="flex justify-center space-x-4 pt-4">
+              {!session ? (
+                <>
+                  <Link to="/auth">
+                    <Button variant="outline">Accedi</Button>
+                  </Link>
+                  <Link to="/auth">
+                    <Button>Registrati</Button>
+                  </Link>
+                </>
+              ) : (
+                <Link to="/dashboard">
+                  <Button>La tua Dashboard</Button>
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </div>
