@@ -17,22 +17,58 @@ import Layout from "./components/Layout";
 import SearchResults from "./pages/SearchResults";
 import ListingDetails from "./pages/ListingDetails";
 import MyListings from "./pages/MyListings";
-import CreditHistory from "./pages/CreditHistory"; // Import the new CreditHistory component
+import CreditHistory from "./pages/CreditHistory";
 
 const queryClient = new QueryClient();
 
 const App = () => {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const getSessionAndRole = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
+      if (session) {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profile && profile.role === 'admin') {
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
+      } else {
+        setIsAdmin(false);
+      }
       setLoading(false);
-    });
+    };
+
+    getSessionAndRole();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      if (session) {
+        // Re-fetch role on auth state change to ensure it's up-to-date
+        supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single()
+          .then(({ data: profile, error }) => {
+            if (profile && profile.role === 'admin') {
+              setIsAdmin(true);
+            } else {
+              setIsAdmin(false);
+            }
+          });
+      } else {
+        setIsAdmin(false);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -61,7 +97,7 @@ const App = () => {
               />
               <Route 
                 path="/admin" 
-                element={session?.user?.email === 'admin@example.com' ? <AdminDashboard /> : <Navigate to="/" />} 
+                element={isAdmin ? <AdminDashboard /> : <Navigate to="/" />} 
               />
               <Route 
                 path="/new-listing" 
