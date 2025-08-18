@@ -18,7 +18,7 @@ interface CreditTransaction {
 }
 
 const CreditHistory = () => {
-  const [currentCredits, setCurrentCredits] = useState<number | null>(null);
+  const [currentCredits, setCurrentCredits] = useState<number | null>(0); // Initialize with 0
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,6 +45,7 @@ const CreditHistory = () => {
       if (profileError) {
         console.error("Errore nel recupero dei crediti:", profileError);
         setError("Impossibile caricare il saldo crediti.");
+        setCurrentCredits(0); // Ensure it's 0 on error
       } else if (profileData) {
         setCurrentCredits(profileData.credits);
       }
@@ -94,9 +95,7 @@ const CreditHistory = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {loading ? (
-              <Skeleton className="h-10 w-1/3" />
-            ) : error ? (
+            {error ? (
               <p className="text-red-500">{error}</p>
             ) : (
               <p className="text-4xl font-bold text-gray-800">

@@ -9,7 +9,7 @@ import { ListFilter, Wallet } from "lucide-react";
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [totalListingsCount, setTotalListingsCount] = useState(0);
-  const [currentCredits, setCurrentCredits] = useState<number | null>(null); // State for current credits
+  const [currentCredits, setCurrentCredits] = useState<number | null>(0); // Initialize with 0
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,6 +42,7 @@ const Dashboard = () => {
 
       if (profileError) {
         console.error("Errore nel recupero dei crediti:", profileError);
+        setCurrentCredits(0); // Ensure it's 0 on error
       } else if (profileData) {
         setCurrentCredits(profileData.credits);
       }
@@ -95,13 +96,9 @@ const Dashboard = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {loading ? (
-                    <Skeleton className="h-6 w-1/2" />
-                  ) : (
-                    <p className="text-gray-600 text-xl">
-                      Crediti disponibili: <span className="font-bold text-rose-500">{currentCredits !== null ? currentCredits : 0}</span>
-                    </p>
-                  )}
+                  <p className="text-gray-600 text-xl">
+                    Crediti disponibili: <span className="font-bold text-rose-500">{currentCredits !== null ? currentCredits : 0}</span>
+                  </p>
                 </CardContent>
               </Card>
             </Link>
