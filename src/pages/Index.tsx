@@ -48,8 +48,7 @@ export default function Index({ session }: IndexProps) {
                   </SelectContent>
                 </Select>
 
-                <Input type="text" placeholder="Parola chiave..." />
-                <Input type="text" placeholder="Zona (es. Centro, Stazione...)" />
+                <Input type="text" placeholder="Parola chiave o zona..." className="md:col-span-2" />
               </div>
               <Button className="w-full">Cerca</Button>
             </div>
