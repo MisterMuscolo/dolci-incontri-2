@@ -26,10 +26,11 @@ export default function Index({ session }: IndexProps) {
                     <SelectValue placeholder="Categoria" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="donne">Donne</SelectItem>
-                    <SelectItem value="uomini">Uomini</SelectItem>
-                    <SelectItem value="coppie">Coppie</SelectItem>
-                    <SelectItem value="trans">Trans</SelectItem>
+                    <SelectItem value="donna-cerca-uomo">👩‍❤️‍👨 Donna cerca Uomo</SelectItem>
+                    <SelectItem value="uomo-cerca-donna">👨‍❤️‍👩 Uomo cerca Donna</SelectItem>
+                    <SelectItem value="coppie">👩‍❤️‍💋‍👨 Coppie</SelectItem>
+                    <SelectItem value="uomo-cerca-uomo">👨‍❤️‍👨 Uomo cerca Uomo</SelectItem>
+                    <SelectItem value="donna-cerca-donna">👩‍❤️‍👩 Donna cerca Donna</SelectItem>
                   </SelectContent>
                 </Select>
                 
