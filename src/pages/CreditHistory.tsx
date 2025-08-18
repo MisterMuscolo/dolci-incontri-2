@@ -26,7 +26,7 @@ const CreditHistory = () => {
   useEffect(() => {
     const fetchCreditData = async () => {
       setLoading(true);
-      setError(null);
+      setError(null); // Reset error state at the beginning of fetch
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
@@ -44,8 +44,8 @@ const CreditHistory = () => {
 
       if (profileError) {
         console.error("Errore nel recupero dei crediti:", profileError);
-        setError("Impossibile caricare il saldo crediti.");
-        setCurrentCredits(0); // Ensure it's 0 on error
+        // Do NOT set a general error for the component here, just ensure credits are 0
+        setCurrentCredits(0); 
       } else if (profileData) {
         setCurrentCredits(profileData.credits);
       }
@@ -59,7 +59,7 @@ const CreditHistory = () => {
 
       if (transactionsError) {
         console.error("Errore nel recupero delle transazioni:", transactionsError);
-        setError("Impossibile caricare la cronologia delle transazioni.");
+        setError("Impossibile caricare la cronologia delle transazioni."); // Set error for transactions
       } else if (transactionsData) {
         setTransactions(transactionsData as CreditTransaction[]);
       }
@@ -95,13 +95,10 @@ const CreditHistory = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {error ? (
-              <p className="text-red-500">{error}</p>
-            ) : (
-              <p className="text-4xl font-bold text-gray-800">
-                {currentCredits !== null ? currentCredits : 0} <span className="text-rose-500">crediti</span>
-              </p>
-            )}
+            {/* Display current credits, always defaulting to 0 if null */}
+            <p className="text-4xl font-bold text-gray-800">
+              {currentCredits !== null ? currentCredits : 0} <span className="text-rose-500">crediti</span>
+            </p>
             <Link to="/buy-credits" className="mt-4 inline-block">
               <Button className="bg-rose-500 hover:bg-rose-600">Acquista più crediti</Button>
             </Link>
@@ -121,6 +118,8 @@ const CreditHistory = () => {
               <div className="space-y-4">
                 {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
               </div>
+            ) : error ? ( // Only show error if there was a problem fetching transactions
+              <p className="text-red-500 text-center py-8">{error}</p>
             ) : transactions.length === 0 ? (
               <p className="text-gray-600 text-center py-8">Nessuna transazione di credito trovata.</p>
             ) : (
