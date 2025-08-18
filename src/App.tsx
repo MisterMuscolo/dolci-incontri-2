@@ -14,19 +14,24 @@ import { useEffect, useState } from "react";
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      setLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  if (loading) return <div className="flex justify-center items-center min-h-screen">Caricamento...</div>;
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -35,7 +40,7 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<Index session={session} />} />
             <Route 
               path="/auth" 
               element={!session ? <Auth /> : <Navigate to="/dashboard" />} 
