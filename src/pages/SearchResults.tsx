@@ -84,7 +84,9 @@ const SearchResults = () => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {listings.map((listing) => (
-          <ListingCard key={listing.id} listing={listing} />
+          <Link to={`/listing/${listing.id}`} key={listing.id} className="block hover:shadow-lg transition-shadow duration-200 rounded-lg">
+            <ListingCard listing={listing} />
+          </Link>
         ))}
       </div>
     );
