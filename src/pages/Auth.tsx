@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Button, Input, Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
 
