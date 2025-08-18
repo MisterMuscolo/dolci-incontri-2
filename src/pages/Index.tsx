@@ -11,7 +11,7 @@ interface IndexProps {
 
 export default function Index({ session }: IndexProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-100 via-white to-sky-100">
+    <div className="bg-gradient-to-br from-rose-100 via-white to-sky-100">
       <div className="container mx-auto px-4 py-16 text-center">
         
         <h1 className="text-5xl font-bold text-rose-600 mb-4">
