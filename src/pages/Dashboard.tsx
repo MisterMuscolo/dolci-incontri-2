@@ -49,19 +49,19 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <Link to="/my-listings">
-              <Card className="w-full transition-shadow hover:shadow-lg cursor-pointer bg-rose-500 hover:bg-rose-600 text-white">
+              <Card className="w-full transition-shadow hover:shadow-lg cursor-pointer bg-white hover:bg-gray-50">
                 <CardHeader>
                   <CardTitle className="text-2xl font-semibold flex items-center gap-2">
-                    <ListFilter className="h-6 w-6 text-white" />
-                    <span>I miei annunci</span>
+                    <ListFilter className="h-6 w-6 text-rose-500" />
+                    <span className="text-gray-800">I miei annunci</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {loading ? (
-                    <Skeleton className="h-8 w-3/4 bg-rose-400" />
+                    <Skeleton className="h-8 w-3/4" />
                   ) : (
-                    <p className="text-white text-xl">
-                      Annunci attivi: <span className="font-bold">{totalListingsCount}</span>
+                    <p className="text-gray-600 text-xl">
+                      Annunci attivi: <span className="font-bold text-rose-500">{totalListingsCount}</span>
                     </p>
                   )}
                 </CardContent>
