@@ -100,7 +100,7 @@ const CreditHistory = () => {
               <p className="text-red-500">{error}</p>
             ) : (
               <p className="text-4xl font-bold text-gray-800">
-                {currentCredits !== null ? currentCredits : 'N/A'} <span className="text-rose-500">crediti</span>
+                {currentCredits !== null ? currentCredits : 0} <span className="text-rose-500">crediti</span>
               </p>
             )}
             <Link to="/buy-credits" className="mt-4 inline-block">

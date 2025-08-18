@@ -99,7 +99,7 @@ const Dashboard = () => {
                     <Skeleton className="h-6 w-1/2" />
                   ) : (
                     <p className="text-gray-600 text-xl">
-                      Crediti disponibili: <span className="font-bold text-rose-500">{currentCredits !== null ? currentCredits : 'N/A'}</span>
+                      Crediti disponibili: <span className="font-bold text-rose-500">{currentCredits !== null ? currentCredits : 0}</span>
                     </p>
                   )}
                 </CardContent>
