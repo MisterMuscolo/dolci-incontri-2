@@ -2,22 +2,16 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ListingListItem, Listing } from "@/components/ListingListItem";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Import Card components
-
-const LISTINGS_PER_PAGE = 10;
+import { ListFilter } from "lucide-react";
 
 const Dashboard = () => {
-  const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
   const [totalListingsCount, setTotalListingsCount] = useState(0); // State for total count
-  const [totalPages, setTotalPages] = useState(0);
 
   useEffect(() => {
-    const fetchListings = async () => {
+    const fetchListingsCount = async () => {
       setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -33,49 +27,14 @@ const Dashboard = () => {
 
       if (countError) {
         console.error("Errore nel conteggio degli annunci:", countError);
-        setLoading(false);
-        return;
-      }
-
-      if (count !== null) {
+      } else if (count !== null) {
         setTotalListingsCount(count); // Set the total active listings count
-        setTotalPages(Math.ceil(count / LISTINGS_PER_PAGE));
-      }
-
-      const from = (currentPage - 1) * LISTINGS_PER_PAGE;
-      const to = from + LISTINGS_PER_PAGE - 1;
-
-      const { data, error } = await supabase
-        .from('listings')
-        .select(`
-          id,
-          title,
-          category,
-          city,
-          created_at,
-          listing_photos ( url, is_primary )
-        `)
-        .eq('user_id', user.id)
-        .gt('expires_at', new Date().toISOString()) // Filter for active listings
-        .order('created_at', { ascending: false })
-        .range(from, to);
-
-      if (error) {
-        console.error("Errore nel recupero degli annunci:", error);
-      } else if (data) {
-        setListings(data as Listing[]);
       }
       setLoading(false);
     };
 
-    fetchListings();
-  }, [currentPage]);
-
-  const handlePageChange = (page: number) => {
-    if (page > 0 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
+    fetchListingsCount();
+  }, []);
 
   return (
     <div className="bg-gray-50 p-6 flex-grow">
@@ -89,53 +48,25 @@ const Dashboard = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl font-semibold flex justify-between items-center">
-                  <span>I tuoi annunci attivi</span>
-                  <span className="text-rose-500 text-3xl font-bold">{totalListingsCount}</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="space-y-4">
-                    {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
-                  </div>
-                ) : listings.length > 0 ? (
-                  <div className="space-y-4">
-                    {listings.map((listing) => (
-                      <ListingListItem key={listing.id} listing={listing} showControls={true} />
-                    ))}
-                    {totalPages > 1 && (
-                      <Pagination className="pt-4">
-                        <PaginationContent>
-                          <PaginationItem>
-                            <PaginationPrevious href="#" onClick={(e) => { e.preventDefault(); handlePageChange(currentPage - 1); }} />
-                          </PaginationItem>
-                          {[...Array(totalPages)].map((_, i) => (
-                            <PaginationItem key={i}>
-                              <PaginationLink href="#" isActive={currentPage === i + 1} onClick={(e) => { e.preventDefault(); handlePageChange(i + 1); }}>
-                                {i + 1}
-                              </PaginationLink>
-                            </PaginationItem>
-                          ))}
-                          <PaginationItem>
-                            <PaginationNext href="#" onClick={(e) => { e.preventDefault(); handlePageChange(currentPage + 1); }} />
-                          </PaginationItem>
-                        </PaginationContent>
-                      </Pagination>
-                    )}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <p className="text-gray-600">Non hai ancora creato nessun annuncio attivo.</p>
-                    <Link to="/new-listing" className="mt-4 inline-block">
-                      <Button className="bg-rose-500 hover:bg-rose-600">Pubblica il tuo primo annuncio</Button>
-                    </Link>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <Link to="/my-listings">
+              <Card className="w-full transition-shadow hover:shadow-lg cursor-pointer">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-semibold flex items-center gap-2">
+                    <ListFilter className="h-6 w-6 text-rose-500" />
+                    <span>I miei annunci</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loading ? (
+                    <Skeleton className="h-8 w-3/4" />
+                  ) : (
+                    <p className="text-gray-600 text-xl">
+                      Annunci attivi: <span className="font-bold text-rose-500">{totalListingsCount}</span>
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </Link>
           </div>
 
           <div className="space-y-6">

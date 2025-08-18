@@ -16,6 +16,7 @@ import ProfileSettings from "./pages/ProfileSettings";
 import Layout from "./components/Layout";
 import SearchResults from "./pages/SearchResults";
 import ListingDetails from "./pages/ListingDetails";
+import MyListings from "./pages/MyListings"; // Import the new MyListings component
 
 const queryClient = new QueryClient();
 
@@ -72,6 +73,10 @@ const App = () => {
               <Route 
                 path="/profile-settings" 
                 element={session ? <ProfileSettings /> : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/my-listings" 
+                element={session ? <MyListings /> : <Navigate to="/auth" />} 
               />
               <Route path="*" element={<NotFound />} />
             </Route>
