@@ -3,12 +3,12 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Import Card components
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ListFilter } from "lucide-react";
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
-  const [totalListingsCount, setTotalListingsCount] = useState(0); // State for total count
+  const [totalListingsCount, setTotalListingsCount] = useState(0);
 
   useEffect(() => {
     const fetchListingsCount = async () => {
@@ -23,12 +23,12 @@ const Dashboard = () => {
         .from('listings')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
-        .gt('expires_at', new Date().toISOString()); // Only count active listings
+        .gt('expires_at', new Date().toISOString());
 
       if (countError) {
         console.error("Errore nel conteggio degli annunci:", countError);
       } else if (count !== null) {
-        setTotalListingsCount(count); // Set the total active listings count
+        setTotalListingsCount(count);
       }
       setLoading(false);
     };
@@ -49,19 +49,19 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <Link to="/my-listings">
-              <Card className="w-full transition-shadow hover:shadow-lg cursor-pointer">
+              <Card className="w-full transition-shadow hover:shadow-lg cursor-pointer bg-rose-500 hover:bg-rose-600 text-white">
                 <CardHeader>
                   <CardTitle className="text-2xl font-semibold flex items-center gap-2">
-                    <ListFilter className="h-6 w-6 text-rose-500" />
+                    <ListFilter className="h-6 w-6 text-white" />
                     <span>I miei annunci</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {loading ? (
-                    <Skeleton className="h-8 w-3/4" />
+                    <Skeleton className="h-8 w-3/4 bg-rose-400" />
                   ) : (
-                    <p className="text-gray-600 text-xl">
-                      Annunci attivi: <span className="font-bold text-rose-500">{totalListingsCount}</span>
+                    <p className="text-white text-xl">
+                      Annunci attivi: <span className="font-bold">{totalListingsCount}</span>
                     </p>
                   )}
                 </CardContent>
