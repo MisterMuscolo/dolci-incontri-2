@@ -1,4 +1,3 @@
-import { MadeWithDyad } from './made-with-dyad';
 import { Heart } from 'lucide-react';
 
 export const Footer = () => {
@@ -12,9 +11,6 @@ export const Footer = () => {
         <p className="text-sm">
           © {new Date().getFullYear()} Dolci Incontri. Tutti i diritti riservati.
         </p>
-        <div className="mt-4">
-          <MadeWithDyad />
-        </div>
       </div>
     </footer>
   );
