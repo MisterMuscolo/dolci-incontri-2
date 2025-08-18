@@ -61,10 +61,6 @@ const NewListing = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Devi essere autenticato per creare un annuncio.');
 
-      if (files.length === 0) {
-        throw new Error('Devi caricare almeno una foto.');
-      }
-
       const { age, ...restOfValues } = values;
       const submissionData = {
         ...restOfValues,
@@ -84,34 +80,36 @@ const NewListing = () => {
 
       const listingId = listingData.id;
 
-      const uploadPromises = files.map(async (file, index) => {
-        const fileName = `${Date.now()}-${file.name}`;
-        const filePath = `${user.id}/${listingId}/${fileName}`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from('listing_photos')
-          .upload(filePath, file);
+      if (files.length > 0) {
+        const uploadPromises = files.map(async (file, index) => {
+          const fileName = `${Date.now()}-${file.name}`;
+          const filePath = `${user.id}/${listingId}/${fileName}`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from('listing_photos')
+            .upload(filePath, file);
 
-        if (uploadError) {
-          throw new Error(`Errore nel caricamento della foto ${index + 1}: ${uploadError.message}`);
+          if (uploadError) {
+            throw new Error(`Errore nel caricamento della foto ${index + 1}: ${uploadError.message}`);
+          }
+
+          const { data: { publicUrl } } = supabase.storage.from('listing_photos').getPublicUrl(filePath);
+          
+          return {
+            listing_id: listingId,
+            url: publicUrl,
+            is_primary: index === primaryIndex,
+          };
+        });
+
+        const photoPayloads = await Promise.all(uploadPromises);
+
+        const { error: photosError } = await supabase.from('listing_photos').insert(photoPayloads);
+
+        if (photosError) {
+          await supabase.from('listings').delete().eq('id', listingId);
+          throw new Error(photosError.message || 'Errore nel salvataggio delle foto.');
         }
-
-        const { data: { publicUrl } } = supabase.storage.from('listing_photos').getPublicUrl(filePath);
-        
-        return {
-          listing_id: listingId,
-          url: publicUrl,
-          is_primary: index === primaryIndex,
-        };
-      });
-
-      const photoPayloads = await Promise.all(uploadPromises);
-
-      const { error: photosError } = await supabase.from('listing_photos').insert(photoPayloads);
-
-      if (photosError) {
-        await supabase.from('listings').delete().eq('id', listingId);
-        throw new Error(photosError.message || 'Errore nel salvataggio delle foto.');
       }
 
       dismissToast(toastId);
@@ -250,8 +248,8 @@ const NewListing = () => {
                   />
                 </div>
                 <div>
-                  <FormLabel>Fotografie *</FormLabel>
-                  <p className="text-sm text-gray-500 mb-2">Carica almeno una foto. La prima sarà la foto principale.</p>
+                  <FormLabel>Fotografie</FormLabel>
+                  <p className="text-sm text-gray-500 mb-2">Puoi caricare delle foto. La prima sarà la foto principale.</p>
                   <ImageUploader onFilesChange={setFiles} onPrimaryIndexChange={setPrimaryIndex} />
                 </div>
                 <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600" disabled={isLoading}>
