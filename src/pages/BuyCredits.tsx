@@ -77,9 +77,9 @@ const BuyCredits = () => {
           Scegli il pacchetto di crediti più adatto alle tue esigenze e sblocca tutte le funzionalità!
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+        <div className="flex flex-col gap-6 mb-10"> {/* Modificato da grid a flex-col */}
           {creditPackages.map((pkg) => (
-            <Card key={pkg.id} className="flex flex-col justify-between p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <Card key={pkg.id} className="w-full flex flex-col justify-between p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardHeader className="pb-4 text-center">
                 <CardTitle className="text-2xl font-bold text-rose-600">{pkg.name}</CardTitle>
                 <CardDescription className="text-gray-600">{pkg.description}</CardDescription>
