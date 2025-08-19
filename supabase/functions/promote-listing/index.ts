@@ -70,7 +70,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Calculate new expiry date
+    // Calculate new expiry date based on durationHours received
     const newExpiryDate = new Date();
     newExpiryDate.setHours(newExpiryDate.getHours() + durationHours);
 
@@ -107,7 +107,7 @@ serve(async (req) => {
         user_id: user.id,
         amount: -cost,
         type: 'premium_upgrade',
-        package_name: `Promozione: ${promotionType === 'day' ? 'Modalità Giorno' : 'Modalità Notte'}`,
+        package_name: `Promozione: ${promotionType === 'day' ? 'Modalità Giorno' : 'Modalità Notte'} per ${durationHours / 24} giorni`,
       });
 
     if (transactionError) {

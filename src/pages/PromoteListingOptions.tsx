@@ -6,12 +6,12 @@ import { ChevronLeft, Rocket, Sun, Moon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface PromotionOption {
   id: 'day' | 'night';
   name: string;
-  credits: number;
-  durationHours: number;
+  baseCreditsPerDay: number; // Crediti per giorno
   description: string;
   icon: React.ElementType;
   details: string[];
@@ -21,29 +21,33 @@ const promotionOptions: PromotionOption[] = [
   {
     id: 'day',
     name: 'Modalità Giorno',
-    credits: 10,
-    durationHours: 24,
+    baseCreditsPerDay: 10,
     description: 'Il tuo annuncio sarà in evidenza durante il giorno.',
     icon: Sun,
     details: [
       '1 risalita immediata (in cima ai risultati)',
-      'Visibilità premium per 24 ore',
+      'Visibilità premium per ogni giorno selezionato',
       'Ideale per annunci con alta interazione diurna',
     ],
   },
   {
     id: 'night',
     name: 'Modalità Notte',
-    credits: 30,
-    durationHours: 48,
+    baseCreditsPerDay: 30,
     description: 'Massima visibilità durante le ore notturne.',
     icon: Moon,
     details: [
       '5 risalite (più frequenti) durante il periodo',
-      'Visibilità premium per 48 ore',
+      'Visibilità premium per ogni giorno selezionato',
       'Perfetto per raggiungere un pubblico diverso',
     ],
   },
+];
+
+const durations = [
+  { value: 1, label: '1 Giorno' },
+  { value: 3, label: '3 Giorni' },
+  { value: 7, label: '7 Giorni' },
 ];
 
 const PromoteListingOptions = () => {
@@ -53,6 +57,7 @@ const PromoteListingOptions = () => {
   const [currentCredits, setCurrentCredits] = useState<number | null>(null);
   const [listingTitle, setListingTitle] = useState<string | null>(null);
   const [isPromoting, setIsPromoting] = useState(false);
+  const [selectedDuration, setSelectedDuration] = useState<number>(durations[0].value); // Default to 1 day
 
   useEffect(() => {
     const fetchUserDataAndListing = async () => {
@@ -107,21 +112,24 @@ const PromoteListingOptions = () => {
   }, [listingId, navigate]);
 
   const handlePromote = async (option: PromotionOption) => {
-    if (!listingId || currentCredits === null || currentCredits < option.credits) {
+    const totalCost = option.baseCreditsPerDay * selectedDuration;
+    const totalDurationHours = selectedDuration * 24; // Each day is 24 hours of premium visibility
+
+    if (!listingId || currentCredits === null || currentCredits < totalCost) {
       showError('Crediti insufficienti o annuncio non valido.');
       return;
     }
 
     setIsPromoting(true);
-    const toastId = showLoading(`Promozione annuncio in Modalità ${option.name} in corso...`);
+    const toastId = showLoading(`Promozione annuncio in Modalità ${option.name} per ${selectedDuration} giorni in corso...`);
 
     try {
       const { error } = await supabase.functions.invoke('promote-listing', {
         body: {
           listingId: listingId,
           promotionType: option.id,
-          cost: option.credits,
-          durationHours: option.durationHours,
+          cost: totalCost,
+          durationHours: totalDurationHours, // Pass total hours
         },
       });
 
@@ -144,7 +152,7 @@ const PromoteListingOptions = () => {
         throw new Error(errorMessage);
       }
 
-      showSuccess(`Annuncio promosso in Modalità ${option.name} con successo!`);
+      showSuccess(`Annuncio promosso in Modalità ${option.name} per ${selectedDuration} giorni con successo!`);
       navigate('/my-listings'); // Reindirizza a "I miei annunci"
     } catch (error: any) {
       dismissToast(toastId);
@@ -207,7 +215,8 @@ const PromoteListingOptions = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {promotionOptions.map((option) => {
             const Icon = option.icon;
-            const canAfford = currentCredits !== null && currentCredits >= option.credits;
+            const totalCost = option.baseCreditsPerDay * selectedDuration;
+            const canAfford = currentCredits !== null && currentCredits >= totalCost;
 
             return (
               <Card
@@ -219,7 +228,7 @@ const PromoteListingOptions = () => {
                     <Icon className="h-6 w-6 text-rose-500" /> {option.name}
                   </CardTitle>
                   <div className="text-2xl font-bold text-gray-900">
-                    {option.credits} <span className="text-rose-500">crediti</span>
+                    {totalCost} <span className="text-rose-500">crediti</span>
                   </div>
                 </CardHeader>
                 <CardContent className="flex-grow flex flex-col justify-between pt-4">
@@ -229,12 +238,26 @@ const PromoteListingOptions = () => {
                       <li key={index}>{detail}</li>
                     ))}
                   </ul>
+                  <div className="mb-4">
+                    <Select onValueChange={(value) => setSelectedDuration(parseInt(value))} defaultValue={String(selectedDuration)}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Seleziona durata" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {durations.map((d) => (
+                          <SelectItem key={d.value} value={String(d.value)}>
+                            {d.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <Button
                     onClick={() => handlePromote(option)}
                     disabled={!canAfford || isPromoting}
                     className="w-full bg-rose-500 hover:bg-rose-600"
                   >
-                    {isPromoting ? 'Promozione in corso...' : `Promuovi per ${option.credits} crediti`}
+                    {isPromoting ? 'Promozione in corso...' : `Promuovi per ${totalCost} crediti`}
                   </Button>
                   {!canAfford && (
                     <p className="text-red-500 text-sm mt-2 text-center">Crediti insufficienti.</p>
