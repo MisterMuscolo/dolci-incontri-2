@@ -20,6 +20,7 @@ import MyListings from "./pages/MyListings";
 import CreditHistory from "./pages/CreditHistory";
 import UserListingsAdminView from "./pages/UserListingsAdminView";
 import BannedUser from "./pages/BannedUser"; // Importa la nuova pagina
+import EditListing from "./pages/EditListing"; // Importa la nuova pagina di modifica
 
 const queryClient = new QueryClient();
 
@@ -160,6 +161,10 @@ const App = () => {
               <Route 
                 path="/new-listing" 
                 element={session ? (isBanned ? <Navigate to="/banned" /> : <NewListing />) : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/edit-listing/:id" 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <EditListing />) : <Navigate to="/auth" />} 
               />
               <Route 
                 path="/buy-credits" 

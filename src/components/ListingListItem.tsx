@@ -112,10 +112,12 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
       </Link>
       {showControls && (
         <div className="flex-shrink-0 flex md:flex-col justify-end md:justify-center items-center gap-2 p-4 border-t md:border-t-0 md:border-l">
-           <Button variant="outline" size="sm" className="w-full">
-            <Pencil className="h-4 w-4 md:mr-2" />
-            <span className="hidden md:inline">Modifica</span>
-          </Button>
+           <Link to={`/edit-listing/${listing.id}`} className="w-full">
+            <Button variant="outline" size="sm" className="w-full">
+              <Pencil className="h-4 w-4 md:mr-2" />
+              <span className="hidden md:inline">Modifica</span>
+            </Button>
+          </Link>
           {!listing.is_premium && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
