@@ -60,9 +60,20 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
   // Determina se l'annuncio è premium ma in attesa di attivazione
   const isPendingPremium = listing.is_premium && promoStart && promoStart > now;
 
-  // Se l'annuncio è premium attivo, mostra fino a 5 foto, altrimenti nessuna.
-  const photosToDisplay = isActivePremium ? listing.listing_photos.slice(0, 5) : [];
-  const primaryPhoto = photosToDisplay.find(p => p.is_primary)?.url || photosToDisplay[0]?.url;
+  // Determine photos to display:
+  // If actively premium, show up to 5 photos.
+  // Otherwise (regular or pending premium), show only the primary/first photo if available.
+  let photosForDisplay: { url: string; is_primary: boolean }[] = [];
+  const primaryPhoto = listing.listing_photos.find(p => p.is_primary) || listing.listing_photos[0];
+
+  if (isActivePremium) {
+    photosForDisplay = listing.listing_photos.slice(0, 5);
+  } else if (primaryPhoto) {
+    photosForDisplay = [primaryPhoto];
+  }
+
+  const hasPhotos = photosForDisplay.length > 0;
+  const currentActivePhotoUrl = hasPhotos ? photosForDisplay[0].url : null; // For single image display or carousel initial
 
   const dateToDisplay = showExpiryDate ? new Date(listing.expires_at) : new Date(listing.created_at);
   const prefix = showExpiryDate ? 'Scade il:' : '';
@@ -123,13 +134,14 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
     <Card className={cn(
       "w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row relative",
       isActivePremium && "border-2 border-rose-500 shadow-lg bg-rose-50",
-      isPendingPremium && "border-2 border-blue-400 shadow-lg bg-blue-50" // Nuovo stile per annunci in attesa
+      // Apply blue border/background only if showControls is true (My Listings/Admin) AND it's pending premium
+      showControls && isPendingPremium && "border-2 border-blue-400 shadow-lg bg-blue-50" 
     )}>
       <div className="flex flex-col sm:flex-row w-full">
-        {photosToDisplay.length > 0 ? (
+        {hasPhotos ? ( // Use hasPhotos for conditional rendering
           <div className="sm:w-1/4 lg:w-1/5 flex-shrink-0 relative">
             <AspectRatio ratio={16 / 9} className="w-full h-full">
-              {photosToDisplay.length > 1 ? (
+              {photosForDisplay.length > 1 ? (
                 <Carousel
                   plugins={[
                     Autoplay({
@@ -144,7 +156,7 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
                   className="w-full h-full"
                 >
                   <CarouselContent className="h-full">
-                    {photosToDisplay.map((photo, index) => (
+                    {photosForDisplay.map((photo, index) => (
                       <CarouselItem key={index} className="h-full">
                         <Link to={`/listing/${listing.id}`} className="block w-full h-full">
                           <img src={photo.url} alt={`${listing.title} - ${index + 1}`} className="object-cover w-full h-full" />
@@ -157,7 +169,7 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
                 </Carousel>
               ) : (
                 <Link to={`/listing/${listing.id}`} className="block w-full h-full">
-                  <img src={primaryPhoto!} alt={listing.title} className="object-cover w-full h-full" />
+                  <img src={currentActivePhotoUrl!} alt={listing.title} className="object-cover w-full h-full" />
                 </Link>
               )}
             </AspectRatio>
@@ -182,11 +194,13 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
           </div>
         </Link>
       </div>
+      {/* Badge for Premium status in search results (when showControls is false) */}
       {!showControls && isActivePremium && (
         <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white absolute top-2 right-2 z-20">
           <Rocket className="h-3 w-3 mr-1" /> Premium
         </Badge>
       )}
+      {/* Controls section (only rendered if showControls is true) */}
       {showControls && (
         <div className="flex-shrink-0 flex md:flex-col justify-end md:justify-center items-center gap-2 p-4 border-t md:border-t-0 md:border-l">
            <Link to={`/edit-listing/${listing.id}`} className="w-full">
