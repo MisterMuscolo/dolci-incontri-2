@@ -13,8 +13,10 @@ serve(async (req) => {
 
   try {
     const { listingId, reporterEmail, reportMessage } = await req.json();
+    console.log('Received report:', { listingId, reporterEmail, reportMessage });
 
     if (!listingId || !reporterEmail || !reportMessage) {
+      console.error('Missing required fields for report.');
       throw new Error('Missing required fields: listingId, reporterEmail, reportMessage');
     }
 
@@ -31,10 +33,13 @@ serve(async (req) => {
       .single();
 
     if (listingError || !listing) {
+      console.error('Error fetching listing for report:', listingError?.message);
       throw new Error('Listing not found or could not retrieve its title.');
     }
+    console.log('Listing found:', listing.title);
     
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
+    console.log('RESEND_API_KEY status:', resendApiKey ? 'Set' : 'Not Set');
 
     if (!resendApiKey) {
       throw new Error('RESEND_API_KEY is not set in environment variables. Cannot send email.');
@@ -71,6 +76,7 @@ serve(async (req) => {
       </div>
     `;
 
+    console.log('Attempting to send email via Resend...');
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -88,16 +94,18 @@ serve(async (req) => {
 
     if (!res.ok) {
       const errorData = await res.json();
-      console.error('Resend API Error:', errorData);
-      throw new Error('Failed to send report email via Resend.');
+      console.error('Resend API Error:', res.status, errorData);
+      throw new Error(`Failed to send email via Resend: ${errorData.message || JSON.stringify(errorData)}`);
     }
 
+    console.log('Email sent successfully.');
     return new Response(JSON.stringify({ success: true, message: 'Report sent successfully.' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
 
   } catch (error) {
+    console.error('Edge Function Error:', error.message);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,
