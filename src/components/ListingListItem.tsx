@@ -57,6 +57,8 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
 
   // Determina se l'annuncio è attivamente premium in questo momento
   const isActivePremium = listing.is_premium && promoStart && promoEnd && promoStart <= now && promoEnd >= now;
+  // Determina se l'annuncio è premium ma in attesa di attivazione
+  const isPendingPremium = listing.is_premium && promoStart && promoStart > now;
 
   // Se l'annuncio è premium attivo, mostra fino a 5 foto, altrimenti nessuna.
   const photosToDisplay = isActivePremium ? listing.listing_photos.slice(0, 5) : [];
@@ -120,7 +122,8 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
   return (
     <Card className={cn(
       "w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row relative",
-      isActivePremium && "border-2 border-rose-500 shadow-lg bg-rose-50" 
+      isActivePremium && "border-2 border-rose-500 shadow-lg bg-rose-50",
+      isPendingPremium && "border-2 border-blue-400 shadow-lg bg-blue-50" // Nuovo stile per annunci in attesa
     )}>
       <div className="flex flex-col sm:flex-row w-full">
         {photosToDisplay.length > 0 ? (
@@ -210,6 +213,36 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
                     Questo annuncio è già Premium. Gli annunci Premium appaiono in cima ai risultati di ricerca e possono avere fino a 5 foto.
                     <br/><br/>
                     Vuoi estendere la sua visibilità o acquistare più crediti?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Chiudi</AlertDialogCancel>
+                  <Link to="/buy-credits">
+                    <AlertDialogAction className="bg-rose-500 hover:bg-rose-600">
+                      Acquista Crediti
+                    </AlertDialogAction>
+                  </Link>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          ) : isPendingPremium ? ( // Nuovo stato per promozione in attesa
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-1"
+                >
+                  <Rocket className="h-4 w-4" /> In Attesa
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Promozione in Attesa</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Questo annuncio è già stato promosso e la sua visibilità Premium inizierà il {promoStart ? format(promoStart, 'dd/MM/yyyy HH:mm', { locale: it }) : 'N/D'}.
+                    <br/><br/>
+                    Gli annunci Premium appaiono in cima ai risultati di ricerca e possono avere fino a 5 foto.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

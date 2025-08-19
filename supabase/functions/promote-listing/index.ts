@@ -66,18 +66,26 @@ serve(async (req) => {
 
     // Calculate promotion start and end times
     const now = new Date(); // Current UTC time
+
     let promoStart: Date;
+    let promoEnd: Date;
 
     if (promotionType === 'day') {
         const [startHourStr, startMinuteStr] = timeSlot.split('-')[0].split(':');
         const startHour = parseInt(startHourStr);
         const startMinute = parseInt(startMinuteStr);
 
-        promoStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), startHour, startMinute, 0, 0));
-        if (promoStart.getTime() < now.getTime()) {
-            // If the target time today has already passed, schedule for tomorrow
-            promoStart.setUTCDate(promoStart.getUTCDate() + 1);
+        const targetTimeToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), startHour, startMinute, 0, 0));
+
+        if (targetTimeToday.getTime() <= now.getTime()) {
+            // If the selected time slot for today has already passed or is current, start promotion immediately
+            promoStart = now;
+        } else {
+            // If the selected time slot is in the future today, schedule for that time
+            promoStart = targetTimeToday;
         }
+        promoEnd = new Date(promoStart.getTime() + durationHours * 60 * 60 * 1000);
+
     } else { // night mode
         const startHour = 23; // 23:00 UTC
         const startMinute = 0;
@@ -86,8 +94,8 @@ serve(async (req) => {
             // If 23:00 today has already passed, schedule for tomorrow
             promoStart.setUTCDate(promoStart.getUTCDate() + 1);
         }
+        promoEnd = new Date(promoStart.getTime() + durationHours * 60 * 60 * 1000);
     }
-    const promoEnd = new Date(promoStart.getTime() + durationHours * 60 * 60 * 1000);
 
     // Calculate new expires_at: max of current expiry or promoEnd, then add 30 days
     const currentExpiresAt = new Date(listing.expires_at);
@@ -109,7 +117,7 @@ serve(async (req) => {
         promotion_mode: promotionType,
         promotion_start_at: promoStart.toISOString(),
         promotion_end_at: promoEnd.toISOString(),
-        last_bumped_at: promoStart.toISOString(), // Set bump time to promotion start
+        last_bumped_at: now.toISOString(), // Always bump to now when promotion is purchased
         expires_at: newExpiresAt.toISOString(), // Extend expiry date
       })
       .eq('id', listingId);
