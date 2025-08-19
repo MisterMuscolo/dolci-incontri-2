@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // Importa Link
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
-import { User, AlertTriangle, ChevronLeft } from 'lucide-react';
+import { User, AlertTriangle, ChevronLeft, KeyRound } from 'lucide-react'; // Importa KeyRound
 
 const ProfileSettings = () => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -88,6 +88,26 @@ const ProfileSettings = () => {
                 <p className="text-lg font-semibold text-gray-800">{userEmail}</p>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Nuova Card per Cambia Password */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <KeyRound className="h-6 w-6 text-rose-500" />
+              Cambia Password
+            </CardTitle>
+            <CardDescription>
+              Aggiorna la tua password per mantenere il tuo account sicuro.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link to="/change-password">
+              <Button variant="outline" className="border-rose-500 text-rose-500 hover:bg-rose-50 hover:text-rose-600">
+                Cambia Password
+              </Button>
+            </Link>
           </CardContent>
         </Card>
 

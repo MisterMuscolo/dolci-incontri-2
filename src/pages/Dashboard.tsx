@@ -154,17 +154,7 @@ const Dashboard = () => {
               <CardDescription className="ml-[88px]">Gestisci le impostazioni del tuo account.</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Cambia Password</h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  Aggiorna la tua password per mantenere il tuo account sicuro.
-                </p>
-                <Link to="/change-password">
-                  <Button variant="outline" className="border-rose-500 text-rose-500 hover:bg-rose-50 hover:text-rose-600">
-                    Cambia Password
-                  </Button>
-                </Link>
-              </div>
+              {/* Il pulsante "Cambia Password" è stato rimosso da qui */}
             </CardContent>
           </Card>
         </div>
