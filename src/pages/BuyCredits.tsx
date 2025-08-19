@@ -1,8 +1,8 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, ChevronLeft } from 'lucide-react';
 
 interface CreditPackage {
   id: string;
@@ -71,6 +71,8 @@ const creditPackages: CreditPackage[] = [
 ];
 
 const BuyCredits = () => {
+  const navigate = useNavigate();
+
   const handlePurchase = (packageName: string, price: number) => {
     alert(`Hai cliccato per acquistare ${packageName} per €${price.toFixed(2)}. La funzionalità di acquisto sarà implementata qui.`);
     // Qui andrebbe la logica di integrazione con un sistema di pagamento
@@ -79,7 +81,12 @@ const BuyCredits = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6 flex flex-col items-center">
       <div className="w-full max-w-3xl">
-        <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">Acquista Crediti</h1>
+        <div className="flex items-center gap-4 mb-8">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">
+            <ChevronLeft className="h-6 w-6" />
+          </Button>
+          <h1 className="text-3xl font-bold text-gray-800">Acquista Crediti</h1>
+        </div>
         <p className="text-lg text-gray-600 mb-10 text-center">
           Scegli il pacchetto di crediti più adatto alle tue esigenze e sblocca tutte le funzionalità!
         </p>

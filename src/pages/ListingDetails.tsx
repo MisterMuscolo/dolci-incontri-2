@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
-import { MapPin, Tag, User, Mail, BookText } from 'lucide-react';
+import { MapPin, Tag, User, Mail, BookText, ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const replySchema = z.object({
@@ -36,6 +36,7 @@ type FullListing = {
 
 const ListingDetails = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [listing, setListing] = useState<FullListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [activePhoto, setActivePhoto] = useState<string | null>(null);
@@ -130,6 +131,12 @@ const ListingDetails = () => {
   return (
     <div className="bg-gray-50">
       <div className="container mx-auto p-4 sm:p-6 md:p-8">
+        <div className="flex items-center gap-4 mb-6">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">
+            <ChevronLeft className="h-6 w-6" />
+          </Button>
+          <h1 className="text-3xl font-bold text-gray-800">Dettagli Annuncio</h1>
+        </div>
         <div className={cn("grid grid-cols-1 gap-8", hasPhotos && "lg:grid-cols-5")}>
           {hasPhotos && (
             <div className="lg:col-span-3">

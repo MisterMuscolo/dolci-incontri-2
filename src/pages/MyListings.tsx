@@ -1,15 +1,17 @@
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ListingListItem, Listing } from "@/components/ListingListItem";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChevronLeft } from "lucide-react";
 
 const LISTINGS_PER_PAGE = 10;
 
 const MyListings = () => {
+  const navigate = useNavigate();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -79,7 +81,12 @@ const MyListings = () => {
     <div className="bg-gray-50 p-6 flex-grow">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">I tuoi annunci</h1>
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">
+              <ChevronLeft className="h-6 w-6" />
+            </Button>
+            <h1 className="text-3xl font-bold">I tuoi annunci</h1>
+          </div>
           <Link to="/new-listing">
             <Button className="bg-rose-500 hover:bg-rose-600">Crea nuovo annuncio</Button>
           </Link>

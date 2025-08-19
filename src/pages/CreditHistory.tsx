@@ -5,9 +5,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Wallet, History } from 'lucide-react';
+import { Wallet, History, ChevronLeft } from 'lucide-react';
 
 interface CreditTransaction {
   id: string;
@@ -18,6 +18,7 @@ interface CreditTransaction {
 }
 
 const CreditHistory = () => {
+  const navigate = useNavigate();
   const [currentCredits, setCurrentCredits] = useState<number | null>(0); // Initialize with 0
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -85,7 +86,12 @@ const CreditHistory = () => {
   return (
     <div className="bg-gray-50 p-4 sm:p-6 md:p-8 min-h-screen">
       <div className="max-w-4xl mx-auto space-y-8">
-        <h1 className="text-3xl font-bold text-gray-800">Portafoglio Crediti</h1>
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">
+            <ChevronLeft className="h-6 w-6" />
+          </Button>
+          <h1 className="text-3xl font-bold text-gray-800">Portafoglio Crediti</h1>
+        </div>
 
         <Card>
           <CardHeader>
