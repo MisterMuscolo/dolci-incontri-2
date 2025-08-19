@@ -20,15 +20,20 @@ export interface Listing {
 interface ListingListItemProps {
   listing: Listing;
   showControls?: boolean;
+  showExpiryDate?: boolean; // Nuova prop per controllare quale data mostrare
 }
 
-export const ListingListItem = ({ listing, showControls = false }: ListingListItemProps) => {
+export const ListingListItem = ({ listing, showControls = false, showExpiryDate = false }: ListingListItemProps) => {
   const primaryPhoto = listing.listing_photos.find(p => p.is_primary)?.url || listing.listing_photos[0]?.url;
 
-  // Verifica se expires_at è una stringa valida prima di creare l'oggetto Date
-  const expiryDate = listing.expires_at ? new Date(listing.expires_at) : null;
-  const formattedExpiryDate = expiryDate && !isNaN(expiryDate.getTime()) 
-    ? format(expiryDate, 'dd MMMM yyyy', { locale: it }) 
+  // Determina quale data e quale etichetta mostrare
+  const dateToDisplay = showExpiryDate ? listing.expires_at : listing.created_at;
+  const dateLabel = showExpiryDate ? 'Scade il:' : 'Pubblicato il:';
+
+  // Verifica se la data è una stringa valida prima di creare l'oggetto Date
+  const formattedDate = dateToDisplay ? new Date(dateToDisplay) : null;
+  const displayDate = formattedDate && !isNaN(formattedDate.getTime()) 
+    ? format(formattedDate, 'dd MMMM yyyy', { locale: it }) 
     : 'N/D'; // "N/D" per "Non Disponibile"
 
   return (
@@ -48,7 +53,7 @@ export const ListingListItem = ({ listing, showControls = false }: ListingListIt
             </div>
             <div className="mt-auto flex items-center text-xs text-gray-500">
               <CalendarDays className="h-4 w-4 mr-2" />
-              <span>Scade il: {formattedExpiryDate}</span> {/* Usa la data formattata con controllo */}
+              <span>{dateLabel} {displayDate}</span> {/* Usa l'etichetta e la data dinamiche */}
             </div>
           </div>
         </div>

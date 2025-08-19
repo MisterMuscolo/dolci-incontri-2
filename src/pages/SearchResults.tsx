@@ -34,15 +34,16 @@ const SearchResults = () => {
           city,
           description,
           created_at,
+          expires_at, // Assicurati che expires_at sia ancora selezionato per la tipizzazione
           listing_photos ( url, is_primary )
         `, { count: 'exact' })
         .gt('expires_at', new Date().toISOString())
         .order('created_at', { ascending: false });
 
-      if (category) {
+      if (category && category !== 'tutte') {
         query = query.eq('category', category);
       }
-      if (city) {
+      if (city && city !== 'tutte') {
         query = query.eq('city', city);
       }
       if (keyword) {
@@ -105,7 +106,7 @@ const SearchResults = () => {
     return (
       <div className="space-y-4">
         {listings.map((listing) => (
-          <ListingListItem key={listing.id} listing={listing} />
+          <ListingListItem key={listing.id} listing={listing} showExpiryDate={false} /> {/* Imposta showExpiryDate a false */}
         ))}
         {totalPages > 1 && (
           <Pagination className="pt-4">

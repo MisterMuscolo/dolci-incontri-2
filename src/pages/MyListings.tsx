@@ -30,7 +30,7 @@ const MyListings = () => {
       const { count, error: countError } = await supabase
         .from('listings')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id); // Rimosso il filtro .gt('expires_at', ...) per mostrare tutti gli annunci
+        .eq('user_id', user.id); 
 
       if (countError) {
         console.error("Errore nel conteggio degli annunci:", countError);
@@ -108,7 +108,7 @@ const MyListings = () => {
             ) : listings.length > 0 ? (
               <div className="space-y-4">
                 {listings.map((listing) => (
-                  <ListingListItem key={listing.id} listing={listing} showControls={true} />
+                  <ListingListItem key={listing.id} listing={listing} showControls={true} showExpiryDate={true} /> {/* Imposta showExpiryDate a true */}
                 ))}
                 {totalPages > 1 && (
                   <Pagination className="pt-4">
