@@ -21,8 +21,9 @@ import CreditHistory from "./pages/CreditHistory";
 import UserListingsAdminView from "./pages/UserListingsAdminView";
 import BannedUser from "./pages/BannedUser";
 import EditListing from "./pages/EditListing";
-import Termini from "./pages/Termini"; // Importa la nuova pagina Termini
-import Privacy from "./pages/Privacy"; // Importa la nuova pagina Privacy
+import Termini from "./pages/Termini"; 
+import Privacy from "./pages/Privacy"; 
+import Contatti from "./pages/Contatti"; // Importa la nuova pagina Contatti
 
 const queryClient = new QueryClient();
 
@@ -142,8 +143,9 @@ const App = () => {
               <Route path="/" element={<Index session={session} />} />
               <Route path="/search" element={<SearchResults />} />
               <Route path="/listing/:id" element={<ListingDetails />} />
-              <Route path="/termini" element={<Termini />} /> {/* Nuova rotta */}
-              <Route path="/privacy" element={<Privacy />} /> {/* Nuova rotta */}
+              <Route path="/termini" element={<Termini />} /> 
+              <Route path="/privacy" element={<Privacy />} /> 
+              <Route path="/contatti" element={<Contatti />} /> {/* Nuova rotta */}
               
               {/* Reindirizza gli utenti bannati alla pagina /banned */}
               <Route 
