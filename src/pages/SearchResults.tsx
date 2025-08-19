@@ -11,7 +11,7 @@ const LISTINGS_PER_PAGE = 10;
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
   const [listings, setListings] = useState<Listing[]>([]);
-  const [loading, setLoading] = true);
+  const [loading, setLoading] = useState(true); // Correzione qui: aggiunto useState(true)
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
