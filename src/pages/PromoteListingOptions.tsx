@@ -11,18 +11,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 interface PromotionOption {
   id: 'day' | 'night';
   name: string;
-  baseCreditsPerDay: number; // Crediti per giorno
   description: string;
   icon: React.ElementType;
   details: string[];
-  coverageText: string; // Nuovo campo per il testo di copertura
+  coverageText: string;
+  costs: { [duration: number]: number }; // Nuovo campo per i costi specifici per durata
 }
 
 const promotionOptions: PromotionOption[] = [
   {
     id: 'day',
     name: 'Modalità Giorno',
-    baseCreditsPerDay: 10,
     description: 'Il tuo annuncio sarà in evidenza durante il giorno.',
     icon: Sun,
     details: [
@@ -31,11 +30,15 @@ const promotionOptions: PromotionOption[] = [
       'Ideale per annunci con alta interazione diurna',
     ],
     coverageText: 'Copertura: dalle 07:00 alle 23:00',
+    costs: { // Nuovi costi specifici per la Modalità Giorno
+      1: 15,
+      3: 30,
+      7: 62,
+    },
   },
   {
     id: 'night',
     name: 'Modalità Notte',
-    baseCreditsPerDay: 30,
     description: 'Massima visibilità durante le ore notturne.',
     icon: Moon,
     details: [
@@ -44,6 +47,11 @@ const promotionOptions: PromotionOption[] = [
       'Perfetto per raggiungere un pubblico diverso',
     ],
     coverageText: 'Copertura: dalle 23:00 alle 07:00',
+    costs: { // Costi calcolati per la Modalità Notte (30 crediti/giorno)
+      1: 30,
+      3: 90,
+      7: 210,
+    },
   },
 ];
 
@@ -139,9 +147,9 @@ const PromoteListingOptions = () => {
   }, [listingId, navigate]);
 
   const handlePromote = async (option: PromotionOption) => {
-    const currentDuration = selectedDurations[option.id]; // Usa la durata specifica per l'opzione
-    const totalCost = option.baseCreditsPerDay * currentDuration;
-    const totalDurationHours = currentDuration * 24; // Each day is 24 hours of premium visibility
+    const currentDuration = selectedDurations[option.id];
+    const totalCost = option.costs[currentDuration]; // Usa il costo specifico dalla mappa
+    const totalDurationHours = currentDuration * 24; // Ogni giorno è 24 ore di visibilità premium
 
     if (!listingId || currentCredits === null || currentCredits < totalCost) {
       showError('Crediti insufficienti o annuncio non valido.');
@@ -245,7 +253,7 @@ const PromoteListingOptions = () => {
           {promotionOptions.map((option) => {
             const Icon = option.icon;
             const currentDuration = selectedDurations[option.id]; // Usa la durata specifica per l'opzione
-            const totalCost = option.baseCreditsPerDay * currentDuration;
+            const totalCost = option.costs[currentDuration]; // Ottieni il costo dalla mappa
             const canAfford = currentCredits !== null && currentCredits >= totalCost;
 
             return (
@@ -271,7 +279,7 @@ const PromoteListingOptions = () => {
                   </ul>
                   {option.id === 'day' && (
                     <div className="mb-4">
-                      <Select onValueChange={setSelectedTimeSlot} value={selectedTimeSlot}> {/* Aggiunto value */}
+                      <Select onValueChange={setSelectedTimeSlot} value={selectedTimeSlot}>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Seleziona fascia oraria" />
                         </SelectTrigger>
@@ -288,7 +296,7 @@ const PromoteListingOptions = () => {
                   <div className="mb-4">
                     <Select
                       onValueChange={(value) => setSelectedDurations(prev => ({ ...prev, [option.id]: parseInt(value) }))}
-                      value={String(currentDuration)} // Aggiunto value per controllare il componente
+                      value={String(currentDuration)}
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Seleziona durata" />
