@@ -197,63 +197,59 @@ const ListingDetails = () => {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Mail className="h-5 w-5 text-rose-500" /> Rispondi all'annuncio</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Dialog open={isReplyDialogOpen} onOpenChange={setIsReplyDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button className="w-full bg-rose-500 hover:bg-rose-600">
-                      Invia un messaggio
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle className="flex items-center gap-2"><Mail className="h-5 w-5 text-rose-500" /> Invia un messaggio</DialogTitle>
-                      <DialogDescription>
-                        Compila il modulo per inviare un messaggio all'autore dell'annuncio.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <Form {...form}>
-                      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-                        <FormField
-                          control={form.control}
-                          name="fromEmail"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>La tua Email</FormLabel>
-                              <FormControl><Input type="email" placeholder="iltuoindirizzo@email.com" {...field} /></FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="message"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Messaggio</FormLabel>
-                              <FormControl><Textarea placeholder="Scrivi qui il tuo messaggio..." className="min-h-[100px]" {...field} /></FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600" disabled={isSubmitting}>
-                          {isSubmitting ? 'Invio in corso...' : 'Invia Messaggio'}
-                        </Button>
-                      </form>
-                    </Form>
-                    <DialogClose asChild>
-                      <Button variant="ghost" className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-                        <X className="h-4 w-4" />
-                        <span className="sr-only">Close</span>
+            {/* Nuova implementazione del pulsante "Rispondi" che apre il dialog */}
+            <div className="flex justify-center py-4">
+              <Dialog open={isReplyDialogOpen} onOpenChange={setIsReplyDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-rose-500 hover:bg-rose-600 text-lg px-8 py-6 rounded-lg shadow-lg flex items-center gap-2">
+                    <Mail className="h-6 w-6" /> Rispondi
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2"><Mail className="h-5 w-5 text-rose-500" /> Invia un messaggio</DialogTitle>
+                    <DialogDescription>
+                      Compila il modulo per inviare un messaggio all'autore dell'annuncio.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+                      <FormField
+                        control={form.control}
+                        name="fromEmail"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>La tua Email</FormLabel>
+                            <FormControl><Input type="email" placeholder="iltuoindirizzo@email.com" {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="message"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Messaggio</FormLabel>
+                            <FormControl><Textarea placeholder="Scrivi qui il tuo messaggio..." className="min-h-[100px]" {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600" disabled={isSubmitting}>
+                        {isSubmitting ? 'Invio in corso...' : 'Invia Messaggio'}
                       </Button>
-                    </DialogClose>
-                  </DialogContent>
-                </Dialog>
-              </CardContent>
-            </Card>
+                    </form>
+                  </Form>
+                  <DialogClose asChild>
+                    <Button variant="ghost" className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+                      <X className="h-4 w-4" />
+                      <span className="sr-only">Close</span>
+                    </Button>
+                  </DialogClose>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
         </div>
       </div>
