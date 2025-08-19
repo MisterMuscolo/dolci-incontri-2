@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { italianProvinces } from '@/data/provinces';
-import { ImageUploader } from '@/components/ImageUploader';
+import { ImageUploader } from '@/components/ImageUploader'; // Use the updated ImageUploader
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { ChevronLeft, Image as ImageIcon } from 'lucide-react';
@@ -32,6 +32,8 @@ const listingSchema = z.object({
   phone: z.string().optional(),
 });
 
+type ExistingPhoto = { id: string; url: string; is_primary: boolean };
+
 type FullListing = {
   id: string;
   title: string;
@@ -42,11 +44,12 @@ type FullListing = {
   age: number;
   phone: string | null;
   email: string;
-  is_premium: boolean; // Aggiunto
-  promotion_mode: string | null; // Aggiunto
-  promotion_start_at: string | null; // Aggiunto
-  promotion_end_at: string | null; // Aggiunto
-  listing_photos: { id: string; url: string; is_primary: boolean }[];
+  user_id: string; // Added to pass to ImageUploader
+  is_premium: boolean;
+  promotion_mode: string | null;
+  promotion_start_at: string | null;
+  promotion_end_at: string | null;
+  listing_photos: ExistingPhoto[];
 };
 
 const EditListing = () => {
@@ -55,9 +58,9 @@ const EditListing = () => {
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [newPrimaryIndex, setNewPrimaryIndex] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [existingPhotos, setExistingPhotos] = useState<{ id: string; url: string; is_primary: boolean }[]>([]);
-  const [activeExistingPhoto, setActiveExistingPhoto] = useState<string | null>(null);
+  const [existingPhotos, setExistingPhotos] = useState<ExistingPhoto[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentListing, setCurrentListing] = useState<FullListing | null>(null); // Store full listing data
 
   const form = useForm<z.infer<typeof listingSchema>>({
     resolver: zodResolver(listingSchema),
@@ -88,6 +91,8 @@ const EditListing = () => {
     }
 
     const listing = data as FullListing;
+    setCurrentListing(listing); // Set the full listing data
+
     form.reset({
       category: listing.category,
       city: listing.city,
@@ -100,8 +105,6 @@ const EditListing = () => {
     });
 
     setExistingPhotos(listing.listing_photos || []);
-    const primaryPhoto = listing.listing_photos.find(p => p.is_primary)?.url || listing.listing_photos[0]?.url;
-    setActiveExistingPhoto(primaryPhoto || null);
     setIsLoading(false);
   }, [id, navigate, form]);
 
@@ -152,9 +155,7 @@ const EditListing = () => {
           return {
             listing_id: id,
             url: publicUrl,
-            // For simplicity, new photos are not set as primary automatically here.
-            // Primary photo logic would need to be more robust if allowing existing photo primary changes.
-            is_primary: false, 
+            is_primary: newPrimaryIndex === index && existingPhotos.length === 0, // Set primary only if no existing photos
           };
         });
 
@@ -179,7 +180,7 @@ const EditListing = () => {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || !currentListing) {
     return (
       <div className="bg-gray-50 p-4 sm:p-6 md:p-8">
         <div className="max-w-4xl mx-auto space-y-8">
@@ -200,6 +201,11 @@ const EditListing = () => {
       </div>
     );
   }
+
+  const now = new Date();
+  const promoStart = currentListing.promotion_start_at ? new Date(currentListing.promotion_start_at) : null;
+  const promoEnd = currentListing.promotion_end_at ? new Date(currentListing.promotion_end_at) : null;
+  const isPremiumOrPending = currentListing.is_premium && promoStart && promoEnd && (promoStart <= now || promoEnd >= now); // Check if premium or pending
 
   return (
     <div className="bg-gray-50 p-4 sm:p-6 md:p-8">
@@ -332,34 +338,17 @@ const EditListing = () => {
                   />
                 </div>
                 <div>
-                  <FormLabel>Fotografie Esistenti</FormLabel>
-                  <p className="text-sm text-gray-500 mb-2">Queste sono le foto attuali del tuo annuncio. Puoi aggiungere nuove foto qui sotto.</p>
-                  {existingPhotos.length > 0 ? (
-                    <>
-                      <AspectRatio ratio={16 / 10} className="bg-gray-100 rounded-lg overflow-hidden mb-4">
-                        <img src={activeExistingPhoto!} alt="Foto principale" className="w-full h-full object-cover" />
-                      </AspectRatio>
-                      {existingPhotos.length > 1 && (
-                        <div className="flex gap-2 overflow-x-auto pb-2">
-                          {existingPhotos.map((photo) => (
-                            <button key={photo.id} onClick={() => setActiveExistingPhoto(photo.url)} className={cn("w-24 h-24 rounded-md overflow-hidden flex-shrink-0 ring-offset-2 ring-offset-gray-50", activeExistingPhoto === photo.url && 'ring-2 ring-rose-500')}>
-                              <img src={photo.url} alt="Thumbnail" className="w-full h-full object-cover" />
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="border border-dashed border-gray-300 rounded-lg p-6 text-center text-gray-500">
-                      <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
-                      <p className="mt-2 text-sm">Nessuna foto esistente.</p>
-                    </div>
-                  )}
-                </div>
-                <div className="mt-8">
-                  <FormLabel>Aggiungi Nuove Fotografie</FormLabel>
-                  <p className="text-sm text-gray-500 mb-2">Puoi caricare nuove foto per il tuo annuncio.</p>
-                  <ImageUploader onFilesChange={setNewFiles} onPrimaryIndexChange={setNewPrimaryIndex} />
+                  <FormLabel>Fotografie</FormLabel>
+                  <p className="text-sm text-gray-500 mb-2">Gestisci le foto del tuo annuncio. Gli annunci gratuiti possono avere 1 foto, gli annunci Premium fino a 5.</p>
+                  <ImageUploader
+                    listingId={currentListing.id}
+                    userId={currentListing.user_id}
+                    initialPhotos={existingPhotos}
+                    isPremiumOrPending={isPremiumOrPending}
+                    onFilesChange={setNewFiles}
+                    onPrimaryIndexChange={setNewPrimaryIndex}
+                    onExistingPhotosUpdated={setExistingPhotos} // Update existingPhotos state when changes occur
+                  />
                 </div>
                 <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600" disabled={isSubmitting}>
                   {isSubmitting ? 'Aggiornamento in corso...' : 'Salva Modifiche'}
