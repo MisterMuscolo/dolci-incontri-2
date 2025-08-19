@@ -78,9 +78,7 @@ const Dashboard = () => {
             <h1 className="text-3xl font-bold">La Mia Dashboard</h1>
             <p className="text-gray-600 text-sm mt-1">Gestisci i tuoi annunci, crediti e impostazioni del tuo account.</p>
           </div>
-          <Link to="/new-listing">
-            <Button className="bg-rose-500 hover:bg-rose-600">Crea nuovo annuncio</Button>
-          </Link>
+          {/* Rimosso il pulsante "Crea nuovo annuncio" duplicato qui */}
         </div>
 
         <div className="space-y-4">
