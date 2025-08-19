@@ -1,4 +1,4 @@
-import { useEffect, useState } => 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { MapPin, Tag, User, Mail, BookText, ChevronLeft, X, CalendarDays } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } => '@/lib/utils';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale'; // Importa la locale italiana
 import {
