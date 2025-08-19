@@ -23,6 +23,7 @@ import Autoplay from 'embla-carousel-autoplay';
 import { cn } from '@/lib/utils';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { useState } from "react";
+import { ListingPhotoManagerDialog } from "./ListingPhotoManagerDialog"; // Importa il nuovo componente
 
 export interface Listing {
   id: string;
@@ -50,7 +51,6 @@ interface ListingListItemProps {
 
 export const ListingListItem = ({ listing, showControls = false, showExpiryDate = false, onListingUpdated }: ListingListItemProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isDeletingPhotos, setIsDeletingPhotos] = useState(false); // Nuovo stato per eliminazione foto
 
   const now = new Date();
   const promoStart = listing.promotion_start_at ? new Date(listing.promotion_start_at) : null;
@@ -136,103 +136,6 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
     }
   };
 
-  const handleDeleteAllPhotos = async () => {
-    setIsDeletingPhotos(true);
-    const toastId = showLoading('Eliminazione foto in corso...');
-
-    try {
-      // 1. List all photos for the listing in storage
-      const { data: storagePhotos, error: storageListError } = await supabase.storage
-        .from('listing_photos')
-        .list(`${listing.id}/`);
-
-      if (storageListError) {
-        console.warn(`Could not list photos for listing ${listing.id} in storage:`, storageListError.message);
-        // Don't throw, proceed to DB deletion if storage list fails
-      } else if (storagePhotos && storagePhotos.length > 0) {
-        const filePaths = storagePhotos.map(file => `${listing.id}/${file.name}`);
-        const { error: storageDeleteError } = await supabase.storage
-          .from('listing_photos')
-          .remove(filePaths);
-
-        if (storageDeleteError) {
-          console.warn(`Could not delete photos for listing ${listing.id} from storage:`, storageDeleteError.message);
-        }
-      }
-
-      // 2. Delete all photo entries from the database for this listing
-      const { error: dbDeleteError } = await supabase
-        .from('listing_photos')
-        .delete()
-        .eq('listing_id', listing.id);
-
-      if (dbDeleteError) {
-        throw new Error(`Errore durante l'eliminazione delle foto dal database: ${dbDeleteError.message}`);
-      }
-
-      // 3. Update listing's premium status if it was premium and had photos
-      if (listing.is_premium) {
-        const { error: updateListingError } = await supabase
-          .from('listings')
-          .update({ 
-            is_premium: false, // Set to false if all photos are removed
-            promotion_mode: null,
-            promotion_start_at: null,
-            promotion_end_at: null,
-          })
-          .eq('id', listing.id);
-
-        if (updateListingError) {
-          console.warn(`Could not update listing premium status after photo deletion: ${updateListingError.message}`);
-        }
-      }
-
-      dismissToast(toastId);
-      showSuccess('Tutte le foto dell\'annuncio sono state eliminate con successo!');
-      if (onListingUpdated) {
-        onListingUpdated(); // Refresh the list in the parent component
-      }
-    } catch (error: any) {
-      dismissToast(toastId);
-      showError(error.message || 'Errore durante l\'eliminazione delle foto.');
-    } finally {
-      setIsDeletingPhotos(false);
-    }
-  };
-
-  const getPromotionPeriodDetails = () => {
-    if (!listing.promotion_start_at || !listing.promotion_end_at) return '';
-
-    const start = new Date(listing.promotion_start_at);
-    const end = new Date(listing.promotion_end_at);
-    const durationInDays = differenceInDays(end, start);
-
-    const formattedStart = format(start, 'dd/MM/yyyy HH:mm', { locale: it });
-    const formattedEnd = format(end, 'dd/MM/yyyy HH:mm', { locale: it });
-
-    const promotionTypeLabel = listing.promotion_mode === 'day' ? 'Modalità Giorno' : 'Modalità Notte';
-
-    return (
-      <>
-        <p className="text-base font-semibold text-gray-800 mb-2">
-          Pacchetto: <span className="capitalize">{promotionTypeLabel}</span>
-        </p>
-        <p className="text-sm text-gray-600">
-          Durata: <span className="font-medium">{durationInDays} {durationInDays === 1 ? 'giorno' : 'giorni'}</span>
-        </p>
-        <p className="text-sm text-gray-600">
-          Inizio: <span className="font-medium">{formattedStart}</span>
-        </p>
-        <p className="text-sm text-gray-600 mb-4">
-          Fine: <span className="font-medium">{formattedEnd}</span>
-        </p>
-        <p className="text-sm text-gray-700">
-          {getPromotionDetails(listing.promotion_mode)}
-        </p>
-      </>
-    );
-  };
-
   return (
     <Card className={cn(
       "w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row relative",
@@ -303,33 +206,13 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
       )}
       {showControls && (
         <div className="flex-shrink-0 flex md:flex-col justify-end md:justify-center items-center gap-2 p-4 border-t md:border-t-0 md:border-l">
-           {/* Pulsante "Elimina Foto" */}
-           <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="outline" size="sm" className="w-full" disabled={isDeletingPhotos || !hasPhotos}>
-                  <ImageOff className="h-4 w-4 md:mr-2" />
-                  <span className="hidden md:inline">Elimina Foto</span>
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Sei assolutamente sicuro?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Questa azione eliminerà definitivamente TUTTE le foto dell'annuncio "{listing.title}" dallo storage e dal database. L'annuncio rimarrà attivo ma senza immagini. Se l'annuncio era Premium, tornerà ad essere un annuncio base.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Annulla</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDeleteAllPhotos}
-                    className="bg-destructive hover:bg-destructive/90"
-                    disabled={isDeletingPhotos}
-                  >
-                    {isDeletingPhotos ? 'Eliminazione...' : 'Sì, elimina foto'}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+           {/* Pulsante "Gestisci Foto" */}
+           <ListingPhotoManagerDialog 
+              listingId={listing.id} 
+              listingTitle={listing.title} 
+              userId={listing.user_id} // Assicurati che user_id sia disponibile nell'interfaccia Listing
+              onPhotosUpdated={onListingUpdated || (() => {})} // Passa la callback
+            />
 
           {isActivePremium ? (
             <AlertDialog>
