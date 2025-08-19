@@ -19,8 +19,10 @@ import ListingDetails from "./pages/ListingDetails";
 import MyListings from "./pages/MyListings";
 import CreditHistory from "./pages/CreditHistory";
 import UserListingsAdminView from "./pages/UserListingsAdminView";
-import BannedUser from "./pages/BannedUser"; // Importa la nuova pagina
-import EditListing from "./pages/EditListing"; // Importa la nuova pagina di modifica
+import BannedUser from "./pages/BannedUser";
+import EditListing from "./pages/EditListing";
+import Termini from "./pages/Termini"; // Importa la nuova pagina Termini
+import Privacy from "./pages/Privacy"; // Importa la nuova pagina Privacy
 
 const queryClient = new QueryClient();
 
@@ -28,7 +30,7 @@ const App = () => {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isBanned, setIsBanned] = useState(false); // Nuovo stato per il ban
+  const [isBanned, setIsBanned] = useState(false);
 
   useEffect(() => {
     const getSessionAndRole = async () => {
@@ -47,7 +49,7 @@ const App = () => {
           console.log("App.tsx: Profile role fetched:", profile.role);
           if (profile.role === 'admin') {
             setIsAdmin(true);
-            setIsBanned(false); // Un admin non può essere bannato
+            setIsBanned(false);
             console.log("App.tsx: isAdmin set to TRUE");
           } else if (profile.role === 'banned') {
             setIsBanned(true);
@@ -140,6 +142,8 @@ const App = () => {
               <Route path="/" element={<Index session={session} />} />
               <Route path="/search" element={<SearchResults />} />
               <Route path="/listing/:id" element={<ListingDetails />} />
+              <Route path="/termini" element={<Termini />} /> {/* Nuova rotta */}
+              <Route path="/privacy" element={<Privacy />} /> {/* Nuova rotta */}
               
               {/* Reindirizza gli utenti bannati alla pagina /banned */}
               <Route 
