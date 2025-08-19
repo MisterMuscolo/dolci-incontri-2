@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart, LogOut, User, PlusCircle, Shield } from 'lucide-react';
+import { Heart, LogOut, User, PlusCircle, Shield, LogIn } from 'lucide-react'; // Aggiunto LogIn icona
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -79,14 +79,22 @@ export const Header = ({ session, isAdmin }: HeaderProps) => {
               </DropdownMenu>
             </div>
           ) : (
-            <div className="space-x-2">
-              <Link to="/auth?tab=login">
-                <Button variant="ghost">Accedi</Button>
-              </Link>
-              <Link to="/auth?tab=register">
-                <Button className="bg-rose-500 hover:bg-rose-600">Registrati</Button>
-              </Link>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center gap-2">
+                  <LogIn className="h-5 w-5" />
+                  <span>Accedi / Registrati</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-48" align="end" forceMount>
+                <DropdownMenuItem onClick={() => navigate('/auth?tab=login')}>
+                  Accedi
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/auth?tab=register')}>
+                  Registrati
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </nav>
       </div>
