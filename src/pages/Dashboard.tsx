@@ -94,7 +94,7 @@ const Dashboard = () => {
                     </div>
                     <span className="text-gray-800">I Miei Annunci</span>
                   </CardTitle>
-                  <CardDescription className="ml-[58px]">Visualizza e gestisci i tuoi annunci.</CardDescription> {/* Modificato ml */}
+                  <CardDescription className="ml-[88px]">Visualizza e gestisci i tuoi annunci.</CardDescription> {/* Modificato ml */}
                 </CardHeader>
                 <CardContent>
                   {loading ? (
@@ -120,7 +120,7 @@ const Dashboard = () => {
                     <span>Crediti</span>
                   </CardTitle>
                 </Link>
-                <CardDescription className="ml-[58px]">Acquista e gestisci i tuoi crediti.</CardDescription> {/* Modificato ml */}
+                <CardDescription className="ml-[88px]">Acquista e gestisci i tuoi crediti.</CardDescription> {/* Modificato ml */}
               </CardHeader>
               <CardContent>
                 {loading ? (
@@ -154,7 +154,7 @@ const Dashboard = () => {
                     <span>Impostazioni</span>
                   </CardTitle>
                 </Link>
-                <CardDescription className="ml-[58px]">Gestisci le impostazioni del tuo account.</CardDescription> {/* Modificato ml */}
+                <CardDescription className="ml-[88px]">Gestisci le impostazioni del tuo account.</CardDescription> {/* Modificato ml */}
               </CardHeader>
               <CardContent>
                 {/* Il pulsante "Modifica profilo" è stato rimosso in quanto il titolo della card è già cliccabile */}
