@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { italianProvinces } from '@/data/provinces';
-import { Heart, MapPin, Search } from 'lucide-react';
+import { Heart, MapPin, Search, Users, Venus, Mars } from 'lucide-react'; // Importa icone aggiuntive
+import { Card, CardContent } from '@/components/ui/card'; // Importa Card e CardContent
 
 interface IndexProps {
   session: any;
@@ -25,6 +26,20 @@ export default function Index({ session }: IndexProps) {
     
     navigate(`/search?${searchParams.toString()}`);
   };
+
+  const handleCategoryCardClick = (selectedCategory: string) => {
+    const searchParams = new URLSearchParams();
+    searchParams.append('category', selectedCategory);
+    navigate(`/search?${searchParams.toString()}`);
+  };
+
+  const categories = [
+    { value: 'donna-cerca-uomo', label: 'Donna cerca Uomo', icon: Heart },
+    { value: 'uomo-cerca-donna', label: 'Uomo cerca Donna', icon: Heart },
+    { value: 'coppie', label: 'Coppie', icon: Users },
+    { value: 'uomo-cerca-uomo', label: 'Uomo cerca Uomo', icon: Mars },
+    { value: 'donna-cerca-donna', label: 'Donna cerca Donna', icon: Venus },
+  ];
 
   return (
     <>
@@ -111,6 +126,28 @@ export default function Index({ session }: IndexProps) {
                   </Button>
                 </Link>
               )}
+            </div>
+          </div>
+
+          {/* Nuova sezione per le categorie cliccabili */}
+          <div className="mt-16">
+            <h2 className="text-3xl font-bold text-gray-800 mb-8">Esplora per Categoria</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+              {categories.map((cat) => {
+                const Icon = cat.icon;
+                return (
+                  <Card 
+                    key={cat.value} 
+                    className="cursor-pointer hover:shadow-lg transition-shadow duration-200 bg-white/80 backdrop-blur-sm"
+                    onClick={() => handleCategoryCardClick(cat.value)}
+                  >
+                    <CardContent className="flex flex-col items-center justify-center p-6 text-center">
+                      <Icon className="h-12 w-12 text-rose-500 mb-4" />
+                      <p className="text-lg font-semibold text-gray-700">{cat.label}</p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </div>
         </div>
