@@ -10,7 +10,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [totalListingsCount, setTotalListingsCount] = useState(0);
   const [currentCredits, setCurrentCredits] = useState<number | null>(0);
-  const [totalCreditsSpent, setTotalCreditsSpent] = useState<number>(0); // Nuovo stato per i crediti utilizzati
+  const [totalCreditsSpent, setTotalCreditsSpent] = useState<number>(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -89,7 +89,9 @@ const Dashboard = () => {
               <Card className="w-full transition-shadow hover:shadow-lg cursor-pointer bg-white hover:bg-gray-50">
                 <CardHeader>
                   <CardTitle className="text-2xl font-semibold flex items-center gap-2">
-                    <LayoutGrid className="h-6 w-6 text-rose-500" />
+                    <div className="bg-rose-100 p-2 rounded-md flex items-center justify-center"> {/* Wrapper per l'icona */}
+                      <LayoutGrid className="h-6 w-6 text-rose-500" />
+                    </div>
                     <span className="text-gray-800">I Miei Annunci</span>
                   </CardTitle>
                   <CardDescription>Visualizza e gestisci i tuoi annunci.</CardDescription>
@@ -112,11 +114,13 @@ const Dashboard = () => {
               <CardHeader>
                 <Link to="/credit-history" className="block">
                   <CardTitle className="text-lg font-semibold flex items-center gap-2 cursor-pointer">
-                    <Wallet className="h-5 w-5 text-rose-500" />
-                    <span>Crediti</span> {/* Modificato il titolo */}
+                    <div className="bg-rose-100 p-2 rounded-md flex items-center justify-center"> {/* Wrapper per l'icona */}
+                      <Wallet className="h-5 w-5 text-rose-500" />
+                    </div>
+                    <span>Crediti</span>
                   </CardTitle>
                 </Link>
-                <CardDescription>Acquista e gestisci i tuoi crediti.</CardDescription> {/* Nuova descrizione */}
+                <CardDescription>Acquista e gestisci i tuoi crediti.</CardDescription>
               </CardHeader>
               <CardContent>
                 {loading ? (
@@ -144,7 +148,9 @@ const Dashboard = () => {
               <CardHeader>
                 <Link to="/profile-settings" className="block">
                   <CardTitle className="text-lg font-semibold flex items-center gap-2 cursor-pointer">
-                    <Settings className="h-5 w-5 text-rose-500" />
+                    <div className="bg-rose-100 p-2 rounded-md flex items-center justify-center"> {/* Wrapper per l'icona */}
+                      <Settings className="h-5 w-5 text-rose-500" />
+                    </div>
                     <span>Impostazioni account</span>
                   </CardTitle>
                 </Link>
