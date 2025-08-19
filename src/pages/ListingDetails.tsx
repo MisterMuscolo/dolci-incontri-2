@@ -247,7 +247,7 @@ const ListingDetails = () => {
                 className="w-full sm:w-auto" // Rende il link un blocco per il pulsante
               >
                 <Button className="w-full bg-green-500 hover:bg-green-600 text-lg px-8 py-6 rounded-lg shadow-lg flex items-center justify-center gap-2">
-                  <Phone className="h-6 w-6" /> Chiama
+                  <Phone className="h-6 w-6" /> Chiama {listing.phone}
                 </Button>
               </a>
             )}
