@@ -144,7 +144,16 @@ export default function Auth() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password-login">Password</Label>
+                  <div className="flex justify-between items-center"> {/* Modificato qui */}
+                    <Label htmlFor="password-login">Password</Label>
+                    <button
+                      type="button"
+                      onClick={() => setIsResettingPassword(true)}
+                      className="text-sm font-semibold text-rose-500 hover:text-rose-600 focus:outline-none"
+                    >
+                      Hai dimenticato la password?
+                    </button>
+                  </div>
                   <div className="relative">
                     <Input
                       id="password-login"
@@ -167,18 +176,9 @@ export default function Auth() {
                       )}
                     </Button>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="remember-me" checked={rememberMe} onCheckedChange={(checked) => setRememberMe(!!checked)} />
-                      <Label htmlFor="remember-me">Rimani connesso</Label>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setIsResettingPassword(true)}
-                      className="text-sm font-semibold text-rose-500 hover:text-rose-600 focus:outline-none"
-                    >
-                      Hai dimenticato la password?
-                    </button>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="remember-me" checked={rememberMe} onCheckedChange={(checked) => setRememberMe(!!checked)} />
+                    <Label htmlFor="remember-me">Rimani connesso</Label>
                   </div>
                 </div>
                 <Button 
