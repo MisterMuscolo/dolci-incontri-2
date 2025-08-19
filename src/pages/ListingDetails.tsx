@@ -176,7 +176,7 @@ const ListingDetails = () => {
               <CardTitle className="text-3xl font-bold text-gray-800">{listing.title}</CardTitle>
               {listing.is_premium && (
                 <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white text-base px-3 py-1 rounded-full font-semibold flex items-center gap-1 w-fit absolute top-4 right-4"> {/* Positioned absolutely */}
-                  <Rocket className="h-4 w-4" /> Annuncio Premium
+                  <Rocket className="h-4 w-4" /> Premium
                 </Badge>
               )}
               <div className="flex flex-wrap gap-2 pt-4">
