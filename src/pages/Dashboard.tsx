@@ -83,21 +83,21 @@ const Dashboard = () => {
           </Link>
         </div>
 
-        <div className="space-y-4"> {/* Ridotto lo spazio verticale */}
+        <div className="space-y-4">
           <Link to="/my-listings">
             <Card className="w-full transition-shadow hover:shadow-lg cursor-pointer bg-white hover:bg-gray-50">
-              <CardHeader className="text-center"> {/* Centrato il contenuto dell'header */}
-                <CardTitle className="text-2xl font-semibold flex items-center justify-center gap-2"> {/* Ridotto il font e centrato */}
-                  <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center"> {/* Ridotto il padding */}
-                    <LayoutGrid className="h-8 w-8 text-rose-500" /> {/* Ridotto l'icona */}
+              <CardHeader className="text-center">
+                <CardTitle className="text-2xl font-semibold flex items-center justify-center gap-2">
+                  <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center">
+                    <LayoutGrid className="h-8 w-8 text-rose-500" />
                   </div>
                   <span className="text-gray-800">I Miei Annunci</span>
                 </CardTitle>
-                <CardDescription className="text-center">Visualizza e gestisci i tuoi annunci.</CardDescription> {/* Centrato */}
+                <CardDescription className="text-center">Visualizza e gestisci i tuoi annunci.</CardDescription>
               </CardHeader>
-              <CardContent className="text-center"> {/* Centrato il contenuto */}
+              <CardContent className="text-center">
                 {loading ? (
-                  <Skeleton className="h-8 w-3/4 mx-auto" /> {/* Centrato lo skeleton */}
+                  <Skeleton className="h-8 w-3/4 mx-auto" />
                 ) : (
                   <p className="text-gray-600 text-xl">
                     Hai <span className="font-bold text-rose-500">{totalListingsCount}</span> annunci attivi
@@ -108,25 +108,25 @@ const Dashboard = () => {
           </Link>
 
           <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
-            <CardHeader className="text-center"> {/* Centrato il contenuto dell'header */}
+            <CardHeader className="text-center">
               <Link to="/credit-history" className="block">
-                <CardTitle className="text-2xl font-semibold flex items-center justify-center gap-2"> {/* Ridotto il font e centrato */}
-                  <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center"> {/* Ridotto il padding */}
-                    <Wallet className="h-8 w-8 text-rose-500" /> {/* Ridotto l'icona */}
+                <CardTitle className="text-2xl font-semibold flex items-center justify-center gap-2">
+                  <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center">
+                    <Wallet className="h-8 w-8 text-rose-500" />
                   </div>
                   <span>Crediti</span>
                 </CardTitle>
               </Link>
-              <CardDescription className="text-center">Acquista e gestisci i tuoi crediti.</CardDescription> {/* Centrato */}
+              <CardDescription className="text-center">Acquista e gestisci i tuoi crediti.</CardDescription>
             </CardHeader>
-            <CardContent className="text-center"> {/* Centrato il contenuto */}
+            <CardContent className="text-center">
               {loading ? (
                 <div className="space-y-2">
-                  <Skeleton className="h-6 w-full mx-auto" /> {/* Centrato lo skeleton */}
-                  <Skeleton className="h-6 w-full mx-auto" /> {/* Centrato lo skeleton */}
+                  <Skeleton className="h-6 w-full mx-auto" />
+                  <Skeleton className="h-6 w-full mx-auto" />
                 </div>
               ) : (
-                <div className="flex flex-col gap-2 items-center"> {/* Centrato il contenuto */}
+                <div className="flex flex-col gap-2 items-center">
                   <p className="text-gray-600 text-lg">
                     Disponibili: <span className="font-bold text-rose-500">{currentCredits !== null ? currentCredits : 0}</span>
                   </p>
@@ -136,22 +136,22 @@ const Dashboard = () => {
                 </div>
               )}
               <Link to="/buy-credits">
-                <Button className="bg-rose-500 hover:bg-rose-600 mt-4 mx-auto block">Acquista crediti</Button> {/* Centrato il pulsante */}
+                <Button className="bg-rose-500 hover:bg-rose-600 mt-4 mx-auto block">Acquista crediti</Button>
               </Link>
             </CardContent>
           </Card>
           
           <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
-            <CardHeader className="text-center"> {/* Centrato il contenuto dell'header */}
+            <CardHeader className="text-center">
               <Link to="/profile-settings" className="block">
-                <CardTitle className="text-2xl font-semibold flex items-center justify-center gap-2"> {/* Ridotto il font e centrato */}
-                  <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center"> {/* Ridotto il padding */}
-                    <Settings className="h-8 w-8 text-rose-500" /> {/* Ridotto l'icona */}
+                <CardTitle className="text-2xl font-semibold flex items-center justify-center gap-2">
+                  <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center">
+                    <Settings className="h-8 w-8 text-rose-500" />
                   </div>
                   <span>Impostazioni</span>
                 </CardTitle>
               </Link>
-              <CardDescription className="text-center">Gestisci le impostazioni del tuo account.</CardDescription> {/* Centrato */}
+              <CardDescription className="text-center">Gestisci le impostazioni del tuo account.</CardDescription>
             </CardHeader>
             <CardContent>
               {/* Il pulsante "Modifica profilo" è stato rimosso in quanto il titolo della card è già cliccabile */}
