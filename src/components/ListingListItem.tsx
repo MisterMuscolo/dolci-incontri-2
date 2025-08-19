@@ -90,14 +90,14 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
     <Card className="w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row">
       <Link to={`/listing/${listing.id}`} className="flex-grow block hover:bg-gray-50/50">
         <div className="flex flex-col sm:flex-row">
-          {listing.is_premium && listing.listing_photos.length > 0 ? ( {/* Changed to > 0 to handle single premium photo */}
-            <div className="sm:w-1/4 lg:w-1/5 flex-shrink-0 relative"> {/* Added relative for positioning arrows */}
+          {listing.is_premium && listing.listing_photos.length > 0 ? (
+            <div className="sm:w-1/4 lg:w-1/5 flex-shrink-0 relative">
               <Carousel
                 plugins={[
                   Autoplay({
-                    delay: 3000, // Auto-scroll every 3 seconds
-                    stopOnInteraction: false, // Keep scrolling even if user interacts
-                    stopOnMouseEnter: true, // Pause on hover
+                    delay: 3000,
+                    stopOnInteraction: false,
+                    stopOnMouseEnter: true,
                   }),
                 ]}
                 opts={{
@@ -112,7 +112,7 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
                     </CarouselItem>
                   ))}
                 </CarouselContent>
-                {listing.listing_photos.length > 1 && ( // Show arrows only if more than one photo
+                {listing.listing_photos.length > 1 && (
                   <>
                     <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10" />
                     <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10" />
@@ -120,7 +120,7 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
                 )}
               </Carousel>
             </div>
-          ) : null /* No photo for non-premium listings in list item */ }
+          ) : null }
           <div className="p-4 flex flex-col flex-grow">
             <h3 className="text-xl font-semibold mb-2 text-gray-800 line-clamp-2">{listing.title}</h3>
             <div className="flex flex-wrap gap-2 mb-3">
