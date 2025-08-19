@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useEffect, useState } => "react";
+import { useEffect, useState } from "react"; // Corretto: da '=>' a 'from'
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -151,10 +151,10 @@ const Dashboard = () => {
                     <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center">
                       <Settings className="h-6 w-6 text-rose-500" />
                     </div>
-                    <span>Impostazioni</span> {/* Modificato il titolo */}
+                    <span>Impostazioni</span>
                   </CardTitle>
                 </Link>
-                <CardDescription>Gestisci le impostazioni del tuo account.</CardDescription> {/* Nuova descrizione */}
+                <CardDescription>Gestisci le impostazioni del tuo account.</CardDescription>
               </CardHeader>
               <CardContent>
                 {/* Il pulsante "Modifica profilo" è stato rimosso in quanto il titolo della card è già cliccabile */}
