@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { italianProvinces } from '@/data/provinces';
-import { Heart, MapPin, Search, Users, User } from 'lucide-react'; // Importa icone corrette e rimuovi quelle problematiche
-import { Card, CardContent } from '@/components/ui/card'; // Importa Card e CardContent
+import { Heart, MapPin, Search, Users, User } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface IndexProps {
   session: any;
@@ -34,11 +34,11 @@ export default function Index({ session }: IndexProps) {
   };
 
   const categories = [
-    { value: 'donna-cerca-uomo', label: 'Donna cerca Uomo', icon: Heart },
-    { value: 'uomo-cerca-donna', label: 'Uomo cerca Donna', icon: Heart },
-    { value: 'coppie', label: 'Coppie', icon: Users },
-    { value: 'uomo-cerca-uomo', label: 'Uomo cerca Uomo', icon: User }, // Icona corretta
-    { value: 'donna-cerca-donna', label: 'Donna cerca Donna', icon: User }, // Icona corretta
+    { value: 'donna-cerca-uomo', label: '👩‍❤️‍👨 Donna cerca Uomo', icon: Heart },
+    { value: 'uomo-cerca-donna', label: '👨‍❤️‍👩 Uomo cerca Donna', icon: Heart },
+    { value: 'coppie', label: '👩‍❤️‍💋‍👨 Coppie', icon: Users },
+    { value: 'uomo-cerca-uomo', label: '👨‍❤️‍👨 Uomo cerca Uomo', icon: User },
+    { value: 'donna-cerca-donna', label: '👩‍❤️‍👩 Donna cerca Donna', icon: User },
   ];
 
   return (
