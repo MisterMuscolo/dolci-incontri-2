@@ -87,7 +87,7 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
     <Card className="w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row">
       <Link to={`/listing/${listing.id}`} className="flex-grow block hover:bg-gray-50/50">
         <div className="flex flex-col sm:flex-row">
-          {primaryPhoto && (
+          {listing.is_premium && primaryPhoto && ( // Mostra la foto solo se l'annuncio è premium
             <div className="sm:w-1/4 lg:w-1/5 flex-shrink-0">
               <img src={primaryPhoto} alt={listing.title} className="object-cover w-full h-48 sm:h-full" />
             </div>

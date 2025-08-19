@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } => 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -42,6 +42,7 @@ type FullListing = {
   age: number;
   phone: string | null;
   created_at: string;
+  is_premium: boolean; // Aggiunto is_premium
   listing_photos: { id: string; url: string }[];
 };
 
@@ -72,10 +73,19 @@ const ListingDetails = () => {
       if (error || !data) {
         console.error('Error fetching listing:', error);
       } else {
-        setListing(data as FullListing);
-        if (data.listing_photos && data.listing_photos.length > 0) {
-          setActivePhoto(data.listing_photos[0].url);
+        let photosToDisplay = data.listing_photos || [];
+        if (!data.is_premium) {
+          photosToDisplay = photosToDisplay.slice(0, 1); // Solo 1 foto per annunci gratuiti
+        } else {
+          photosToDisplay = photosToDisplay.slice(0, 5); // Fino a 5 foto per annunci premium
         }
+
+        if (photosToDisplay.length > 0) {
+          setActivePhoto(photosToDisplay[0].url);
+        } else {
+          setActivePhoto(null); // Nessuna foto da mostrare
+        }
+        setListing({ ...data, listing_photos: photosToDisplay } as FullListing); // Aggiorna lo stato con le foto filtrate
       }
       setLoading(false);
     };
@@ -166,7 +176,7 @@ const ListingDetails = () => {
               <AspectRatio ratio={16 / 10} className="bg-gray-100 rounded-lg overflow-hidden mb-4">
                 <img src={activePhoto!} alt={listing.title} className="w-full h-full object-cover" />
               </AspectRatio>
-              {listing.listing_photos.length > 1 && (
+              {listing.listing_photos.length > 1 && ( // Mostra le miniature solo se c'è più di una foto da visualizzare
                 <div className="flex gap-2 overflow-x-auto pb-2">
                   {listing.listing_photos.map((photo) => (
                     <button key={photo.id} onClick={() => setActivePhoto(photo.url)} className={cn("w-24 h-24 rounded-md overflow-hidden flex-shrink-0 ring-offset-2 ring-offset-gray-50", activePhoto === photo.url && 'ring-2 ring-rose-500')}>
