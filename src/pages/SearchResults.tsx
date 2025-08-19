@@ -61,7 +61,7 @@ const SearchResults = () => {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error("SearchResults: Errore nella ricerca degli annunci:", error);
+      console.error("SearchResults: Errore nella ricerca degli annunci:", error.message, error.details);
       setError("Si è verificato un errore durante la ricerca. Riprova più tardi.");
     } else {
       if (count) {

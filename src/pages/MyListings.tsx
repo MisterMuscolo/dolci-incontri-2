@@ -35,7 +35,7 @@ const MyListings = () => {
       .gt('expires_at', new Date().toISOString()); // Filtra solo gli annunci attivi
 
     if (countError) {
-      console.error("MyListings: Errore nel conteggio degli annunci:", countError);
+      console.error("MyListings: Errore nel conteggio degli annunci:", countError.message, countError.details);
       setLoading(false);
       return;
     }
@@ -71,7 +71,7 @@ const MyListings = () => {
       .range(from, to); 
 
     if (error) {
-      console.error("MyListings: Errore nel recupero degli annunci:", error);
+      console.error("MyListings: Errore nel recupero degli annunci:", error.message, error.details);
     } else if (data) {
       console.log("MyListings: Dati ricevuti:", data);
       // Client-side sorting for active premium listings
