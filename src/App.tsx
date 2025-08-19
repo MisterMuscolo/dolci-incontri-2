@@ -26,7 +26,7 @@ import Privacy from "./pages/Privacy";
 import Contatti from "./pages/Contatti";
 import PromoteListingOptions from "./pages/PromoteListingOptions";
 import RegistrationSuccess from "./pages/RegistrationSuccess";
-import ChangePassword from "./pages/ChangePassword"; // Importa la nuova pagina
+import ChangePassword from "./pages/ChangePassword";
 
 const queryClient = new QueryClient();
 
@@ -36,101 +36,80 @@ const App = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isBanned, setIsBanned] = useState(false);
 
-  useEffect(() => {
-    const getSessionAndRole = async () => {
-      console.log("App.tsx: Fetching session and role...");
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
-      if (session) {
-        console.log("App.tsx: Session found for user:", session.user.email);
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', session.user.id)
-          .single();
+  // Function to fetch user role
+  const fetchUserRole = async (userId: string) => {
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .single();
 
-        if (profile) {
-          console.log("App.tsx: Profile role fetched:", profile.role);
-          if (profile.role === 'admin') {
-            setIsAdmin(true);
-            setIsBanned(false);
-            console.log("App.tsx: isAdmin set to TRUE");
-          } else if (profile.role === 'banned') {
-            setIsBanned(true);
-            setIsAdmin(false);
-            console.log("App.tsx: isBanned set to TRUE");
-          } else {
-            setIsAdmin(false);
-            setIsBanned(false);
-            console.log("App.tsx: isAdmin/isBanned set to FALSE (role was:", profile.role, ")");
-          }
-        } else if (error) {
-          console.error("App.tsx: Error fetching profile:", error);
-          setIsAdmin(false);
-          setIsBanned(false);
-        } else {
-          console.log("App.tsx: No profile found for user, isAdmin/isBanned set to FALSE");
-          setIsAdmin(false);
-          setIsBanned(false);
-        }
+    if (profile) {
+      console.log("App.tsx: Profile role fetched:", profile.role);
+      if (profile.role === 'admin') {
+        setIsAdmin(true);
+        setIsBanned(false);
+        console.log("App.tsx: isAdmin set to TRUE");
+      } else if (profile.role === 'banned') {
+        setIsBanned(true);
+        setIsAdmin(false);
+        console.log("App.tsx: isBanned set to TRUE");
       } else {
-        console.log("App.tsx: No session found, isAdmin/isBanned set to FALSE");
+        setIsAdmin(false);
+        setIsBanned(false);
+        console.log("App.tsx: isAdmin/isBanned set to FALSE (role was:", profile.role, ")");
+      }
+    } else if (error) {
+      console.error("App.tsx: Error fetching profile:", error);
+      setIsAdmin(false);
+      setIsBanned(false);
+    } else {
+      console.log("App.tsx: No profile found for user, isAdmin/isBanned set to FALSE");
+      setIsAdmin(false);
+      setIsBanned(false);
+    }
+  };
+
+  useEffect(() => {
+    const getInitialSessionAndRole = async () => {
+      console.log("App.tsx: Fetching initial session and role...");
+      const { data: { session: initialSession } } = await supabase.auth.getSession();
+      setSession(initialSession);
+
+      if (initialSession) {
+        await fetchUserRole(initialSession.user.id);
+      } else {
         setIsAdmin(false);
         setIsBanned(false);
       }
-      setLoading(false);
+      setLoading(false); // Set loading to false after initial check
     };
 
-    getSessionAndRole();
+    getInitialSessionAndRole();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log("App.tsx: Auth state changed. Event:", _event, "Session:", session);
-      setSession(session);
-      if (session) {
-        supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', session.user.id)
-          .single()
-          .then(({ data: profile, error }) => {
-            if (profile) {
-              console.log("App.tsx: Auth state change: Profile role fetched:", profile.role);
-              if (profile.role === 'admin') {
-                setIsAdmin(true);
-                setIsBanned(false);
-                console.log("App.tsx: Auth state change: isAdmin set to TRUE");
-              } else if (profile.role === 'banned') {
-                setIsBanned(true);
-                setIsAdmin(false);
-                console.log("App.tsx: Auth state change: isBanned set to TRUE");
-              } else {
-                setIsAdmin(false);
-                setIsBanned(false);
-                console.log("App.tsx: Auth state change: isAdmin/isBanned set to FALSE (role was:", profile.role, ")");
-              }
-            } else if (error) {
-              console.error("App.tsx: Auth state change: Error fetching profile:", error);
-              setIsAdmin(false);
-              setIsBanned(false);
-            } else {
-              console.log("App.tsx: Auth state change: No profile found, isAdmin/isBanned set to FALSE");
-              setIsAdmin(false);
-              setIsBanned(false);
-            }
-          });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+      console.log("App.tsx: Auth state changed. Event:", _event, "New Session:", newSession);
+      setSession(newSession);
+      setLoading(true); // Set loading to true while fetching new role
+
+      if (newSession) {
+        await fetchUserRole(newSession.user.id);
       } else {
-        console.log("App.tsx: Auth state change: No session, isAdmin/isBanned set to FALSE");
         setIsAdmin(false);
         setIsBanned(false);
       }
+      setLoading(false); // Set loading to false after role is determined
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  if (loading) return <div className="flex justify-center items-center min-h-screen">Caricamento...</div>;
+  if (loading) {
+    console.log("App.tsx: Displaying loading screen.");
+    return <div className="flex justify-center items-center min-h-screen">Caricamento...</div>;
+  }
 
-  console.log("App.tsx: Rendering Layout with isAdmin:", isAdmin, "isBanned:", isBanned);
+  console.log("App.tsx: Rendering Layout with isAdmin:", isAdmin, "isBanned:", isBanned, "Session exists:", !!session);
 
   return (
     <QueryClientProvider client={queryClient}>
