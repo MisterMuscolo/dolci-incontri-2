@@ -16,6 +16,7 @@ const MyListings = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null); // Stato per l'ID utente corrente
 
   const fetchListings = useCallback(async () => {
     setLoading(true);
@@ -25,6 +26,7 @@ const MyListings = () => {
       setLoading(false);
       return;
     }
+    setCurrentUserId(user.id); // Imposta l'ID utente corrente
     console.log("MyListings: Utente autenticato con ID:", user.id);
 
     // Query per il conteggio totale degli annunci attivi dell'utente
@@ -53,6 +55,7 @@ const MyListings = () => {
       .from('listings')
       .select(`
         id,
+        user_id,
         title,
         category,
         city,
@@ -139,7 +142,15 @@ const MyListings = () => {
             ) : listings.length > 0 ? (
               <div className="space-y-4">
                 {listings.map((listing) => (
-                  <ListingListItem key={listing.id} listing={listing} showControls={true} showExpiryDate={true} onListingUpdated={fetchListings} />
+                  <ListingListItem 
+                    key={listing.id} 
+                    listing={listing} 
+                    canEdit={true} // L'utente può modificare i propri annunci
+                    canManagePhotos={true} // L'utente può gestire le foto dei propri annunci
+                    canDelete={true} // L'utente può eliminare i propri annunci
+                    showExpiryDate={true} 
+                    onListingUpdated={fetchListings} 
+                  />
                 ))}
                 {totalPages > 1 && (
                   <Pagination className="pt-4">

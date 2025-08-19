@@ -46,6 +46,7 @@ const UserListingsAdminView = () => {
       .from('listings')
       .select(`
         id,
+        user_id,
         title,
         category,
         city,
@@ -124,7 +125,15 @@ const UserListingsAdminView = () => {
             ) : listings.length > 0 ? (
               <div className="space-y-4">
                 {listings.map((listing) => (
-                  <ListingListItem key={listing.id} listing={listing} showControls={true} showExpiryDate={true} onListingUpdated={fetchUserDataAndListings} />
+                  <ListingListItem 
+                    key={listing.id} 
+                    listing={listing} 
+                    canEdit={false} // Gli amministratori non modificano direttamente gli annunci degli utenti da qui
+                    canManagePhotos={true} // Gli amministratori possono gestire le foto
+                    canDelete={true} // Gli amministratori possono eliminare
+                    showExpiryDate={true} 
+                    onListingUpdated={fetchUserDataAndListings} 
+                  />
                 ))}
               </div>
             ) : (
