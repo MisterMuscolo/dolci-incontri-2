@@ -42,7 +42,7 @@ const SearchResults = () => {
         last_bumped_at,
         listing_photos ( url, is_primary )
       `, { count: 'exact' })
-      .gt('expires_at', new Date().toISOString());
+      .gt('expires_at', new Date().toISOString()); // Questo filtro è gestito dalla RLS policy "Active listings are visible to all"
 
     if (category && category !== 'tutte') {
       query = query.eq('category', category);
@@ -61,13 +61,15 @@ const SearchResults = () => {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error("Errore nella ricerca degli annunci:", error);
+      console.error("SearchResults: Errore nella ricerca degli annunci:", error);
       setError("Si è verificato un errore durante la ricerca. Riprova più tardi.");
     } else {
       if (count) {
         setTotalPages(Math.ceil(count / LISTINGS_PER_PAGE));
+        console.log("SearchResults: Conteggio annunci trovati:", count, "Pagine totali:", totalPages);
       }
       if (data) {
+        console.log("SearchResults: Dati ricevuti:", data);
         // Client-side sorting for active premium listings
         const now = new Date();
         const sortedData = (data as Listing[]).sort((a, b) => {

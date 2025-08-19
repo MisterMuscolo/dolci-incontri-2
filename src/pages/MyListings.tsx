@@ -21,32 +21,34 @@ const MyListings = () => {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
+      console.log("MyListings: Utente non autenticato.");
       setLoading(false);
       return;
     }
+    console.log("MyListings: Utente autenticato con ID:", user.id);
 
     // Query per il conteggio totale degli annunci attivi dell'utente
-    // Manteniamo il filtro qui per ora, dato che il conteggio è corretto
     const { count, error: countError } = await supabase
       .from('listings')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
-      .gt('expires_at', new Date().toISOString()); 
+      .gt('expires_at', new Date().toISOString()); // Filtra solo gli annunci attivi
 
     if (countError) {
-      console.error("Errore nel conteggio degli annunci:", countError);
+      console.error("MyListings: Errore nel conteggio degli annunci:", countError);
       setLoading(false);
       return;
     }
 
     if (count !== null) {
       setTotalPages(Math.ceil(count / LISTINGS_PER_PAGE));
+      console.log("MyListings: Conteggio annunci attivi:", count, "Pagine totali:", totalPages);
     }
 
     const from = (currentPage - 1) * LISTINGS_PER_PAGE;
     const to = from + LISTINGS_PER_PAGE - 1;
 
-    // Query per recuperare gli annunci. Rimosso temporaneamente il filtro expires_at per debug.
+    // Query per recuperare gli annunci attivi, ordinati per premium e poi per data
     const { data, error } = await supabase
       .from('listings')
       .select(`
@@ -65,12 +67,13 @@ const MyListings = () => {
         listing_photos ( url, is_primary )
       `)
       .eq('user_id', user.id)
-      // .gt('expires_at', new Date().toISOString()) // Rimosso temporaneamente per debug
+      .gt('expires_at', new Date().toISOString()) // Filtra solo gli annunci attivi
       .range(from, to); 
 
     if (error) {
-      console.error("Errore nel recupero degli annunci:", error);
+      console.error("MyListings: Errore nel recupero degli annunci:", error);
     } else if (data) {
+      console.log("MyListings: Dati ricevuti:", data);
       // Client-side sorting for active premium listings
       const now = new Date();
       const sortedData = (data as Listing[]).sort((a, b) => {
