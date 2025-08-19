@@ -108,7 +108,7 @@ const MyListings = () => {
             ) : listings.length > 0 ? (
               <div className="space-y-4">
                 {listings.map((listing) => (
-                  <ListingListItem key={listing.id} listing={listing} showControls={true} />
+                  <ListingListItem key={listing.id} listing={listing} showControls={true} showExpiryDate={true} />
                 ))}
                 {totalPages > 1 && (
                   <Pagination className="pt-4">

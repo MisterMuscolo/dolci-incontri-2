@@ -20,15 +20,18 @@ export interface Listing {
 interface ListingListItemProps {
   listing: Listing;
   showControls?: boolean;
+  showExpiryDate?: boolean; // Nuova prop per controllare la data
 }
 
-export const ListingListItem = ({ listing, showControls = false }: ListingListItemProps) => {
+export const ListingListItem = ({ listing, showControls = false, showExpiryDate = false }: ListingListItemProps) => {
   const primaryPhoto = listing.listing_photos.find(p => p.is_primary)?.url || listing.listing_photos[0]?.url;
 
-  // Mostra sempre la data di creazione per semplicità
-  const displayDate = new Date(listing.created_at);
-  const formattedDisplayDate = !isNaN(displayDate.getTime()) 
-    ? format(displayDate, 'dd MMMM yyyy', { locale: it }) 
+  const dateToDisplay = showExpiryDate ? new Date(listing.expires_at) : new Date(listing.created_at);
+  const prefix = showExpiryDate ? 'Scade il:' : 'Pubblicato il:';
+  const dateFormat = showExpiryDate ? 'dd MMMM yyyy' : 'dd MMMM'; // Formato diverso per scadenza e pubblicazione
+
+  const formattedDate = !isNaN(dateToDisplay.getTime()) 
+    ? format(dateToDisplay, dateFormat, { locale: it }) 
     : 'N/D';
 
   return (
@@ -48,7 +51,7 @@ export const ListingListItem = ({ listing, showControls = false }: ListingListIt
             </div>
             <div className="mt-auto flex items-center text-xs text-gray-500">
               <CalendarDays className="h-4 w-4 mr-2" />
-              <span>Pubblicato il: {formattedDisplayDate}</span>
+              <span>{prefix} {formattedDate}</span>
             </div>
           </div>
         </div>
