@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2, CalendarDays, Rocket, User } from "lucide-react";
-import { format } from 'date-fns';
+import { format, differenceInDays } from 'date-fns'; // Importa differenceInDays
 import { it } from 'date-fns/locale';
 import { Link } from "react-router-dom";
 import {
@@ -147,6 +147,7 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
 
     const start = new Date(listing.promotion_start_at);
     const end = new Date(listing.promotion_end_at);
+    const durationInDays = differenceInDays(end, start); // Calcola la differenza in giorni
 
     const formattedStart = format(start, 'dd/MM/yyyy HH:mm', { locale: it });
     const formattedEnd = format(end, 'dd/MM/yyyy HH:mm', { locale: it });
@@ -157,6 +158,9 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
       <>
         <p className="text-base font-semibold text-gray-800 mb-2">
           Pacchetto: <span className="capitalize">{promotionTypeLabel}</span>
+        </p>
+        <p className="text-sm text-gray-600">
+          Durata: <span className="font-medium">{durationInDays} giorni</span>
         </p>
         <p className="text-sm text-gray-600">
           Inizio: <span className="font-medium">{formattedStart}</span>
