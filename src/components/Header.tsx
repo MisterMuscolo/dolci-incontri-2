@@ -79,22 +79,13 @@ export const Header = ({ session, isAdmin }: HeaderProps) => {
               </DropdownMenu>
             </div>
           ) : (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2">
-                  <LogIn className="h-5 w-5" />
-                  <span>Accedi / Registrati</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-48" align="end" forceMount>
-                <DropdownMenuItem onClick={() => navigate('/auth?tab=login')}>
-                  Accedi
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/auth?tab=register')}>
-                  Registrati
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button 
+              onClick={() => navigate('/auth?tab=login')} 
+              className="bg-rose-500 hover:bg-rose-600 text-white flex items-center gap-2"
+            >
+              <LogIn className="h-5 w-5" />
+              <span>Accedi / Registrati</span>
+            </Button>
           )}
         </nav>
       </div>
