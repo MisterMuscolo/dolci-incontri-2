@@ -47,10 +47,10 @@ const promotionOptions: PromotionOption[] = [
       'Perfetto per raggiungere un pubblico diverso',
     ],
     coverageText: 'Copertura: dalle 23:00 alle 07:00',
-    costs: { // Costi calcolati per la Modalità Notte (30 crediti/giorno)
-      1: 30,
-      3: 90,
-      7: 210,
+    costs: { // Nuovi costi specifici per la Modalità Notte
+      1: 20,
+      3: 45,
+      7: 90,
     },
   },
 ];
