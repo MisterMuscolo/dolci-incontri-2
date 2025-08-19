@@ -52,6 +52,18 @@ serve(async (req) => {
       <a href="${listingLink}" style="color: #E54A70; text-decoration: underline;">${listing.title}</a><br><br>
       Vorrei chiederti:<br>
       <p style="white-space: pre-wrap; margin: 0;">${message}</p>
+
+      <div style="border: 1px solid #eee; padding: 15px; margin-top: 30px; border-radius: 8px; background-color: #f9f9f9;">
+        <p style="font-size: 14px; color: #555; text-align: center; margin: 0;">
+          Se ti serve aiuto, contattaci a: <a href="mailto:supporto@dolciincontri.com" style="color: #E54A70; text-decoration: underline;">supporto@dolciincontri.com</a>
+        </p>
+      </div>
+      <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+      <div style="text-align: center;">
+        <a href="https://dolciincontri.it/termini" style="color: #E54A70; text-decoration: underline; margin: 0 10px;">Termini e Condizioni</a>
+        <a href="https://dolciincontri.it/privacy" style="color: #E54A70; text-decoration: underline; margin: 0 10px;">Privacy Policy</a>
+        <a href="https://dolciincontri.it/contatti" style="color: #E54A70; text-decoration: underline; margin: 0 10px;">Contatti</a>
+      </div>
     `;
 
     const res = await fetch('https://api.resend.com/emails', {
