@@ -62,14 +62,17 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
 
   // Determine photos to display:
   // If actively premium, show up to 5 photos.
-  // Otherwise (regular or pending premium), show only the primary/first photo if available.
+  // If not actively premium, but showControls is true (My Listings/Admin), show only the primary/first photo.
+  // If not actively premium AND showControls is false (public search), photosForDisplay remains empty.
   let photosForDisplay: { url: string; is_primary: boolean }[] = [];
   const primaryPhoto = listing.listing_photos.find(p => p.is_primary) || listing.listing_photos[0];
 
   if (isActivePremium) {
     photosForDisplay = listing.listing_photos.slice(0, 5);
-  } else if (primaryPhoto) {
-    photosForDisplay = [primaryPhoto];
+  } else if (showControls) {
+    if (primaryPhoto) {
+      photosForDisplay = [primaryPhoto];
+    }
   }
 
   const hasPhotos = photosForDisplay.length > 0;
