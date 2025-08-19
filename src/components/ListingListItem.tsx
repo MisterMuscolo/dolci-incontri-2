@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { Button } => "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2, CalendarDays } from "lucide-react";
 import { format } from 'date-fns';
@@ -41,7 +41,7 @@ export const ListingListItem = ({ listing, showControls = false }: ListingListIt
             </div>
             <div className="mt-auto flex items-center text-xs text-gray-500">
               <CalendarDays className="h-4 w-4 mr-2" />
-              <span>{format(new Date(listing.created_at), 'dd MMMM', { locale: it })}</span> {/* Modificato formato data */}
+              <span>{format(new Date(listing.created_at), 'dd MMMM', { locale: it })}</span>
             </div>
           </div>
         </div>
