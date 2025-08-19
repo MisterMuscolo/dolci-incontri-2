@@ -83,21 +83,21 @@ const Dashboard = () => {
           </Link>
         </div>
 
-        <div className="space-y-6"> {/* Modificato da grid a space-y */}
+        <div className="space-y-4"> {/* Ridotto lo spazio verticale */}
           <Link to="/my-listings">
             <Card className="w-full transition-shadow hover:shadow-lg cursor-pointer bg-white hover:bg-gray-50">
-              <CardHeader>
-                <CardTitle className="text-3xl font-semibold flex items-center gap-4">
-                  <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center">
-                    <LayoutGrid className="h-10 w-10 text-rose-500" />
+              <CardHeader className="text-center"> {/* Centrato il contenuto dell'header */}
+                <CardTitle className="text-2xl font-semibold flex items-center justify-center gap-2"> {/* Ridotto il font e centrato */}
+                  <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center"> {/* Ridotto il padding */}
+                    <LayoutGrid className="h-8 w-8 text-rose-500" /> {/* Ridotto l'icona */}
                   </div>
                   <span className="text-gray-800">I Miei Annunci</span>
                 </CardTitle>
-                <CardDescription className="ml-[88px]">Visualizza e gestisci i tuoi annunci.</CardDescription>
+                <CardDescription className="text-center">Visualizza e gestisci i tuoi annunci.</CardDescription> {/* Centrato */}
               </CardHeader>
-              <CardContent>
+              <CardContent className="text-center"> {/* Centrato il contenuto */}
                 {loading ? (
-                  <Skeleton className="h-8 w-3/4" />
+                  <Skeleton className="h-8 w-3/4 mx-auto" /> {/* Centrato lo skeleton */}
                 ) : (
                   <p className="text-gray-600 text-xl">
                     Hai <span className="font-bold text-rose-500">{totalListingsCount}</span> annunci attivi
@@ -108,25 +108,25 @@ const Dashboard = () => {
           </Link>
 
           <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
-            <CardHeader>
+            <CardHeader className="text-center"> {/* Centrato il contenuto dell'header */}
               <Link to="/credit-history" className="block">
-                <CardTitle className="text-xl font-semibold flex items-center gap-4">
-                  <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center">
-                    <Wallet className="h-10 w-10 text-rose-500" />
+                <CardTitle className="text-2xl font-semibold flex items-center justify-center gap-2"> {/* Ridotto il font e centrato */}
+                  <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center"> {/* Ridotto il padding */}
+                    <Wallet className="h-8 w-8 text-rose-500" /> {/* Ridotto l'icona */}
                   </div>
                   <span>Crediti</span>
                 </CardTitle>
               </Link>
-              <CardDescription className="ml-[88px]">Acquista e gestisci i tuoi crediti.</CardDescription>
+              <CardDescription className="text-center">Acquista e gestisci i tuoi crediti.</CardDescription> {/* Centrato */}
             </CardHeader>
-            <CardContent>
+            <CardContent className="text-center"> {/* Centrato il contenuto */}
               {loading ? (
                 <div className="space-y-2">
-                  <Skeleton className="h-6 w-full" />
-                  <Skeleton className="h-6 w-full" />
+                  <Skeleton className="h-6 w-full mx-auto" /> {/* Centrato lo skeleton */}
+                  <Skeleton className="h-6 w-full mx-auto" /> {/* Centrato lo skeleton */}
                 </div>
               ) : (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 items-center"> {/* Centrato il contenuto */}
                   <p className="text-gray-600 text-lg">
                     Disponibili: <span className="font-bold text-rose-500">{currentCredits !== null ? currentCredits : 0}</span>
                   </p>
@@ -136,22 +136,22 @@ const Dashboard = () => {
                 </div>
               )}
               <Link to="/buy-credits">
-                <Button className="bg-rose-500 hover:bg-rose-600 mt-4">Acquista crediti</Button>
+                <Button className="bg-rose-500 hover:bg-rose-600 mt-4 mx-auto block">Acquista crediti</Button> {/* Centrato il pulsante */}
               </Link>
             </CardContent>
           </Card>
           
           <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
-            <CardHeader>
+            <CardHeader className="text-center"> {/* Centrato il contenuto dell'header */}
               <Link to="/profile-settings" className="block">
-                <CardTitle className="text-xl font-semibold flex items-center gap-4">
-                  <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center">
-                    <Settings className="h-10 w-10 text-rose-500" />
+                <CardTitle className="text-2xl font-semibold flex items-center justify-center gap-2"> {/* Ridotto il font e centrato */}
+                  <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center"> {/* Ridotto il padding */}
+                    <Settings className="h-8 w-8 text-rose-500" /> {/* Ridotto l'icona */}
                   </div>
                   <span>Impostazioni</span>
                 </CardTitle>
               </Link>
-              <CardDescription className="ml-[88px]">Gestisci le impostazioni del tuo account.</CardDescription>
+              <CardDescription className="text-center">Gestisci le impostazioni del tuo account.</CardDescription> {/* Centrato */}
             </CardHeader>
             <CardContent>
               {/* Il pulsante "Modifica profilo" è stato rimosso in quanto il titolo della card è già cliccabile */}
