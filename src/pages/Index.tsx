@@ -34,11 +34,11 @@ export default function Index({ session }: IndexProps) {
   };
 
   const categories = [
-    { value: 'donna-cerca-uomo', label: '👩‍❤️‍👨 Donna cerca Uomo', icon: Heart },
-    { value: 'uomo-cerca-donna', label: '👨‍❤️‍👩 Uomo cerca Donna', icon: Heart },
-    { value: 'coppie', label: '👩‍❤️‍💋‍👨 Coppie', icon: Users },
-    { value: 'uomo-cerca-uomo', label: '👨‍❤️‍👨 Uomo cerca Uomo', icon: User },
-    { value: 'donna-cerca-donna', label: '👩‍❤️‍👩 Donna cerca Donna', icon: User },
+    { value: 'donna-cerca-uomo', label: 'Donna cerca Uomo', icon: Heart },
+    { value: 'uomo-cerca-donna', label: 'Uomo cerca Donna', icon: Heart },
+    { value: 'coppie', label: 'Coppie', icon: Users },
+    { value: 'uomo-cerca-uomo', label: 'Uomo cerca Uomo', icon: User },
+    { value: 'donna-cerca-donna', label: 'Donna cerca Donna', icon: User },
   ];
 
   return (
