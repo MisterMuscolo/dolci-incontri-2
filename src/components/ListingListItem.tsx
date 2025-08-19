@@ -81,13 +81,46 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
     ? format(dateToDisplay, dateFormat, { locale: it }) 
     : 'N/D';
 
-  const getPromotionDetails = (mode: string | null) => {
+  const getPromotionDetailsText = (mode: string | null) => {
     if (mode === 'day') {
         return 'Il tuo annuncio sarà in evidenza durante il giorno, con 1 risalita immediata. Apparirà in cima ai risultati di ricerca e potrà avere fino a 5 foto.';
     } else if (mode === 'night') {
         return 'Il tuo annuncio avrà massima visibilità durante le ore notturne, con 5 risalite più frequenti durante il periodo. Apparirà in cima ai risultati di ricerca e potrà avere fino a 5 foto.';
     }
     return 'Gli annunci Premium appaiono in cima ai risultati di ricerca e possono avere fino a 5 foto.';
+  };
+
+  const getPromotionPeriodDetails = () => {
+    if (!listing.promotion_start_at || !listing.promotion_end_at) return '';
+
+    const start = new Date(listing.promotion_start_at);
+    const end = new Date(listing.promotion_end_at);
+    const durationInDays = differenceInDays(end, start);
+
+    const formattedStart = format(start, 'dd/MM/yyyy HH:mm', { locale: it });
+    const formattedEnd = format(end, 'dd/MM/yyyy HH:mm', { locale: it });
+
+    const promotionTypeLabel = listing.promotion_mode === 'day' ? 'Modalità Giorno' : 'Modalità Notte';
+
+    return (
+      <>
+        <p className="text-base font-semibold text-gray-800 mb-2">
+          Pacchetto: <span className="capitalize">{promotionTypeLabel}</span>
+        </p>
+        <p className="text-sm text-gray-600">
+          Durata: <span className="font-medium">{durationInDays} {durationInDays === 1 ? 'giorno' : 'giorni'}</span>
+        </p>
+        <p className="text-sm text-gray-600">
+          Inizio: <span className="font-medium">{formattedStart}</span>
+        </p>
+        <p className="text-sm text-gray-600 mb-4">
+          Fine: <span className="font-medium">{formattedEnd}</span>
+        </p>
+        <p className="text-sm text-gray-700">
+          {getPromotionDetailsText(listing.promotion_mode)}
+        </p>
+      </>
+    );
   };
 
   const handleDeleteListing = async () => {
