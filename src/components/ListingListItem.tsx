@@ -32,6 +32,10 @@ export interface Listing {
   created_at: string;
   expires_at: string;
   is_premium: boolean;
+  promotion_mode: string | null; // 'day', 'night', 'none'
+  promotion_start_at: string | null;
+  promotion_end_at: string | null;
+  last_bumped_at: string | null; // Aggiunto per l'ordinamento
   listing_photos: { url: string; is_primary: boolean }[];
   description?: string;
   age?: number;
@@ -45,8 +49,17 @@ interface ListingListItemProps {
 }
 
 export const ListingListItem = ({ listing, showControls = false, showExpiryDate = false, onListingUpdated }: ListingListItemProps) => {
-  const primaryPhoto = listing.listing_photos.find(p => p.is_primary)?.url || listing.listing_photos[0]?.url;
   const [isDeleting, setIsDeleting] = useState(false); // Stato per gestire il caricamento dell'eliminazione
+
+  const now = new Date();
+  const promoStart = listing.promotion_start_at ? new Date(listing.promotion_start_at) : null;
+  const promoEnd = listing.promotion_end_at ? new Date(listing.promotion_end_at) : null;
+
+  // Determina se l'annuncio è attivamente premium in questo momento
+  const isActivePremium = listing.is_premium && promoStart && promoEnd && promoStart <= now && promoEnd >= now;
+
+  const photosToDisplay = isActivePremium ? listing.listing_photos.slice(0, 5) : listing.listing_photos.slice(0, 1);
+  const primaryPhoto = photosToDisplay.find(p => p.is_primary)?.url || photosToDisplay[0]?.url;
 
   const dateToDisplay = showExpiryDate ? new Date(listing.expires_at) : new Date(listing.created_at);
   const prefix = showExpiryDate ? 'Scade il:' : '';
@@ -106,57 +119,46 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
   return (
     <Card className={cn(
       "w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row relative",
-      listing.is_premium && "border-2 border-rose-500 shadow-lg bg-rose-50" 
+      isActivePremium && "border-2 border-rose-500 shadow-lg bg-rose-50" 
     )}>
       <div className="flex flex-col sm:flex-row w-full">
-        {listing.is_premium && listing.listing_photos.length > 0 ? (
+        {photosToDisplay.length > 0 ? (
           <div className="sm:w-1/4 lg:w-1/5 flex-shrink-0 relative">
-            {/* Use AspectRatio for consistent image display */}
-            <AspectRatio ratio={16 / 9} className="w-full h-full"> {/* Adjust ratio as needed */}
-              <Carousel
-                plugins={[
-                  Autoplay({
-                    delay: 3000,
-                    stopOnInteraction: false,
-                    stopOnMouseEnter: true,
-                  }),
-                ]}
-                opts={{
-                  loop: true,
-                }}
-                className="w-full h-full" // Make carousel fill AspectRatio container
-              >
-                <CarouselContent className="h-full">
-                  {listing.listing_photos.map((photo, index) => (
-                    <CarouselItem key={index} className="h-full">
-                      <Link to={`/listing/${listing.id}`} className="block w-full h-full">
-                        <img src={photo.url} alt={`${listing.title} - ${index + 1}`} className="object-cover w-full h-full" />
-                      </Link>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                {listing.listing_photos.length > 1 && (
-                  <>
-                    <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10" />
-                    <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10" />
-                  </>
-                )}
-              </Carousel>
+            <AspectRatio ratio={16 / 9} className="w-full h-full">
+              {photosToDisplay.length > 1 ? (
+                <Carousel
+                  plugins={[
+                    Autoplay({
+                      delay: 3000,
+                      stopOnInteraction: false,
+                      stopOnMouseEnter: true,
+                    }),
+                  ]}
+                  opts={{
+                    loop: true,
+                  }}
+                  className="w-full h-full"
+                >
+                  <CarouselContent className="h-full">
+                    {photosToDisplay.map((photo, index) => (
+                      <CarouselItem key={index} className="h-full">
+                        <Link to={`/listing/${listing.id}`} className="block w-full h-full">
+                          <img src={photo.url} alt={`${listing.title} - ${index + 1}`} className="object-cover w-full h-full" />
+                        </Link>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10" />
+                  <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10" />
+                </Carousel>
+              ) : (
+                <Link to={`/listing/${listing.id}`} className="block w-full h-full">
+                  <img src={primaryPhoto!} alt={listing.title} className="object-cover w-full h-full" />
+                </Link>
+              )}
             </AspectRatio>
           </div>
-        ) : (
-          // If not premium, show a placeholder or nothing if no primary photo
-          primaryPhoto ? (
-            <div className="sm:w-1/4 lg:w-1/5 flex-shrink-0 relative">
-              <AspectRatio ratio={16 / 9} className="w-full h-full">
-                <Link to={`/listing/${listing.id}`} className="block w-full h-full">
-                  <img src={primaryPhoto} alt={listing.title} className="object-cover w-full h-full" />
-                </Link>
-              </AspectRatio>
-            </div>
-          ) : null
-        )}
-        {/* This Link wraps the textual content */}
+        ) : null}
         <Link to={`/listing/${listing.id}`} className="flex-grow block hover:bg-gray-50/50">
           <div className="p-4 flex flex-col flex-grow">
             <h3 className="text-xl font-semibold mb-2 text-gray-800 line-clamp-2">{listing.title}</h3>
@@ -176,8 +178,7 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
           </div>
         </Link>
       </div>
-      {/* This badge is for when showControls is FALSE (e.g., search results) */}
-      {!showControls && listing.is_premium && (
+      {!showControls && isActivePremium && (
         <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white absolute top-2 right-2 z-20">
           <Rocket className="h-3 w-3 mr-1" /> Premium
         </Badge>
@@ -190,7 +191,7 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
               <span className="hidden md:inline">Modifica</span>
             </Button>
           </Link>
-          {listing.is_premium ? (
+          {isActivePremium ? (
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button 

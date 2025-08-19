@@ -36,11 +36,13 @@ const SearchResults = () => {
         expires_at,
         is_premium,
         age,
+        promotion_mode,
+        promotion_start_at,
+        promotion_end_at,
+        last_bumped_at,
         listing_photos ( url, is_primary )
       `, { count: 'exact' })
-      .gt('expires_at', new Date().toISOString())
-      .order('is_premium', { ascending: false }) // Premium listings first
-      .order('created_at', { ascending: false }); // Then by creation date
+      .gt('expires_at', new Date().toISOString());
 
     if (category && category !== 'tutte') {
       query = query.eq('category', category);
@@ -66,7 +68,29 @@ const SearchResults = () => {
         setTotalPages(Math.ceil(count / LISTINGS_PER_PAGE));
       }
       if (data) {
-        setListings(data as Listing[]);
+        // Client-side sorting for active premium listings
+        const now = new Date();
+        const sortedData = (data as Listing[]).sort((a, b) => {
+          const aIsActivePremium = a.is_premium && a.promotion_start_at && a.promotion_end_at && new Date(a.promotion_start_at) <= now && new Date(a.promotion_end_at) >= now;
+          const bIsActivePremium = b.is_premium && b.promotion_start_at && b.promotion_end_at && new Date(b.promotion_start_at) <= now && new Date(b.promotion_end_at) >= now;
+
+          // Prioritize active premium listings
+          if (aIsActivePremium && !bIsActivePremium) return -1;
+          if (!aIsActivePremium && bIsActivePremium) return 1;
+
+          // If both are active premium or both are not, then sort by last_bumped_at (desc)
+          const aBumpedAt = a.last_bumped_at ? new Date(a.last_bumped_at).getTime() : 0;
+          const bBumpedAt = b.last_bumped_at ? new Date(b.last_bumped_at).getTime() : 0;
+          if (aBumpedAt !== bBumpedAt) {
+              return bBumpedAt - aBumpedAt; // Descending
+          }
+
+          // Fallback to created_at (desc) if all else is equal
+          const aCreatedAt = new Date(a.created_at).getTime();
+          const bCreatedAt = new Date(b.created_at).getTime();
+          return bCreatedAt - aCreatedAt;
+        });
+        setListings(sortedData);
       }
     }
     setLoading(false);

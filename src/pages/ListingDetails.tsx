@@ -42,7 +42,11 @@ type FullListing = {
   age: number;
   phone: string | null;
   created_at: string;
+  expires_at: string;
   is_premium: boolean; // Aggiunto is_premium
+  promotion_mode: string | null;
+  promotion_start_at: string | null;
+  promotion_end_at: string | null;
   listing_photos: { id: string; url: string }[];
 };
 
@@ -73,11 +77,18 @@ const ListingDetails = () => {
       if (error || !data) {
         console.error('Error fetching listing:', error);
       } else {
+        const now = new Date();
+        const promoStart = data.promotion_start_at ? new Date(data.promotion_start_at) : null;
+        const promoEnd = data.promotion_end_at ? new Date(data.promotion_end_at) : null;
+
+        // Determine if the listing is actively premium based on promotion dates
+        const isActivePremium = data.is_premium && promoStart && promoEnd && promoStart <= now && promoEnd >= now;
+
         let photosToDisplay = data.listing_photos || [];
-        if (!data.is_premium) {
-          photosToDisplay = photosToDisplay.slice(0, 1); // Solo 1 foto per annunci gratuiti
+        if (!isActivePremium) {
+          photosToDisplay = photosToDisplay.slice(0, 1); // Solo 1 foto per annunci non attivamente premium
         } else {
-          photosToDisplay = photosToDisplay.slice(0, 5); // Fino a 5 foto per annunci premium
+          photosToDisplay = photosToDisplay.slice(0, 5); // Fino a 5 foto per annunci attivamente premium
         }
 
         if (photosToDisplay.length > 0) {
@@ -124,11 +135,11 @@ const ListingDetails = () => {
           const errorBody = JSON.parse(error.context.body);
           if (errorBody.error) {
             errorMessage = errorBody.error;
+            }
+          } catch (e) {
+            console.error("Could not parse error response from edge function:", e);
           }
-        } catch (e) {
-          console.error("Could not parse error response from edge function:", e);
         }
-      }
       showError(errorMessage);
     } else {
       showSuccess('Messaggio inviato con successo!');
@@ -159,6 +170,11 @@ const ListingDetails = () => {
     return <div className="text-center py-20">Annuncio non trovato.</div>;
   }
 
+  const now = new Date();
+  const promoStart = listing.promotion_start_at ? new Date(listing.promotion_start_at) : null;
+  const promoEnd = listing.promotion_end_at ? new Date(listing.promotion_end_at) : null;
+  const isActivePremium = listing.is_premium && promoStart && promoEnd && promoStart <= now && promoEnd >= now;
+
   const hasPhotos = listing.listing_photos && listing.listing_photos.length > 0;
 
   return (
@@ -174,7 +190,7 @@ const ListingDetails = () => {
           <Card className="relative"> {/* Added relative to Card for absolute positioning */}
             <CardHeader>
               <CardTitle className="text-3xl font-bold text-gray-800">{listing.title}</CardTitle>
-              {listing.is_premium && (
+              {isActivePremium && (
                 <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white text-base px-3 py-1 rounded-full font-semibold flex items-center gap-1 w-fit absolute top-4 right-4"> {/* Positioned absolutely */}
                   <Rocket className="h-4 w-4" /> Premium
                 </Badge>

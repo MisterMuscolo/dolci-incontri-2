@@ -42,6 +42,10 @@ type FullListing = {
   age: number;
   phone: string | null;
   email: string;
+  is_premium: boolean; // Aggiunto
+  promotion_mode: string | null; // Aggiunto
+  promotion_start_at: string | null; // Aggiunto
+  promotion_end_at: string | null; // Aggiunto
   listing_photos: { id: string; url: string; is_primary: boolean }[];
 };
 

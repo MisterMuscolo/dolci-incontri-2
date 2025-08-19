@@ -34,10 +34,10 @@ serve(async (req) => {
       });
     }
 
-    // Verify the listing belongs to the user
+    // Verify the listing belongs to the user and get its current expires_at
     const { data: listing, error: listingError } = await supabaseClient
       .from('listings')
-      .select('user_id')
+      .select('user_id, expires_at')
       .eq('id', listingId)
       .single();
 
@@ -64,29 +64,58 @@ serve(async (req) => {
       throw new Error(`Crediti insufficienti. Hai bisogno di ${cost} crediti.`);
     }
 
+    // Calculate promotion start and end times
+    const now = new Date(); // Current UTC time
+    let promoStart: Date;
+
+    if (promotionType === 'day') {
+        const [startHourStr, startMinuteStr] = timeSlot.split('-')[0].split(':');
+        const startHour = parseInt(startHourStr);
+        const startMinute = parseInt(startMinuteStr);
+
+        promoStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), startHour, startMinute, 0, 0));
+        if (promoStart.getTime() < now.getTime()) {
+            // If the target time today has already passed, schedule for tomorrow
+            promoStart.setUTCDate(promoStart.getUTCDate() + 1);
+        }
+    } else { // night mode
+        const startHour = 23; // 23:00 UTC
+        const startMinute = 0;
+        promoStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), startHour, startMinute, 0, 0));
+        if (promoStart.getTime() < now.getTime()) {
+            // If 23:00 today has already passed, schedule for tomorrow
+            promoStart.setUTCDate(promoStart.getUTCDate() + 1);
+        }
+    }
+    const promoEnd = new Date(promoStart.getTime() + durationHours * 60 * 60 * 1000);
+
+    // Calculate new expires_at: max of current expiry or promoEnd, then add 30 days
+    const currentExpiresAt = new Date(listing.expires_at);
+    const newExpiresAt = new Date(Math.max(currentExpiresAt.getTime(), promoEnd.getTime()));
+    newExpiresAt.setUTCDate(newExpiresAt.getUTCDate() + 30); // Add 30 days from the later of current expiry or promo end.
+
+
     // Use the service role key for the actual update to bypass RLS for atomic transaction
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Calculate new expiry date based on durationHours received
-    const newExpiryDate = new Date();
-    newExpiryDate.setHours(newExpiryDate.getHours() + durationHours);
-
-    // Update listing to premium, set promotion_mode and last_bumped_at
+    // Update listing to premium, set promotion_mode, promotion_start_at, promotion_end_at and last_bumped_at
     const { error: updateListingError } = await supabaseAdmin
       .from('listings')
       .update({ 
-        is_premium: true,
+        is_premium: true, // Flag that it's a premium listing
         promotion_mode: promotionType,
-        last_bumped_at: new Date().toISOString(), // Set current time as last bumped
-        expires_at: newExpiryDate.toISOString(), // Extend expiry date
+        promotion_start_at: promoStart.toISOString(),
+        promotion_end_at: promoEnd.toISOString(),
+        last_bumped_at: promoStart.toISOString(), // Set bump time to promotion start
+        expires_at: newExpiresAt.toISOString(), // Extend expiry date
       })
       .eq('id', listingId);
 
     if (updateListingError) {
-      throw new Error(`Failed to update listing to premium: ${updateListingError.message}`);
+      throw new Error(`Failed to update listing for promotion: ${updateListingError.message}`);
     }
 
     // Deduct credits
