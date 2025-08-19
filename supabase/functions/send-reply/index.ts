@@ -40,22 +40,18 @@ serve(async (req) => {
       throw new Error('RESEND_API_KEY is not set in environment variables. Cannot send email.');
     }
 
-    // Costruisci il link all'annuncio. Assumo che il dominio sia dolciincontri.it
-    // Se il tuo dominio è diverso, dovrai aggiornare questa riga.
     const listingLink = `https://dolciincontri.it/listing/${listingId}`;
 
     const emailHtml = `
       <div style="text-align: center; margin-bottom: 20px;">
         <p style="font-size: 24px; font-weight: bold; color: #E54A70; margin: 0;">❤️ Dolci Incontri</p>
       </div>
-      <p style="margin-bottom: 10px;">Ciao ${fromEmail},</p>
-      <p style="margin-bottom: 10px;">Ho visto il tuo annuncio su Dolci Incontri:</p>
-      <p style="margin-bottom: 15px;"><a href="${listingLink}" style="color: #E54A70; text-decoration: underline;">${listing.title}</a></p>
-      <p style="margin-bottom: 10px;">Vorrei chiederti:</p>
-      <div style="border: 1px solid #eee; padding: 15px; border-radius: 8px; background-color: #f9f9f9;">
-        <p style="white-space: pre-wrap; margin: 0;">${message}</p>
-      </div>
-      <p style="margin-top: 20px;">A presto su Dolci Incontri!</p>
+      Ciao ${fromEmail},<br><br>
+      Ho visto il tuo annuncio su Dolci Incontri:<br>
+      <a href="${listingLink}" style="color: #E54A70; text-decoration: underline;">${listing.title}</a><br><br>
+      Vorrei chiederti:<br>
+      <p style="white-space: pre-wrap; margin: 0;">${message}</p><br>
+      A presto su Dolci Incontri!
     `;
 
     const res = await fetch('https://api.resend.com/emails', {
