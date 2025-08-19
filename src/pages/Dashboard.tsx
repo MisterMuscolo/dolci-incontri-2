@@ -86,18 +86,18 @@ const Dashboard = () => {
         <div className="space-y-4">
           <Link to="/my-listings">
             <Card className="w-full transition-shadow hover:shadow-lg cursor-pointer bg-white hover:bg-gray-50">
-              <CardHeader className="text-center">
-                <CardTitle className="text-2xl font-semibold flex items-center justify-center gap-2">
-                  <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center">
-                    <LayoutGrid className="h-8 w-8 text-rose-500" />
+              <CardHeader> {/* Rimosso text-center */}
+                <CardTitle className="text-2xl font-semibold flex items-center gap-4"> {/* Rimosso justify-center */}
+                  <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center"> {/* Ripristinato padding e dimensioni icona */}
+                    <LayoutGrid className="h-10 w-10 text-rose-500" />
                   </div>
                   <span className="text-gray-800">I Miei Annunci</span>
                 </CardTitle>
-                <CardDescription className="text-center">Visualizza e gestisci i tuoi annunci.</CardDescription>
+                <CardDescription className="ml-[88px]">Visualizza e gestisci i tuoi annunci.</CardDescription> {/* Ripristinato ml */}
               </CardHeader>
-              <CardContent className="text-center">
+              <CardContent> {/* Rimosso text-center */}
                 {loading ? (
-                  <Skeleton className="h-8 w-3/4 mx-auto" />
+                  <Skeleton className="h-8 w-3/4" /> {/* Rimosso mx-auto */}
                 ) : (
                   <p className="text-gray-600 text-xl">
                     Hai <span className="font-bold text-rose-500">{totalListingsCount}</span> annunci attivi
@@ -108,25 +108,25 @@ const Dashboard = () => {
           </Link>
 
           <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
-            <CardHeader className="text-center">
+            <CardHeader> {/* Rimosso text-center */}
               <Link to="/credit-history" className="block">
-                <CardTitle className="text-2xl font-semibold flex items-center justify-center gap-2">
-                  <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center">
-                    <Wallet className="h-8 w-8 text-rose-500" />
+                <CardTitle className="text-2xl font-semibold flex items-center gap-4"> {/* Rimosso justify-center */}
+                  <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center"> {/* Ripristinato padding e dimensioni icona */}
+                    <Wallet className="h-10 w-10 text-rose-500" />
                   </div>
                   <span>Crediti</span>
                 </CardTitle>
               </Link>
-              <CardDescription className="text-center">Acquista e gestisci i tuoi crediti.</CardDescription>
+              <CardDescription className="ml-[88px]">Acquista e gestisci i tuoi crediti.</CardDescription> {/* Ripristinato ml */}
             </CardHeader>
-            <CardContent className="text-center">
+            <CardContent> {/* Rimosso text-center */}
               {loading ? (
                 <div className="space-y-2">
-                  <Skeleton className="h-6 w-full mx-auto" />
-                  <Skeleton className="h-6 w-full mx-auto" />
+                  <Skeleton className="h-6 w-full" /> {/* Rimosso mx-auto */}
+                  <Skeleton className="h-6 w-full" /> {/* Rimosso mx-auto */}
                 </div>
               ) : (
-                <div className="flex flex-col gap-2 items-center">
+                <div className="flex flex-col gap-2"> {/* Rimosso items-center */}
                   <p className="text-gray-600 text-lg">
                     Disponibili: <span className="font-bold text-rose-500">{currentCredits !== null ? currentCredits : 0}</span>
                   </p>
@@ -136,22 +136,22 @@ const Dashboard = () => {
                 </div>
               )}
               <Link to="/buy-credits">
-                <Button className="bg-rose-500 hover:bg-rose-600 mt-4 mx-auto block">Acquista crediti</Button>
+                <Button className="bg-rose-500 hover:bg-rose-600 mt-4">Acquista crediti</Button> {/* Rimosso mx-auto block */}
               </Link>
             </CardContent>
           </Card>
           
           <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
-            <CardHeader className="text-center">
+            <CardHeader> {/* Rimosso text-center */}
               <Link to="/profile-settings" className="block">
-                <CardTitle className="text-2xl font-semibold flex items-center justify-center gap-2">
-                  <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center">
-                    <Settings className="h-8 w-8 text-rose-500" />
+                <CardTitle className="text-2xl font-semibold flex items-center gap-4"> {/* Rimosso justify-center */}
+                  <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center"> {/* Ripristinato padding e dimensioni icona */}
+                    <Settings className="h-10 w-10 text-rose-500" />
                   </div>
                   <span>Impostazioni</span>
                 </CardTitle>
               </Link>
-              <CardDescription className="text-center">Gestisci le impostazioni del tuo account.</CardDescription>
+              <CardDescription className="ml-[88px]">Gestisci le impostazioni del tuo account.</CardDescription> {/* Ripristinato ml */}
             </CardHeader>
             <CardContent>
               {/* Il pulsante "Modifica profilo" è stato rimosso in quanto il titolo della card è già cliccabile */}
