@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { UploadCloud, X, Star, Plus } from 'lucide-react';
 import { Button } from './ui/button';
-import { cn } => '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client'; // Import supabase
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
