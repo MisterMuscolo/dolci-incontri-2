@@ -51,8 +51,7 @@ serve(async (req) => {
       Ho visto il tuo annuncio su Dolci Incontri:<br>
       <a href="${listingLink}" style="color: #E54A70; text-decoration: underline;">${listing.title}</a><br><br>
       Vorrei chiederti:<br>
-      <p style="white-space: pre-wrap; margin: 0;">${message}</p><br>
-      A presto su Dolci Incontri!
+      <p style="white-space: pre-wrap; margin: 0;">${message}</p>
     `;
 
     const res = await fetch('https://api.resend.com/emails', {
