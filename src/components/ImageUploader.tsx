@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { UploadCloud, X, Star, Plus } from 'lucide-react';
 import { Button } from './ui/button';
-import { cn } from '@/lib/utils';
+import { cn } => '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client'; // Import supabase
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
@@ -100,11 +100,11 @@ export const ImageUploader = ({
 
   const setNewlySelectedAsPrimary = (index: number) => {
     setNewlySelectedPrimaryIndex(index);
-    // Aggiunto controllo per assicurarsi che newlySelectedPreviews sia un array e che l'indice esista
-    if (Array.isArray(newlySelectedPreviews) && newlySelectedPreviews.length > index) {
-      setActivePreviewUrl(newlySelectedPreviews[index]);
+    const previews = newlySelectedPreviews ?? []; // Defensive check
+    if (previews.length > index) {
+      setActivePreviewUrl(previews[index]);
     } else {
-      setActivePreviewUrl(null); // Fallback se l'indice non è valido
+      setActivePreviewUrl(null); // Fallback if the index is invalid
     }
   };
 
@@ -149,16 +149,17 @@ export const ImageUploader = ({
         } else if (newlySelectedFiles.length > 0) {
           // Set first newly selected photo as primary
           setNewlySelectedPrimaryIndex(0);
-          // Aggiunto controllo per assicurarsi che newlySelectedPreviews sia un array e non vuoto
-          setActivePreviewUrl(Array.isArray(newlySelectedPreviews) && newlySelectedPreviews.length > 0 ? newlySelectedPreviews[0] : null);
+          const previews = newlySelectedPreviews ?? []; // Defensive check
+          setActivePreviewUrl(previews.length > 0 ? previews[0] : null);
         } else {
           setActivePreviewUrl(null);
         }
       } else if (activePreviewUrl === photoToDelete.url) {
         // If deleted photo was just the active preview, reset preview
+        const previews = newlySelectedPreviews ?? []; // Defensive check
         setActivePreviewUrl(
           updatedExistingPhotos[0]?.url || 
-          (Array.isArray(newlySelectedPreviews) && newlySelectedPreviews.length > 0 ? newlySelectedPreviews[0] : null) || 
+          (previews.length > 0 ? previews[0] : null) || 
           null
         );
       }
@@ -216,11 +217,18 @@ export const ImageUploader = ({
   const emptySlotsCount = Math.max(0, maxAllowedPhotos - currentPhotoCount);
 
   // Determine the main preview URL
-  const mainPreview = activePreviewUrl || existingPhotosState.find(p => p.is_primary)?.url || existingPhotosState[0]?.url || newlySelectedPreviews[0] || null;
+  const mainPreview = activePreviewUrl || existingPhotosState.find(p => p.is_primary)?.url || existingPhotosState[0]?.url || (newlySelectedPreviews.length > 0 ? newlySelectedPreviews[0] : null) || null;
 
   return (
     <div className="space-y-4">
-      {/* La sezione Anteprima foto principale è stata rimossa */}
+      {mainPreview && (
+        <div className="mb-4">
+          <p className="text-sm text-gray-500 mb-2">Anteprima foto principale:</p>
+          <AspectRatio ratio={16 / 10} className="bg-gray-100 rounded-lg overflow-hidden">
+            <img src={mainPreview} alt="Foto principale" className="w-full h-full object-cover" />
+          </AspectRatio>
+        </div>
+      )}
 
       <p className="text-sm text-gray-500 mb-2">Gestisci le tue foto:</p>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
