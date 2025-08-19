@@ -166,8 +166,6 @@ export const ImageUploader = ({
     } catch (error: any) {
       dismissToast(toastId);
       showError(error.message || 'Errore durante l\'eliminazione della foto.');
-    } finally {
-      setIsLoading(false); // Assicurati che isLoading sia gestito correttamente
     }
   };
 
@@ -222,14 +220,7 @@ export const ImageUploader = ({
 
   return (
     <div className="space-y-4">
-      {mainPreview && (
-        <div className="mb-4">
-          <p className="text-sm text-gray-500 mb-2">Anteprima foto principale:</p>
-          <AspectRatio ratio={16 / 10} className="bg-gray-100 rounded-lg overflow-hidden">
-            <img src={mainPreview} alt="Foto principale" className="w-full h-full object-cover" />
-          </AspectRatio>
-        </div>
-      )}
+      {/* La sezione Anteprima foto principale è stata rimossa */}
 
       <p className="text-sm text-gray-500 mb-2">Gestisci le tue foto:</p>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
