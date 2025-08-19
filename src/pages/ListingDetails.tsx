@@ -13,8 +13,17 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
-import { MapPin, Tag, User, Mail, BookText, ChevronLeft } from 'lucide-react';
+import { MapPin, Tag, User, Mail, BookText, ChevronLeft, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+  DialogClose,
+} from '@/components/ui/dialog';
 
 const replySchema = z.object({
   message: z.string().min(10, 'Il messaggio deve contenere almeno 10 caratteri.'),
@@ -41,6 +50,7 @@ const ListingDetails = () => {
   const [loading, setLoading] = useState(true);
   const [activePhoto, setActivePhoto] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isReplyDialogOpen, setIsReplyDialogOpen] = useState(false); // Stato per il dialog di risposta
 
   const form = useForm<z.infer<typeof replySchema>>({
     resolver: zodResolver(replySchema),
@@ -69,6 +79,16 @@ const ListingDetails = () => {
     };
     fetchListing();
   }, [id]);
+
+  useEffect(() => {
+    const fetchUserEmail = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email) {
+        form.setValue('fromEmail', user.email);
+      }
+    };
+    fetchUserEmail();
+  }, [form]);
 
   const onSubmit = async (values: z.infer<typeof replySchema>) => {
     setIsSubmitting(true);
@@ -101,6 +121,7 @@ const ListingDetails = () => {
     } else {
       showSuccess('Messaggio inviato con successo!');
       form.reset();
+      setIsReplyDialogOpen(false); // Chiudi il dialog dopo l'invio
     }
 
     setIsSubmitting(false);
@@ -136,7 +157,6 @@ const ListingDetails = () => {
             <ChevronLeft className="h-5 w-5 mr-2" />
             Indietro
           </Button>
-          {/* Rimosso il titolo "Dettagli Annuncio" */}
         </div>
         <div className={cn("grid grid-cols-1 gap-8", hasPhotos && "lg:grid-cols-5")}>
           {hasPhotos && (
@@ -182,35 +202,56 @@ const ListingDetails = () => {
                 <CardTitle className="flex items-center gap-2"><Mail className="h-5 w-5 text-rose-500" /> Rispondi all'annuncio</CardTitle>
               </CardHeader>
               <CardContent>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="fromEmail"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>La tua Email</FormLabel>
-                          <FormControl><Input type="email" placeholder="iltuoindirizzo@email.com" {...field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="message"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Messaggio</FormLabel>
-                          <FormControl><Textarea placeholder="Scrivi qui il tuo messaggio..." className="min-h-[100px]" {...field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600" disabled={isSubmitting}>
-                      {isSubmitting ? 'Invio in corso...' : 'Invia Messaggio'}
+                <Dialog open={isReplyDialogOpen} onOpenChange={setIsReplyDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="w-full bg-rose-500 hover:bg-rose-600">
+                      Invia un messaggio
                     </Button>
-                  </form>
-                </Form>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-2"><Mail className="h-5 w-5 text-rose-500" /> Invia un messaggio</DialogTitle>
+                      <DialogDescription>
+                        Compila il modulo per inviare un messaggio all'autore dell'annuncio.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <Form {...form}>
+                      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+                        <FormField
+                          control={form.control}
+                          name="fromEmail"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>La tua Email</FormLabel>
+                              <FormControl><Input type="email" placeholder="iltuoindirizzo@email.com" {...field} /></FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="message"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Messaggio</FormLabel>
+                              <FormControl><Textarea placeholder="Scrivi qui il tuo messaggio..." className="min-h-[100px]" {...field} /></FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600" disabled={isSubmitting}>
+                          {isSubmitting ? 'Invio in corso...' : 'Invia Messaggio'}
+                        </Button>
+                      </form>
+                    </Form>
+                    <DialogClose asChild>
+                      <Button variant="ghost" className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+                        <X className="h-4 w-4" />
+                        <span className="sr-only">Close</span>
+                      </Button>
+                    </DialogClose>
+                  </DialogContent>
+                </Dialog>
               </CardContent>
             </Card>
           </div>
