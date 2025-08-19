@@ -31,7 +31,8 @@ export default function Auth() {
     setIsResettingPassword(false);
   };
 
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault(); // Previene il ricaricamento della pagina
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
@@ -44,7 +45,8 @@ export default function Auth() {
     }
   };
 
-  const handleSignUp = async () => {
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault(); // Previene il ricaricamento della pagina
     if (!isPasswordValid(password)) {
       showError('La password non rispetta i requisiti.');
       return;
@@ -60,7 +62,8 @@ export default function Auth() {
     }
   };
 
-  const handlePasswordReset = async () => {
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault(); // Previene il ricaricamento della pagina
     if (!email) {
       showError('Inserisci il tuo indirizzo email.');
       return;
@@ -90,7 +93,7 @@ export default function Auth() {
           
           <TabsContent value="login">
             {isResettingPassword ? (
-              <div className="space-y-4 pt-6">
+              <form onSubmit={handlePasswordReset} className="space-y-4 pt-6"> {/* Modificato a form */}
                 <h3 className="text-center font-semibold text-gray-700">Recupera la tua password</h3>
                 <p className="text-center text-sm text-gray-600">
                   Inserisci la tua email e ti invieremo un link per reimpostare la password.
@@ -102,8 +105,8 @@ export default function Auth() {
                   onChange={(e) => setEmail(e.target.value)}
                 />
                 <Button 
+                  type="submit" {/* Aggiunto type="submit" */}
                   className="w-full bg-rose-500 hover:bg-rose-600" 
-                  onClick={handlePasswordReset}
                   disabled={loading}
                 >
                   {loading ? 'Invio in corso...' : 'Invia link di recupero'}
@@ -117,9 +120,9 @@ export default function Auth() {
                     Torna al login
                   </button>
                 </p>
-              </div>
+              </form>
             ) : (
-              <div className="space-y-4 pt-6">
+              <form onSubmit={handleLogin} className="space-y-4 pt-6"> {/* Modificato a form */}
                 <Input
                   type="email"
                   placeholder="Email"
@@ -144,8 +147,8 @@ export default function Auth() {
                   </div>
                 </div>
                 <Button 
+                  type="submit" {/* Aggiunto type="submit" */}
                   className="w-full bg-rose-500 hover:bg-rose-600" 
-                  onClick={handleLogin}
                   disabled={loading}
                 >
                   {loading ? 'Caricamento...' : 'Accedi'}
@@ -160,12 +163,12 @@ export default function Auth() {
                     Registrati
                   </button>
                 </p>
-              </div>
+              </form>
             )}
           </TabsContent>
           
           <TabsContent value="register">
-            <div className="space-y-4 pt-6">
+            <form onSubmit={handleSignUp} className="space-y-4 pt-6"> {/* Modificato a form */}
               <Input
                 type="email"
                 placeholder="Email"
@@ -180,8 +183,8 @@ export default function Auth() {
               />
               <PasswordValidator password={password} />
               <Button 
+                type="submit" {/* Aggiunto type="submit" */}
                 className="w-full bg-rose-500 hover:bg-rose-600" 
-                onClick={handleSignUp}
                 disabled={loading || !isPasswordValid(password)}
               >
                 {loading ? 'Caricamento...' : 'Registrati'}
@@ -196,7 +199,7 @@ export default function Auth() {
                   Accedi
                 </button>
               </p>
-            </div>
+            </form>
           </TabsContent>
         </Tabs>
       </div>
