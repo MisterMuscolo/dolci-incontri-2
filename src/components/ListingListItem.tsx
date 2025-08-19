@@ -88,10 +88,10 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
 
   return (
     <Card className="w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row">
-      <Link to={`/listing/${listing.id}`} className="flex-grow block hover:bg-gray-50/50">
-        <div className="flex flex-col sm:flex-row">
-          {listing.is_premium && listing.listing_photos.length > 0 ? (
-            <div className="sm:w-1/4 lg:w-1/5 flex-shrink-0 relative">
+      <div className="flex flex-col sm:flex-row w-full"> {/* Wrapped content in a div to control Link scope */}
+        {listing.is_premium && listing.listing_photos.length > 0 ? (
+          <div className="sm:w-1/4 lg:w-1/5 flex-shrink-0 relative">
+            <Link to={`/listing/${listing.id}`} className="block w-full h-full"> {/* Link for the image area */}
               <Carousel
                 plugins={[
                   Autoplay({
@@ -114,13 +114,16 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
                 </CarouselContent>
                 {listing.listing_photos.length > 1 && (
                   <>
-                    <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10" />
-                    <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10" />
+                    {/* Add onClick to stop propagation for carousel navigation buttons */}
+                    <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10" onClick={(e) => e.stopPropagation()} />
+                    <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10" onClick={(e) => e.stopPropagation()} />
                   </>
                 )}
               </Carousel>
-            </div>
-          ) : null }
+            </Link>
+          </div>
+        ) : null }
+        <Link to={`/listing/${listing.id}`} className="flex-grow block hover:bg-gray-50/50"> {/* Link for the text content */}
           <div className="p-4 flex flex-col flex-grow">
             <h3 className="text-xl font-semibold mb-2 text-gray-800 line-clamp-2">{listing.title}</h3>
             <div className="flex flex-wrap gap-2 mb-3">
@@ -142,8 +145,8 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
               <span>{prefix} {formattedDate}</span>
             </div>
           </div>
-        </div>
-      </Link>
+        </Link>
+      </div>
       {showControls && (
         <div className="flex-shrink-0 flex md:flex-col justify-end md:justify-center items-center gap-2 p-4 border-t md:border-t-0 md:border-l">
            <Link to={`/edit-listing/${listing.id}`} className="w-full">
