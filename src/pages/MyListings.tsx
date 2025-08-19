@@ -25,11 +25,12 @@ const MyListings = () => {
       return;
     }
 
-    // Query per il conteggio totale degli annunci dell'utente
+    // Query per il conteggio totale degli annunci attivi dell'utente
     const { count, error: countError } = await supabase
       .from('listings')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id); 
+      .eq('user_id', user.id)
+      .gt('expires_at', new Date().toISOString()); // Filtra solo gli annunci attivi
 
     if (countError) {
       console.error("Errore nel conteggio degli annunci:", countError);
@@ -44,7 +45,7 @@ const MyListings = () => {
     const from = (currentPage - 1) * LISTINGS_PER_PAGE;
     const to = from + LISTINGS_PER_PAGE - 1;
 
-    // Query per recuperare gli annunci, ordinati per premium e poi per data
+    // Query per recuperare gli annunci attivi, ordinati per premium e poi per data
     const { data, error } = await supabase
       .from('listings')
       .select(`
@@ -63,7 +64,8 @@ const MyListings = () => {
         listing_photos ( url, is_primary )
       `)
       .eq('user_id', user.id)
-      .range(from, to); // Rimosso l'ordinamento lato server per gestirlo lato client
+      .gt('expires_at', new Date().toISOString()) // Filtra solo gli annunci attivi
+      .range(from, to); 
 
     if (error) {
       console.error("Errore nel recupero degli annunci:", error);
