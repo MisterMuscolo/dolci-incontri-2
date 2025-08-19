@@ -136,7 +136,7 @@ const ListingDetails = () => {
             <ChevronLeft className="h-5 w-5 mr-2" />
             Indietro
           </Button>
-          <h1 className="text-3xl font-bold text-gray-800">Dettagli Annuncio</h1>
+          {/* Rimosso il titolo "Dettagli Annuncio" */}
         </div>
         <div className={cn("grid grid-cols-1 gap-8", hasPhotos && "lg:grid-cols-5")}>
           {hasPhotos && (
