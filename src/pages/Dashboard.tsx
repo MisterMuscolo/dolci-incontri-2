@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState } => "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -88,9 +88,9 @@ const Dashboard = () => {
             <Link to="/my-listings">
               <Card className="w-full transition-shadow hover:shadow-lg cursor-pointer bg-white hover:bg-gray-50">
                 <CardHeader>
-                  <CardTitle className="text-3xl font-semibold flex items-center gap-3"> {/* Aumentato text-2xl a text-3xl e gap */}
-                    <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center"> {/* Aumentato p-2 a p-3 */}
-                      <LayoutGrid className="h-8 w-8 text-rose-500" /> {/* Aumentato h-6 w-6 a h-8 w-8 */}
+                  <CardTitle className="text-3xl font-semibold flex items-center gap-3">
+                    <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center">
+                      <LayoutGrid className="h-8 w-8 text-rose-500" />
                     </div>
                     <span className="text-gray-800">I Miei Annunci</span>
                   </CardTitle>
@@ -113,9 +113,9 @@ const Dashboard = () => {
             <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
               <CardHeader>
                 <Link to="/credit-history" className="block">
-                  <CardTitle className="text-xl font-semibold flex items-center gap-3 cursor-pointer"> {/* Aumentato text-lg a text-xl e gap */}
-                    <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center"> {/* Aumentato p-2 a p-3 */}
-                      <Wallet className="h-6 w-6 text-rose-500" /> {/* Aumentato h-5 w-5 a h-6 w-6 */}
+                  <CardTitle className="text-xl font-semibold flex items-center gap-3 cursor-pointer">
+                    <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center">
+                      <Wallet className="h-6 w-6 text-rose-500" />
                     </div>
                     <span>Crediti</span>
                   </CardTitle>
@@ -147,13 +147,14 @@ const Dashboard = () => {
             <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
               <CardHeader>
                 <Link to="/profile-settings" className="block">
-                  <CardTitle className="text-xl font-semibold flex items-center gap-3 cursor-pointer"> {/* Aumentato text-lg a text-xl e gap */}
-                    <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center"> {/* Aumentato p-2 a p-3 */}
-                      <Settings className="h-6 w-6 text-rose-500" /> {/* Aumentato h-5 w-5 a h-6 w-6 */}
+                  <CardTitle className="text-xl font-semibold flex items-center gap-3 cursor-pointer">
+                    <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center">
+                      <Settings className="h-6 w-6 text-rose-500" />
                     </div>
-                    <span>Impostazioni account</span>
+                    <span>Impostazioni</span> {/* Modificato il titolo */}
                   </CardTitle>
                 </Link>
+                <CardDescription>Gestisci le impostazioni del tuo account.</CardDescription> {/* Nuova descrizione */}
               </CardHeader>
               <CardContent>
                 {/* Il pulsante "Modifica profilo" è stato rimosso in quanto il titolo della card è già cliccabile */}
