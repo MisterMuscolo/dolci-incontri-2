@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,7 +32,7 @@ export default function Auth() {
   };
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault(); // Previene il ricaricamento della pagina
+    e.preventDefault();
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
@@ -46,7 +46,7 @@ export default function Auth() {
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault(); // Previene il ricaricamento della pagina
+    e.preventDefault();
     if (!isPasswordValid(password)) {
       showError('La password non rispetta i requisiti.');
       return;
@@ -63,7 +63,7 @@ export default function Auth() {
   };
 
   const handlePasswordReset = async (e: React.FormEvent) => {
-    e.preventDefault(); // Previene il ricaricamento della pagina
+    e.preventDefault();
     if (!email) {
       showError('Inserisci il tuo indirizzo email.');
       return;
@@ -93,7 +93,7 @@ export default function Auth() {
           
           <TabsContent value="login">
             {isResettingPassword ? (
-              <form onSubmit={handlePasswordReset} className="space-y-4 pt-6"> {/* Modificato a form */}
+              <form onSubmit={handlePasswordReset} className="space-y-4 pt-6">
                 <h3 className="text-center font-semibold text-gray-700">Recupera la tua password</h3>
                 <p className="text-center text-sm text-gray-600">
                   Inserisci la tua email e ti invieremo un link per reimpostare la password.
@@ -105,7 +105,7 @@ export default function Auth() {
                   onChange={(e) => setEmail(e.target.value)}
                 />
                 <Button 
-                  type="submit" {/* Aggiunto type="submit" */}
+                  type="submit"
                   className="w-full bg-rose-500 hover:bg-rose-600" 
                   disabled={loading}
                 >
@@ -122,7 +122,7 @@ export default function Auth() {
                 </p>
               </form>
             ) : (
-              <form onSubmit={handleLogin} className="space-y-4 pt-6"> {/* Modificato a form */}
+              <form onSubmit={handleLogin} className="space-y-4 pt-6">
                 <Input
                   type="email"
                   placeholder="Email"
@@ -147,7 +147,7 @@ export default function Auth() {
                   </div>
                 </div>
                 <Button 
-                  type="submit" {/* Aggiunto type="submit" */}
+                  type="submit"
                   className="w-full bg-rose-500 hover:bg-rose-600" 
                   disabled={loading}
                 >
@@ -168,7 +168,7 @@ export default function Auth() {
           </TabsContent>
           
           <TabsContent value="register">
-            <form onSubmit={handleSignUp} className="space-y-4 pt-6"> {/* Modificato a form */}
+            <form onSubmit={handleSignUp} className="space-y-4 pt-6">
               <Input
                 type="email"
                 placeholder="Email"
@@ -183,7 +183,7 @@ export default function Auth() {
               />
               <PasswordValidator password={password} />
               <Button 
-                type="submit" {/* Aggiunto type="submit" */}
+                type="submit"
                 className="w-full bg-rose-500 hover:bg-rose-600" 
                 disabled={loading || !isPasswordValid(password)}
               >
