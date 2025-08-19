@@ -6,8 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
 import { PasswordValidator, isPasswordValid } from '@/components/PasswordValidator';
-import { Checkbox } from '@/components/ui/checkbox'; // Importa Checkbox
-import { Label } from '@/components/ui/label'; // Importa Label
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Eye, EyeOff } from 'lucide-react'; // Importa le icone dell'occhio
 
 export default function Auth() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -16,7 +17,8 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false); // Stato per la checkbox
+  const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // Nuovo stato per la visibilità della password
 
   useEffect(() => {
     const tab = searchParams.get('tab');
@@ -101,12 +103,16 @@ export default function Auth() {
                 <p className="text-center text-sm text-gray-600">
                   Inserisci la tua email e ti invieremo un link per reimpostare la password.
                 </p>
-                <Input
-                  type="email"
-                  placeholder="La tua email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
+                <div>
+                  <Label htmlFor="email-reset">Email</Label>
+                  <Input
+                    id="email-reset"
+                    type="email"
+                    placeholder="mario.rossi@esempio.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
                 <Button 
                   type="submit"
                   className="w-full bg-rose-500 hover:bg-rose-600" 
@@ -126,21 +132,42 @@ export default function Auth() {
               </form>
             ) : (
               <form onSubmit={handleLogin} className="space-y-4 pt-6">
-                <p className="text-center text-gray-600">Accedi al tuo account per continuare.</p> {/* Descrizione */}
-                <Input
-                  type="email"
-                  placeholder="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                <div className="space-y-2"> {/* Aumentato space-y per includere la checkbox */}
+                <p className="text-center text-gray-600">Accedi al tuo account per continuare.</p>
+                <div>
+                  <Label htmlFor="email-login">Email</Label>
                   <Input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    id="email-login"
+                    type="email"
+                    placeholder="mario.rossi@esempio.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
-                  <div className="flex items-center justify-between"> {/* Modificato per allineare checkbox e link */}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password-login">Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="password-login"
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="********"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-gray-500" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-gray-500" />
+                      )}
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <Checkbox id="remember-me" checked={rememberMe} onCheckedChange={(checked) => setRememberMe(!!checked)} />
                       <Label htmlFor="remember-me">Rimani connesso</Label>
@@ -177,19 +204,27 @@ export default function Auth() {
           
           <TabsContent value="register">
             <form onSubmit={handleSignUp} className="space-y-4 pt-6">
-              <p className="text-center text-gray-600">Crea un nuovo account per iniziare la tua avventura.</p> {/* Descrizione */}
-              <Input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <Input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <p className="text-center text-gray-600">Crea un nuovo account per iniziare la tua avventura.</p>
+              <div>
+                <Label htmlFor="email-register">Email</Label>
+                <Input
+                  id="email-register"
+                  type="email"
+                  placeholder="mario.rossi@esempio.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="password-register">Password</Label>
+                <Input
+                  id="password-register"
+                  type="password"
+                  placeholder="********"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
               <PasswordValidator password={password} />
               <Button 
                 type="submit"
