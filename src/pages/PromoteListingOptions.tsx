@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } => {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ChevronLeft, Rocket, Sun, Moon } from 'lucide-react';
@@ -15,6 +15,7 @@ interface PromotionOption {
   description: string;
   icon: React.ElementType;
   details: string[];
+  coverageText: string; // Nuovo campo per il testo di copertura
 }
 
 const promotionOptions: PromotionOption[] = [
@@ -29,6 +30,7 @@ const promotionOptions: PromotionOption[] = [
       'Visibilità premium per ogni giorno selezionato',
       'Ideale per annunci con alta interazione diurna',
     ],
+    coverageText: 'Copertura: dalle 07:00 alle 23:00',
   },
   {
     id: 'night',
@@ -41,6 +43,7 @@ const promotionOptions: PromotionOption[] = [
       'Visibilità premium per ogni giorno selezionato',
       'Perfetto per raggiungere un pubblico diverso',
     ],
+    coverageText: 'Copertura: dalle 23:00 alle 07:00',
   },
 ];
 
@@ -51,14 +54,22 @@ const durations = [
 ];
 
 const dayTimeSlots = [
-  { value: '07:00-09:00', label: '07:00 - 09:00' },
-  { value: '09:00-11:00', label: '09:00 - 11:00' },
-  { value: '11:00-13:00', label: '11:00 - 13:00' },
-  { value: '13:00-15:00', label: '13:00 - 15:00' },
-  { value: '15:00-17:00', label: '15:00 - 17:00' },
-  { value: '17:00-19:00', label: '17:00 - 19:00' },
-  { value: '19:00-21:00', label: '19:00 - 21:00' },
-  { value: '21:00-23:00', label: '21:00 - 23:00' },
+  { value: '07:00-08:00', label: '07:00 - 08:00' },
+  { value: '08:00-09:00', label: '08:00 - 09:00' },
+  { value: '09:00-10:00', label: '09:00 - 10:00' },
+  { value: '10:00-11:00', label: '10:00 - 11:00' },
+  { value: '11:00-12:00', label: '11:00 - 12:00' },
+  { value: '12:00-13:00', label: '12:00 - 13:00' },
+  { value: '13:00-14:00', label: '13:00 - 14:00' },
+  { value: '14:00-15:00', label: '14:00 - 15:00' },
+  { value: '15:00-16:00', label: '15:00 - 16:00' },
+  { value: '16:00-17:00', label: '16:00 - 17:00' },
+  { value: '17:00-18:00', label: '17:00 - 18:00' },
+  { value: '18:00-19:00', label: '18:00 - 19:00' },
+  { value: '19:00-20:00', label: '19:00 - 20:00' },
+  { value: '20:00-21:00', label: '20:00 - 21:00' },
+  { value: '21:00-22:00', label: '21:00 - 22:00' },
+  { value: '22:00-23:00', label: '22:00 - 23:00' },
 ];
 
 const PromoteListingOptions = () => {
@@ -245,7 +256,8 @@ const PromoteListingOptions = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="flex-grow flex flex-col justify-between pt-4">
-                  <CardDescription className="mb-4 text-gray-600">{option.description}</CardDescription>
+                  <CardDescription className="mb-2 text-gray-600">{option.description}</CardDescription>
+                  <p className="text-sm text-gray-500 mb-4">{option.coverageText}</p> {/* Testo di copertura */}
                   <ul className="list-disc list-inside text-sm text-gray-700 mb-4 space-y-1">
                     {option.details.map((detail, index) => (
                       <li key={index}>{detail}</li>
