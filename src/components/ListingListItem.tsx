@@ -88,42 +88,49 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
 
   return (
     <Card className="w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row">
-      <div className="flex flex-col sm:flex-row w-full"> {/* Wrapped content in a div to control Link scope */}
+      <div className="flex flex-col sm:flex-row w-full">
         {listing.is_premium && listing.listing_photos.length > 0 ? (
           <div className="sm:w-1/4 lg:w-1/5 flex-shrink-0 relative">
-            <Link to={`/listing/${listing.id}`} className="block w-full h-full"> {/* Link for the image area */}
-              <Carousel
-                plugins={[
-                  Autoplay({
-                    delay: 3000,
-                    stopOnInteraction: false,
-                    stopOnMouseEnter: true,
-                  }),
-                ]}
-                opts={{
-                  loop: true,
-                }}
-                className="w-full h-48 sm:h-full"
-              >
-                <CarouselContent className="h-full">
-                  {listing.listing_photos.map((photo, index) => (
-                    <CarouselItem key={index} className="h-full">
+            <Carousel
+              plugins={[
+                Autoplay({
+                  delay: 3000,
+                  stopOnInteraction: false,
+                  stopOnMouseEnter: true,
+                }),
+              ]}
+              opts={{
+                loop: true,
+              }}
+              className="w-full h-48 sm:h-full"
+            >
+              <CarouselContent className="h-full">
+                {listing.listing_photos.map((photo, index) => (
+                  <CarouselItem key={index} className="h-full">
+                    {/* Link only wraps the image inside the carousel item */}
+                    <Link to={`/listing/${listing.id}`} className="block w-full h-full">
                       <img src={photo.url} alt={`${listing.title} - ${index + 1}`} className="object-cover w-full h-full" />
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                {listing.listing_photos.length > 1 && (
-                  <>
-                    {/* Add onClick to stop propagation for carousel navigation buttons */}
-                    <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10" onClick={(e) => e.stopPropagation()} />
-                    <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10" onClick={(e) => e.stopPropagation()} />
-                  </>
-                )}
-              </Carousel>
-            </Link>
+                    </Link>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              {listing.listing_photos.length > 1 && (
+                <>
+                  {/* Carousel navigation buttons are outside the Link */}
+                  <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10" />
+                  <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10" />
+                </>
+              )}
+            </Carousel>
           </div>
-        ) : null }
-        <Link to={`/listing/${listing.id}`} className="flex-grow block hover:bg-gray-50/50"> {/* Link for the text content */}
+        ) : (
+          // For non-premium listings, a single image wrapped in a Link
+          <Link to={`/listing/${listing.id}`} className="sm:w-1/4 lg:w-1/5 flex-shrink-0 block w-full h-48 sm:h-full">
+            <img src={primaryPhoto} alt={listing.title} className="object-cover w-full h-full" />
+          </Link>
+        )}
+        {/* This Link wraps the text content */}
+        <Link to={`/listing/${listing.id}`} className="flex-grow block hover:bg-gray-50/50">
           <div className="p-4 flex flex-col flex-grow">
             <h3 className="text-xl font-semibold mb-2 text-gray-800 line-clamp-2">{listing.title}</h3>
             <div className="flex flex-wrap gap-2 mb-3">
