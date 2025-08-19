@@ -152,7 +152,7 @@ const BuyCredits = () => {
                 className={`w-full flex items-center justify-between p-4 shadow-lg hover:shadow-xl transition-shadow duration-300 relative ${pkg.recommended ? 'border-2 border-rose-500' : ''}`}
               >
                 {pkg.recommended && (
-                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-rose-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">
+                  <Badge className="absolute top-2 left-2 bg-rose-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">
                     Consigliato
                   </Badge>
                 )}
