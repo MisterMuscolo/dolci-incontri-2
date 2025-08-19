@@ -53,6 +53,7 @@ const MyListings = () => {
           category,
           city,
           created_at,
+          expires_at,  // Includi expires_at nella query
           listing_photos ( url, is_primary )
         `)
         .eq('user_id', user.id)

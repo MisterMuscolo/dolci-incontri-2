@@ -12,6 +12,7 @@ export interface Listing {
   category: string;
   city: string;
   created_at: string;
+  expires_at: string; // Aggiunto expires_at
   listing_photos: { url: string; is_primary: boolean }[];
   description?: string;
 }
@@ -41,7 +42,7 @@ export const ListingListItem = ({ listing, showControls = false }: ListingListIt
             </div>
             <div className="mt-auto flex items-center text-xs text-gray-500">
               <CalendarDays className="h-4 w-4 mr-2" />
-              <span>{format(new Date(listing.created_at), 'dd MMMM', { locale: it })}</span>
+              <span>Scade il: {format(new Date(listing.expires_at), 'dd MMMM yyyy', { locale: it })}</span> {/* Modificato per mostrare expires_at */}
             </div>
           </div>
         </div>
