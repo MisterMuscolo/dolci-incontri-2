@@ -27,9 +27,10 @@ const reportSchema = z.object({
 interface ReportListingDialogProps {
   listingId: string;
   listingTitle: string;
+  buttonSize?: "default" | "sm" | "lg" | "icon" | null | undefined; // Aggiunta la prop buttonSize
 }
 
-export const ReportListingDialog = ({ listingId, listingTitle }: ReportListingDialogProps) => {
+export const ReportListingDialog = ({ listingId, listingTitle, buttonSize = "default" }: ReportListingDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -97,7 +98,11 @@ export const ReportListingDialog = ({ listingId, listingTitle }: ReportListingDi
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="text-red-500 border-red-500 hover:bg-red-50 hover:text-red-600 flex items-center gap-2">
+        <Button
+          variant="outline"
+          size={buttonSize} // Applica la dimensione qui
+          className="text-red-500 border-red-500 hover:bg-red-50 hover:text-red-600 flex items-center gap-2"
+        >
           <Flag className="h-5 w-5" /> Segnala Annuncio
         </Button>
       </DialogTrigger>

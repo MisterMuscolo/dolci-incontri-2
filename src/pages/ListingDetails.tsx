@@ -225,6 +225,11 @@ const ListingDetails = () => {
             </div>
           )}
 
+          {/* Pulsante per segnalare l'annuncio spostato qui */}
+          <div className="flex justify-end -mt-4 mb-4"> {/* Aggiunto margine negativo per avvicinarlo */}
+            <ReportListingDialog listingId={listing.id} listingTitle={listing.title} buttonSize="sm" />
+          </div>
+
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-xl"><BookText className="h-5 w-5 text-rose-500" /> Descrizione</CardTitle>
@@ -234,7 +239,7 @@ const ListingDetails = () => {
             </CardContent>
           </Card>
 
-          <div className="flex justify-center py-4 gap-4"> {/* Aggiunto gap per spaziatura tra i bottoni */}
+          <div className="flex justify-center py-4 gap-4"> {/* Ora contiene solo il pulsante Rispondi */}
             <Dialog open={isReplyDialogOpen} onOpenChange={setIsReplyDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-rose-500 hover:bg-rose-600 text-lg px-8 py-6 rounded-lg shadow-lg flex items-center gap-2">
@@ -279,8 +284,6 @@ const ListingDetails = () => {
                 </Form>
               </DialogContent>
             </Dialog>
-            {/* Pulsante per segnalare l'annuncio */}
-            <ReportListingDialog listingId={listing.id} listingTitle={listing.title} />
           </div>
         </div>
       </div>
