@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
-import { MapPin, Tag, User, Mail, BookText, ChevronLeft, X, CalendarDays } from 'lucide-react';
+import { MapPin, Tag, User, Mail, BookText, ChevronLeft, X, CalendarDays, Rocket } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale'; // Importa la locale italiana
@@ -174,6 +174,11 @@ const ListingDetails = () => {
           <Card>
             <CardHeader>
               <CardTitle className="text-3xl font-bold text-gray-800">{listing.title}</CardTitle>
+              {listing.is_premium && (
+                <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white text-base px-3 py-1 rounded-full font-semibold flex items-center gap-1 w-fit mt-2">
+                  <Rocket className="h-4 w-4" /> Annuncio Premium
+                </Badge>
+              )}
               <div className="flex flex-wrap gap-2 pt-4">
                 <Badge variant="secondary" className="capitalize"><Tag className="h-4 w-4 mr-1.5" />{listing.category.replace(/-/g, ' ')}</Badge>
                 <Badge variant="outline"><MapPin className="h-4 w-4 mr-1.5" />{listing.city}{listing.zone && `, ${listing.zone}`}</Badge>
