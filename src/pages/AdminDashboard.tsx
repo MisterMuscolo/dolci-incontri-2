@@ -1,5 +1,6 @@
 import { UserManagementTable } from "@/components/admin/UserManagementTable";
 import { ListingManagementTable } from "@/components/admin/ListingManagementTable";
+import { OverviewStats } from "@/components/admin/OverviewStats"; // Importa il nuovo componente
 
 const AdminDashboard = () => {
   return (
@@ -7,6 +8,8 @@ const AdminDashboard = () => {
       <div className="max-w-6xl mx-auto space-y-8">
         <h1 className="text-3xl font-bold text-gray-800">Dashboard Amministratore</h1>
         
+        <OverviewStats /> {/* Aggiungi il componente delle statistiche qui */}
+
         <UserManagementTable />
         
         <ListingManagementTable />
