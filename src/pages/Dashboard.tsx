@@ -52,7 +52,7 @@ const Dashboard = () => {
       const { data: transactionsData, error: transactionsError } = await supabase
         .from('credit_transactions')
         .select('amount')
-        .eq('user.id', user.id);
+        .eq('user_id', user.id);
 
       if (transactionsError) {
         console.error("Errore nel recupero delle transazioni per i crediti utilizzati:", transactionsError);
@@ -94,7 +94,7 @@ const Dashboard = () => {
                     </div>
                     <span className="text-gray-800">I Miei Annunci</span>
                   </CardTitle>
-                  <CardDescription className="ml-[88px]">Visualizza e gestisci i tuoi annunci.</CardDescription> {/* Aggiunto ml */}
+                  <CardDescription className="ml-[58px]">Visualizza e gestisci i tuoi annunci.</CardDescription> {/* Modificato ml */}
                 </CardHeader>
                 <CardContent>
                   {loading ? (
@@ -113,14 +113,14 @@ const Dashboard = () => {
             <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
               <CardHeader>
                 <Link to="/credit-history" className="block">
-                  <CardTitle className="text-xl font-semibold flex items-center gap-3 cursor-pointer">
-                    <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center">
-                      <Wallet className="h-6 w-6 text-rose-500" />
+                  <CardTitle className="text-xl font-semibold flex items-center gap-4"> {/* Aumentato il gap */}
+                    <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center"> {/* Aumentato il padding */}
+                      <Wallet className="h-10 w-10 text-rose-500" /> {/* Ingrandita l'icona */}
                     </div>
                     <span>Crediti</span>
                   </CardTitle>
                 </Link>
-                <CardDescription className="ml-[60px]">Acquista e gestisci i tuoi crediti.</CardDescription> {/* Aggiunto ml */}
+                <CardDescription className="ml-[58px]">Acquista e gestisci i tuoi crediti.</CardDescription> {/* Modificato ml */}
               </CardHeader>
               <CardContent>
                 {loading ? (
@@ -147,14 +147,14 @@ const Dashboard = () => {
             <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
               <CardHeader>
                 <Link to="/profile-settings" className="block">
-                  <CardTitle className="text-xl font-semibold flex items-center gap-3 cursor-pointer">
-                    <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center">
-                      <Settings className="h-6 w-6 text-rose-500" />
+                  <CardTitle className="text-xl font-semibold flex items-center gap-4"> {/* Aumentato il gap */}
+                    <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center"> {/* Aumentato il padding */}
+                      <Settings className="h-10 w-10 text-rose-500" /> {/* Ingrandita l'icona */}
                     </div>
                     <span>Impostazioni</span>
                   </CardTitle>
                 </Link>
-                <CardDescription className="ml-[60px]">Gestisci le impostazioni del tuo account.</CardDescription> {/* Aggiunto ml */}
+                <CardDescription className="ml-[58px]">Gestisci le impostazioni del tuo account.</CardDescription> {/* Modificato ml */}
               </CardHeader>
               <CardContent>
                 {/* Il pulsante "Modifica profilo" è stato rimosso in quanto il titolo della card è già cliccabile */}
