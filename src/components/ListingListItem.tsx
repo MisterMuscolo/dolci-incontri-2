@@ -20,7 +20,7 @@ import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast
 import { supabase } from '@/integrations/supabase/client';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '@/components/ui/carousel';
 import Autoplay from 'embla-carousel-autoplay';
-import { cn } '@/lib/utils'; // Importa la funzione cn
+import { cn } from '@/lib/utils'; // Importa la funzione cn
 import { AspectRatio } from '@/components/ui/aspect-ratio'; // Import AspectRatio
 import { useState } from "react"; // Importa useState
 
