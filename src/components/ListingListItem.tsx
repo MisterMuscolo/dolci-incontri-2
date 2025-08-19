@@ -58,7 +58,8 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
   // Determina se l'annuncio è attivamente premium in questo momento
   const isActivePremium = listing.is_premium && promoStart && promoEnd && promoStart <= now && promoEnd >= now;
 
-  const photosToDisplay = isActivePremium ? listing.listing_photos.slice(0, 5) : listing.listing_photos.slice(0, 1);
+  // Se l'annuncio è premium attivo, mostra fino a 5 foto, altrimenti nessuna.
+  const photosToDisplay = isActivePremium ? listing.listing_photos.slice(0, 5) : [];
   const primaryPhoto = photosToDisplay.find(p => p.is_primary)?.url || photosToDisplay[0]?.url;
 
   const dateToDisplay = showExpiryDate ? new Date(listing.expires_at) : new Date(listing.created_at);
