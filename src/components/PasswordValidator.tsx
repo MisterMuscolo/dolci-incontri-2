@@ -16,6 +16,7 @@ const rules: ValidationRule[] = [
   { id: 'lowercase', text: 'Una lettera minuscola', regex: /[a-z]/ },
   { id: 'uppercase', text: 'Una lettera maiuscola', regex: /[A-Z]/ },
   { id: 'number', text: 'Un numero', regex: /[0-9]/ },
+  { id: 'specialChar', text: 'Un carattere speciale', regex: /[!@#$%^&*(),.?":{}|<>]/ }, // Nuova regola
 ];
 
 export const PasswordValidator = ({ password = '' }: PasswordValidatorProps) => {
