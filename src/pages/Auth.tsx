@@ -6,6 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
 import { PasswordValidator, isPasswordValid } from '@/components/PasswordValidator';
+import { Checkbox } from '@/components/ui/checkbox'; // Importa Checkbox
+import { Label } from '@/components/ui/label'; // Importa Label
 
 export default function Auth() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -14,6 +16,7 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false); // Stato per la checkbox
 
   useEffect(() => {
     const tab = searchParams.get('tab');
@@ -123,20 +126,25 @@ export default function Auth() {
               </form>
             ) : (
               <form onSubmit={handleLogin} className="space-y-4 pt-6">
+                <p className="text-center text-gray-600">Accedi al tuo account per continuare.</p> {/* Descrizione */}
                 <Input
                   type="email"
                   placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
-                <div className="space-y-1">
+                <div className="space-y-2"> {/* Aumentato space-y per includere la checkbox */}
                   <Input
                     type="password"
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
-                  <div className="text-right">
+                  <div className="flex items-center justify-between"> {/* Modificato per allineare checkbox e link */}
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="remember-me" checked={rememberMe} onCheckedChange={(checked) => setRememberMe(!!checked)} />
+                      <Label htmlFor="remember-me">Rimani connesso</Label>
+                    </div>
                     <button
                       type="button"
                       onClick={() => setIsResettingPassword(true)}
@@ -169,6 +177,7 @@ export default function Auth() {
           
           <TabsContent value="register">
             <form onSubmit={handleSignUp} className="space-y-4 pt-6">
+              <p className="text-center text-gray-600">Crea un nuovo account per iniziare la tua avventura.</p> {/* Descrizione */}
               <Input
                 type="email"
                 placeholder="Email"
