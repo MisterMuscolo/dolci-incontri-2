@@ -18,6 +18,7 @@ import SearchResults from "./pages/SearchResults";
 import ListingDetails from "./pages/ListingDetails";
 import MyListings from "./pages/MyListings";
 import CreditHistory from "./pages/CreditHistory";
+import UserListingsAdminView from "./pages/UserListingsAdminView"; // Importa la nuova pagina
 
 const queryClient = new QueryClient();
 
@@ -126,6 +127,10 @@ const App = () => {
               <Route 
                 path="/admin" 
                 element={isAdmin ? <AdminDashboard /> : <Navigate to="/" />} 
+              />
+              <Route 
+                path="/admin/users/:userId/listings" 
+                element={isAdmin ? <UserListingsAdminView /> : <Navigate to="/" />} 
               />
               <Route 
                 path="/new-listing" 

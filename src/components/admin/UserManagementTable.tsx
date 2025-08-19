@@ -4,6 +4,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { showError } from '@/utils/toast';
+import { Link } from 'react-router-dom'; // Importa Link
+import { Button } from '@/components/ui/button'; // Importa Button
+import { Eye } from 'lucide-react'; // Importa l'icona Eye
 
 interface UserProfile {
   id: string;
@@ -56,6 +59,7 @@ export const UserManagementTable = () => {
                 <TableHead>Ruolo</TableHead>
                 <TableHead className="text-right">Crediti</TableHead>
                 <TableHead>Data Registrazione</TableHead>
+                <TableHead className="text-right">Azioni</TableHead> {/* Nuova colonna */}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -69,6 +73,13 @@ export const UserManagementTable = () => {
                   </TableCell>
                   <TableCell className="text-right">{user.credits}</TableCell>
                   <TableCell>{new Date(user.created_at).toLocaleDateString('it-IT')}</TableCell>
+                  <TableCell className="text-right">
+                    <Link to={`/admin/users/${user.id}/listings`}>
+                      <Button variant="outline" size="sm">
+                        <Eye className="h-4 w-4 mr-1" /> Visualizza Annunci
+                      </Button>
+                    </Link>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
