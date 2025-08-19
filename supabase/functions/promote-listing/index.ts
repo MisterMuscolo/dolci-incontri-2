@@ -12,10 +12,10 @@ serve(async (req) => {
   }
 
   try {
-    const { listingId, promotionType, cost, durationHours, timeSlot } = await req.json();
+    const { listingId, promotionType, cost, durationHours, timeSlot, timezoneOffsetMinutes } = await req.json();
 
-    if (!listingId || !promotionType || typeof cost !== 'number' || typeof durationHours !== 'number') {
-      throw new Error('Missing required fields: listingId, promotionType, cost, durationHours');
+    if (!listingId || !promotionType || typeof cost !== 'number' || typeof durationHours !== 'number' || typeof timezoneOffsetMinutes !== 'number') {
+      throw new Error('Missing required fields: listingId, promotionType, cost, durationHours, timezoneOffsetMinutes');
     }
 
     // Create a Supabase client with the user's JWT for RLS checks
@@ -65,24 +65,38 @@ serve(async (req) => {
     }
 
     // Calculate promotion start and end times
-    const now = new Date(); // Current UTC time
+    const now = new Date(); // Current UTC time in the Edge Function environment
 
     let promoStart: Date;
     let promoEnd: Date;
 
     if (promotionType === 'day') {
         const [startHourStr, startMinuteStr] = timeSlot.split('-')[0].split(':');
-        const startHour = parseInt(startHourStr);
-        const startMinute = parseInt(startMinuteStr);
+        const localStartHour = parseInt(startHourStr);
+        const localStartMinute = parseInt(startMinuteStr);
 
-        const targetTimeToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), startHour, startMinute, 0, 0));
+        // Calculate the total minutes from midnight for the selected local time
+        const totalLocalMinutes = localStartHour * 60 + localStartMinute;
+        // Adjust to UTC minutes using the client's timezone offset
+        // timezoneOffsetMinutes is (UTC - local) in minutes. So, local + offset = UTC.
+        const totalUTCMinutes = totalLocalMinutes + timezoneOffsetMinutes;
 
-        if (targetTimeToday.getTime() <= now.getTime()) {
-            // If the selected time slot for today has already passed or is current, start promotion immediately
+        // Create a Date object for the current UTC day (midnight UTC)
+        const currentUTCDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
+
+        // Set the UTC hours and minutes based on the calculated UTC time
+        const targetTimeTodayUTC = new Date(currentUTCDate.getTime());
+        targetTimeTodayUTC.setUTCHours(Math.floor(totalUTCMinutes / 60));
+        targetTimeTodayUTC.setUTCMinutes(totalUTCMinutes % 60);
+        targetTimeTodayUTC.setUTCSeconds(0);
+        targetTimeTodayUTC.setUTCMilliseconds(0);
+
+        if (targetTimeTodayUTC.getTime() <= now.getTime()) {
+            // If the selected time slot (converted to UTC) for today has already passed or is current, start promotion immediately
             promoStart = now;
         } else {
-            // If the selected time slot is in the future today, schedule for that time
-            promoStart = targetTimeToday;
+            // If the selected time slot (converted to UTC) is in the future today, schedule for that time
+            promoStart = targetTimeTodayUTC;
         }
         promoEnd = new Date(promoStart.getTime() + durationHours * 60 * 60 * 1000);
 
@@ -91,7 +105,7 @@ serve(async (req) => {
         const startMinute = 0;
         promoStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), startHour, startMinute, 0, 0));
         if (promoStart.getTime() < now.getTime()) {
-            // If 23:00 today has already passed, schedule for tomorrow
+            // If 23:00 UTC today has already passed, schedule for tomorrow
             promoStart.setUTCDate(promoStart.getUTCDate() + 1);
         }
         promoEnd = new Date(promoStart.getTime() + durationHours * 60 * 60 * 1000);

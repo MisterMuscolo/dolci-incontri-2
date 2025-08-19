@@ -150,6 +150,7 @@ const PromoteListingOptions = () => {
     const currentDuration = selectedDurations[option.id];
     const totalCost = option.costs[currentDuration]; // Usa il costo specifico dalla mappa
     const totalDurationHours = currentDuration * 24; // Ogni giorno è 24 ore di visibilità premium
+    const timezoneOffsetMinutes = new Date().getTimezoneOffset(); // Get local timezone offset in minutes
 
     if (!listingId || currentCredits === null || currentCredits < totalCost) {
       showError('Crediti insufficienti o annuncio non valido.');
@@ -167,6 +168,7 @@ const PromoteListingOptions = () => {
           cost: totalCost,
           durationHours: totalDurationHours, // Pass total hours
           timeSlot: option.id === 'day' ? selectedTimeSlot : undefined, // Pass time slot only for 'day' mode
+          timezoneOffsetMinutes: timezoneOffsetMinutes, // Add this
         },
       });
 
@@ -272,11 +274,6 @@ const PromoteListingOptions = () => {
                 <CardContent className="flex-grow flex flex-col justify-between pt-4">
                   <CardDescription className="mb-2 text-gray-600">{option.description}</CardDescription>
                   <p className="text-sm text-gray-500 mb-4">{option.coverageText}</p> {/* Testo di copertura */}
-                  <ul className="list-disc list-inside text-sm text-gray-700 mb-4 space-y-1">
-                    {option.details.map((detail, index) => (
-                      <li key={index}>{detail}</li>
-                    ))}
-                  </ul>
                   {option.id === 'day' && (
                     <div className="mb-4">
                       <Select onValueChange={setSelectedTimeSlot} value={selectedTimeSlot}>
