@@ -1,8 +1,7 @@
 import { UserManagementTable } from "@/components/admin/UserManagementTable";
-import { ListingManagementTable } from "@/components/admin/ListingManagementTable";
 import { OverviewStats } from "@/components/admin/OverviewStats";
-import { CreditManagement } from "@/components/admin/CreditManagement"; // Importa il nuovo componente
-import { AllCreditTransactionsTable } from "@/components/admin/AllCreditTransactionsTable"; // Importa il nuovo componente
+import { CreditManagement } from "@/components/admin/CreditManagement";
+import { AllCreditTransactionsTable } from "@/components/admin/AllCreditTransactionsTable";
 
 const AdminDashboard = () => {
   return (
@@ -12,22 +11,13 @@ const AdminDashboard = () => {
         
         <OverviewStats />
         
-        <CreditManagement /> {/* Aggiungi il componente di gestione crediti qui */}
+        <CreditManagement />
 
-        <AllCreditTransactionsTable /> {/* Aggiungi il componente della cronologia transazioni qui */}
+        <AllCreditTransactionsTable />
 
         <UserManagementTable />
         
-        <ListingManagementTable />
-        
-        {/* Puoi aggiungere altre sezioni qui in futuro, ad esempio per le statistiche o la gestione dei crediti */}
-        {/*
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-lg font-semibold mb-4">Statistiche</h2>
-          <Button className="w-full mb-2">Visualizza statistiche</Button>
-          <Button variant="outline" className="w-full">Gestisci crediti</Button>
-        </div>
-        */}
+        {/* La sezione ListingManagementTable è stata rimossa come richiesto */}
       </div>
     </div>
   );
