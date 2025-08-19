@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom'; // Importa useNavigate
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,6 +12,7 @@ import { Eye, EyeOff } from 'lucide-react'; // Importa le icone dell'occhio
 
 export default function Auth() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate(); // Inizializza useNavigate
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -46,7 +47,7 @@ export default function Auth() {
       showError('Credenziali non valide');
     } else {
       showSuccess('Accesso effettuato!');
-      window.location.href = '/dashboard';
+      navigate('/dashboard'); // Reindirizza alla dashboard dopo il login
     }
   };
 
@@ -64,6 +65,7 @@ export default function Auth() {
       showError(error.message);
     } else {
       showSuccess('Registrazione completata! Verifica la tua email.');
+      navigate('/registration-success'); // Reindirizza alla pagina di successo
     }
   };
 

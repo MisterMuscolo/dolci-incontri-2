@@ -24,7 +24,8 @@ import EditListing from "./pages/EditListing";
 import Termini from "./pages/Termini"; 
 import Privacy from "./pages/Privacy"; 
 import Contatti from "./pages/Contatti";
-import PromoteListingOptions from "./pages/PromoteListingOptions"; // Importa la nuova pagina
+import PromoteListingOptions from "./pages/PromoteListingOptions";
+import RegistrationSuccess from "./pages/RegistrationSuccess"; // Importa la nuova pagina
 
 const queryClient = new QueryClient();
 
@@ -139,6 +140,8 @@ const App = () => {
           <Routes>
             {/* Route per utenti bannati */}
             <Route path="/banned" element={<BannedUser />} />
+            {/* Nuova rotta per la conferma registrazione */}
+            <Route path="/registration-success" element={<RegistrationSuccess />} />
 
             <Route element={<Layout session={session} isAdmin={isAdmin} />}>
               <Route path="/" element={<Index session={session} />} />
