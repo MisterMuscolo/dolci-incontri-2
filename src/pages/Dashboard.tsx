@@ -3,13 +3,14 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"; // Importa CardDescription
-import { Wallet, Settings, LayoutGrid } from "lucide-react"; // Importa LayoutGrid
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Wallet, Settings, LayoutGrid } from "lucide-react";
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [totalListingsCount, setTotalListingsCount] = useState(0);
-  const [currentCredits, setCurrentCredits] = useState<number | null>(0); // Initialize with 0
+  const [currentCredits, setCurrentCredits] = useState<number | null>(0);
+  const [totalCreditsSpent, setTotalCreditsSpent] = useState<number>(0); // Nuovo stato per i crediti utilizzati
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,9 +43,25 @@ const Dashboard = () => {
 
       if (profileError) {
         console.error("Errore nel recupero dei crediti:", profileError);
-        setCurrentCredits(0); // Ensure it's 0 on error
+        setCurrentCredits(0);
       } else if (profileData) {
         setCurrentCredits(profileData.credits);
+      }
+
+      // Fetch credit transactions to calculate total spent
+      const { data: transactionsData, error: transactionsError } = await supabase
+        .from('credit_transactions')
+        .select('amount')
+        .eq('user_id', user.id);
+
+      if (transactionsError) {
+        console.error("Errore nel recupero delle transazioni per i crediti utilizzati:", transactionsError);
+        setTotalCreditsSpent(0);
+      } else if (transactionsData) {
+        const spent = transactionsData
+          .filter(t => t.amount < 0) // Solo transazioni negative (spese)
+          .reduce((sum, t) => sum + Math.abs(t.amount), 0); // Somma i valori assoluti
+        setTotalCreditsSpent(spent);
       }
 
       setLoading(false);
@@ -56,7 +73,7 @@ const Dashboard = () => {
   return (
     <div className="bg-gray-50 p-6 flex-grow">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-4"> {/* Ridotto mb per fare spazio al sottotitolo */}
+        <div className="flex justify-between items-center mb-4">
           <div>
             <h1 className="text-3xl font-bold">La Mia Dashboard</h1>
             <p className="text-gray-600 text-sm mt-1">Gestisci i tuoi annunci, crediti e impostazioni del tuo account.</p>
@@ -72,10 +89,10 @@ const Dashboard = () => {
               <Card className="w-full transition-shadow hover:shadow-lg cursor-pointer bg-white hover:bg-gray-50">
                 <CardHeader>
                   <CardTitle className="text-2xl font-semibold flex items-center gap-2">
-                    <LayoutGrid className="h-6 w-6 text-rose-500" /> {/* Nuova icona */}
-                    <span className="text-gray-800">I Miei Annunci</span> {/* Nuovo testo */}
+                    <LayoutGrid className="h-6 w-6 text-rose-500" />
+                    <span className="text-gray-800">I Miei Annunci</span>
                   </CardTitle>
-                  <CardDescription>Visualizza e gestisci i tuoi annunci.</CardDescription> {/* Nuovo sottotitolo */}
+                  <CardDescription>Visualizza e gestisci i tuoi annunci.</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {loading ? (
@@ -96,19 +113,30 @@ const Dashboard = () => {
                 <Link to="/credit-history" className="block">
                   <CardTitle className="text-lg font-semibold flex items-center gap-2 cursor-pointer">
                     <Wallet className="h-5 w-5 text-rose-500" />
-                    <span>Portafoglio crediti</span>
+                    <span>Crediti</span> {/* Modificato il titolo */}
                   </CardTitle>
                 </Link>
+                <CardDescription>Acquista e gestisci i tuoi crediti.</CardDescription> {/* Nuova descrizione */}
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <p className="text-gray-600 text-xl">
-                    Crediti disponibili: <span className="font-bold text-rose-500">{currentCredits !== null ? currentCredits : 0}</span>
-                  </p>
-                  <Link to="/buy-credits">
-                    <Button className="bg-rose-500 hover:bg-rose-600">Acquista crediti</Button>
-                  </Link>
-                </div>
+                {loading ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-6 w-full" />
+                    <Skeleton className="h-6 w-full" />
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    <p className="text-gray-600 text-lg">
+                      Disponibili: <span className="font-bold text-rose-500">{currentCredits !== null ? currentCredits : 0}</span>
+                    </p>
+                    <p className="text-gray-600 text-lg">
+                      Utilizzati: <span className="font-bold text-gray-800">{totalCreditsSpent}</span>
+                    </p>
+                  </div>
+                )}
+                <Link to="/buy-credits">
+                  <Button className="bg-rose-500 hover:bg-rose-600 mt-4">Acquista crediti</Button>
+                </Link>
               </CardContent>
             </Card>
             
