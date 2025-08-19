@@ -163,7 +163,7 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
       </div>
       {/* This badge is for when showControls is FALSE (e.g., search results) */}
       {!showControls && listing.is_premium && (
-        <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white absolute top-2 left-1/2 -translate-x-1/2 z-20">
+        <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white absolute top-2 right-2 z-20">
           <Rocket className="h-3 w-3 mr-1" /> Premium
         </Badge>
       )}
