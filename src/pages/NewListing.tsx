@@ -34,6 +34,7 @@ const NewListing = () => {
   const [files, setFiles] = useState<File[]>([]);
   const [primaryIndex, setPrimaryIndex] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null); // Stato per l'ID utente
 
   const form = useForm<z.infer<typeof listingSchema>>({
     resolver: zodResolver(listingSchema),
@@ -45,13 +46,14 @@ const NewListing = () => {
   });
 
   useEffect(() => {
-    const fetchUserEmail = async () => {
+    const fetchUserEmailAndId = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user?.email) {
         form.setValue('email', user.email);
+        setCurrentUserId(user.id); // Imposta l'ID utente
       }
     };
-    fetchUserEmail();
+    fetchUserEmailAndId();
   }, [form]);
 
   const onSubmit = async (values: z.infer<typeof listingSchema>) => {
@@ -258,7 +260,15 @@ const NewListing = () => {
                 <div>
                   <FormLabel>Fotografie</FormLabel>
                   <p className="text-sm text-gray-500 mb-2">Puoi caricare delle foto. La prima sarà la foto principale.</p>
-                  <ImageUploader onFilesChange={setFiles} onPrimaryIndexChange={setPrimaryIndex} />
+                  <ImageUploader
+                    listingId={undefined} // Non disponibile per un nuovo annuncio
+                    userId={currentUserId ?? undefined} // Passa l'ID utente se disponibile
+                    initialPhotos={[]} // Nessuna foto iniziale per un nuovo annuncio
+                    isPremiumOrPending={false} // Un nuovo annuncio non è premium
+                    onFilesChange={setFiles}
+                    onPrimaryIndexChange={setPrimaryIndex}
+                    onExistingPhotosUpdated={() => {}} // Non fa nulla per un nuovo annuncio
+                  />
                 </div>
                 <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600" disabled={isLoading}>
                   {isLoading ? 'Pubblicazione in corso...' : 'Pubblica Annuncio'}

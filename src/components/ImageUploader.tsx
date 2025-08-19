@@ -14,10 +14,10 @@ interface ExistingPhoto {
 }
 
 interface ImageUploaderProps {
-  listingId: string; // Required for deleting existing photos
-  userId: string; // Required for storage path
-  initialPhotos: ExistingPhoto[]; // Existing photos from DB
-  isPremiumOrPending: boolean; // True if listing is premium or pending premium
+  listingId?: string; // Reso opzionale
+  userId?: string; // Reso opzionale
+  initialPhotos?: ExistingPhoto[]; // Reso opzionale
+  isPremiumOrPending?: boolean; // Reso opzionale
   onFilesChange: (files: File[]) => void; // For new files to be uploaded
   onPrimaryIndexChange: (index: number | null) => void; // For new files primary index
   onExistingPhotosUpdated: (updatedPhotos: ExistingPhoto[]) => void; // Callback for parent to update existing photos state
@@ -26,8 +26,8 @@ interface ImageUploaderProps {
 export const ImageUploader = ({
   listingId,
   userId,
-  initialPhotos,
-  isPremiumOrPending,
+  initialPhotos = [], // Valore predefinito
+  isPremiumOrPending = false, // Valore predefinito
   onFilesChange,
   onPrimaryIndexChange,
   onExistingPhotosUpdated,
@@ -124,6 +124,11 @@ export const ImageUploader = ({
   };
 
   const handleDeleteExistingPhoto = async (photoToDelete: ExistingPhoto) => {
+    if (!listingId || !userId) {
+      showError('Impossibile eliminare la foto: ID annuncio o ID utente non disponibili.');
+      return;
+    }
+
     const toastId = showLoading('Eliminazione foto in corso...');
     try {
       // 1. Delete from Supabase Storage
@@ -187,6 +192,10 @@ export const ImageUploader = ({
 
   const handleSetExistingAsPrimary = async (photoToSetPrimary: ExistingPhoto) => {
     if (photoToSetPrimary.is_primary) return; // Already primary
+    if (!listingId) {
+      showError('Impossibile impostare la foto principale: ID annuncio non disponibile.');
+      return;
+    }
 
     const toastId = showLoading('Impostazione foto principale...');
     try {
@@ -265,6 +274,7 @@ export const ImageUploader = ({
                 size="icon"
                 className="h-8 w-8 opacity-0 group-hover:opacity-100"
                 onClick={() => handleDeleteExistingPhoto(photo)}
+                disabled={!listingId} // Disabilita se non c'è listingId
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -274,7 +284,7 @@ export const ImageUploader = ({
                 size="icon"
                 className="h-8 w-8 opacity-0 group-hover:opacity-100"
                 onClick={() => handleSetExistingAsPrimary(photo)}
-                disabled={photo.is_primary}
+                disabled={photo.is_primary || !listingId} // Disabilita se già primaria o non c'è listingId
               >
                 <Star className={cn("h-4 w-4", photo.is_primary && "text-yellow-400 fill-current")} />
               </Button>
