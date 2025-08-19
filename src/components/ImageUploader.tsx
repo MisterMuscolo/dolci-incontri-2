@@ -46,7 +46,7 @@ export const ImageUploader = ({
     setExistingPhotosState(initialPhotos);
     // Set initial active preview to primary existing photo or first existing photo
     const primary = initialPhotos.find(p => p.is_primary);
-    setActivePreviewUrl(primary?.url || initialPhotos[0]?.url || null);
+    setActivePreviewUrl(primary?.url ?? initialPhotos[0]?.url ?? null);
   }, [initialPhotos]);
 
   useEffect(() => {
@@ -69,14 +69,27 @@ export const ImageUploader = ({
         return;
       }
 
-      const newFiles = filesToAdd.slice(0, availableSlots); // Take only what fits
-      const newPreviews = newFiles.map(file => URL.createObjectURL(file));
+      const newFiles = filesToAdd.slice(0, availableSlots);
+      const newPreviews = newFiles
+        .map(file => {
+          try {
+            return URL.createObjectURL(file);
+          } catch (e) {
+            console.error("Error creating object URL for file:", file.name, e);
+            return undefined; // Return undefined if there's an issue
+          }
+        })
+        .filter((p): p is string => typeof p === 'string'); // Filter out any undefined results
 
       setNewlySelectedFiles(prev => [...prev, ...newFiles]);
       setNewlySelectedPreviews(prev => [...prev, ...newPreviews]);
 
       if (newlySelectedPrimaryIndex === null && existingPhotosState.length === 0 && (newlySelectedFiles.length + newFiles.length) > 0) {
-        setNewlySelectedPrimaryIndex(0); // Set first new photo as primary if no existing and no other new
+        // Set first new photo as primary if no existing and no other new, and there's at least one valid new preview
+        if (newPreviews.length > 0) {
+          setNewlySelectedPrimaryIndex(newlySelectedFiles.length); // Index of the first new file added in this batch
+          setActivePreviewUrl(newPreviews[0] ?? null); // Set the active preview immediately
+        }
       }
       // Clear the input so the same file can be selected again
       if (fileInputRef.current) {
@@ -98,14 +111,16 @@ export const ImageUploader = ({
     }
   };
 
-  const setNewlySelectedAsPrimary = (index: number) => {
-    setNewlySelectedPrimaryIndex(index);
-    const previews = newlySelectedPreviews ?? []; // Defensive check
-    if (previews.length > index) {
-      setActivePreviewUrl(previews[index] || null); // Ensure null if undefined
-    } else {
-      setActivePreviewUrl(null); // Fallback if the index is invalid
+  const setNewlySelectedAsPrimary = (previewUrl: string) => {
+    const index = newlySelectedPreviews.indexOf(previewUrl);
+    if (index === -1) {
+      console.warn("Attempted to set primary for a non-existent new photo URL:", previewUrl);
+      setNewlySelectedPrimaryIndex(null);
+      setActivePreviewUrl(null);
+      return;
     }
+    setNewlySelectedPrimaryIndex(index);
+    setActivePreviewUrl(previewUrl ?? null);
   };
 
   const handleDeleteExistingPhoto = async (photoToDelete: ExistingPhoto) => {
@@ -150,7 +165,7 @@ export const ImageUploader = ({
           // Set first newly selected photo as primary
           setNewlySelectedPrimaryIndex(0);
           const previews = newlySelectedPreviews ?? []; // Defensive check
-          setActivePreviewUrl(previews.length > 0 ? (previews[0] || null) : null);
+          setActivePreviewUrl(previews.length > 0 ? (previews[0] ?? null) : null);
         } else {
           setActivePreviewUrl(null);
         }
@@ -158,8 +173,8 @@ export const ImageUploader = ({
         // If deleted photo was just the active preview, reset preview
         const previews = newlySelectedPreviews ?? []; // Defensive check
         setActivePreviewUrl(
-          updatedExistingPhotos[0]?.url || 
-          (previews.length > 0 ? (previews[0] || null) : null) || 
+          updatedExistingPhotos[0]?.url ?? 
+          (previews.length > 0 ? (previews[0] ?? null) : null) ?? 
           null
         );
       }
@@ -204,7 +219,7 @@ export const ImageUploader = ({
       setExistingPhotosState(updatedExistingPhotos);
       onExistingPhotosUpdated(updatedExistingPhotos); // Notify parent
       setNewlySelectedPrimaryIndex(null); // Clear primary for new files
-      setActivePreviewUrl(photoToSetPrimary.url); // Update main preview
+      setActivePreviewUrl(photoToSetPrimary.url ?? null); // Update main preview
     } catch (error: any) {
       dismissToast(toastId);
       showError(error.message || 'Errore durante l\'impostazione della foto principale.');
@@ -217,7 +232,7 @@ export const ImageUploader = ({
   const emptySlotsCount = Math.max(0, maxAllowedPhotos - currentPhotoCount);
 
   // Determine the main preview URL
-  const mainPreview = activePreviewUrl || existingPhotosState.find(p => p.is_primary)?.url || existingPhotosState[0]?.url || (newlySelectedPreviews.length > 0 ? newlySelectedPreviews[0] : null) || null;
+  const mainPreview = activePreviewUrl ?? existingPhotosState.find(p => p.is_primary)?.url ?? existingPhotosState[0]?.url ?? (newlySelectedPreviews.length > 0 ? newlySelectedPreviews[0] : null) ?? null;
 
   return (
     <div className="space-y-4">
@@ -241,7 +256,7 @@ export const ImageUploader = ({
                 "w-full h-full object-cover rounded-md transition-all",
                 photo.is_primary && "ring-4 ring-offset-2 ring-rose-500"
               )}
-              onClick={() => setActivePreviewUrl(photo.url)}
+              onClick={() => setActivePreviewUrl(photo.url ?? null)}
             />
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center gap-2">
               <Button
@@ -281,7 +296,7 @@ export const ImageUploader = ({
                 "w-full h-full object-cover rounded-md transition-all",
                 (newlySelectedPrimaryIndex === index && existingPhotosState.length === 0) && "ring-4 ring-offset-2 ring-rose-500"
               )}
-              onClick={() => setActivePreviewUrl(preview)}
+              onClick={() => setActivePreviewUrl(preview ?? null)}
             />
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center gap-2">
               <Button
@@ -299,7 +314,7 @@ export const ImageUploader = ({
                   variant="secondary"
                   size="icon"
                   className="h-8 w-8 opacity-0 group-hover:opacity-100"
-                  onClick={() => setNewlySelectedAsPrimary(index)}
+                  onClick={() => setNewlySelectedAsPrimary(preview)} // Pass the preview URL
                   disabled={newlySelectedPrimaryIndex === index}
                 >
                   <Star className={cn("h-4 w-4", newlySelectedPrimaryIndex === index && "text-yellow-400 fill-current")} />
