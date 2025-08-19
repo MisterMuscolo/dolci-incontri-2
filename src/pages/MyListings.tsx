@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ListingListItem, Listing } from "@/components/ListingListItem";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } "@/components/ui/skeleton";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft } from "lucide-react";
@@ -146,7 +146,7 @@ const MyListings = () => {
                     key={listing.id} 
                     listing={listing} 
                     canEdit={true} // L'utente può modificare i propri annunci
-                    canManagePhotos={true} // L'utente può gestire le foto dei propri annunci
+                    canManagePhotos={false} // Rimosso: la gestione delle foto avviene nella pagina di modifica
                     canDelete={true} // L'utente può eliminare i propri annunci
                     showExpiryDate={true} 
                     onListingUpdated={fetchListings} 
