@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart, LogOut, User, PlusCircle, Shield } from 'lucide-react'; // Aggiunto Shield per l'icona admin
+import { Heart, LogOut, User, PlusCircle, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -13,16 +13,18 @@ import {
 
 interface HeaderProps {
   session: any;
-  isAdmin: boolean; // Aggiunto isAdmin
+  isAdmin: boolean;
 }
 
-export const Header = ({ session, isAdmin }: HeaderProps) => { // Accetta isAdmin
+export const Header = ({ session, isAdmin }: HeaderProps) => {
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate('/');
   };
+
+  console.log("Header: isAdmin prop received:", isAdmin);
 
   return (
     <header className="bg-white/80 backdrop-blur-sm shadow-md sticky top-0 z-50">
@@ -62,7 +64,7 @@ export const Header = ({ session, isAdmin }: HeaderProps) => { // Accetta isAdmi
                   <DropdownMenuItem onClick={() => navigate('/profile-settings')}>
                     Settings
                   </DropdownMenuItem>
-                  {isAdmin && ( // Mostra solo se l'utente è admin
+                  {isAdmin && (
                     <DropdownMenuItem onClick={() => navigate('/admin')}>
                       <Shield className="mr-2 h-4 w-4" />
                       <span>Dashboard Admin</span>

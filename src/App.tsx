@@ -28,11 +28,11 @@ const App = () => {
 
   useEffect(() => {
     const getSessionAndRole = async () => {
-      console.log("Fetching session and role...");
+      console.log("App.tsx: Fetching session and role...");
       const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
       if (session) {
-        console.log("Session found:", session.user.email);
+        console.log("App.tsx: Session found for user:", session.user.email);
         const { data: profile, error } = await supabase
           .from('profiles')
           .select('role')
@@ -40,23 +40,23 @@ const App = () => {
           .single();
 
         if (profile) {
-          console.log("Profile role fetched:", profile.role);
+          console.log("App.tsx: Profile role fetched:", profile.role);
           if (profile.role === 'admin') {
             setIsAdmin(true);
-            console.log("isAdmin set to TRUE");
+            console.log("App.tsx: isAdmin set to TRUE");
           } else {
             setIsAdmin(false);
-            console.log("isAdmin set to FALSE (role was:", profile.role, ")");
+            console.log("App.tsx: isAdmin set to FALSE (role was:", profile.role, ")");
           }
         } else if (error) {
-          console.error("Error fetching profile:", error);
+          console.error("App.tsx: Error fetching profile:", error);
           setIsAdmin(false);
         } else {
-          console.log("No profile found for user, isAdmin set to FALSE");
+          console.log("App.tsx: No profile found for user, isAdmin set to FALSE");
           setIsAdmin(false);
         }
       } else {
-        console.log("No session found, isAdmin set to FALSE");
+        console.log("App.tsx: No session found, isAdmin set to FALSE");
         setIsAdmin(false);
       }
       setLoading(false);
@@ -65,10 +65,9 @@ const App = () => {
     getSessionAndRole();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log("Auth state changed. Event:", _event, "Session:", session);
+      console.log("App.tsx: Auth state changed. Event:", _event, "Session:", session);
       setSession(session);
       if (session) {
-        // Re-fetch role on auth state change to ensure it's up-to-date
         supabase
           .from('profiles')
           .select('role')
@@ -76,24 +75,24 @@ const App = () => {
           .single()
           .then(({ data: profile, error }) => {
             if (profile) {
-              console.log("Auth state change: Profile role fetched:", profile.role);
+              console.log("App.tsx: Auth state change: Profile role fetched:", profile.role);
               if (profile.role === 'admin') {
                 setIsAdmin(true);
-                console.log("Auth state change: isAdmin set to TRUE");
+                console.log("App.tsx: Auth state change: isAdmin set to TRUE");
               } else {
                 setIsAdmin(false);
-                console.log("Auth state change: isAdmin set to FALSE (role was:", profile.role, ")");
+                console.log("App.tsx: Auth state change: isAdmin set to FALSE (role was:", profile.role, ")");
               }
             } else if (error) {
-              console.error("Auth state change: Error fetching profile:", error);
+              console.error("App.tsx: Auth state change: Error fetching profile:", error);
               setIsAdmin(false);
             } else {
-              console.log("Auth state change: No profile found, isAdmin set to FALSE");
+              console.log("App.tsx: Auth state change: No profile found, isAdmin set to FALSE");
               setIsAdmin(false);
             }
           });
       } else {
-        console.log("Auth state change: No session, isAdmin set to FALSE");
+        console.log("App.tsx: Auth state change: No session, isAdmin set to FALSE");
         setIsAdmin(false);
       }
     });
@@ -102,6 +101,8 @@ const App = () => {
   }, []);
 
   if (loading) return <div className="flex justify-center items-center min-h-screen">Caricamento...</div>;
+
+  console.log("App.tsx: Rendering Layout with isAdmin:", isAdmin);
 
   return (
     <QueryClientProvider client={queryClient}>
