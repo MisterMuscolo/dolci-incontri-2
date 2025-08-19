@@ -54,39 +54,8 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
     ? format(dateToDisplay, dateFormat, { locale: it }) 
     : 'N/D';
 
-  const handlePromoteListing = async (listingId: string) => {
-    const toastId = showLoading('Promozione annuncio in corso...');
-    try {
-      const { error } = await supabase.functions.invoke('promote-listing', {
-        body: { listingId },
-      });
-
-      dismissToast(toastId);
-
-      if (error) {
-        let errorMessage = 'Errore durante la promozione dell\'annuncio.';
-        // @ts-ignore
-        if (error.context && typeof error.context.body === 'string') {
-          try {
-            // @ts-ignore
-            const errorBody = JSON.parse(error.context.body);
-            if (errorBody.error) {
-              errorMessage = errorBody.error;
-            }
-          } catch (e) {
-            console.error("Could not parse error response from edge function:", e);
-          }
-        }
-        throw new Error(errorMessage);
-      }
-
-      showSuccess('Annuncio promosso a premium con successo!');
-      onListingUpdated?.(); // Trigger refresh
-    } catch (error: any) {
-      dismissToast(toastId);
-      showError(error.message || 'Si è verificato un errore imprevisto.');
-    }
-  };
+  // La logica di promozione è stata spostata nella pagina PromoteListingOptions
+  // Questo componente ora reindirizza semplicemente a quella pagina.
 
   return (
     <Card className={cn(
@@ -206,32 +175,12 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
               </AlertDialogContent>
             </AlertDialog>
           ) : (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="default" size="sm" className="w-full bg-green-500 hover:bg-green-600 text-white">
-                  <Rocket className="h-4 w-4 md:mr-2" />
-                  <span className="hidden md:inline">Promuovi</span>
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Promuovi Annuncio a Premium</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Sei sicuro di voler promuovere questo annuncio a Premium? Ti costerà 20 crediti.
-                    Gli annunci Premium appaiono in cima ai risultati di ricerca e possono avere fino a 5 foto.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Annulla</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => handlePromoteListing(listing.id)}
-                    className="bg-green-500 hover:bg-green-600"
-                  >
-                    Sì, Promuovi
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <Link to={`/promote-listing/${listing.id}`} className="w-full">
+              <Button variant="default" size="sm" className="w-full bg-green-500 hover:bg-green-600 text-white">
+                <Rocket className="h-4 w-4 md:mr-2" />
+                <span className="hidden md:inline">Promuovi</span>
+              </Button>
+            </Link>
           )}
           <Button variant="destructive" size="sm" className="w-full">
             <Trash2 className="h-4 w-4 md:mr-2" />

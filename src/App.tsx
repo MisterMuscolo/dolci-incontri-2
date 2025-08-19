@@ -23,7 +23,8 @@ import BannedUser from "./pages/BannedUser";
 import EditListing from "./pages/EditListing";
 import Termini from "./pages/Termini"; 
 import Privacy from "./pages/Privacy"; 
-import Contatti from "./pages/Contatti"; // Importa la nuova pagina Contatti
+import Contatti from "./pages/Contatti";
+import PromoteListingOptions from "./pages/PromoteListingOptions"; // Importa la nuova pagina
 
 const queryClient = new QueryClient();
 
@@ -145,7 +146,7 @@ const App = () => {
               <Route path="/listing/:id" element={<ListingDetails />} />
               <Route path="/termini" element={<Termini />} /> 
               <Route path="/privacy" element={<Privacy />} /> 
-              <Route path="/contatti" element={<Contatti />} /> {/* Nuova rotta */}
+              <Route path="/contatti" element={<Contatti />} />
               
               {/* Reindirizza gli utenti bannati alla pagina /banned */}
               <Route 
@@ -171,6 +172,10 @@ const App = () => {
               <Route 
                 path="/edit-listing/:id" 
                 element={session ? (isBanned ? <Navigate to="/banned" /> : <EditListing />) : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/promote-listing/:listingId" 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <PromoteListingOptions />) : <Navigate to="/auth" />} 
               />
               <Route 
                 path="/buy-credits" 

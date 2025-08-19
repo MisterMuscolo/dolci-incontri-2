@@ -12,10 +12,10 @@ serve(async (req) => {
   }
 
   try {
-    const { listingId } = await req.json();
+    const { listingId, promotionType, cost, durationHours } = await req.json();
 
-    if (!listingId) {
-      throw new Error('Missing required field: listingId');
+    if (!listingId || !promotionType || typeof cost !== 'number' || typeof durationHours !== 'number') {
+      throw new Error('Missing required fields: listingId, promotionType, cost, durationHours');
     }
 
     // Create a Supabase client with the user's JWT for RLS checks
@@ -34,10 +34,10 @@ serve(async (req) => {
       });
     }
 
-    // Verify the listing belongs to the user and is not already premium
+    // Verify the listing belongs to the user
     const { data: listing, error: listingError } = await supabaseClient
       .from('listings')
-      .select('user_id, is_premium')
+      .select('user_id')
       .eq('id', listingId)
       .single();
 
@@ -47,10 +47,6 @@ serve(async (req) => {
 
     if (listing.user_id !== user.id) {
       throw new Error('You do not have permission to promote this listing.');
-    }
-
-    if (listing.is_premium) {
-      throw new Error('This listing is already premium.');
     }
 
     // Get user's current credits
@@ -64,10 +60,8 @@ serve(async (req) => {
       throw new Error('User profile not found.');
     }
 
-    const PROMOTION_COST = 20; // Define promotion cost here
-
-    if (profile.credits < PROMOTION_COST) {
-      throw new Error(`Crediti insufficienti. Hai bisogno di ${PROMOTION_COST} crediti.`);
+    if (profile.credits < cost) {
+      throw new Error(`Crediti insufficienti. Hai bisogno di ${cost} crediti.`);
     }
 
     // Use the service role key for the actual update to bypass RLS for atomic transaction
@@ -76,12 +70,19 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Start a transaction (Supabase client doesn't have explicit transactions,
-    // so we do sequential updates and handle errors)
-    // Update listing to premium
+    // Calculate new expiry date
+    const newExpiryDate = new Date();
+    newExpiryDate.setHours(newExpiryDate.getHours() + durationHours);
+
+    // Update listing to premium, set promotion_mode and last_bumped_at
     const { error: updateListingError } = await supabaseAdmin
       .from('listings')
-      .update({ is_premium: true })
+      .update({ 
+        is_premium: true,
+        promotion_mode: promotionType,
+        last_bumped_at: new Date().toISOString(), // Set current time as last bumped
+        expires_at: newExpiryDate.toISOString(), // Extend expiry date
+      })
       .eq('id', listingId);
 
     if (updateListingError) {
@@ -91,7 +92,7 @@ serve(async (req) => {
     // Deduct credits
     const { error: updateCreditsError } = await supabaseAdmin
       .from('profiles')
-      .update({ credits: profile.credits - PROMOTION_COST })
+      .update({ credits: profile.credits - cost })
       .eq('id', user.id);
 
     if (updateCreditsError) {
@@ -104,9 +105,9 @@ serve(async (req) => {
       .from('credit_transactions')
       .insert({
         user_id: user.id,
-        amount: -PROMOTION_COST,
+        amount: -cost,
         type: 'premium_upgrade',
-        package_name: 'Promozione Annuncio',
+        package_name: `Promozione: ${promotionType === 'day' ? 'Modalità Giorno' : 'Modalità Notte'}`,
       });
 
     if (transactionError) {
