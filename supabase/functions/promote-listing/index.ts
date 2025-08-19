@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { listingId, promotionType, cost, durationHours } = await req.json();
+    const { listingId, promotionType, cost, durationHours, timeSlot } = await req.json();
 
     if (!listingId || !promotionType || typeof cost !== 'number' || typeof durationHours !== 'number') {
       throw new Error('Missing required fields: listingId, promotionType, cost, durationHours');
@@ -101,13 +101,18 @@ serve(async (req) => {
     }
 
     // Log the transaction
+    let packageName = `Promozione: ${promotionType === 'day' ? 'Modalità Giorno' : 'Modalità Notte'} per ${durationHours / 24} giorni`;
+    if (promotionType === 'day' && timeSlot) {
+      packageName += ` (Fascia: ${timeSlot})`;
+    }
+
     const { error: transactionError } = await supabaseAdmin
       .from('credit_transactions')
       .insert({
         user_id: user.id,
         amount: -cost,
         type: 'premium_upgrade',
-        package_name: `Promozione: ${promotionType === 'day' ? 'Modalità Giorno' : 'Modalità Notte'} per ${durationHours / 24} giorni`,
+        package_name: packageName,
       });
 
     if (transactionError) {

@@ -50,6 +50,17 @@ const durations = [
   { value: 7, label: '7 Giorni' },
 ];
 
+const dayTimeSlots = [
+  { value: '07:00-09:00', label: '07:00 - 09:00' },
+  { value: '09:00-11:00', label: '09:00 - 11:00' },
+  { value: '11:00-13:00', label: '11:00 - 13:00' },
+  { value: '13:00-15:00', label: '13:00 - 15:00' },
+  { value: '15:00-17:00', label: '15:00 - 17:00' },
+  { value: '17:00-19:00', label: '17:00 - 19:00' },
+  { value: '19:00-21:00', label: '19:00 - 21:00' },
+  { value: '21:00-23:00', label: '21:00 - 23:00' },
+];
+
 const PromoteListingOptions = () => {
   const { listingId } = useParams<{ listingId: string }>();
   const navigate = useNavigate();
@@ -58,6 +69,7 @@ const PromoteListingOptions = () => {
   const [listingTitle, setListingTitle] = useState<string | null>(null);
   const [isPromoting, setIsPromoting] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState<number>(durations[0].value); // Default to 1 day
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>(dayTimeSlots[0].value); // Default to first time slot
 
   useEffect(() => {
     const fetchUserDataAndListing = async () => {
@@ -130,6 +142,7 @@ const PromoteListingOptions = () => {
           promotionType: option.id,
           cost: totalCost,
           durationHours: totalDurationHours, // Pass total hours
+          timeSlot: option.id === 'day' ? selectedTimeSlot : undefined, // Pass time slot only for 'day' mode
         },
       });
 
@@ -238,6 +251,22 @@ const PromoteListingOptions = () => {
                       <li key={index}>{detail}</li>
                     ))}
                   </ul>
+                  {option.id === 'day' && (
+                    <div className="mb-4">
+                      <Select onValueChange={setSelectedTimeSlot} defaultValue={selectedTimeSlot}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Seleziona fascia oraria" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {dayTimeSlots.map((slot) => (
+                            <SelectItem key={slot.value} value={slot.value}>
+                              {slot.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                   <div className="mb-4">
                     <Select onValueChange={(value) => setSelectedDuration(parseInt(value))} defaultValue={String(selectedDuration)}>
                       <SelectTrigger className="w-full">
