@@ -1,8 +1,9 @@
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button } => "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2, CalendarDays } from "lucide-react";
 import { format } from 'date-fns';
+import { it } from 'date-fns/locale'; // Importa la locale italiana
 import { Link } from "react-router-dom";
 
 export interface Listing {
@@ -38,9 +39,9 @@ export const ListingListItem = ({ listing, showControls = false }: ListingListIt
               <Badge variant="secondary" className="capitalize">{listing.category.replace(/-/g, ' ')}</Badge>
               <Badge variant="outline">{listing.city}</Badge>
             </div>
-            <div className="mt-auto flex items-center text-xs text-gray-500"> {/* Modificato text-sm a text-xs */}
+            <div className="mt-auto flex items-center text-xs text-gray-500">
               <CalendarDays className="h-4 w-4 mr-2" />
-              <span>Pubblicato il {format(new Date(listing.created_at), 'dd/MM')}</span> {/* Modificato formato data */}
+              <span>{format(new Date(listing.created_at), 'dd MMMM', { locale: it })}</span> {/* Modificato formato data */}
             </div>
           </div>
         </div>
