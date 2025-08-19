@@ -142,6 +142,35 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
     }
   };
 
+  const getPromotionPeriodDetails = () => {
+    if (!listing.promotion_start_at || !listing.promotion_end_at) return '';
+
+    const start = new Date(listing.promotion_start_at);
+    const end = new Date(listing.promotion_end_at);
+
+    const formattedStart = format(start, 'dd/MM/yyyy HH:mm', { locale: it });
+    const formattedEnd = format(end, 'dd/MM/yyyy HH:mm', { locale: it });
+
+    const promotionTypeLabel = listing.promotion_mode === 'day' ? 'Modalità Giorno' : 'Modalità Notte';
+
+    return (
+      <>
+        <p className="text-base font-semibold text-gray-800 mb-2">
+          Pacchetto: <span className="capitalize">{promotionTypeLabel}</span>
+        </p>
+        <p className="text-sm text-gray-600">
+          Inizio: <span className="font-medium">{formattedStart}</span>
+        </p>
+        <p className="text-sm text-gray-600 mb-4">
+          Fine: <span className="font-medium">{formattedEnd}</span>
+        </p>
+        <p className="text-sm text-gray-700">
+          {getPromotionDetails(listing.promotion_mode)}
+        </p>
+      </>
+    );
+  };
+
   return (
     <Card className={cn(
       "w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row relative",
@@ -234,11 +263,9 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Annuncio Premium</AlertDialogTitle>
+                  <AlertDialogTitle>Annuncio Premium Attivo</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Questo annuncio è già Premium. Gli annunci Premium appaiono in cima ai risultati di ricerca e possono avere fino a 5 foto.
-                    <br/><br/>
-                    Vuoi estendere la sua visibilità o acquistare più crediti?
+                    {getPromotionPeriodDetails()}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -266,9 +293,7 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
                 <AlertDialogHeader>
                   <AlertDialogTitle>Promozione in Attesa</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Questo annuncio è già stato promosso e la sua visibilità Premium inizierà il {promoStart ? format(promoStart, 'dd/MM/yyyy HH:mm', { locale: it }) : 'N/D'}.
-                    <br/><br/>
-                    {getPromotionDetails(listing.promotion_mode)}
+                    {getPromotionPeriodDetails()}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
