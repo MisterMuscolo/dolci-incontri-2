@@ -113,10 +113,11 @@ const EditListing = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Devi essere autenticato per modificare un annuncio.');
 
-      const { age, ...restOfValues } = values;
+      // Only send mutable fields to the update operation
       const updateData = {
-        ...restOfValues,
-        age: parseInt(age, 10),
+        title: values.title,
+        description: values.description,
+        phone: values.phone,
       };
 
       const { error: updateError } = await supabase
@@ -221,9 +222,9 @@ const EditListing = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Categoria *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled>
                           <FormControl>
-                            <SelectTrigger><SelectValue placeholder="Seleziona una categoria" /></SelectTrigger>
+                            <SelectTrigger className="bg-gray-100 cursor-not-allowed"><SelectValue placeholder="Seleziona una categoria" /></SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             <SelectItem value="donna-cerca-uomo">👩‍❤️‍👨 Donna cerca Uomo</SelectItem>
@@ -243,9 +244,9 @@ const EditListing = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Città *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled>
                           <FormControl>
-                            <SelectTrigger><SelectValue placeholder="Seleziona una città" /></SelectTrigger>
+                            <SelectTrigger className="bg-gray-100 cursor-not-allowed"><SelectValue placeholder="Seleziona una città" /></SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             {italianProvinces.map((p) => <SelectItem key={p.value} value={p.label}>{p.label}</SelectItem>)}
@@ -263,7 +264,7 @@ const EditListing = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Zona (Opzionale)</FormLabel>
-                        <FormControl><Input placeholder="Es. Centro Storico" {...field} /></FormControl>
+                        <FormControl><Input placeholder="Es. Centro Storico" {...field} readOnly className="bg-gray-100 cursor-not-allowed" /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -274,7 +275,7 @@ const EditListing = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Età *</FormLabel>
-                        <FormControl><Input type="number" placeholder="La tua età" {...field} /></FormControl>
+                        <FormControl><Input type="number" placeholder="La tua età" {...field} readOnly className="bg-gray-100 cursor-not-allowed" /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
