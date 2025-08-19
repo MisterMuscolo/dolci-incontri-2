@@ -27,7 +27,7 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
   const primaryPhoto = listing.listing_photos.find(p => p.is_primary)?.url || listing.listing_photos[0]?.url;
 
   const dateToDisplay = showExpiryDate ? new Date(listing.expires_at) : new Date(listing.created_at);
-  const prefix = showExpiryDate ? 'Scade il:' : 'Pubblicato il:';
+  const prefix = showExpiryDate ? 'Scade il:' : ''; // Rimosso 'Pubblicato il:' quando showExpiryDate è false
   const dateFormat = showExpiryDate ? 'dd MMMM yyyy' : 'dd MMMM'; // Formato diverso per scadenza e pubblicazione
 
   const formattedDate = !isNaN(dateToDisplay.getTime()) 
