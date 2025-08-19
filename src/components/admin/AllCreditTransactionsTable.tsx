@@ -28,6 +28,7 @@ export const AllCreditTransactionsTable = () => {
       .from('credit_transactions')
       .select(`
         id,
+        user_id,
         amount,
         type,
         package_name,
