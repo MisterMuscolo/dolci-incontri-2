@@ -65,11 +65,11 @@ export const Header = ({ session, isAdmin }: HeaderProps) => {
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuItem onClick={() => navigate('/dashboard')}>
-                    <LayoutGrid className="mr-2 h-4 w-4" />
+                    <User className="mr-2 h-4 w-4" /> {/* Icona Utente per Dashboard */}
                     <span>Dashboard</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/my-listings')}>
-                    <PlusCircle className="mr-2 h-4 w-4" />
+                    <LayoutGrid className="mr-2 h-4 w-4" /> {/* Icona 4 quadrati per I miei Annunci */}
                     <span>I miei Annunci</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/credit-history')}>
