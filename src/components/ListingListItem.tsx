@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2, CalendarDays } from "lucide-react";
 import { format } from 'date-fns';
-import { it } from 'date-fns/locale'; // Importa la locale italiana
+import { it } from 'date-fns/locale';
 import { Link } from "react-router-dom";
 
 export interface Listing {
@@ -12,7 +12,7 @@ export interface Listing {
   category: string;
   city: string;
   created_at: string;
-  expires_at: string; // Aggiunto expires_at
+  expires_at: string;
   listing_photos: { url: string; is_primary: boolean }[];
   description?: string;
 }
@@ -20,21 +20,16 @@ export interface Listing {
 interface ListingListItemProps {
   listing: Listing;
   showControls?: boolean;
-  showExpiryDate?: boolean; // Nuova prop per controllare quale data mostrare
 }
 
-export const ListingListItem = ({ listing, showControls = false, showExpiryDate = false }: ListingListItemProps) => {
+export const ListingListItem = ({ listing, showControls = false }: ListingListItemProps) => {
   const primaryPhoto = listing.listing_photos.find(p => p.is_primary)?.url || listing.listing_photos[0]?.url;
 
-  // Determina quale data e quale etichetta mostrare
-  const dateToDisplay = showExpiryDate ? listing.expires_at : listing.created_at;
-  const dateLabel = showExpiryDate ? 'Scade il:' : 'Pubblicato il:';
-
-  // Verifica se la data è una stringa valida prima di creare l'oggetto Date
-  const formattedDate = dateToDisplay ? new Date(dateToDisplay) : null;
-  const displayDate = formattedDate && !isNaN(formattedDate.getTime()) 
-    ? format(formattedDate, 'dd MMMM yyyy', { locale: it }) 
-    : 'N/D'; // "N/D" per "Non Disponibile"
+  // Mostra sempre la data di creazione per semplicità
+  const displayDate = new Date(listing.created_at);
+  const formattedDisplayDate = !isNaN(displayDate.getTime()) 
+    ? format(displayDate, 'dd MMMM yyyy', { locale: it }) 
+    : 'N/D';
 
   return (
     <Card className="w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row">
@@ -53,7 +48,7 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
             </div>
             <div className="mt-auto flex items-center text-xs text-gray-500">
               <CalendarDays className="h-4 w-4 mr-2" />
-              <span>{dateLabel} {displayDate}</span> {/* Usa l'etichetta e la data dinamiche */}
+              <span>Pubblicato il: {formattedDisplayDate}</span>
             </div>
           </div>
         </div>
