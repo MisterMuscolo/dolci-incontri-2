@@ -79,7 +79,11 @@ const PromoteListingOptions = () => {
   const [currentCredits, setCurrentCredits] = useState<number | null>(null);
   const [listingTitle, setListingTitle] = useState<string | null>(null);
   const [isPromoting, setIsPromoting] = useState(false);
-  const [selectedDuration, setSelectedDuration] = useState<number>(durations[0].value); // Default to 1 day
+  // Modificato per gestire la durata per ogni opzione
+  const [selectedDurations, setSelectedDurations] = useState<{ [key: string]: number }>({
+    day: durations[0].value,
+    night: durations[0].value,
+  });
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>(dayTimeSlots[0].value); // Default to first time slot
 
   useEffect(() => {
@@ -135,8 +139,9 @@ const PromoteListingOptions = () => {
   }, [listingId, navigate]);
 
   const handlePromote = async (option: PromotionOption) => {
-    const totalCost = option.baseCreditsPerDay * selectedDuration;
-    const totalDurationHours = selectedDuration * 24; // Each day is 24 hours of premium visibility
+    const currentDuration = selectedDurations[option.id]; // Usa la durata specifica per l'opzione
+    const totalCost = option.baseCreditsPerDay * currentDuration;
+    const totalDurationHours = currentDuration * 24; // Each day is 24 hours of premium visibility
 
     if (!listingId || currentCredits === null || currentCredits < totalCost) {
       showError('Crediti insufficienti o annuncio non valido.');
@@ -144,7 +149,7 @@ const PromoteListingOptions = () => {
     }
 
     setIsPromoting(true);
-    const toastId = showLoading(`Promozione annuncio in Modalità ${option.name} per ${selectedDuration} giorni in corso...`);
+    const toastId = showLoading(`Promozione annuncio in Modalità ${option.name} per ${currentDuration} giorni in corso...`);
 
     try {
       const { error } = await supabase.functions.invoke('promote-listing', {
@@ -176,7 +181,7 @@ const PromoteListingOptions = () => {
         throw new Error(errorMessage);
       }
 
-      showSuccess(`Annuncio promosso in Modalità ${option.name} per ${selectedDuration} giorni con successo!`);
+      showSuccess(`Annuncio promosso in Modalità ${option.name} per ${currentDuration} giorni con successo!`);
       navigate('/my-listings'); // Reindirizza a "I miei annunci"
     } catch (error: any) {
       dismissToast(toastId);
@@ -239,7 +244,8 @@ const PromoteListingOptions = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {promotionOptions.map((option) => {
             const Icon = option.icon;
-            const totalCost = option.baseCreditsPerDay * selectedDuration;
+            const currentDuration = selectedDurations[option.id]; // Usa la durata specifica per l'opzione
+            const totalCost = option.baseCreditsPerDay * currentDuration;
             const canAfford = currentCredits !== null && currentCredits >= totalCost;
 
             return (
@@ -265,7 +271,7 @@ const PromoteListingOptions = () => {
                   </ul>
                   {option.id === 'day' && (
                     <div className="mb-4">
-                      <Select onValueChange={setSelectedTimeSlot} defaultValue={selectedTimeSlot}>
+                      <Select onValueChange={setSelectedTimeSlot} value={selectedTimeSlot}> {/* Aggiunto value */}
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Seleziona fascia oraria" />
                         </SelectTrigger>
@@ -280,7 +286,10 @@ const PromoteListingOptions = () => {
                     </div>
                   )}
                   <div className="mb-4">
-                    <Select onValueChange={(value) => setSelectedDuration(parseInt(value))} defaultValue={String(selectedDuration)}>
+                    <Select
+                      onValueChange={(value) => setSelectedDurations(prev => ({ ...prev, [option.id]: parseInt(value) }))}
+                      value={String(currentDuration)} // Aggiunto value per controllare il componente
+                    >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Seleziona durata" />
                       </SelectTrigger>
