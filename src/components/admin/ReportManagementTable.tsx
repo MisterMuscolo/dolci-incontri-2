@@ -2,11 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
-import { Flag, Eye, CheckCircle, XCircle } from 'lucide-react';
-import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { Badge } from '@/components/ui/badge';
+import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Eye, Ban, CheckCircle } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -20,7 +31,7 @@ interface Report {
   created_at: string;
   reviewed_at: string | null;
   reviewer_id: string | null;
-  listings: { title: string } | null; // Per ottenere il titolo dell'annuncio
+  listings: { title: string }[] | null; // Modificato per essere un array di oggetti listing
 }
 
 export const ReportManagementTable = () => {
@@ -138,7 +149,7 @@ export const ReportManagementTable = () => {
                   <TableRow key={report.id}>
                     <TableCell>{format(new Date(report.created_at), 'dd/MM/yyyy HH:mm', { locale: it })}</TableCell>
                     <TableCell className="font-medium">
-                      {report.listings?.title || 'Annuncio Sconosciuto'}
+                      {report.listings?.[0]?.title || 'Annuncio Sconosciuto'}
                       {report.listing_id && (
                         <Link to={`/listing/${report.listing_id}`} className="ml-2 text-blue-500 hover:underline">
                           <Eye className="h-4 w-4 inline-block" />
