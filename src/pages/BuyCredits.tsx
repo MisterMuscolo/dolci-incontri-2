@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { ChevronLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
+import { Badge } from '@/components/ui/badge'; // Importa Badge
 
 interface CreditPackage {
   id: string;
@@ -14,61 +15,62 @@ interface CreditPackage {
   originalPrice?: number; // Original price for discount calculation
   description: string;
   features: string[]; // Keeping this for data structure, but not rendering
+  recommended?: boolean; // Nuovo campo per indicare se è consigliato
 }
 
 const creditPackages: CreditPackage[] = [
   {
-    id: 'starter',
-    name: 'Pacchetto Base',
+    id: 'mini',
+    name: 'Mini',
+    credits: 20,
+    price: 4.99,
+    description: 'Ideale per un piccolo inizio.',
+    features: ['20 crediti'],
+  },
+  {
+    id: 'base',
+    name: 'Base',
     credits: 50,
     price: 9.99,
     description: 'Ideale per iniziare a esplorare.',
-    features: ['50 crediti', 'Accesso base'],
+    features: ['50 crediti'],
   },
   {
-    id: 'standard',
-    name: 'Pacchetto Standard',
-    credits: 150,
-    price: 24.99,
-    originalPrice: 29.97, // 3 * 9.99
+    id: 'popolare',
+    name: 'Popolare',
+    credits: 110,
+    price: 19.99,
+    originalPrice: 21.95, // (110 / 50) * 9.99 = 2.2 * 9.99 = 21.978 -> arrotondato
     description: 'Più crediti per più opportunità.',
-    features: ['150 crediti'],
+    features: ['110 crediti'],
+    recommended: true, // Questo è il pacchetto consigliato
   },
   {
-    id: 'premium',
-    name: 'Pacchetto Premium',
-    credits: 300,
+    id: 'avanzato',
+    name: 'Avanzato',
+    credits: 240,
     price: 39.99,
-    originalPrice: 59.94, // 6 * 9.99
+    originalPrice: 47.95, // (240 / 50) * 9.99 = 4.8 * 9.99 = 47.952 -> arrotondato
     description: 'Per chi cerca il meglio.',
-    features: ['300 crediti', 'Supporto prioritario'],
+    features: ['240 crediti', 'Supporto prioritario'],
   },
   {
-    id: 'gold',
-    name: 'Pacchetto Gold',
+    id: 'pro',
+    name: 'Pro',
     credits: 500,
-    price: 59.99,
-    originalPrice: 99.90, // 10 * 9.99
+    price: 79.99,
+    originalPrice: 99.90, // (500 / 50) * 9.99 = 10 * 9.99 = 99.9 -> arrotondato
     description: 'Massima visibilità e interazioni.',
     features: ['500 crediti', 'Annunci in evidenza'],
   },
   {
-    id: 'platinum',
-    name: 'Pacchetto Platinum',
-    credits: 1000,
-    price: 99.99,
-    originalPrice: 199.80, // 20 * 9.99
-    description: 'Il pacchetto definitivo per i più attivi.',
-    features: ['1000 crediti', 'Funzionalità esclusive'],
-  },
-  {
-    id: 'unlimited',
-    name: 'Pacchetto Illimitato',
-    credits: 2000,
+    id: 'dominatore',
+    name: 'Dominatore',
+    credits: 1200,
     price: 179.99,
-    originalPrice: 399.60, // 40 * 9.99
-    description: 'Non rimanere mai senza crediti.',
-    features: ['2000 crediti', 'Tutti i vantaggi premium'],
+    originalPrice: 239.76, // (1200 / 50) * 9.99 = 24 * 9.99 = 239.76 -> arrotondato
+    description: 'Il pacchetto definitivo per i più attivi.',
+    features: ['1200 crediti', 'Tutti i vantaggi premium'],
   },
 ];
 
@@ -145,7 +147,15 @@ const BuyCredits = () => {
               : null;
 
             return (
-              <Card key={pkg.id} className="w-full flex items-center justify-between p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <Card 
+                key={pkg.id} 
+                className={`w-full flex items-center justify-between p-4 shadow-lg hover:shadow-xl transition-shadow duration-300 relative ${pkg.recommended ? 'border-2 border-rose-500' : ''}`}
+              >
+                {pkg.recommended && (
+                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-rose-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">
+                    Consigliato
+                  </Badge>
+                )}
                 {/* Left section: Name and Credits */}
                 <div className="flex flex-col text-left flex-grow">
                   <CardTitle className="text-lg font-bold text-rose-600">{pkg.name}</CardTitle>
