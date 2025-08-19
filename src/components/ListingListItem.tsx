@@ -38,9 +38,9 @@ export const ListingListItem = ({ listing, showControls = false }: ListingListIt
               <Badge variant="secondary" className="capitalize">{listing.category.replace(/-/g, ' ')}</Badge>
               <Badge variant="outline">{listing.city}</Badge>
             </div>
-            <div className="mt-auto flex items-center text-sm text-gray-500">
+            <div className="mt-auto flex items-center text-xs text-gray-500"> {/* Modificato text-sm a text-xs */}
               <CalendarDays className="h-4 w-4 mr-2" />
-              <span>Pubblicato il {format(new Date(listing.created_at), 'dd/MM/yyyy')}</span>
+              <span>Pubblicato il {format(new Date(listing.created_at), 'dd/MM')}</span> {/* Modificato formato data */}
             </div>
           </div>
         </div>

@@ -13,8 +13,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
-import { MapPin, Tag, User, Mail, BookText, ChevronLeft } from 'lucide-react';
+import { MapPin, Tag, User, Mail, BookText, ChevronLeft, X, CalendarDays } from 'lucide-react'; // Aggiunto CalendarDays
 import { cn } from '@/lib/utils';
+import { format } from 'date-fns'; // Importato format
 import {
   Dialog,
   DialogContent,
@@ -184,6 +185,10 @@ const ListingDetails = () => {
                   <Badge variant="secondary" className="capitalize"><Tag className="h-4 w-4 mr-1.5" />{listing.category.replace(/-/g, ' ')}</Badge>
                   <Badge variant="outline"><MapPin className="h-4 w-4 mr-1.5" />{listing.city}{listing.zone && `, ${listing.zone}`}</Badge>
                   <Badge variant="outline"><User className="h-4 w-4 mr-1.5" />{listing.age} anni</Badge>
+                  <Badge variant="outline" className="text-xs"> {/* Aggiunto text-xs qui */}
+                    <CalendarDays className="h-4 w-4 mr-1.5" />
+                    Pubblicato il {format(new Date(listing.created_at), 'dd/MM')} {/* Formato data ridotto */}
+                  </Badge>
                 </div>
               </CardHeader>
             </Card>
@@ -197,7 +202,6 @@ const ListingDetails = () => {
               </CardContent>
             </Card>
 
-            {/* Nuova implementazione del pulsante "Rispondi" che apre il dialog */}
             <div className="flex justify-center py-4">
               <Dialog open={isReplyDialogOpen} onOpenChange={setIsReplyDialogOpen}>
                 <DialogTrigger asChild>
@@ -241,7 +245,6 @@ const ListingDetails = () => {
                       </Button>
                     </form>
                   </Form>
-                  {/* Rimosso il pulsante 'X' duplicato */}
                 </DialogContent>
               </Dialog>
             </div>
