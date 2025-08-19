@@ -26,6 +26,7 @@ import {
   DialogTrigger,
   DialogClose,
 } from '@/components/ui/dialog';
+import { ReportListingDialog } from '@/components/ReportListingDialog'; // Importa il nuovo componente
 
 const replySchema = z.object({
   message: z.string().min(10, 'Il messaggio deve contenere almeno 10 caratteri.'),
@@ -233,7 +234,7 @@ const ListingDetails = () => {
             </CardContent>
           </Card>
 
-          <div className="flex justify-center py-4">
+          <div className="flex justify-center py-4 gap-4"> {/* Aggiunto gap per spaziatura tra i bottoni */}
             <Dialog open={isReplyDialogOpen} onOpenChange={setIsReplyDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-rose-500 hover:bg-rose-600 text-lg px-8 py-6 rounded-lg shadow-lg flex items-center gap-2">
@@ -278,6 +279,8 @@ const ListingDetails = () => {
                 </Form>
               </DialogContent>
             </Dialog>
+            {/* Pulsante per segnalare l'annuncio */}
+            <ReportListingDialog listingId={listing.id} listingTitle={listing.title} />
           </div>
         </div>
       </div>
