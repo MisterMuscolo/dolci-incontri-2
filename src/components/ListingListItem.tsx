@@ -124,12 +124,10 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
             </Carousel>
           </div>
         ) : (
-          // For non-premium listings, a single image wrapped in a Link
-          <Link to={`/listing/${listing.id}`} className="sm:w-1/4 lg:w-1/5 flex-shrink-0 block w-full h-48 sm:h-full">
-            <img src={primaryPhoto} alt={listing.title} className="object-cover w-full h-full" />
-          </Link>
+          // Se non è premium, non mostrare alcuna immagine in preview
+          null
         )}
-        {/* This Link wraps the text content */}
+        {/* Questo Link avvolge il contenuto testuale */}
         <Link to={`/listing/${listing.id}`} className="flex-grow block hover:bg-gray-50/50">
           <div className="p-4 flex flex-col flex-grow">
             <h3 className="text-xl font-semibold mb-2 text-gray-800 line-clamp-2">{listing.title}</h3>
