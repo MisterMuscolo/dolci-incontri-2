@@ -25,6 +25,12 @@ interface ListingListItemProps {
 export const ListingListItem = ({ listing, showControls = false }: ListingListItemProps) => {
   const primaryPhoto = listing.listing_photos.find(p => p.is_primary)?.url || listing.listing_photos[0]?.url;
 
+  // Verifica se expires_at è una stringa valida prima di creare l'oggetto Date
+  const expiryDate = listing.expires_at ? new Date(listing.expires_at) : null;
+  const formattedExpiryDate = expiryDate && !isNaN(expiryDate.getTime()) 
+    ? format(expiryDate, 'dd MMMM yyyy', { locale: it }) 
+    : 'N/D'; // "N/D" per "Non Disponibile"
+
   return (
     <Card className="w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row">
       <Link to={`/listing/${listing.id}`} className="flex-grow block hover:bg-gray-50/50">
@@ -42,7 +48,7 @@ export const ListingListItem = ({ listing, showControls = false }: ListingListIt
             </div>
             <div className="mt-auto flex items-center text-xs text-gray-500">
               <CalendarDays className="h-4 w-4 mr-2" />
-              <span>Scade il: {format(new Date(listing.expires_at), 'dd MMMM yyyy', { locale: it })}</span> {/* Modificato per mostrare expires_at */}
+              <span>Scade il: {formattedExpiryDate}</span> {/* Usa la data formattata con controllo */}
             </div>
           </div>
         </div>
