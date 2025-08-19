@@ -239,31 +239,21 @@ const ListingDetails = () => {
             </CardContent>
           </Card>
 
-          {listing.phone && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <Phone className="h-5 w-5 text-rose-500" /> Contatto Telefonico
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  Puoi contattare l'autore dell'annuncio al seguente numero:
-                </p>
-                <a 
-                  href={`tel:${listing.phone}`} 
-                  className="text-lg font-semibold text-rose-500 hover:underline flex items-center gap-2 mt-2"
-                >
-                  <Phone className="h-5 w-5" /> {listing.phone}
-                </a>
-              </CardContent>
-            </Card>
-          )}
-
-          <div className="flex justify-center py-4 gap-4"> {/* Ora contiene solo il pulsante Rispondi */}
+          {/* Sezione dei pulsanti di contatto */}
+          <div className="flex flex-col sm:flex-row justify-center py-4 gap-4">
+            {listing.phone && (
+              <a 
+                href={`tel:${listing.phone}`} 
+                className="w-full sm:w-auto" // Rende il link un blocco per il pulsante
+              >
+                <Button className="w-full bg-green-500 hover:bg-green-600 text-lg px-8 py-6 rounded-lg shadow-lg flex items-center justify-center gap-2">
+                  <Phone className="h-6 w-6" /> Chiama
+                </Button>
+              </a>
+            )}
             <Dialog open={isReplyDialogOpen} onOpenChange={setIsReplyDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-rose-500 hover:bg-rose-600 text-lg px-8 py-6 rounded-lg shadow-lg flex items-center gap-2">
+                <Button className="w-full sm:w-auto bg-rose-500 hover:bg-rose-600 text-lg px-8 py-6 rounded-lg shadow-lg flex items-center justify-center gap-2">
                   <Mail className="h-6 w-6" /> Rispondi
                 </Button>
               </DialogTrigger>
