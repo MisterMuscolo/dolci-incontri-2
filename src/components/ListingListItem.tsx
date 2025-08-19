@@ -89,8 +89,8 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
 
   return (
     <Card className={cn(
-      "w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row",
-      listing.is_premium && "border-2 border-rose-500 shadow-lg bg-rose-50" // Stili aggiuntivi per annunci premium
+      "w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row relative", // Aggiunto 'relative' qui
+      listing.is_premium && "border-2 border-rose-500 shadow-lg bg-rose-50" 
     )}>
       <div className="flex flex-col sm:flex-row w-full">
         {listing.is_premium && listing.listing_photos.length > 0 ? (
@@ -143,11 +143,7 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
                   <User className="h-3 w-3 mr-1" /> {listing.age} anni
                 </Badge>
               )}
-              {listing.is_premium && (
-                <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white">
-                  <Rocket className="h-3 w-3 mr-1" /> Premium
-                </Badge>
-              )}
+              {/* Il badge Premium è stato spostato fuori da qui */}
             </div>
             <div className="mt-auto flex items-center text-xs text-gray-500">
               <CalendarDays className="h-4 w-4 mr-2" />
@@ -156,6 +152,11 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
           </div>
         </Link>
       </div>
+      {listing.is_premium && (
+        <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white absolute top-2 right-2 z-20">
+          <Rocket className="h-3 w-3 mr-1" /> Premium
+        </Badge>
+      )}
       {showControls && (
         <div className="flex-shrink-0 flex md:flex-col justify-end md:justify-center items-center gap-2 p-4 border-t md:border-t-0 md:border-l">
            <Link to={`/edit-listing/${listing.id}`} className="w-full">
