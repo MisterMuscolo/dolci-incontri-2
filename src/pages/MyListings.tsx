@@ -122,9 +122,7 @@ const MyListings = () => {
             </Button>
             <h1 className="text-3xl font-bold">I tuoi annunci</h1>
           </div>
-          <Link to="/new-listing">
-            <Button className="bg-rose-500 hover:bg-rose-600">Crea nuovo annuncio</Button>
-          </Link>
+          {/* Il pulsante "Crea nuovo annuncio" è stato rimosso da qui */}
         </div>
 
         <Card>
