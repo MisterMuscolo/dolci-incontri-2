@@ -152,10 +152,20 @@ const App = () => {
               <Route path="/privacy" element={<Privacy />} /> 
               <Route path="/contatti" element={<Contatti />} />
               
-              {/* Reindirizza gli utenti bannati alla pagina /banned */}
+              {/* Reindirizza gli utenti in base allo stato di autenticazione e al ruolo */}
               <Route 
                 path="/auth" 
-                element={!session ? <Auth /> : (isBanned ? <Navigate to="/banned" /> : <Navigate to="/dashboard" />)} 
+                element={
+                  !session ? (
+                    <Auth />
+                  ) : isBanned ? (
+                    <Navigate to="/banned" />
+                  ) : isAdmin ? (
+                    <Navigate to="/admin" /> // Reindirizza gli admin a /admin
+                  ) : (
+                    <Navigate to="/dashboard" /> // Reindirizza gli utenti normali a /dashboard
+                  )
+                } 
               />
               <Route 
                 path="/dashboard" 

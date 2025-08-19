@@ -69,6 +69,8 @@ export const ReportListingDialog = ({ listingId, listingTitle, buttonSize = "def
 
       if (error) {
         let errorMessage = 'Impossibile inviare la segnalazione. Riprova più tardi.';
+        // Log the full error object for debugging
+        console.error("Error invoking report-listing function:", error);
         // @ts-ignore
         if (error.context && typeof error.context.body === 'string') {
           try {

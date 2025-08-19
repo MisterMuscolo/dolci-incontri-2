@@ -42,6 +42,7 @@ serve(async (req) => {
     console.log('RESEND_API_KEY status:', resendApiKey ? 'Set' : 'Not Set');
 
     if (!resendApiKey) {
+      console.error('RESEND_API_KEY is not set in environment variables.');
       throw new Error('RESEND_API_KEY is not set in environment variables. Cannot send email.');
     }
 

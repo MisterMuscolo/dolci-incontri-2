@@ -47,7 +47,7 @@ export default function Auth() {
       showError('Credenziali non valide');
     } else {
       showSuccess('Accesso effettuato!');
-      navigate('/dashboard'); // Reindirizza alla dashboard dopo il login
+      // Rimosso il reindirizzamento esplicito, App.tsx gestirà il reindirizzamento in base al ruolo
     }
   };
 
