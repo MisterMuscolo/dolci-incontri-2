@@ -22,6 +22,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext
 import Autoplay from 'embla-carousel-autoplay';
 import { cn } from '@/lib/utils'; // Importa la funzione cn
 import { AspectRatio } from '@/components/ui/aspect-ratio'; // Import AspectRatio
+import { useState } from "react"; // Importa useState
 
 export interface Listing {
   id: string;
@@ -45,6 +46,7 @@ interface ListingListItemProps {
 
 export const ListingListItem = ({ listing, showControls = false, showExpiryDate = false, onListingUpdated }: ListingListItemProps) => {
   const primaryPhoto = listing.listing_photos.find(p => p.is_primary)?.url || listing.listing_photos[0]?.url;
+  const [isDeleting, setIsDeleting] = useState(false); // Stato per gestire il caricamento dell'eliminazione
 
   const dateToDisplay = showExpiryDate ? new Date(listing.expires_at) : new Date(listing.created_at);
   const prefix = showExpiryDate ? 'Scade il:' : '';
@@ -54,8 +56,52 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
     ? format(dateToDisplay, dateFormat, { locale: it }) 
     : 'N/D';
 
-  // La logica di promozione è stata spostata nella pagina PromoteListingOptions
-  // Questo componente ora reindirizza semplicemente a quella pagina.
+  const handleDeleteListing = async () => {
+    setIsDeleting(true);
+    const toastId = showLoading('Eliminazione annuncio in corso...');
+
+    try {
+      // Delete associated photos from storage first
+      const { data: photos, error: photoListError } = await supabase.storage
+        .from('listing_photos')
+        .list(`${listing.id}/`); // List files in the listing's folder
+
+      if (photoListError) {
+        console.warn(`Could not list photos for listing ${listing.id}:`, photoListError.message);
+        // Don't throw, as listing itself can still be deleted, but log the issue
+      } else if (photos && photos.length > 0) {
+        const filePaths = photos.map(file => `${listing.id}/${file.name}`);
+        const { error: deletePhotoError } = await supabase.storage
+          .from('listing_photos')
+          .remove(filePaths);
+
+        if (deletePhotoError) {
+          console.warn(`Could not delete photos for listing ${listing.id}:`, deletePhotoError.message);
+        }
+      }
+
+      // Then delete the listing from the database
+      const { error: listingDeleteError } = await supabase
+        .from('listings')
+        .delete()
+        .eq('id', listing.id);
+
+      if (listingDeleteError) {
+        throw new Error(listingDeleteError.message);
+      }
+
+      dismissToast(toastId);
+      showSuccess('Annuncio eliminato con successo!');
+      if (onListingUpdated) {
+        onListingUpdated(); // Refresh the list in the parent component
+      }
+    } catch (error: any) {
+      dismissToast(toastId);
+      showError(error.message || 'Errore durante l\'eliminazione dell\'annuncio.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <Card className={cn(
@@ -182,10 +228,32 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
               </Button>
             </Link>
           )}
-          <Button variant="destructive" size="sm" className="w-full">
-            <Trash2 className="h-4 w-4 md:mr-2" />
-            <span className="hidden md:inline">Elimina</span>
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm" className="w-full" disabled={isDeleting}>
+                <Trash2 className="h-4 w-4 md:mr-2" />
+                <span className="hidden md:inline">Elimina</span>
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Sei assolutamente sicuro?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Questa azione eliminerà definitivamente l'annuncio "{listing.title}" e tutte le sue foto.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Annulla</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDeleteListing}
+                  className="bg-destructive hover:bg-destructive/90"
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? 'Eliminazione...' : 'Sì, elimina'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       )}
     </Card>
