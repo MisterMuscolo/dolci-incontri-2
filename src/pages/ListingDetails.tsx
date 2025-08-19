@@ -1,18 +1,18 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useState } => 'react';
+import { useParams, useNavigate } => 'react-router-dom';
+import { useForm } => 'react-hook-form';
+import { zodResolver } => '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { supabase } from '@/integrations/supabase/client';
-import { Skeleton } from '@/components/ui/skeleton';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
+import { supabase } => '@/integrations/supabase/client';
+import { Skeleton } => '@/components/ui/skeleton';
+import { AspectRatio } => '@/components/ui/aspect-ratio';
+import { Badge } => '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } => '@/components/ui/card';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } => '@/components/ui/form';
+import { Input } => '@/components/ui/input';
+import { Textarea } => '@/components/ui/textarea';
+import { Button } => '@/components/ui/button';
+import { showError, showSuccess, showLoading, dismissToast } => '@/utils/toast';
 import { MapPin, Tag, User, Mail, BookText, ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -132,8 +132,9 @@ const ListingDetails = () => {
     <div className="bg-gray-50">
       <div className="container mx-auto p-4 sm:p-6 md:p-8">
         <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">
-            <ChevronLeft className="h-6 w-6" />
+          <Button variant="ghost" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">
+            <ChevronLeft className="h-5 w-5 mr-2" />
+            Indietro
           </Button>
           <h1 className="text-3xl font-bold text-gray-800">Dettagli Annuncio</h1>
         </div>

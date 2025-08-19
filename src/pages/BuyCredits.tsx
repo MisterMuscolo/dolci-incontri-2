@@ -82,8 +82,9 @@ const BuyCredits = () => {
     <div className="min-h-screen bg-gray-50 p-6 flex flex-col items-center">
       <div className="w-full max-w-3xl">
         <div className="flex items-center gap-4 mb-8">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">
-            <ChevronLeft className="h-6 w-6" />
+          <Button variant="ghost" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">
+            <ChevronLeft className="h-5 w-5 mr-2" />
+            Indietro
           </Button>
           <h1 className="text-3xl font-bold text-gray-800">Acquista Crediti</h1>
         </div>

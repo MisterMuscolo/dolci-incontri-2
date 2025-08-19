@@ -129,8 +129,9 @@ const NewListing = () => {
     <div className="bg-gray-50 p-4 sm:p-6 md:p-8">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">
-            <ChevronLeft className="h-6 w-6" />
+          <Button variant="ghost" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">
+            <ChevronLeft className="h-5 w-5 mr-2" />
+            Indietro
           </Button>
           <h1 className="text-3xl font-bold text-gray-800">Crea un nuovo annuncio</h1>
         </div>
