@@ -46,6 +46,7 @@ serve(async (req) => {
       <div style="text-align: center; margin-bottom: 20px;">
         <p style="font-size: 24px; font-weight: bold; color: #E54A70; margin: 0;">❤️ Dolci Incontri</p>
       </div>
+      <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
       Ciao ${fromEmail},<br><br>
       Ho visto il tuo annuncio su Dolci Incontri:<br>
       <a href="${listingLink}" style="color: #E54A70; text-decoration: underline;">${listing.title}</a><br><br>
