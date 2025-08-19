@@ -100,7 +100,12 @@ export const ImageUploader = ({
 
   const setNewlySelectedAsPrimary = (index: number) => {
     setNewlySelectedPrimaryIndex(index);
-    setActivePreviewUrl(newlySelectedPreviews[index]); // Update main preview
+    // Aggiunto controllo per assicurarsi che newlySelectedPreviews sia un array e che l'indice esista
+    if (Array.isArray(newlySelectedPreviews) && newlySelectedPreviews.length > index) {
+      setActivePreviewUrl(newlySelectedPreviews[index]);
+    } else {
+      setActivePreviewUrl(null); // Fallback se l'indice non è valido
+    }
   };
 
   const handleDeleteExistingPhoto = async (photoToDelete: ExistingPhoto) => {
@@ -144,18 +149,25 @@ export const ImageUploader = ({
         } else if (newlySelectedFiles.length > 0) {
           // Set first newly selected photo as primary
           setNewlySelectedPrimaryIndex(0);
-          setActivePreviewUrl(newlySelectedPreviews[0]);
+          // Aggiunto controllo per assicurarsi che newlySelectedPreviews sia un array e non vuoto
+          setActivePreviewUrl(Array.isArray(newlySelectedPreviews) && newlySelectedPreviews.length > 0 ? newlySelectedPreviews[0] : null);
         } else {
           setActivePreviewUrl(null);
         }
       } else if (activePreviewUrl === photoToDelete.url) {
         // If deleted photo was just the active preview, reset preview
-        setActivePreviewUrl(updatedExistingPhotos[0]?.url || newlySelectedPreviews[0] || null);
+        setActivePreviewUrl(
+          updatedExistingPhotos[0]?.url || 
+          (Array.isArray(newlySelectedPreviews) && newlySelectedPreviews.length > 0 ? newlySelectedPreviews[0] : null) || 
+          null
+        );
       }
 
     } catch (error: any) {
       dismissToast(toastId);
       showError(error.message || 'Errore durante l\'eliminazione della foto.');
+    } finally {
+      setIsLoading(false); // Assicurati che isLoading sia gestito correttamente
     }
   };
 
