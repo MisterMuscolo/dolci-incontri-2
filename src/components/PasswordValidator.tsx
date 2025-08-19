@@ -1,4 +1,4 @@
-import { Check, X } from 'lucide-react';
+import { CheckCircle, Circle } from 'lucide-react'; // Importa le nuove icone
 import { cn } from '@/lib/utils';
 
 interface PasswordValidatorProps {
@@ -28,11 +28,11 @@ export const PasswordValidator = ({ password = '' }: PasswordValidatorProps) => 
           return (
             <li key={rule.id} className="flex items-center transition-colors duration-300">
               {isValid ? (
-                <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
+                <CheckCircle className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
               ) : (
-                <X className="h-4 w-4 text-red-500 mr-2 flex-shrink-0" />
+                <Circle className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
               )}
-              <span className={cn(isValid && 'text-gray-400 line-through')}>
+              <span className={cn(isValid ? 'text-green-600' : 'text-gray-600')}>
                 {rule.text}
               </span>
             </li>
