@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { CheckCircle, ChevronLeft } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 
 interface CreditPackage {
   id: string;
@@ -72,10 +74,54 @@ const creditPackages: CreditPackage[] = [
 
 const BuyCredits = () => {
   const navigate = useNavigate();
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handlePurchase = (packageName: string, price: number) => {
-    alert(`Hai cliccato per acquistare ${packageName} per €${price.toFixed(2)}. La funzionalità di acquisto sarà implementata qui.`);
-    // Qui andrebbe la logica di integrazione con un sistema di pagamento
+  const handlePurchase = async (pkg: CreditPackage) => {
+    setIsProcessing(true);
+    const toastId = showLoading(`Acquisto ${pkg.name} in corso...`);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('Devi essere autenticato per acquistare crediti.');
+      }
+
+      const { error } = await supabase.functions.invoke('manage-credits', {
+        body: {
+          userId: user.id,
+          amount: pkg.credits,
+          transactionType: 'purchase',
+          description: pkg.name,
+        },
+      });
+
+      dismissToast(toastId);
+
+      if (error) {
+        let errorMessage = 'Errore durante l\'acquisto dei crediti.';
+        // @ts-ignore
+        if (error.context && typeof error.context.body === 'string') {
+          try {
+            // @ts-ignore
+            const errorBody = JSON.parse(error.context.body);
+            if (errorBody.error) {
+              errorMessage = errorBody.error;
+            }
+          } catch (e) {
+            console.error("Could not parse error response from edge function:", e);
+          }
+        }
+        throw new Error(errorMessage);
+      }
+
+      showSuccess(`Hai acquistato ${pkg.credits} crediti con successo!`);
+      navigate('/credit-history'); // Reindirizza alla cronologia crediti
+    } catch (error: any) {
+      dismissToast(toastId);
+      showError(error.message || 'Si è verificato un errore imprevisto durante l\'acquisto.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -125,12 +171,12 @@ const BuyCredits = () => {
                   <p className="text-2xl font-extrabold text-gray-900 mb-3 text-left">
                     {pkg.credits} <span className="text-rose-500">crediti</span>
                   </p>
-                  {/* Removed the features list as requested */}
                   <Button
                     className="w-full bg-rose-500 hover:bg-rose-600 text-sm py-3"
-                    onClick={() => handlePurchase(pkg.name, pkg.price)}
+                    onClick={() => handlePurchase(pkg)}
+                    disabled={isProcessing}
                   >
-                    Acquista Ora
+                    {isProcessing ? 'Acquisto in corso...' : 'Acquista Ora'}
                   </Button>
                 </CardContent>
               </Card>
