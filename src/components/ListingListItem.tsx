@@ -20,7 +20,7 @@ import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast
 import { supabase } from '@/integrations/supabase/client';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '@/components/ui/carousel';
 import Autoplay from 'embla-carousel-autoplay';
-import { cn } from '@/lib/utils'; // Importa la funzione cn
+import { cn } '@/lib/utils'; // Importa la funzione cn
 import { AspectRatio } from '@/components/ui/aspect-ratio'; // Import AspectRatio
 import { useState } from "react"; // Importa useState
 
@@ -160,7 +160,7 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
           Pacchetto: <span className="capitalize">{promotionTypeLabel}</span>
         </p>
         <p className="text-sm text-gray-600">
-          Durata: <span className="font-medium">{durationInDays} giorni</span>
+          Durata: <span className="font-medium">{durationInDays} {durationInDays === 1 ? 'giorno' : 'giorni'}</span>
         </p>
         <p className="text-sm text-gray-600">
           Inizio: <span className="font-medium">{formattedStart}</span>
