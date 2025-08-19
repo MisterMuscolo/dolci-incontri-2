@@ -34,11 +34,11 @@ export default function Index({ session }: IndexProps) {
   };
 
   const categories = [
-    { value: 'donna-cerca-uomo', label: 'Donna cerca Uomo', icon: Heart },
-    { value: 'uomo-cerca-donna', label: 'Uomo cerca Donna', icon: Heart },
-    { value: 'coppie', label: 'Coppie', icon: Users },
-    { value: 'uomo-cerca-uomo', label: 'Uomo cerca Uomo', icon: User },
-    { value: 'donna-cerca-donna', label: 'Donna cerca Donna', icon: User },
+    { value: 'donna-cerca-uomo', label: '👩‍❤️‍👨 Donna cerca Uomo' },
+    { value: 'uomo-cerca-donna', label: '👨‍❤️‍👩 Uomo cerca Donna' },
+    { value: 'coppie', label: '👩‍❤️‍💋‍👨 Coppie' },
+    { value: 'uomo-cerca-uomo', label: '👨‍❤️‍👨 Uomo cerca Uomo' },
+    { value: 'donna-cerca-donna', label: '👩‍❤️‍👩 Donna cerca Donna' },
   ];
 
   return (
@@ -134,7 +134,6 @@ export default function Index({ session }: IndexProps) {
             <h2 className="text-3xl font-bold text-gray-800 mb-8">Esplora per Categoria</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
               {categories.map((cat) => {
-                const Icon = cat.icon;
                 return (
                   <Card 
                     key={cat.value} 
@@ -142,8 +141,9 @@ export default function Index({ session }: IndexProps) {
                     onClick={() => handleCategoryCardClick(cat.value)}
                   >
                     <CardContent className="flex flex-col items-center justify-center p-6 text-center">
-                      <Icon className="h-12 w-12 text-rose-500 mb-4" />
-                      <p className="text-lg font-semibold text-gray-700">{cat.label}</p>
+                      {/* Rimosso l'elemento Icon e aggiunto un div per l'emoji */}
+                      <div className="text-5xl mb-4">{cat.label.split(' ')[0]}</div> {/* Estrae solo l'emoji */}
+                      <p className="text-lg font-semibold text-gray-700">{cat.label.substring(cat.label.indexOf(' ') + 1)}</p> {/* Estrae il testo */}
                     </CardContent>
                   </Card>
                 );
