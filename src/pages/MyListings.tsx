@@ -26,11 +26,12 @@ const MyListings = () => {
     }
 
     // Query per il conteggio totale degli annunci attivi dell'utente
+    // Manteniamo il filtro qui per ora, dato che il conteggio è corretto
     const { count, error: countError } = await supabase
       .from('listings')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
-      .gt('expires_at', new Date().toISOString()); // Filtra solo gli annunci attivi
+      .gt('expires_at', new Date().toISOString()); 
 
     if (countError) {
       console.error("Errore nel conteggio degli annunci:", countError);
@@ -45,7 +46,7 @@ const MyListings = () => {
     const from = (currentPage - 1) * LISTINGS_PER_PAGE;
     const to = from + LISTINGS_PER_PAGE - 1;
 
-    // Query per recuperare gli annunci attivi, ordinati per premium e poi per data
+    // Query per recuperare gli annunci. Rimosso temporaneamente il filtro expires_at per debug.
     const { data, error } = await supabase
       .from('listings')
       .select(`
@@ -64,7 +65,7 @@ const MyListings = () => {
         listing_photos ( url, is_primary )
       `)
       .eq('user_id', user.id)
-      .gt('expires_at', new Date().toISOString()) // Filtra solo gli annunci attivi
+      // .gt('expires_at', new Date().toISOString()) // Rimosso temporaneamente per debug
       .range(from, to); 
 
     if (error) {
