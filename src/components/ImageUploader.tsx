@@ -102,7 +102,7 @@ export const ImageUploader = ({
     setNewlySelectedPrimaryIndex(index);
     const previews = newlySelectedPreviews ?? []; // Defensive check
     if (previews.length > index) {
-      setActivePreviewUrl(previews[index]);
+      setActivePreviewUrl(previews[index] || null); // Ensure null if undefined
     } else {
       setActivePreviewUrl(null); // Fallback if the index is invalid
     }
@@ -150,7 +150,7 @@ export const ImageUploader = ({
           // Set first newly selected photo as primary
           setNewlySelectedPrimaryIndex(0);
           const previews = newlySelectedPreviews ?? []; // Defensive check
-          setActivePreviewUrl(previews.length > 0 ? previews[0] : null);
+          setActivePreviewUrl(previews.length > 0 ? (previews[0] || null) : null);
         } else {
           setActivePreviewUrl(null);
         }
@@ -159,7 +159,7 @@ export const ImageUploader = ({
         const previews = newlySelectedPreviews ?? []; // Defensive check
         setActivePreviewUrl(
           updatedExistingPhotos[0]?.url || 
-          (previews.length > 0 ? previews[0] : null) || 
+          (previews.length > 0 ? (previews[0] || null) : null) || 
           null
         );
       }
