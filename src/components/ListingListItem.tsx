@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, CalendarDays, Rocket } from "lucide-react";
+import { Pencil, Trash2, CalendarDays, Rocket, User } from "lucide-react"; // Importa l'icona User
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Link } from "react-router-dom";
@@ -26,9 +26,10 @@ export interface Listing {
   city: string;
   created_at: string;
   expires_at: string;
-  is_premium: boolean; // Aggiunto is_premium
+  is_premium: boolean;
   listing_photos: { url: string; is_primary: boolean }[];
   description?: string;
+  age?: number; // Aggiunto il campo age
 }
 
 interface ListingListItemProps {
@@ -97,6 +98,11 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
             <div className="flex flex-wrap gap-2 mb-3">
               <Badge variant="secondary" className="capitalize">{listing.category.replace(/-/g, ' ')}</Badge>
               <Badge variant="outline">{listing.city}</Badge>
+              {listing.age && ( // Mostra l'età solo se presente
+                <Badge variant="outline">
+                  <User className="h-3 w-3 mr-1" /> {listing.age} anni
+                </Badge>
+              )}
               {listing.is_premium && (
                 <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white">
                   <Rocket className="h-3 w-3 mr-1" /> Premium
