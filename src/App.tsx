@@ -18,7 +18,8 @@ import SearchResults from "./pages/SearchResults";
 import ListingDetails from "./pages/ListingDetails";
 import MyListings from "./pages/MyListings";
 import CreditHistory from "./pages/CreditHistory";
-import UserListingsAdminView from "./pages/UserListingsAdminView"; // Importa la nuova pagina
+import UserListingsAdminView from "./pages/UserListingsAdminView";
+import BannedUser from "./pages/BannedUser"; // Importa la nuova pagina
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isBanned, setIsBanned] = useState(false); // Nuovo stato per il ban
 
   useEffect(() => {
     const getSessionAndRole = async () => {
@@ -44,21 +46,30 @@ const App = () => {
           console.log("App.tsx: Profile role fetched:", profile.role);
           if (profile.role === 'admin') {
             setIsAdmin(true);
+            setIsBanned(false); // Un admin non può essere bannato
             console.log("App.tsx: isAdmin set to TRUE");
+          } else if (profile.role === 'banned') {
+            setIsBanned(true);
+            setIsAdmin(false);
+            console.log("App.tsx: isBanned set to TRUE");
           } else {
             setIsAdmin(false);
-            console.log("App.tsx: isAdmin set to FALSE (role was:", profile.role, ")");
+            setIsBanned(false);
+            console.log("App.tsx: isAdmin/isBanned set to FALSE (role was:", profile.role, ")");
           }
         } else if (error) {
           console.error("App.tsx: Error fetching profile:", error);
           setIsAdmin(false);
+          setIsBanned(false);
         } else {
-          console.log("App.tsx: No profile found for user, isAdmin set to FALSE");
+          console.log("App.tsx: No profile found for user, isAdmin/isBanned set to FALSE");
           setIsAdmin(false);
+          setIsBanned(false);
         }
       } else {
-        console.log("App.tsx: No session found, isAdmin set to FALSE");
+        console.log("App.tsx: No session found, isAdmin/isBanned set to FALSE");
         setIsAdmin(false);
+        setIsBanned(false);
       }
       setLoading(false);
     };
@@ -79,22 +90,31 @@ const App = () => {
               console.log("App.tsx: Auth state change: Profile role fetched:", profile.role);
               if (profile.role === 'admin') {
                 setIsAdmin(true);
+                setIsBanned(false);
                 console.log("App.tsx: Auth state change: isAdmin set to TRUE");
+              } else if (profile.role === 'banned') {
+                setIsBanned(true);
+                setIsAdmin(false);
+                console.log("App.tsx: Auth state change: isBanned set to TRUE");
               } else {
                 setIsAdmin(false);
-                console.log("App.tsx: Auth state change: isAdmin set to FALSE (role was:", profile.role, ")");
+                setIsBanned(false);
+                console.log("App.tsx: Auth state change: isAdmin/isBanned set to FALSE (role was:", profile.role, ")");
               }
             } else if (error) {
               console.error("App.tsx: Auth state change: Error fetching profile:", error);
               setIsAdmin(false);
+              setIsBanned(false);
             } else {
-              console.log("App.tsx: Auth state change: No profile found, isAdmin set to FALSE");
+              console.log("App.tsx: Auth state change: No profile found, isAdmin/isBanned set to FALSE");
               setIsAdmin(false);
+              setIsBanned(false);
             }
           });
       } else {
-        console.log("App.tsx: Auth state change: No session, isAdmin set to FALSE");
+        console.log("App.tsx: Auth state change: No session, isAdmin/isBanned set to FALSE");
         setIsAdmin(false);
+        setIsBanned(false);
       }
     });
 
@@ -103,7 +123,7 @@ const App = () => {
 
   if (loading) return <div className="flex justify-center items-center min-h-screen">Caricamento...</div>;
 
-  console.log("App.tsx: Rendering Layout with isAdmin:", isAdmin);
+  console.log("App.tsx: Rendering Layout with isAdmin:", isAdmin, "isBanned:", isBanned);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -112,17 +132,22 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
+            {/* Route per utenti bannati */}
+            <Route path="/banned" element={<BannedUser />} />
+
             <Route element={<Layout session={session} isAdmin={isAdmin} />}>
               <Route path="/" element={<Index session={session} />} />
               <Route path="/search" element={<SearchResults />} />
               <Route path="/listing/:id" element={<ListingDetails />} />
+              
+              {/* Reindirizza gli utenti bannati alla pagina /banned */}
               <Route 
                 path="/auth" 
-                element={!session ? <Auth /> : <Navigate to="/dashboard" />} 
+                element={!session ? <Auth /> : (isBanned ? <Navigate to="/banned" /> : <Navigate to="/dashboard" />)} 
               />
               <Route 
                 path="/dashboard" 
-                element={session ? <Dashboard /> : <Navigate to="/auth" />} 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Dashboard />) : <Navigate to="/auth" />} 
               />
               <Route 
                 path="/admin" 
@@ -134,23 +159,23 @@ const App = () => {
               />
               <Route 
                 path="/new-listing" 
-                element={session ? <NewListing /> : <Navigate to="/auth" />} 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <NewListing />) : <Navigate to="/auth" />} 
               />
               <Route 
                 path="/buy-credits" 
-                element={session ? <BuyCredits /> : <Navigate to="/auth" />} 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <BuyCredits />) : <Navigate to="/auth" />} 
               />
               <Route 
                 path="/profile-settings" 
-                element={session ? <ProfileSettings /> : <Navigate to="/auth" />} 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <ProfileSettings />) : <Navigate to="/auth" />} 
               />
               <Route 
                 path="/my-listings" 
-                element={session ? <MyListings /> : <Navigate to="/auth" />} 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <MyListings />) : <Navigate to="/auth" />} 
               />
               <Route 
                 path="/credit-history" 
-                element={session ? <CreditHistory /> : <Navigate to="/auth" />} 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <CreditHistory />) : <Navigate to="/auth" />} 
               />
               <Route path="*" element={<NotFound />} />
             </Route>
