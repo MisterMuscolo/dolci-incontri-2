@@ -20,6 +20,7 @@ import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast
 import { supabase } from '@/integrations/supabase/client';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '@/components/ui/carousel';
 import Autoplay from 'embla-carousel-autoplay';
+import { cn } from '@/lib/utils'; // Importa la funzione cn
 
 export interface Listing {
   id: string;
@@ -87,7 +88,10 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
   };
 
   return (
-    <Card className="w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row">
+    <Card className={cn(
+      "w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row",
+      listing.is_premium && "border-2 border-rose-500 shadow-lg bg-rose-50" // Stili aggiuntivi per annunci premium
+    )}>
       <div className="flex flex-col sm:flex-row w-full">
         {listing.is_premium && listing.listing_photos.length > 0 ? (
           <div className="sm:w-1/4 lg:w-1/5 flex-shrink-0 relative">
