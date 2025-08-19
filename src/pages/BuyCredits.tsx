@@ -145,40 +145,38 @@ const BuyCredits = () => {
               : null;
 
             return (
-              <Card key={pkg.id} className="w-full flex flex-col p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-start">
-                    <div className="flex flex-col text-left">
-                      <CardTitle className="text-lg font-bold text-rose-600">{pkg.name}</CardTitle>
-                      <CardDescription className="text-gray-600 text-sm">{pkg.description}</CardDescription>
-                    </div>
-                    <div className="text-right">
-                      {pkg.originalPrice && pkg.originalPrice > pkg.price ? (
-                        <>
-                          <p className="text-sm text-gray-500 line-through">€{pkg.originalPrice.toFixed(2)}</p>
-                          <p className="text-xl font-bold text-gray-900">€{pkg.price.toFixed(2)}</p>
-                          <p className="text-xs text-green-600 font-semibold">
-                            Risparmi {discountPercentage}%
-                          </p>
-                        </>
-                      ) : (
-                        <p className="text-xl font-bold text-gray-900">€{pkg.price.toFixed(2)}</p>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="flex-grow flex flex-col justify-between py-2">
-                  <p className="text-2xl font-extrabold text-gray-900 mb-3 text-left">
+              <Card key={pkg.id} className="w-full flex items-center justify-between p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                {/* Left section: Name and Credits */}
+                <div className="flex flex-col text-left flex-grow">
+                  <CardTitle className="text-lg font-bold text-rose-600">{pkg.name}</CardTitle>
+                  <p className="text-xl font-extrabold text-gray-900">
                     {pkg.credits} <span className="text-rose-500">crediti</span>
                   </p>
-                  <Button
-                    className="w-full bg-rose-500 hover:bg-rose-600 text-sm py-3"
-                    onClick={() => handlePurchase(pkg)}
-                    disabled={isProcessing}
-                  >
-                    {isProcessing ? 'Acquisto in corso...' : 'Acquista Ora'}
-                  </Button>
-                </CardContent>
+                </div>
+
+                {/* Middle section: Prices and Savings */}
+                <div className="flex flex-col items-end text-right mx-4">
+                  {pkg.originalPrice && pkg.originalPrice > pkg.price ? (
+                    <>
+                      <p className="text-sm text-gray-500 line-through">€{pkg.originalPrice.toFixed(2)}</p>
+                      <p className="text-xl font-bold text-gray-900">€{pkg.price.toFixed(2)}</p>
+                      <p className="text-xs text-green-600 font-semibold">
+                        Risparmi {discountPercentage}%
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-xl font-bold text-gray-900">€{pkg.price.toFixed(2)}</p>
+                  )}
+                </div>
+
+                {/* Right section: Buy Button */}
+                <Button
+                  className="bg-rose-500 hover:bg-rose-600 text-sm py-2 px-4 flex-shrink-0"
+                  onClick={() => handlePurchase(pkg)}
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? 'Acquisto in corso...' : 'Acquista'}
+                </Button>
               </Card>
             );
           })}
