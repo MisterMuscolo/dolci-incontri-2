@@ -52,7 +52,7 @@ const Dashboard = () => {
       const { data: transactionsData, error: transactionsError } = await supabase
         .from('credit_transactions')
         .select('amount')
-        .eq('user_id', user.id);
+        .eq('user.id', user.id);
 
       if (transactionsError) {
         console.error("Errore nel recupero delle transazioni per i crediti utilizzati:", transactionsError);
@@ -88,13 +88,13 @@ const Dashboard = () => {
             <Link to="/my-listings">
               <Card className="w-full transition-shadow hover:shadow-lg cursor-pointer bg-white hover:bg-gray-50">
                 <CardHeader>
-                  <CardTitle className="text-3xl font-semibold flex items-center gap-4"> {/* Aumentato il gap */}
-                    <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center"> {/* Aumentato il padding */}
-                      <LayoutGrid className="h-10 w-10 text-rose-500" /> {/* Ingrandita l'icona */}
+                  <CardTitle className="text-3xl font-semibold flex items-center gap-4">
+                    <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center">
+                      <LayoutGrid className="h-10 w-10 text-rose-500" />
                     </div>
                     <span className="text-gray-800">I Miei Annunci</span>
                   </CardTitle>
-                  <CardDescription>Visualizza e gestisci i tuoi annunci.</CardDescription>
+                  <CardDescription className="ml-[88px]">Visualizza e gestisci i tuoi annunci.</CardDescription> {/* Aggiunto ml */}
                 </CardHeader>
                 <CardContent>
                   {loading ? (
@@ -113,14 +113,14 @@ const Dashboard = () => {
             <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
               <CardHeader>
                 <Link to="/credit-history" className="block">
-                  <CardTitle className="text-xl font-semibold flex items-center gap-4"> {/* Aumentato il gap */}
-                    <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center"> {/* Aumentato il padding */}
-                      <Wallet className="h-10 w-10 text-rose-500" /> {/* Ingrandita l'icona */}
+                  <CardTitle className="text-xl font-semibold flex items-center gap-3 cursor-pointer">
+                    <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center">
+                      <Wallet className="h-6 w-6 text-rose-500" />
                     </div>
                     <span>Crediti</span>
                   </CardTitle>
                 </Link>
-                <CardDescription>Acquista e gestisci i tuoi crediti.</CardDescription>
+                <CardDescription className="ml-[60px]">Acquista e gestisci i tuoi crediti.</CardDescription> {/* Aggiunto ml */}
               </CardHeader>
               <CardContent>
                 {loading ? (
@@ -147,14 +147,14 @@ const Dashboard = () => {
             <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
               <CardHeader>
                 <Link to="/profile-settings" className="block">
-                  <CardTitle className="text-xl font-semibold flex items-center gap-4"> {/* Aumentato il gap */}
-                    <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center"> {/* Aumentato il padding */}
-                      <Settings className="h-10 w-10 text-rose-500" /> {/* Ingrandita l'icona */}
+                  <CardTitle className="text-xl font-semibold flex items-center gap-3 cursor-pointer">
+                    <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center">
+                      <Settings className="h-6 w-6 text-rose-500" />
                     </div>
                     <span>Impostazioni</span>
                   </CardTitle>
                 </Link>
-                <CardDescription>Gestisci le impostazioni del tuo account.</CardDescription>
+                <CardDescription className="ml-[60px]">Gestisci le impostazioni del tuo account.</CardDescription> {/* Aggiunto ml */}
               </CardHeader>
               <CardContent>
                 {/* Il pulsante "Modifica profilo" è stato rimosso in quanto il titolo della card è già cliccabile */}
