@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart, LogOut, User, PlusCircle, Shield, LogIn } from 'lucide-react'; // Aggiunto LogIn icona
+import { Heart, LogOut, User, PlusCircle, Shield, LogIn, LayoutGrid, Wallet, Settings } from 'lucide-react'; // Aggiunto LogIn icona e altre icone per il menu
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -58,18 +58,28 @@ export const Header = ({ session, isAdmin }: HeaderProps) => {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate('/dashboard')}>
-                    Dashboard
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/profile-settings')}>
-                    Settings
-                  </DropdownMenuItem>
                   {isAdmin && (
                     <DropdownMenuItem onClick={() => navigate('/admin')}>
                       <Shield className="mr-2 h-4 w-4" />
-                      <span>Dashboard Admin</span>
+                      <span>Pannello Controllo</span>
                     </DropdownMenuItem>
                   )}
+                  <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+                    <LayoutGrid className="mr-2 h-4 w-4" />
+                    <span>Dashboard</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/my-listings')}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    <span>I miei Annunci</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/credit-history')}>
+                    <Wallet className="mr-2 h-4 w-4" />
+                    <span>Crediti</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/profile-settings')}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Impostazioni</span>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />
