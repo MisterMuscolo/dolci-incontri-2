@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
-import { MapPin, Tag, User, Mail, BookText, ChevronLeft, X, CalendarDays, Rocket } from 'lucide-react';
+import { MapPin, Tag, User, Mail, BookText, ChevronLeft, X, CalendarDays, Rocket, Phone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale'; // Importa la locale italiana
@@ -238,6 +238,27 @@ const ListingDetails = () => {
               <p className="text-gray-600 whitespace-pre-wrap">{listing.description}</p>
             </CardContent>
           </Card>
+
+          {listing.phone && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Phone className="h-5 w-5 text-rose-500" /> Contatto Telefonico
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Puoi contattare l'autore dell'annuncio al seguente numero:
+                </p>
+                <a 
+                  href={`tel:${listing.phone}`} 
+                  className="text-lg font-semibold text-rose-500 hover:underline flex items-center gap-2 mt-2"
+                >
+                  <Phone className="h-5 w-5" /> {listing.phone}
+                </a>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="flex justify-center py-4 gap-4"> {/* Ora contiene solo il pulsante Rispondi */}
             <Dialog open={isReplyDialogOpen} onOpenChange={setIsReplyDialogOpen}>
