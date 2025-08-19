@@ -21,6 +21,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '@/components/ui/carousel';
 import Autoplay from 'embla-carousel-autoplay';
 import { cn } from '@/lib/utils'; // Importa la funzione cn
+import { AspectRatio } from '@/components/ui/aspect-ratio'; // Import AspectRatio
 
 export interface Listing {
   id: string;
@@ -89,49 +90,58 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
 
   return (
     <Card className={cn(
-      "w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row relative", // Aggiunto 'relative' qui
+      "w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row relative",
       listing.is_premium && "border-2 border-rose-500 shadow-lg bg-rose-50" 
     )}>
       <div className="flex flex-col sm:flex-row w-full">
         {listing.is_premium && listing.listing_photos.length > 0 ? (
           <div className="sm:w-1/4 lg:w-1/5 flex-shrink-0 relative">
-            <Carousel
-              plugins={[
-                Autoplay({
-                  delay: 3000,
-                  stopOnInteraction: false,
-                  stopOnMouseEnter: true,
-                }),
-              ]}
-              opts={{
-                loop: true,
-              }}
-              className="w-full h-48 sm:h-full"
-            >
-              <CarouselContent className="h-full">
-                {listing.listing_photos.map((photo, index) => (
-                  <CarouselItem key={index} className="h-full">
-                    {/* Link only wraps the image inside the carousel item */}
-                    <Link to={`/listing/${listing.id}`} className="block w-full h-full">
-                      <img src={photo.url} alt={`${listing.title} - ${index + 1}`} className="object-cover w-full h-full" />
-                    </Link>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              {listing.listing_photos.length > 1 && (
-                <>
-                  {/* Carousel navigation buttons are outside the Link */}
-                  <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10" />
-                  <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10" />
-                </>
-              )}
-            </Carousel>
+            {/* Use AspectRatio for consistent image display */}
+            <AspectRatio ratio={16 / 9} className="w-full h-full"> {/* Adjust ratio as needed */}
+              <Carousel
+                plugins={[
+                  Autoplay({
+                    delay: 3000,
+                    stopOnInteraction: false,
+                    stopOnMouseEnter: true,
+                  }),
+                ]}
+                opts={{
+                  loop: true,
+                }}
+                className="w-full h-full" // Make carousel fill AspectRatio container
+              >
+                <CarouselContent className="h-full">
+                  {listing.listing_photos.map((photo, index) => (
+                    <CarouselItem key={index} className="h-full">
+                      <Link to={`/listing/${listing.id}`} className="block w-full h-full">
+                        <img src={photo.url} alt={`${listing.title} - ${index + 1}`} className="object-cover w-full h-full" />
+                      </Link>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                {listing.listing_photos.length > 1 && (
+                  <>
+                    <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10" />
+                    <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10" />
+                  </>
+                )}
+              </Carousel>
+            </AspectRatio>
           </div>
         ) : (
-          // Se non è premium, non mostrare alcuna immagine in preview
-          null
+          // If not premium, show a placeholder or nothing if no primary photo
+          primaryPhoto ? (
+            <div className="sm:w-1/4 lg:w-1/5 flex-shrink-0 relative">
+              <AspectRatio ratio={16 / 9} className="w-full h-full">
+                <Link to={`/listing/${listing.id}`} className="block w-full h-full">
+                  <img src={primaryPhoto} alt={listing.title} className="object-cover w-full h-full" />
+                </Link>
+              </AspectRatio>
+            </div>
+          ) : null
         )}
-        {/* Questo Link avvolge il contenuto testuale */}
+        {/* This Link wraps the textual content */}
         <Link to={`/listing/${listing.id}`} className="flex-grow block hover:bg-gray-50/50">
           <div className="p-4 flex flex-col flex-grow">
             <h3 className="text-xl font-semibold mb-2 text-gray-800 line-clamp-2">{listing.title}</h3>
@@ -143,7 +153,6 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
                   <User className="h-3 w-3 mr-1" /> {listing.age} anni
                 </Badge>
               )}
-              {/* Il badge Premium è stato spostato fuori da qui */}
             </div>
             <div className="mt-auto flex items-center text-xs text-gray-500">
               <CalendarDays className="h-4 w-4 mr-2" />
@@ -153,9 +162,42 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
         </Link>
       </div>
       {listing.is_premium && (
-        <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white absolute top-2 right-2 z-20">
-          <Rocket className="h-3 w-3 mr-1" /> Premium
-        </Badge>
+        // Conditional rendering for clickable badge
+        showControls ? (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button 
+                variant="default" 
+                size="sm" 
+                className="bg-yellow-500 hover:bg-yellow-600 text-white absolute top-2 left-1/2 -translate-x-1/2 z-20 px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1"
+              >
+                <Rocket className="h-3 w-3" /> Premium
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Annuncio Premium</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Questo annuncio è già Premium. Gli annunci Premium appaiono in cima ai risultati di ricerca e possono avere fino a 5 foto.
+                  <br/><br/>
+                  Vuoi estendere la sua visibilità o acquistare più crediti?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Chiudi</AlertDialogCancel>
+                <Link to="/buy-credits">
+                  <AlertDialogAction className="bg-rose-500 hover:bg-rose-600">
+                    Acquista Crediti
+                  </AlertDialogAction>
+                </Link>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        ) : (
+          <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white absolute top-2 left-1/2 -translate-x-1/2 z-20">
+            <Rocket className="h-3 w-3 mr-1" /> Premium
+          </Badge>
+        )
       )}
       {showControls && (
         <div className="flex-shrink-0 flex md:flex-col justify-end md:justify-center items-center gap-2 p-4 border-t md:border-t-0 md:border-l">
