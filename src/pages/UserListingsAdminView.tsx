@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { ListingListItem, Listing } from '@/components/ListingListItem';
@@ -16,58 +16,60 @@ const UserListingsAdminView = () => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchUserDataAndListings = async () => {
-      setLoading(true);
-      setError(null);
+  const fetchUserDataAndListings = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-      if (!userId) {
-        setError("ID utente non fornito.");
-        setLoading(false);
-        return;
-      }
-
-      // Fetch user email
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('email')
-        .eq('id', userId)
-        .single();
-
-      if (profileError || !profileData) {
-        console.error("Error fetching user profile:", profileError);
-        setError("Impossibile recuperare i dettagli dell'utente.");
-        setLoading(false);
-        return;
-      }
-      setUserEmail(profileData.email);
-
-      // Fetch listings for the specific user
-      const { data, error: listingsError } = await supabase
-        .from('listings')
-        .select(`
-          id,
-          title,
-          category,
-          city,
-          created_at,
-          expires_at,
-          listing_photos ( url, is_primary )
-        `)
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-
-      if (listingsError) {
-        console.error("Error fetching user listings:", listingsError);
-        setError("Impossibile caricare gli annunci dell'utente.");
-      } else if (data) {
-        setListings(data as Listing[]);
-      }
+    if (!userId) {
+      setError("ID utente non fornito.");
       setLoading(false);
-    };
+      return;
+    }
 
-    fetchUserDataAndListings();
+    // Fetch user email
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('email')
+      .eq('id', userId)
+      .single();
+
+    if (profileError || !profileData) {
+      console.error("Error fetching user profile:", profileError);
+      setError("Impossibile recuperare i dettagli dell'utente.");
+      setLoading(false);
+      return;
+    }
+    setUserEmail(profileData.email);
+
+    // Fetch listings for the specific user, ordered by premium and then by date
+    const { data, error: listingsError } = await supabase
+      .from('listings')
+      .select(`
+        id,
+        title,
+        category,
+        city,
+        created_at,
+        expires_at,
+        is_premium,
+        listing_photos ( url, is_primary )
+      `)
+      .eq('user_id', userId)
+      .order('is_premium', { ascending: false }) // Premium listings first
+      .order('created_at', { ascending: false }); // Then by creation date
+
+    if (listingsError) {
+      console.error("Error fetching user listings:", listingsError);
+      setError("Impossibile caricare gli annunci dell'utente.");
+    } else if (data) {
+      setListings(data as Listing[]);
+    }
+    setLoading(false);
   }, [userId]);
+
+  useEffect(() => {
+    fetchUserDataAndListings();
+  }, [fetchUserDataAndListings]);
 
   return (
     <div className="bg-gray-50 p-6 flex-grow">
@@ -97,7 +99,7 @@ const UserListingsAdminView = () => {
             ) : listings.length > 0 ? (
               <div className="space-y-4">
                 {listings.map((listing) => (
-                  <ListingListItem key={listing.id} listing={listing} showControls={true} showExpiryDate={true} />
+                  <ListingListItem key={listing.id} listing={listing} showControls={true} showExpiryDate={true} onListingUpdated={fetchUserDataAndListings} />
                 ))}
               </div>
             ) : (

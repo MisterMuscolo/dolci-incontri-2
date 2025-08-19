@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ListingListItem, Listing } from "@/components/ListingListItem";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,60 +17,62 @@ const MyListings = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
 
-  useEffect(() => {
-    const fetchListings = async () => {
-      setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
-      // Query per il conteggio totale degli annunci dell'utente (senza filtro scadenza per ora)
-      const { count, error: countError } = await supabase
-        .from('listings')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id); 
-
-      if (countError) {
-        console.error("Errore nel conteggio degli annunci:", countError);
-        setLoading(false);
-        return;
-      }
-
-      if (count !== null) {
-        setTotalPages(Math.ceil(count / LISTINGS_PER_PAGE));
-      }
-
-      const from = (currentPage - 1) * LISTINGS_PER_PAGE;
-      const to = from + LISTINGS_PER_PAGE - 1;
-
-      // Query per recuperare gli annunci (senza filtro scadenza per ora)
-      const { data, error } = await supabase
-        .from('listings')
-        .select(`
-          id,
-          title,
-          category,
-          city,
-          created_at,
-          expires_at,
-          listing_photos ( url, is_primary )
-        `)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .range(from, to);
-
-      if (error) {
-        console.error("Errore nel recupero degli annunci:", error);
-      } else if (data) {
-        setListings(data as Listing[]);
-      }
+  const fetchListings = useCallback(async () => {
+    setLoading(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
       setLoading(false);
-    };
+      return;
+    }
 
+    // Query per il conteggio totale degli annunci dell'utente
+    const { count, error: countError } = await supabase
+      .from('listings')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id); 
+
+    if (countError) {
+      console.error("Errore nel conteggio degli annunci:", countError);
+      setLoading(false);
+      return;
+    }
+
+    if (count !== null) {
+      setTotalPages(Math.ceil(count / LISTINGS_PER_PAGE));
+    }
+
+    const from = (currentPage - 1) * LISTINGS_PER_PAGE;
+    const to = from + LISTINGS_PER_PAGE - 1;
+
+    // Query per recuperare gli annunci, ordinati per premium e poi per data
+    const { data, error } = await supabase
+      .from('listings')
+      .select(`
+        id,
+        title,
+        category,
+        city,
+        created_at,
+        expires_at,
+        is_premium,
+        listing_photos ( url, is_primary )
+      `)
+      .eq('user_id', user.id)
+      .order('is_premium', { ascending: false }) // Premium listings first
+      .order('created_at', { ascending: false }) // Then by creation date
+      .range(from, to);
+
+    if (error) {
+      console.error("Errore nel recupero degli annunci:", error);
+    } else if (data) {
+      setListings(data as Listing[]);
+    }
+    setLoading(false);
+  }, [currentPage]); // Dipendenza da currentPage
+
+  useEffect(() => {
     fetchListings();
-  }, [currentPage]);
+  }, [fetchListings]); // Dipendenza dalla funzione fetchListings
 
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= totalPages) {
@@ -108,7 +110,7 @@ const MyListings = () => {
             ) : listings.length > 0 ? (
               <div className="space-y-4">
                 {listings.map((listing) => (
-                  <ListingListItem key={listing.id} listing={listing} showControls={true} showExpiryDate={true} />
+                  <ListingListItem key={listing.id} listing={listing} showControls={true} showExpiryDate={true} onListingUpdated={fetchListings} />
                 ))}
                 {totalPages > 1 && (
                   <Pagination className="pt-4">

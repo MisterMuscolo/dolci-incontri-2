@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { ListingListItem, Listing } from '@/components/ListingListItem';
@@ -20,58 +20,60 @@ const SearchResults = () => {
   const city = searchParams.get('city');
   const keyword = searchParams.get('keyword');
 
-  useEffect(() => {
-    const fetchListings = async () => {
-      setLoading(true);
-      setError(null);
+  const fetchListings = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-      let query = supabase
-        .from('listings')
-        .select(`
-          id,
-          title,
-          category,
-          city,
-          description,
-          created_at,
-          expires_at,
-          listing_photos ( url, is_primary )
-        `, { count: 'exact' })
-        .gt('expires_at', new Date().toISOString())
-        .order('created_at', { ascending: false });
+    let query = supabase
+      .from('listings')
+      .select(`
+        id,
+        title,
+        category,
+        city,
+        description,
+        created_at,
+        expires_at,
+        is_premium,
+        listing_photos ( url, is_primary )
+      `, { count: 'exact' })
+      .gt('expires_at', new Date().toISOString())
+      .order('is_premium', { ascending: false }) // Premium listings first
+      .order('created_at', { ascending: false }); // Then by creation date
 
-      if (category && category !== 'tutte') {
-        query = query.eq('category', category);
+    if (category && category !== 'tutte') {
+      query = query.eq('category', category);
+    }
+    if (city && city !== 'tutte') {
+      query = query.eq('city', city);
+    }
+    if (keyword) {
+      query = query.or(`title.ilike.%${keyword}%,description.ilike.%${keyword}%`);
+    }
+
+    const from = (currentPage - 1) * LISTINGS_PER_PAGE;
+    const to = from + LISTINGS_PER_PAGE - 1;
+    query = query.range(from, to);
+
+    const { data, error, count } = await query;
+
+    if (error) {
+      console.error("Errore nella ricerca degli annunci:", error);
+      setError("Si è verificato un errore durante la ricerca. Riprova più tardi.");
+    } else {
+      if (count) {
+        setTotalPages(Math.ceil(count / LISTINGS_PER_PAGE));
       }
-      if (city && city !== 'tutte') {
-        query = query.eq('city', city);
+      if (data) {
+        setListings(data as Listing[]);
       }
-      if (keyword) {
-        query = query.or(`title.ilike.%${keyword}%,description.ilike.%${keyword}%`);
-      }
-
-      const from = (currentPage - 1) * LISTINGS_PER_PAGE;
-      const to = from + LISTINGS_PER_PAGE - 1;
-      query = query.range(from, to);
-
-      const { data, error, count } = await query;
-
-      if (error) {
-        console.error("Errore nella ricerca degli annunci:", error);
-        setError("Si è verificato un errore durante la ricerca. Riprova più tardi.");
-      } else {
-        if (count) {
-          setTotalPages(Math.ceil(count / LISTINGS_PER_PAGE));
-        }
-        if (data) {
-          setListings(data as Listing[]);
-        }
-      }
-      setLoading(false);
-    };
-
-    fetchListings();
+    }
+    setLoading(false);
   }, [category, city, keyword, currentPage]);
+
+  useEffect(() => {
+    fetchListings();
+  }, [fetchListings]);
 
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= totalPages) {
