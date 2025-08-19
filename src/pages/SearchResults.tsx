@@ -35,6 +35,7 @@ const SearchResults = () => {
         created_at,
         expires_at,
         is_premium,
+        age,
         listing_photos ( url, is_primary )
       `, { count: 'exact' })
       .gt('expires_at', new Date().toISOString())

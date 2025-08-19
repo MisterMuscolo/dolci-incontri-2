@@ -55,6 +55,7 @@ const MyListings = () => {
         created_at,
         expires_at,
         is_premium,
+        age,
         listing_photos ( url, is_primary )
       `)
       .eq('user_id', user.id)
