@@ -41,11 +41,15 @@ serve(async (req) => {
     }
 
     const emailHtml = `
-      <p>Hai ricevuto una nuova risposta per il tuo annuncio: "<strong>${listing.title}</strong>"</p>
+      <p>Ciao!</p>
+      <p>Hai ricevuto una nuova risposta per il tuo annuncio "<strong>${listing.title}</strong>" su Dolci Incontri.</p>
       <p><strong>Da:</strong> ${fromEmail}</p>
       <hr>
       <p><strong>Messaggio:</strong></p>
       <p style="white-space: pre-wrap; border-left: 2px solid #eee; padding-left: 1em;">${message}</p>
+      <hr>
+      <p>Puoi rispondere direttamente a questa email per contattare l'utente.</p>
+      <p>A presto su Dolci Incontri!</p>
     `;
 
     const res = await fetch('https://api.resend.com/emails', {
