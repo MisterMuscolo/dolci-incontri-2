@@ -161,43 +161,11 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
           </div>
         </Link>
       </div>
-      {listing.is_premium && (
-        // Conditional rendering for clickable badge
-        showControls ? (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button 
-                variant="default" 
-                size="sm" 
-                className="bg-yellow-500 hover:bg-yellow-600 text-white absolute top-2 left-1/2 -translate-x-1/2 z-20 px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1"
-              >
-                <Rocket className="h-3 w-3" /> Premium
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Annuncio Premium</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Questo annuncio è già Premium. Gli annunci Premium appaiono in cima ai risultati di ricerca e possono avere fino a 5 foto.
-                  <br/><br/>
-                  Vuoi estendere la sua visibilità o acquistare più crediti?
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Chiudi</AlertDialogCancel>
-                <Link to="/buy-credits">
-                  <AlertDialogAction className="bg-rose-500 hover:bg-rose-600">
-                    Acquista Crediti
-                  </AlertDialogAction>
-                </Link>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        ) : (
-          <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white absolute top-2 left-1/2 -translate-x-1/2 z-20">
-            <Rocket className="h-3 w-3 mr-1" /> Premium
-          </Badge>
-        )
+      {/* This badge is for when showControls is FALSE (e.g., search results) */}
+      {!showControls && listing.is_premium && (
+        <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white absolute top-2 left-1/2 -translate-x-1/2 z-20">
+          <Rocket className="h-3 w-3 mr-1" /> Premium
+        </Badge>
       )}
       {showControls && (
         <div className="flex-shrink-0 flex md:flex-col justify-end md:justify-center items-center gap-2 p-4 border-t md:border-t-0 md:border-l">
@@ -207,7 +175,37 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
               <span className="hidden md:inline">Modifica</span>
             </Button>
           </Link>
-          {!listing.is_premium && (
+          {listing.is_premium ? (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  className="w-full bg-yellow-500 hover:bg-yellow-600 text-white flex items-center gap-1"
+                >
+                  <Rocket className="h-4 w-4" /> Premium
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Annuncio Premium</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Questo annuncio è già Premium. Gli annunci Premium appaiono in cima ai risultati di ricerca e possono avere fino a 5 foto.
+                    <br/><br/>
+                    Vuoi estendere la sua visibilità o acquistare più crediti?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Chiudi</AlertDialogCancel>
+                  <Link to="/buy-credits">
+                    <AlertDialogAction className="bg-rose-500 hover:bg-rose-600">
+                      Acquista Crediti
+                    </AlertDialogAction>
+                  </Link>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          ) : (
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="default" size="sm" className="w-full bg-green-500 hover:bg-green-600 text-white">
