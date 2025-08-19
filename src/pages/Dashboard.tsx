@@ -83,84 +83,80 @@ const Dashboard = () => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <Link to="/my-listings">
-              <Card className="w-full transition-shadow hover:shadow-lg cursor-pointer bg-white hover:bg-gray-50">
-                <CardHeader>
-                  <CardTitle className="text-3xl font-semibold flex items-center gap-4">
-                    <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center">
-                      <LayoutGrid className="h-10 w-10 text-rose-500" />
-                    </div>
-                    <span className="text-gray-800">I Miei Annunci</span>
-                  </CardTitle>
-                  <CardDescription className="ml-[88px]">Visualizza e gestisci i tuoi annunci.</CardDescription> {/* Modificato ml */}
-                </CardHeader>
-                <CardContent>
-                  {loading ? (
-                    <Skeleton className="h-8 w-3/4" />
-                  ) : (
-                    <p className="text-gray-600 text-xl">
-                      Hai <span className="font-bold text-rose-500">{totalListingsCount}</span> annunci attivi
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-            </Link>
-          </div>
-
-          <div className="space-y-6">
-            <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
+        <div className="space-y-6"> {/* Modificato da grid a space-y */}
+          <Link to="/my-listings">
+            <Card className="w-full transition-shadow hover:shadow-lg cursor-pointer bg-white hover:bg-gray-50">
               <CardHeader>
-                <Link to="/credit-history" className="block">
-                  <CardTitle className="text-xl font-semibold flex items-center gap-4"> {/* Aumentato il gap */}
-                    <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center"> {/* Aumentato il padding */}
-                      <Wallet className="h-10 w-10 text-rose-500" /> {/* Ingrandita l'icona */}
-                    </div>
-                    <span>Crediti</span>
-                  </CardTitle>
-                </Link>
-                <CardDescription className="ml-[88px]">Acquista e gestisci i tuoi crediti.</CardDescription> {/* Modificato ml */}
+                <CardTitle className="text-3xl font-semibold flex items-center gap-4">
+                  <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center">
+                    <LayoutGrid className="h-10 w-10 text-rose-500" />
+                  </div>
+                  <span className="text-gray-800">I Miei Annunci</span>
+                </CardTitle>
+                <CardDescription className="ml-[88px]">Visualizza e gestisci i tuoi annunci.</CardDescription>
               </CardHeader>
               <CardContent>
                 {loading ? (
-                  <div className="space-y-2">
-                    <Skeleton className="h-6 w-full" />
-                    <Skeleton className="h-6 w-full" />
-                  </div>
+                  <Skeleton className="h-8 w-3/4" />
                 ) : (
-                  <div className="flex flex-col gap-2">
-                    <p className="text-gray-600 text-lg">
-                      Disponibili: <span className="font-bold text-rose-500">{currentCredits !== null ? currentCredits : 0}</span>
-                    </p>
-                    <p className="text-gray-600 text-lg">
-                      Utilizzati: <span className="font-bold text-gray-800">{totalCreditsSpent}</span>
-                    </p>
-                  </div>
+                  <p className="text-gray-600 text-xl">
+                    Hai <span className="font-bold text-rose-500">{totalListingsCount}</span> annunci attivi
+                  </p>
                 )}
-                <Link to="/buy-credits">
-                  <Button className="bg-rose-500 hover:bg-rose-600 mt-4">Acquista crediti</Button>
-                </Link>
               </CardContent>
             </Card>
-            
-            <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
-              <CardHeader>
-                <Link to="/profile-settings" className="block">
-                  <CardTitle className="text-xl font-semibold flex items-center gap-4"> {/* Aumentato il gap */}
-                    <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center"> {/* Aumentato il padding */}
-                      <Settings className="h-10 w-10 text-rose-500" /> {/* Ingrandita l'icona */}
-                    </div>
-                    <span>Impostazioni</span>
-                  </CardTitle>
-                </Link>
-                <CardDescription className="ml-[88px]">Gestisci le impostazioni del tuo account.</CardDescription> {/* Modificato ml */}
-              </CardHeader>
-              <CardContent>
-                {/* Il pulsante "Modifica profilo" è stato rimosso in quanto il titolo della card è già cliccabile */}
-              </CardContent>
-            </Card>
-          </div>
+          </Link>
+
+          <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
+            <CardHeader>
+              <Link to="/credit-history" className="block">
+                <CardTitle className="text-xl font-semibold flex items-center gap-4">
+                  <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center">
+                    <Wallet className="h-10 w-10 text-rose-500" />
+                  </div>
+                  <span>Crediti</span>
+                </CardTitle>
+              </Link>
+              <CardDescription className="ml-[88px]">Acquista e gestisci i tuoi crediti.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-6 w-full" />
+                  <Skeleton className="h-6 w-full" />
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <p className="text-gray-600 text-lg">
+                    Disponibili: <span className="font-bold text-rose-500">{currentCredits !== null ? currentCredits : 0}</span>
+                  </p>
+                  <p className="text-gray-600 text-lg">
+                    Utilizzati: <span className="font-bold text-gray-800">{totalCreditsSpent}</span>
+                  </p>
+                </div>
+              )}
+              <Link to="/buy-credits">
+                <Button className="bg-rose-500 hover:bg-rose-600 mt-4">Acquista crediti</Button>
+              </Link>
+            </CardContent>
+          </Card>
+          
+          <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
+            <CardHeader>
+              <Link to="/profile-settings" className="block">
+                <CardTitle className="text-xl font-semibold flex items-center gap-4">
+                  <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center">
+                    <Settings className="h-10 w-10 text-rose-500" />
+                  </div>
+                  <span>Impostazioni</span>
+                </CardTitle>
+              </Link>
+              <CardDescription className="ml-[88px]">Gestisci le impostazioni del tuo account.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {/* Il pulsante "Modifica profilo" è stato rimosso in quanto il titolo della card è già cliccabile */}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
