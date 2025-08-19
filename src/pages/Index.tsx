@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { italianProvinces } from '@/data/provinces';
-import { Heart, MapPin, Search, Users, GenderFemale, GenderMale } from 'lucide-react'; // Importa icone corrette
+import { Heart, MapPin, Search, Users, User } from 'lucide-react'; // Importa icone corrette e rimuovi quelle problematiche
 import { Card, CardContent } from '@/components/ui/card'; // Importa Card e CardContent
 
 interface IndexProps {
@@ -37,8 +37,8 @@ export default function Index({ session }: IndexProps) {
     { value: 'donna-cerca-uomo', label: 'Donna cerca Uomo', icon: Heart },
     { value: 'uomo-cerca-donna', label: 'Uomo cerca Donna', icon: Heart },
     { value: 'coppie', label: 'Coppie', icon: Users },
-    { value: 'uomo-cerca-uomo', label: 'Uomo cerca Uomo', icon: GenderMale }, // Icona corretta
-    { value: 'donna-cerca-donna', label: 'Donna cerca Donna', icon: GenderFemale }, // Icona corretta
+    { value: 'uomo-cerca-uomo', label: 'Uomo cerca Uomo', icon: User }, // Icona corretta
+    { value: 'donna-cerca-donna', label: 'Donna cerca Donna', icon: User }, // Icona corretta
   ];
 
   return (
