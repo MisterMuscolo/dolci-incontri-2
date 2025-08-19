@@ -31,7 +31,7 @@ const creditPackages: CreditPackage[] = [
     id: 'base',
     name: 'Base',
     credits: 50,
-    price: 9.99,
+    price: 11.99, // Aggiornato
     description: 'Ideale per iniziare a esplorare.',
     features: ['50 crediti'],
   },
@@ -39,8 +39,8 @@ const creditPackages: CreditPackage[] = [
     id: 'popolare',
     name: 'Popolare',
     credits: 110,
-    price: 19.99,
-    originalPrice: 21.95, // (110 / 50) * 9.99 = 2.2 * 9.99 = 21.978 -> arrotondato
+    price: 24.99, // Aggiornato
+    originalPrice: (110 / 50) * 11.99, // Ricalcolato
     description: 'Più crediti per più opportunità.',
     features: ['110 crediti'],
     recommended: true, // Questo è il pacchetto consigliato
@@ -49,8 +49,8 @@ const creditPackages: CreditPackage[] = [
     id: 'avanzato',
     name: 'Avanzato',
     credits: 240,
-    price: 39.99,
-    originalPrice: 47.95, // (240 / 50) * 9.99 = 4.8 * 9.99 = 47.952 -> arrotondato
+    price: 49.99, // Aggiornato
+    originalPrice: (240 / 50) * 11.99, // Ricalcolato
     description: 'Per chi cerca il meglio.',
     features: ['240 crediti', 'Supporto prioritario'],
   },
@@ -58,8 +58,8 @@ const creditPackages: CreditPackage[] = [
     id: 'pro',
     name: 'Pro',
     credits: 500,
-    price: 79.99,
-    originalPrice: 99.90, // (500 / 50) * 9.99 = 10 * 9.99 = 99.9 -> arrotondato
+    price: 99.99, // Aggiornato
+    originalPrice: (500 / 50) * 11.99, // Ricalcolato
     description: 'Massima visibilità e interazioni.',
     features: ['500 crediti', 'Annunci in evidenza'],
   },
@@ -67,8 +67,8 @@ const creditPackages: CreditPackage[] = [
     id: 'dominatore',
     name: 'Dominatore',
     credits: 1200,
-    price: 179.99,
-    originalPrice: 239.76, // (1200 / 50) * 9.99 = 24 * 9.99 = 239.76 -> arrotondato
+    price: 199.99, // Aggiornato
+    originalPrice: (1200 / 50) * 11.99, // Ricalcolato
     description: 'Il pacchetto definitivo per i più attivi.',
     features: ['1200 crediti', 'Tutti i vantaggi premium'],
   },
