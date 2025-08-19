@@ -170,13 +170,28 @@ const ListingDetails = () => {
             Indietro
           </Button>
         </div>
-        <div className={cn("grid grid-cols-1 gap-8", hasPhotos && "lg:grid-cols-5")}>
+        <div className="max-w-3xl mx-auto space-y-6"> {/* Centralize and stack elements */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-3xl font-bold text-gray-800">{listing.title}</CardTitle>
+              <div className="flex flex-wrap gap-2 pt-4">
+                <Badge variant="secondary" className="capitalize"><Tag className="h-4 w-4 mr-1.5" />{listing.category.replace(/-/g, ' ')}</Badge>
+                <Badge variant="outline"><MapPin className="h-4 w-4 mr-1.5" />{listing.city}{listing.zone && `, ${listing.zone}`}</Badge>
+                <Badge variant="outline"><User className="h-4 w-4 mr-1.5" />{listing.age} anni</Badge>
+                <Badge variant="outline" className="text-xs">
+                  <CalendarDays className="h-4 w-4 mr-1.5" />
+                  {format(new Date(listing.created_at), 'dd MMMM', { locale: it })} {/* Formato data ridotto */}
+                </Badge>
+              </div>
+            </CardHeader>
+          </Card>
+
           {hasPhotos && (
-            <div className="lg:col-span-3">
+            <div> {/* Photo section */}
               <AspectRatio ratio={16 / 10} className="bg-gray-100 rounded-lg overflow-hidden mb-4">
                 <img src={activePhoto!} alt={listing.title} className="w-full h-full object-cover" />
               </AspectRatio>
-              {listing.listing_photos.length > 1 && ( // Mostra le miniature solo se c'è più di una foto da visualizzare
+              {listing.listing_photos.length > 1 && (
                 <div className="flex gap-2 overflow-x-auto pb-2">
                   {listing.listing_photos.map((photo) => (
                     <button key={photo.id} onClick={() => setActivePhoto(photo.url)} className={cn("w-24 h-24 rounded-md overflow-hidden flex-shrink-0 ring-offset-2 ring-offset-gray-50", activePhoto === photo.url && 'ring-2 ring-rose-500')}>
@@ -188,77 +203,60 @@ const ListingDetails = () => {
             </div>
           )}
 
-          <div className={cn("space-y-6", hasPhotos ? "lg:col-span-2" : "lg:col-span-5")}>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-3xl font-bold text-gray-800">{listing.title}</CardTitle>
-                <div className="flex flex-wrap gap-2 pt-4">
-                  <Badge variant="secondary" className="capitalize"><Tag className="h-4 w-4 mr-1.5" />{listing.category.replace(/-/g, ' ')}</Badge>
-                  <Badge variant="outline"><MapPin className="h-4 w-4 mr-1.5" />{listing.city}{listing.zone && `, ${listing.zone}`}</Badge>
-                  <Badge variant="outline"><User className="h-4 w-4 mr-1.5" />{listing.age} anni</Badge>
-                  <Badge variant="outline" className="text-xs">
-                    <CalendarDays className="h-4 w-4 mr-1.5" />
-                    {format(new Date(listing.created_at), 'dd MMMM', { locale: it })} {/* Formato data ridotto */}
-                  </Badge>
-                </div>
-              </CardHeader>
-            </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-xl"><BookText className="h-5 w-5 text-rose-500" /> Descrizione</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600 whitespace-pre-wrap">{listing.description}</p>
+            </CardContent>
+          </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl"><BookText className="h-5 w-5 text-rose-500" /> Descrizione</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 whitespace-pre-wrap">{listing.description}</p>
-              </CardContent>
-            </Card>
-
-            <div className="flex justify-center py-4">
-              <Dialog open={isReplyDialogOpen} onOpenChange={setIsReplyDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button className="bg-rose-500 hover:bg-rose-600 text-lg px-8 py-6 rounded-lg shadow-lg flex items-center gap-2">
-                    <Mail className="h-6 w-6" /> Rispondi
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
-                  <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2"><Mail className="h-5 w-5 text-rose-500" /> Invia un messaggio</DialogTitle>
-                    <DialogDescription>
-                      Compila il modulo per inviare un messaggio all'autore dell'annuncio.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-                      <FormField
-                        control={form.control}
-                        name="fromEmail"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>La tua Email</FormLabel>
-                            <FormControl><Input type="email" placeholder="iltuoindirizzo@email.com" {...field} /></FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="message"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Messaggio</FormLabel>
-                            <FormControl><Textarea placeholder="Scrivi qui il tuo messaggio..." className="min-h-[100px]" {...field} /></FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600" disabled={isSubmitting}>
-                        {isSubmitting ? 'Invio in corso...' : 'Invia Messaggio'}
-                      </Button>
-                    </form>
-                  </Form>
-                </DialogContent>
-              </Dialog>
-            </div>
+          <div className="flex justify-center py-4">
+            <Dialog open={isReplyDialogOpen} onOpenChange={setIsReplyDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-rose-500 hover:bg-rose-600 text-lg px-8 py-6 rounded-lg shadow-lg flex items-center gap-2">
+                  <Mail className="h-6 w-6" /> Rispondi
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2"><Mail className="h-5 w-5 text-rose-500" /> Invia un messaggio</DialogTitle>
+                  <DialogDescription>
+                    Compila il modulo per inviare un messaggio all'autore dell'annuncio.
+                  </DialogDescription>
+                </DialogHeader>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+                    <FormField
+                      control={form.control}
+                      name="fromEmail"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>La tua Email</FormLabel>
+                          <FormControl><Input type="email" placeholder="iltuoindirizzo@email.com" {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="message"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Messaggio</FormLabel>
+                          <FormControl><Textarea placeholder="Scrivi qui il tuo messaggio..." className="min-h-[100px]" {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600" disabled={isSubmitting}>
+                      {isSubmitting ? 'Invio in corso...' : 'Invia Messaggio'}
+                    </Button>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </div>
