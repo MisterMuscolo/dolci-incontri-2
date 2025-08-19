@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Eye, Ban, CheckCircle } from 'lucide-react';
+import { Eye, Ban, CheckCircle, Flag, XCircle } from 'lucide-react'; // Aggiunte Flag e XCircle
 import {
   AlertDialog,
   AlertDialogAction,
