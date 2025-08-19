@@ -21,6 +21,7 @@ interface ImageUploaderProps {
   onFilesChange: (files: File[]) => void; // For new files to be uploaded
   onPrimaryIndexChange: (index: number | null) => void; // For new files primary index
   onExistingPhotosUpdated: (updatedPhotos: ExistingPhoto[]) => void; // Callback for parent to update existing photos state
+  hideMainPreview?: boolean; // Nuova proprietà
 }
 
 export const ImageUploader = ({
@@ -31,6 +32,7 @@ export const ImageUploader = ({
   onFilesChange,
   onPrimaryIndexChange,
   onExistingPhotosUpdated,
+  hideMainPreview = false, // Valore predefinito
 }: ImageUploaderProps) => {
   const [newlySelectedFiles, setNewlySelectedFiles] = useState<File[]>([]);
   const [newlySelectedPreviews, setNewlySelectedPreviews] = useState<string[]>([]);
@@ -245,7 +247,8 @@ export const ImageUploader = ({
 
   return (
     <div className="space-y-4">
-      {mainPreview && (
+      {/* Conditionally render main preview based on hideMainPreview prop */}
+      {!hideMainPreview && mainPreview && (
         <div className="mb-4">
           <p className="text-sm text-gray-500 mb-2">Anteprima foto principale:</p>
           <AspectRatio ratio={16 / 10} className="bg-gray-100 rounded-lg overflow-hidden">

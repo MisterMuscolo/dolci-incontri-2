@@ -226,13 +226,13 @@ const NewListing = () => {
                   control={form.control}
                   name="description"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Descrizione *</FormLabel>
-                      <FormControl><Textarea placeholder="Descrivi cosa cerchi..." className="min-h-[120px]" {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                      <FormItem>
+                        <FormLabel>Descrizione *</FormLabel>
+                        <FormControl><Textarea placeholder="Descrivi cosa cerchi..." className="min-h-[120px]" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <FormField
                     control={form.control}
@@ -258,8 +258,7 @@ const NewListing = () => {
                   />
                 </div>
                 <div>
-                  <FormLabel>Fotografie</FormLabel>
-                  <p className="text-sm text-gray-500 mb-2">Puoi caricare delle foto. La prima sarà la foto principale.</p>
+                  {/* Rimosse le etichette 'Fotografie' e la sua descrizione */}
                   <ImageUploader
                     listingId={undefined} // Non disponibile per un nuovo annuncio
                     userId={currentUserId ?? undefined} // Passa l'ID utente se disponibile
@@ -268,6 +267,7 @@ const NewListing = () => {
                     onFilesChange={setFiles}
                     onPrimaryIndexChange={setPrimaryIndex}
                     onExistingPhotosUpdated={() => {}} // Non fa nulla per un nuovo annuncio
+                    hideMainPreview={true} // Nasconde l'anteprima principale
                   />
                 </div>
                 <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600" disabled={isLoading}>
