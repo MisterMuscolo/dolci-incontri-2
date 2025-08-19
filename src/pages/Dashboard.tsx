@@ -78,7 +78,9 @@ const Dashboard = () => {
             <h1 className="text-3xl font-bold">La Mia Dashboard</h1>
             <p className="text-gray-600 text-sm mt-1">Gestisci i tuoi annunci, crediti e impostazioni del tuo account.</p>
           </div>
-          {/* Rimosso il pulsante "Crea nuovo annuncio" duplicato qui */}
+          <Link to="/new-listing">
+            <Button className="bg-rose-500 hover:bg-rose-600">Crea nuovo annuncio</Button>
+          </Link>
         </div>
 
         <div className="space-y-4">
@@ -152,7 +154,17 @@ const Dashboard = () => {
               <CardDescription className="ml-[88px]">Gestisci le impostazioni del tuo account.</CardDescription>
             </CardHeader>
             <CardContent>
-              {/* Il pulsante "Modifica profilo" è stato rimosso in quanto il titolo della card è già cliccabile */}
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Cambia Password</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Aggiorna la tua password per mantenere il tuo account sicuro.
+                </p>
+                <Link to="/change-password">
+                  <Button variant="outline" className="border-rose-500 text-rose-500 hover:bg-rose-50 hover:text-rose-600">
+                    Cambia Password
+                  </Button>
+                </Link>
+              </div>
             </CardContent>
           </Card>
         </div>

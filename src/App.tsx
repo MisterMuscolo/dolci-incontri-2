@@ -25,7 +25,8 @@ import Termini from "./pages/Termini";
 import Privacy from "./pages/Privacy"; 
 import Contatti from "./pages/Contatti";
 import PromoteListingOptions from "./pages/PromoteListingOptions";
-import RegistrationSuccess from "./pages/RegistrationSuccess"; // Importa la nuova pagina
+import RegistrationSuccess from "./pages/RegistrationSuccess";
+import ChangePassword from "./pages/ChangePassword"; // Importa la nuova pagina
 
 const queryClient = new QueryClient();
 
@@ -187,6 +188,10 @@ const App = () => {
               <Route 
                 path="/profile-settings" 
                 element={session ? (isBanned ? <Navigate to="/banned" /> : <ProfileSettings />) : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/change-password" 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <ChangePassword />) : <Navigate to="/auth" />} 
               />
               <Route 
                 path="/my-listings" 
