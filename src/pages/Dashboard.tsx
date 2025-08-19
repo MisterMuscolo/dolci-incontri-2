@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ListFilter, Wallet, Settings } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"; // Importa CardDescription
+import { Wallet, Settings, LayoutGrid } from "lucide-react"; // Importa LayoutGrid
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -56,8 +56,11 @@ const Dashboard = () => {
   return (
     <div className="bg-gray-50 p-6 flex-grow">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">La tua Dashboard</h1>
+        <div className="flex justify-between items-center mb-4"> {/* Ridotto mb per fare spazio al sottotitolo */}
+          <div>
+            <h1 className="text-3xl font-bold">La Mia Dashboard</h1>
+            <p className="text-gray-600 text-sm mt-1">Gestisci i tuoi annunci, crediti e impostazioni del tuo account.</p>
+          </div>
           <Link to="/new-listing">
             <Button className="bg-rose-500 hover:bg-rose-600">Crea nuovo annuncio</Button>
           </Link>
@@ -69,16 +72,17 @@ const Dashboard = () => {
               <Card className="w-full transition-shadow hover:shadow-lg cursor-pointer bg-white hover:bg-gray-50">
                 <CardHeader>
                   <CardTitle className="text-2xl font-semibold flex items-center gap-2">
-                    <ListFilter className="h-6 w-6 text-rose-500" />
-                    <span className="text-gray-800">I miei annunci</span>
+                    <LayoutGrid className="h-6 w-6 text-rose-500" /> {/* Nuova icona */}
+                    <span className="text-gray-800">I Miei Annunci</span> {/* Nuovo testo */}
                   </CardTitle>
+                  <CardDescription>Visualizza e gestisci i tuoi annunci.</CardDescription> {/* Nuovo sottotitolo */}
                 </CardHeader>
                 <CardContent>
                   {loading ? (
                     <Skeleton className="h-8 w-3/4" />
                   ) : (
                     <p className="text-gray-600 text-xl">
-                      Annunci attivi: <span className="font-bold text-rose-500">{totalListingsCount}</span>
+                      Hai <span className="font-bold text-rose-500">{totalListingsCount}</span> annunci attivi
                     </p>
                   )}
                 </CardContent>
