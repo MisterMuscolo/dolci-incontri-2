@@ -160,7 +160,7 @@ const BuyCredits = () => {
                 <div className="flex flex-col text-left flex-grow">
                   <CardTitle className="text-lg font-bold text-rose-600">{pkg.name}</CardTitle>
                   <p className="text-xl font-extrabold text-gray-900">
-                    {pkg.credits} <span className="text-rose-500">crediti</span>
+                    {pkg.credits} <span className="text-gray-900">Crediti</span>
                   </p>
                 </div>
 
