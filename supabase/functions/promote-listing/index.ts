@@ -70,44 +70,36 @@ serve(async (req) => {
     let promoStart: Date;
     let promoEnd: Date;
 
+    // Calculate current local time based on the offset sent from client
+    const currentLocalTime = new Date(now.getTime() - timezoneOffsetMinutes * 60 * 1000);
+
     if (promotionType === 'day') {
         const [startHourStr, startMinuteStr] = timeSlot.split('-')[0].split(':');
         const localStartHour = parseInt(startHourStr);
         const localStartMinute = parseInt(startMinuteStr);
 
-        // Calculate the total minutes from midnight for the selected local time
-        const totalLocalMinutes = localStartHour * 60 + localStartMinute;
-        // Adjust to UTC minutes using the client's timezone offset
-        // timezoneOffsetMinutes is (UTC - local) in minutes. So, local + offset = UTC.
-        const totalUTCMinutes = totalLocalMinutes + timezoneOffsetMinutes;
+        // Create a date object for the selected time slot in the client's local timezone for today
+        const targetLocalTimeToday = new Date(currentLocalTime.getFullYear(), currentLocalTime.getMonth(), currentLocalTime.getDate(), localStartHour, localStartMinute, 0, 0);
 
-        // Create a Date object for the current UTC day (midnight UTC)
-        const currentUTCDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
-
-        // Set the UTC hours and minutes based on the calculated UTC time
-        const targetTimeTodayUTC = new Date(currentUTCDate.getTime());
-        targetTimeTodayUTC.setUTCHours(Math.floor(totalUTCMinutes / 60));
-        targetTimeTodayUTC.setUTCMinutes(totalUTCMinutes % 60);
-        targetTimeTodayUTC.setUTCSeconds(0);
-        targetTimeTodayUTC.setUTCMilliseconds(0);
-
-        if (targetTimeTodayUTC.getTime() <= now.getTime()) {
-            // If the selected time slot (converted to UTC) for today has already passed or is current, start promotion immediately
+        if (targetLocalTimeToday.getTime() <= currentLocalTime.getTime()) {
+            // If the selected time slot for today has already passed or is current, start promotion immediately (from now UTC)
             promoStart = now;
         } else {
-            // If the selected time slot (converted to UTC) is in the future today, schedule for that time
-            promoStart = targetTimeTodayUTC;
+            // If the selected time slot is in the future today, convert it to UTC for promoStart
+            promoStart = new Date(targetLocalTimeToday.getTime() + timezoneOffsetMinutes * 60 * 1000);
         }
         promoEnd = new Date(promoStart.getTime() + durationHours * 60 * 60 * 1000);
 
     } else { // night mode
-        const startHour = 23; // 23:00 UTC
-        const startMinute = 0;
-        promoStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), startHour, startMinute, 0, 0));
-        if (promoStart.getTime() < now.getTime()) {
-            // If 23:00 UTC today has already passed, schedule for tomorrow
-            promoStart.setUTCDate(promoStart.getUTCDate() + 1);
+        // Target 23:00 local time
+        const targetLocalNightStart = new Date(currentLocalTime.getFullYear(), currentLocalTime.getMonth(), currentLocalTime.getDate(), 23, 0, 0, 0);
+
+        if (targetLocalNightStart.getTime() <= currentLocalTime.getTime()) {
+            // If 23:00 local time today has already passed, schedule for 23:00 local time tomorrow
+            targetLocalNightStart.setDate(targetLocalNightStart.getDate() + 1);
         }
+        // Convert the local target time to UTC for promoStart
+        promoStart = new Date(targetLocalNightStart.getTime() + timezoneOffsetMinutes * 60 * 1000);
         promoEnd = new Date(promoStart.getTime() + durationHours * 60 * 60 * 1000);
     }
 

@@ -86,6 +86,15 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
     ? format(dateToDisplay, dateFormat, { locale: it }) 
     : 'N/D';
 
+  const getPromotionDetails = (mode: string | null) => {
+    if (mode === 'day') {
+        return 'Il tuo annuncio sarà in evidenza durante il giorno, con 1 risalita immediata. Apparirà in cima ai risultati di ricerca e potrà avere fino a 5 foto.';
+    } else if (mode === 'night') {
+        return 'Il tuo annuncio avrà massima visibilità durante le ore notturne, con 5 risalite più frequenti durante il periodo. Apparirà in cima ai risultati di ricerca e potrà avere fino a 5 foto.';
+    }
+    return 'Gli annunci Premium appaiono in cima ai risultati di ricerca e possono avere fino a 5 foto.';
+  };
+
   const handleDeleteListing = async () => {
     setIsDeleting(true);
     const toastId = showLoading('Eliminazione annuncio in corso...');
@@ -259,7 +268,7 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
                   <AlertDialogDescription>
                     Questo annuncio è già stato promosso e la sua visibilità Premium inizierà il {promoStart ? format(promoStart, 'dd/MM/yyyy HH:mm', { locale: it }) : 'N/D'}.
                     <br/><br/>
-                    Gli annunci Premium appaiono in cima ai risultati di ricerca e possono avere fino a 5 foto.
+                    {getPromotionDetails(listing.promotion_mode)}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
