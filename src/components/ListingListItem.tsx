@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '@/components/ui/carousel';
 import Autoplay from 'embla-carousel-autoplay';
 
 export interface Listing {
@@ -90,8 +90,8 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
     <Card className="w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row">
       <Link to={`/listing/${listing.id}`} className="flex-grow block hover:bg-gray-50/50">
         <div className="flex flex-col sm:flex-row">
-          {listing.is_premium && listing.listing_photos.length > 1 ? (
-            <div className="sm:w-1/4 lg:w-1/5 flex-shrink-0">
+          {listing.is_premium && listing.listing_photos.length > 0 ? ( {/* Changed to > 0 to handle single premium photo */}
+            <div className="sm:w-1/4 lg:w-1/5 flex-shrink-0 relative"> {/* Added relative for positioning arrows */}
               <Carousel
                 plugins={[
                   Autoplay({
@@ -112,11 +112,13 @@ export const ListingListItem = ({ listing, showControls = false, showExpiryDate 
                     </CarouselItem>
                   ))}
                 </CarouselContent>
+                {listing.listing_photos.length > 1 && ( // Show arrows only if more than one photo
+                  <>
+                    <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10" />
+                    <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10" />
+                  </>
+                )}
               </Carousel>
-            </div>
-          ) : primaryPhoto && listing.is_premium ? ( // Single photo for premium or if only one exists
-            <div className="sm:w-1/4 lg:w-1/5 flex-shrink-0">
-              <img src={primaryPhoto} alt={listing.title} className="object-cover w-full h-48 sm:h-full" />
             </div>
           ) : null /* No photo for non-premium listings in list item */ }
           <div className="p-4 flex flex-col flex-grow">
