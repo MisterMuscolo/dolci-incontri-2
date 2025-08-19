@@ -26,11 +26,11 @@ const MyListings = () => {
         return;
       }
 
+      // Query per il conteggio totale degli annunci dell'utente (senza filtro scadenza per ora)
       const { count, error: countError } = await supabase
         .from('listings')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .gt('expires_at', new Date().toISOString());
+        .eq('user_id', user.id); // Rimosso il filtro .gt('expires_at', ...) per mostrare tutti gli annunci
 
       if (countError) {
         console.error("Errore nel conteggio degli annunci:", countError);
@@ -45,6 +45,7 @@ const MyListings = () => {
       const from = (currentPage - 1) * LISTINGS_PER_PAGE;
       const to = from + LISTINGS_PER_PAGE - 1;
 
+      // Query per recuperare gli annunci (senza filtro scadenza per ora)
       const { data, error } = await supabase
         .from('listings')
         .select(`
@@ -53,11 +54,10 @@ const MyListings = () => {
           category,
           city,
           created_at,
-          expires_at,  // Includi expires_at nella query
+          expires_at,
           listing_photos ( url, is_primary )
         `)
         .eq('user_id', user.id)
-        .gt('expires_at', new Date().toISOString())
         .order('created_at', { ascending: false })
         .range(from, to);
 
@@ -97,7 +97,7 @@ const MyListings = () => {
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl font-semibold">
-              Annunci attivi
+              Annunci
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -132,7 +132,7 @@ const MyListings = () => {
               </div>
             ) : (
               <div className="text-center py-8">
-                <p className="text-gray-600">Non hai ancora creato nessun annuncio attivo.</p>
+                <p className="text-gray-600">Non hai ancora creato nessun annuncio.</p>
                 <Link to="/new-listing" className="mt-4 inline-block">
                   <Button className="bg-rose-500 hover:bg-rose-600">Pubblica il tuo primo annuncio</Button>
                 </Link>
