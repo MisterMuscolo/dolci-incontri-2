@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react"; // Corretto: da '=>' a 'from'
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -88,9 +88,9 @@ const Dashboard = () => {
             <Link to="/my-listings">
               <Card className="w-full transition-shadow hover:shadow-lg cursor-pointer bg-white hover:bg-gray-50">
                 <CardHeader>
-                  <CardTitle className="text-3xl font-semibold flex items-center gap-3">
-                    <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center">
-                      <LayoutGrid className="h-8 w-8 text-rose-500" />
+                  <CardTitle className="text-3xl font-semibold flex items-center gap-4"> {/* Aumentato il gap */}
+                    <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center"> {/* Aumentato il padding */}
+                      <LayoutGrid className="h-10 w-10 text-rose-500" /> {/* Ingrandita l'icona */}
                     </div>
                     <span className="text-gray-800">I Miei Annunci</span>
                   </CardTitle>
@@ -113,9 +113,9 @@ const Dashboard = () => {
             <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
               <CardHeader>
                 <Link to="/credit-history" className="block">
-                  <CardTitle className="text-xl font-semibold flex items-center gap-3 cursor-pointer">
-                    <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center">
-                      <Wallet className="h-6 w-6 text-rose-500" />
+                  <CardTitle className="text-xl font-semibold flex items-center gap-4"> {/* Aumentato il gap */}
+                    <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center"> {/* Aumentato il padding */}
+                      <Wallet className="h-10 w-10 text-rose-500" /> {/* Ingrandita l'icona */}
                     </div>
                     <span>Crediti</span>
                   </CardTitle>
@@ -147,9 +147,9 @@ const Dashboard = () => {
             <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
               <CardHeader>
                 <Link to="/profile-settings" className="block">
-                  <CardTitle className="text-xl font-semibold flex items-center gap-3 cursor-pointer">
-                    <div className="bg-rose-100 p-3 rounded-md flex items-center justify-center">
-                      <Settings className="h-6 w-6 text-rose-500" />
+                  <CardTitle className="text-xl font-semibold flex items-center gap-4"> {/* Aumentato il gap */}
+                    <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center"> {/* Aumentato il padding */}
+                      <Settings className="h-10 w-10 text-rose-500" /> {/* Ingrandita l'icona */}
                     </div>
                     <span>Impostazioni</span>
                   </CardTitle>
