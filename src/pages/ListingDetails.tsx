@@ -1,37 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
-import { MapPin, Tag, User, Mail, BookText, ChevronLeft, X, CalendarDays, Rocket, Phone } from 'lucide-react';
+import { showError } from '@/utils/toast';
+import { MapPin, Tag, User, Mail, BookText, ChevronLeft, CalendarDays, Rocket, Phone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { it } from 'date-fns/locale'; // Importa la locale italiana
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogTrigger,
-  DialogClose,
-} from '@/components/ui/dialog';
-import { ReportListingDialog } from '@/components/ReportListingDialog'; // Importa il nuovo componente
-
-const replySchema = z.object({
-  message: z.string().min(10, 'Il messaggio deve contenere almeno 10 caratteri.'),
-  fromEmail: z.string().email('Inserisci un indirizzo email valido.'),
-});
+import { it } from 'date-fns/locale';
+import { ReportListingDialog } from '@/components/ReportListingDialog';
 
 type FullListing = {
   id: string;
@@ -44,7 +24,7 @@ type FullListing = {
   phone: string | null;
   created_at: string;
   expires_at: string;
-  is_premium: boolean; // Aggiunto is_premium
+  is_premium: boolean;
   promotion_mode: string | null;
   promotion_start_at: string | null;
   promotion_end_at: string | null;
@@ -57,13 +37,6 @@ const ListingDetails = () => {
   const [listing, setListing] = useState<FullListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [activePhoto, setActivePhoto] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isReplyDialogOpen, setIsReplyDialogOpen] = useState(false); // Stato per il dialog di risposta
-
-  const form = useForm<z.infer<typeof replySchema>>({
-    resolver: zodResolver(replySchema),
-    defaultValues: { message: '', fromEmail: '' },
-  });
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -104,53 +77,6 @@ const ListingDetails = () => {
     fetchListing();
   }, [id]);
 
-  useEffect(() => {
-    const fetchUserEmail = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user?.email) {
-        form.setValue('fromEmail', user.email);
-      }
-    };
-    fetchUserEmail();
-  }, [form]);
-
-  const onSubmit = async (values: z.infer<typeof replySchema>) => {
-    setIsSubmitting(true);
-    const toastId = showLoading('Invio del messaggio...');
-
-    const { error } = await supabase.functions.invoke('send-reply', {
-      body: {
-        listingId: id,
-        ...values,
-      },
-    });
-
-    dismissToast(toastId);
-
-    if (error) {
-      let errorMessage = 'Impossibile inviare il messaggio. Riprova più tardi.';
-      // @ts-ignore
-      if (error.context && typeof error.context.body === 'string') {
-        try {
-          // @ts-ignore
-          const errorBody = JSON.parse(error.context.body);
-          if (errorBody.error) {
-            errorMessage = errorBody.error;
-            }
-          } catch (e) {
-            console.error("Could not parse error response from edge function:", e);
-          }
-        }
-      showError(errorMessage);
-    } else {
-      showSuccess('Messaggio inviato con successo!');
-      form.reset();
-      setIsReplyDialogOpen(false); // Chiudi il dialog dopo l'invio
-    }
-
-    setIsSubmitting(false);
-  };
-
   if (loading) {
     return (
       <div className="container mx-auto p-6">
@@ -187,12 +113,12 @@ const ListingDetails = () => {
             Indietro
           </Button>
         </div>
-        <div className="max-w-3xl mx-auto space-y-6"> {/* Centralize and stack elements */}
-          <Card className="relative"> {/* Added relative to Card for absolute positioning */}
+        <div className="max-w-3xl mx-auto space-y-6">
+          <Card className="relative">
             <CardHeader>
               <CardTitle className="text-3xl font-bold text-gray-800">{listing.title}</CardTitle>
               {isActivePremium && (
-                <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white text-base px-3 py-1 rounded-full font-semibold flex items-center gap-1 w-fit absolute top-4 right-4"> {/* Positioned absolutely */}
+                <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white text-base px-3 py-1 rounded-full font-semibold flex items-center gap-1 w-fit absolute top-4 right-4">
                   <Rocket className="h-4 w-4" /> Premium
                 </Badge>
               )}
@@ -202,14 +128,14 @@ const ListingDetails = () => {
                 <Badge variant="outline"><User className="h-4 w-4 mr-1.5" />{listing.age} anni</Badge>
                 <Badge variant="outline" className="text-xs">
                   <CalendarDays className="h-4 w-4 mr-1.5" />
-                  {format(new Date(listing.created_at), 'dd MMMM', { locale: it })} {/* Formato data ridotto */}
+                  {format(new Date(listing.created_at), 'dd MMMM', { locale: it })}
                 </Badge>
               </div>
             </CardHeader>
           </Card>
 
           {hasPhotos && (
-            <div> {/* Photo section */}
+            <div>
               <AspectRatio ratio={16 / 10} className="bg-gray-100 rounded-lg overflow-hidden mb-4">
                 <img src={activePhoto!} alt={listing.title} className="w-full h-full object-cover" />
               </AspectRatio>
@@ -225,8 +151,7 @@ const ListingDetails = () => {
             </div>
           )}
 
-          {/* Pulsante per segnalare l'annuncio spostato qui */}
-          <div className="flex justify-end -mt-4 mb-4"> {/* Aggiunto margine negativo per avvicinarlo */}
+          <div className="flex justify-end -mt-4 mb-4">
             <ReportListingDialog listingId={listing.id} listingTitle={listing.title} buttonSize="sm" />
           </div>
 
@@ -239,62 +164,24 @@ const ListingDetails = () => {
             </CardContent>
           </Card>
 
-          {/* Sezione dei pulsanti di contatto */}
           <div className="flex flex-col sm:flex-row justify-center py-4 gap-4">
             {listing.phone && (
-              <a 
-                href={`tel:${listing.phone}`} 
-                className="w-full sm:w-auto" // Rende il link un blocco per il pulsante
+              <a
+                href={`tel:${listing.phone}`}
+                className="w-full sm:w-auto"
               >
                 <Button className="w-full bg-green-500 hover:bg-green-600 text-lg px-8 py-6 rounded-lg shadow-lg flex items-center justify-center gap-2">
                   <Phone className="h-6 w-6" /> {listing.phone}
                 </Button>
               </a>
             )}
-            <Dialog open={isReplyDialogOpen} onOpenChange={setIsReplyDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="w-full sm:w-auto bg-rose-500 hover:bg-rose-600 text-lg px-8 py-6 rounded-lg shadow-lg flex items-center justify-center gap-2">
-                  <Mail className="h-6 w-6" /> Rispondi
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2"><Mail className="h-5 w-5 text-rose-500" /> Invia un messaggio</DialogTitle>
-                  <DialogDescription>
-                    Compila il modulo per inviare un messaggio all'autore dell'annuncio.
-                  </DialogDescription>
-                </DialogHeader>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-                    <FormField
-                      control={form.control}
-                      name="fromEmail"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>La tua Email</FormLabel>
-                          <FormControl><Input type="email" placeholder="iltuoindirizzo@email.com" {...field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="message"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Messaggio</FormLabel>
-                          <FormControl><Textarea placeholder="Scrivi qui il tuo messaggio..." className="min-h-[100px]" {...field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600" disabled={isSubmitting}>
-                      {isSubmitting ? 'Invio in corso...' : 'Invia Messaggio'}
-                    </Button>
-                  </form>
-                </Form>
-              </DialogContent>
-            </Dialog>
+            {/* Il pulsante "Rispondi" ora reindirizza alla pagina di contatto generica */}
+            <Button
+              onClick={() => navigate('/contatti')}
+              className="w-full sm:w-auto bg-rose-500 hover:bg-rose-600 text-lg px-8 py-6 rounded-lg shadow-lg flex items-center justify-center gap-2"
+            >
+              <Mail className="h-6 w-6" /> Contatta l'autore
+            </Button>
           </div>
         </div>
       </div>

@@ -18,50 +18,48 @@ import { Textarea } from '@/components/ui/textarea';
 import { Flag, Mail } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
+import { useNavigate } from 'react-router-dom'; // Importa useNavigate
 
 const reportSchema = z.object({
-  reporterEmail: z.string().email('Inserisci un indirizzo email valido.'),
   reportMessage: z.string().min(20, 'Il messaggio di segnalazione deve contenere almeno 20 caratteri.'),
 });
 
 interface ReportListingDialogProps {
   listingId: string;
   listingTitle: string;
-  buttonSize?: "default" | "sm" | "lg" | "icon" | null | undefined; // Aggiunta la prop buttonSize
+  buttonSize?: "default" | "sm" | "lg" | "icon" | null | undefined;
 }
 
 export const ReportListingDialog = ({ listingId, listingTitle, buttonSize = "default" }: ReportListingDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate(); // Inizializza useNavigate
 
   const form = useForm<z.infer<typeof reportSchema>>({
     resolver: zodResolver(reportSchema),
     defaultValues: {
-      reporterEmail: '',
       reportMessage: '',
     },
   });
 
-  useEffect(() => {
-    const fetchUserEmail = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user?.email) {
-        form.setValue('reporterEmail', user.email);
-      }
-    };
-    fetchUserEmail();
-  }, [form]);
-
   const onSubmit = async (values: z.infer<typeof reportSchema>) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      showError('Devi essere autenticato per segnalare un annuncio.');
+      navigate('/auth?tab=login'); // Reindirizza al login
+      setIsOpen(false); // Chiudi il dialog
+      return;
+    }
+
     setIsSubmitting(true);
     const toastId = showLoading('Invio segnalazione in corso...');
 
     try {
-      const { error } = await supabase.functions.invoke('report-listing', {
+      const { error } = await supabase.functions.invoke('create-ticket', {
         body: {
           listingId: listingId,
-          reporterEmail: values.reporterEmail,
-          reportMessage: values.reportMessage,
+          subject: `Segnalazione annuncio: ${listingTitle}`,
+          messageContent: values.reportMessage,
         },
       });
 
@@ -69,8 +67,6 @@ export const ReportListingDialog = ({ listingId, listingTitle, buttonSize = "def
 
       if (error) {
         let errorMessage = 'Impossibile inviare la segnalazione. Riprova più tardi.';
-        // Log the full error object for debugging
-        console.error("Error invoking report-listing function:", error);
         // @ts-ignore
         if (error.context && typeof error.context.body === 'string') {
           try {
@@ -86,7 +82,7 @@ export const ReportListingDialog = ({ listingId, listingTitle, buttonSize = "def
         throw new Error(errorMessage);
       }
 
-      showSuccess('Segnalazione inviata con successo! Grazie per il tuo contributo.');
+      showSuccess('Segnalazione inviata con successo! Puoi visualizzare lo stato nella sezione "I miei ticket".');
       form.reset();
       setIsOpen(false); // Chiudi il dialog dopo l'invio
     } catch (error: any) {
@@ -102,7 +98,7 @@ export const ReportListingDialog = ({ listingId, listingTitle, buttonSize = "def
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          size={buttonSize} // Applica la dimensione qui
+          size={buttonSize}
           className="text-red-500 border-red-500 hover:bg-red-50 hover:text-red-600 flex items-center gap-2"
         >
           <Flag className="h-5 w-5" /> Segnala Annuncio
@@ -113,21 +109,11 @@ export const ReportListingDialog = ({ listingId, listingTitle, buttonSize = "def
           <DialogTitle className="flex items-center gap-2"><Flag className="h-5 w-5 text-red-500" /> Segnala Annuncio</DialogTitle>
           <DialogDescription>
             Segnala l'annuncio "{listingTitle}" se ritieni che violi le nostre linee guida.
+            Per inviare una segnalazione, devi essere autenticato.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-            <FormField
-              control={form.control}
-              name="reporterEmail"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>La tua Email</FormLabel>
-                  <FormControl><Input type="email" placeholder="iltuoindirizzo@email.com" {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <FormField
               control={form.control}
               name="reportMessage"
