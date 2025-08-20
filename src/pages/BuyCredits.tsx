@@ -21,6 +21,50 @@ interface CreditPackage {
   recommended?: boolean;
 }
 
+// Pacchetti di crediti hardcoded
+// *** IMPORTANTE: SOSTITUISCI GLI 'id' CON I TUOI REALI STRIPE PRICE ID ***
+const hardcodedCreditPackages: CreditPackage[] = [
+  {
+    id: "price_1PjX12abcdefghijklmn", // SOSTITUISCI CON IL TUO STRIPE PRICE ID REALE
+    name: "Pacchetto Piccolo",
+    credits: 50,
+    price: 5.00,
+    description: "50 crediti per provare il servizio.",
+    features: ["50 crediti"],
+    recommended: false,
+  },
+  {
+    id: "price_1PjY34opqrstuvwxyz", // SOSTITUISCI CON IL TUO STRIPE PRICE ID REALE
+    name: "Pacchetto Standard",
+    credits: 150,
+    price: 12.00,
+    originalPrice: 15.00,
+    description: "150 crediti con un piccolo sconto.",
+    features: ["150 crediti", "Risparmia 20%"],
+    recommended: true,
+  },
+  {
+    id: "price_1PjZ56ABCDEFGHIJKL", // SOSTITUISCI CON IL TUO STRIPE PRICE ID REALE
+    name: "Pacchetto Grande",
+    credits: 300,
+    price: 20.00,
+    originalPrice: 30.00,
+    description: "300 crediti per un uso prolungato.",
+    features: ["300 crediti", "Risparmia 33%"],
+    recommended: false,
+  },
+  {
+    id: "price_1PkA78MNOPQRSTUV", // SOSTITUISCI CON IL TUO STRIPE PRICE ID REALE
+    name: "Pacchetto Illimitato",
+    credits: 500,
+    price: 30.00,
+    originalPrice: 50.00,
+    description: "500 crediti per la massima libertà.",
+    features: ["500 crediti", "Risparmia 40%", "Il miglior valore!"],
+    recommended: false,
+  },
+];
+
 // Load Stripe outside of a component render to avoid recreating it
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
@@ -127,8 +171,8 @@ const BuyCredits = () => {
   const [selectedPackage, setSelectedPackage] = useState<CreditPackage | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loadingPaymentIntent, setLoadingPaymentIntent] = useState(false);
-  const [creditPackages, setCreditPackages] = useState<CreditPackage[]>([]); // State for dynamic packages
-  const [loadingPackages, setLoadingPackages] = useState(true);
+  // Ora i pacchetti di crediti sono hardcoded
+  const creditPackages = hardcodedCreditPackages; 
 
   const fetchCurrentCredits = useCallback(async () => {
     setLoadingCredits(true);
@@ -154,39 +198,10 @@ const BuyCredits = () => {
     setLoadingCredits(false);
   }, []);
 
-  const fetchCreditPackages = useCallback(async () => {
-    setLoadingPackages(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('list-credit-packages');
-      if (error) {
-        let errorMessage = 'Errore nel caricamento dei pacchetti di crediti.';
-        // @ts-ignore
-        if (error.context && typeof error.context.body === 'string') {
-          try {
-            // @ts-ignore
-            const errorBody = JSON.parse(error.context.body);
-            if (errorBody.error) {
-              errorMessage = errorBody.error;
-            }
-          } catch (e) {
-            console.error("Could not parse error response from edge function:", e);
-          }
-        }
-        throw new Error(errorMessage);
-      }
-      setCreditPackages(data as CreditPackage[]);
-    } catch (error: any) {
-      showError(error.message || 'Si è verificato un errore imprevisto durante il caricamento dei pacchetti.');
-      setCreditPackages([]);
-    } finally {
-      setLoadingPackages(false);
-    }
-  }, []);
-
   useEffect(() => {
     fetchCurrentCredits();
-    fetchCreditPackages();
-  }, [fetchCurrentCredits, fetchCreditPackages]);
+    // Rimosso il fetching dei pacchetti da Edge Function
+  }, [fetchCurrentCredits]);
 
   const handlePackageSelect = async (pkg: CreditPackage) => {
     setSelectedPackage(pkg);
@@ -276,11 +291,7 @@ const BuyCredits = () => {
         </Card>
 
         <h2 className="text-2xl font-bold text-gray-800 mt-8 mb-6">Scegli il tuo pacchetto:</h2>
-        {loadingPackages ? (
-          <div className="space-y-6">
-            {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}
-          </div>
-        ) : creditPackages.length === 0 ? (
+        {creditPackages.length === 0 ? (
           <p className="text-center text-gray-600">Nessun pacchetto di crediti disponibile. Riprova più tardi.</p>
         ) : (
           <div className="flex flex-col gap-6 mb-10">
