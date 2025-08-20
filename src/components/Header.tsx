@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart, LogOut, User, PlusCircle, Shield, LogIn, LayoutGrid, Wallet, Settings } from 'lucide-react'; // Aggiunto LogIn icona e altre icone per il menu
+import { Heart, LogOut, User, PlusCircle, Shield, LogIn, LayoutGrid, Wallet, Settings, Ticket } from 'lucide-react'; // Aggiunto Ticket icona
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -75,6 +75,10 @@ export const Header = ({ session, isAdmin }: HeaderProps) => {
                   <DropdownMenuItem onClick={() => navigate('/credit-history')}>
                     <Wallet className="mr-2 h-4 w-4" />
                     <span>Crediti</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/my-tickets')}> {/* Nuovo link per I Miei Ticket */}
+                    <Ticket className="mr-2 h-4 w-4" />
+                    <span>I Miei Ticket</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/profile-settings')}>
                     <Settings className="mr-2 h-4 w-4" />

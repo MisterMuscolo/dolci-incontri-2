@@ -27,10 +27,12 @@ const BannedUser = lazy(() => import("./pages/BannedUser"));
 const EditListing = lazy(() => import("./pages/EditListing"));
 const Termini = lazy(() => import("./pages/Termini"));
 const Privacy = lazy(() => import("./pages/Privacy"));
-const Contatti = lazy(() => import("./pages/Contatti"));
+const Contatti = lazy(() => import("./pages/Contatti")); // Ora è la pagina per creare un nuovo ticket
 const PromoteListingOptions = lazy(() => import("./pages/PromoteListingOptions"));
 const RegistrationSuccess = lazy(() => import("./pages/RegistrationSuccess"));
 const ChangePassword = lazy(() => import("./pages/ChangePassword"));
+const MyTickets = lazy(() => import("./pages/MyTickets")); // Nuova pagina
+const TicketDetails = lazy(() => import("./pages/TicketDetails")); // Nuova pagina
 
 const queryClient = new QueryClient();
 
@@ -205,9 +207,21 @@ const App = () => {
                 path="/contatti" 
                 element={
                   <Suspense fallback={<LoadingScreen />}>
-                    <Contatti />
+                    <Contatti /> {/* Ora è la pagina per creare un nuovo ticket */}
                   </Suspense>
                 } 
+              />
+              <Route 
+                path="/new-ticket" 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><Contatti /></Suspense>) : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/my-tickets" 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><MyTickets /></Suspense>) : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/my-tickets/:ticketId" 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><TicketDetails /></Suspense>) : <Navigate to="/auth" />} 
               />
               
               {/* Reindirizza gli utenti in base allo stato di autenticazione e al ruolo */}
@@ -262,14 +276,6 @@ const App = () => {
               <Route 
                 path="/change-password" 
                 element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><ChangePassword /></Suspense>) : <Navigate to="/auth" />} 
-              />
-              <Route 
-                path="/my-listings" 
-                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><MyListings /></Suspense>) : <Navigate to="/auth" />} 
-              />
-              <Route 
-                path="/credit-history" 
-                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><CreditHistory /></Suspense>) : <Navigate to="/auth" />} 
               />
               <Route path="*" element={<NotFound />} />
             </Route>

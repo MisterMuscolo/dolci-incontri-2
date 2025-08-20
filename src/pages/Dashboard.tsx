@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Wallet, Settings, LayoutGrid } from "lucide-react";
+import { Wallet, Settings, LayoutGrid, Ticket } from "lucide-react"; // Importa Ticket
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -135,6 +135,26 @@ const Dashboard = () => {
               )}
               <Link to="/buy-credits">
                 <Button className="bg-rose-500 hover:bg-rose-600 mt-4">Acquista crediti</Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Nuova Card per I Miei Ticket */}
+          <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
+            <CardHeader>
+              <Link to="/my-tickets" className="block">
+                <CardTitle className="text-2xl font-semibold flex items-center gap-4">
+                  <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center">
+                    <Ticket className="h-10 w-10 text-rose-500" />
+                  </div>
+                  <span>I Miei Ticket</span>
+                </CardTitle>
+              </Link>
+              <CardDescription className="ml-[88px]">Visualizza e gestisci le tue richieste di supporto.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link to="/new-ticket">
+                <Button className="bg-rose-500 hover:bg-rose-600 mt-4">Apri un nuovo ticket</Button>
               </Link>
             </CardContent>
           </Card>

@@ -2,7 +2,8 @@ import { UserManagementTable } from "@/components/admin/UserManagementTable";
 import { OverviewStats } from "@/components/admin/OverviewStats";
 import { CreditManagement } from "@/components/admin/CreditManagement";
 import { AllCreditTransactionsTable } from "@/components/admin/AllCreditTransactionsTable";
-import { ReportManagementTable } from "@/components/admin/ReportManagementTable"; // Importa il nuovo componente
+import { ReportManagementTable } from "@/components/admin/ReportManagementTable";
+import { TicketManagementTable } from "@/components/admin/TicketManagementTable"; // Importa il nuovo componente
 
 const AdminDashboard = () => {
   return (
@@ -16,7 +17,9 @@ const AdminDashboard = () => {
 
         <AllCreditTransactionsTable />
 
-        <ReportManagementTable /> {/* Aggiunto il componente per la gestione delle segnalazioni */}
+        <ReportManagementTable />
+        
+        <TicketManagementTable /> {/* Aggiunto il componente per la gestione dei ticket */}
         
         <UserManagementTable />
         
