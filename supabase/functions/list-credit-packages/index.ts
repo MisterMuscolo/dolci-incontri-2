@@ -8,6 +8,8 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  console.log('list-credit-packages function invoked.'); // Added for debugging deployment issues
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
