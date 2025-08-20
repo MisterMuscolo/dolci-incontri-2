@@ -91,12 +91,21 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage:
   const elements = useElements();
   const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPaymentElementReady, setIsPaymentElementReady] = useState(false); // Nuovo stato
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!stripe || !elements || !selectedPackage) {
       return;
+    }
+
+    // Controlla se il PaymentElement è pronto
+    if (!isPaymentElementReady) {
+      setMessage("Errore: Il modulo di pagamento non è ancora pronto. Attendi un momento e riprova.");
+      showError("Errore: Il modulo di pagamento non è ancora pronto. Attendi un momento e riprova.");
+      setIsLoading(false);
+      return; // Impedisci l'invio se non è pronto
     }
 
     setIsLoading(true);
@@ -108,10 +117,11 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage:
         throw new Error('Devi essere autenticato per completare l\'acquisto.');
       }
 
-      // Explicitly get the PaymentElement instance
+      // Recupera esplicitamente l'istanza di PaymentElement
       const paymentElement = elements.getElement(PaymentElement);
 
       if (!paymentElement) {
+        // Errore di fallback, anche se meno probabile con il controllo onReady
         setMessage("Errore: Il modulo di pagamento non è stato caricato correttamente. Riprova.");
         showError("Errore: Il modulo di pagamento non è stato caricato correttamente. Riprova.");
         setIsLoading(false);
@@ -119,13 +129,13 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage:
         return;
       }
 
-      // Confirm the payment on the client side
+      // Conferma il pagamento lato client
       const { error: confirmError } = await stripe.confirmPayment({
-        elements: paymentElement, // Pass the specific PaymentElement instance
+        elements: paymentElement, // Passa l'istanza specifica di PaymentElement
         confirmParams: {
-          return_url: `${window.location.origin}/credit-history`, // Redirect to credit history on success
+          return_url: `${window.location.origin}/credit-history`, // Reindirizza alla cronologia crediti in caso di successo
         },
-        redirect: 'if_required', // Handle redirect manually if needed
+        redirect: 'if_required', // Gestisci il reindirizzamento manualmente se necessario
       });
 
       if (confirmError) {
@@ -141,8 +151,8 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage:
         return;
       }
 
-      // If payment is successful (no redirect, or redirect handled by Stripe and returned to this page)
-      // Call the finalize-credit-purchase Edge Function
+      // Se il pagamento ha successo (nessun reindirizzamento, o reindirizzamento gestito da Stripe e ritorno a questa pagina)
+      // Chiama la funzione Edge 'finalize-credit-purchase'
       const { error: finalizeError } = await supabase.functions.invoke('finalize-credit-purchase', {
         body: {
           userId: user.id,
@@ -171,7 +181,7 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage:
       }
 
       showSuccess(`Hai acquistato ${selectedPackage.credits} crediti con successo!`);
-      onPurchaseSuccess(); // Notify parent component to navigate
+      onPurchaseSuccess(); // Notifica il componente padre per la navigazione
     } catch (error: any) {
       dismissToast(toastId);
       showError(error.message || 'Si è verificato un errore imprevisto durante l\'acquisto.');
@@ -182,8 +192,8 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage:
 
   return (
     <form id="payment-form" onSubmit={handleSubmit} className="space-y-6">
-      <PaymentElement id="payment-element" />
-      <Button disabled={isLoading || !stripe || !elements} id="submit" className="w-full bg-rose-500 hover:bg-rose-600">
+      <PaymentElement id="payment-element" onReady={() => setIsPaymentElementReady(true)} /> {/* Aggiunto onReady */}
+      <Button disabled={isLoading || !stripe || !elements || !isPaymentElementReady} id="submit" className="w-full bg-rose-500 hover:bg-rose-600"> {/* Disabilita finché non è pronto */}
         <span id="button-text">
           {isLoading ? "Elaborazione..." : `Paga €${selectedPackage?.price.toFixed(2)}`}
         </span>
