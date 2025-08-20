@@ -55,7 +55,7 @@ serve(async (req) => {
 
       <div style="border: 1px solid #eee; padding: 15px; margin-top: 30px; border-radius: 8px; background-color: #f9f9f9;">
         <p style="font-size: 14px; color: #555; text-align: center; margin: 0;">
-          Se ti serve aiuto, contattaci a: <a href="mailto:supporto@dolciincontri.com" style="color: #E54A70; text-decoration: underline;">supporto@dolciincontri.com</a>
+          Se ti serve aiuto, contattaci a: <a href="mailto:support@incontridolci.com" style="color: #E54A70; text-decoration: underline;">support@incontridolci.com</a>
         </p>
       </div>
       <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">

@@ -24,7 +24,7 @@ const BannedUser = () => {
           Esci
         </Button>
         <p className="text-sm text-gray-500 mt-4">
-          Per assistenza, contatta <a href="mailto:supporto@dolciincontri.it" className="text-rose-500 hover:underline">supporto@dolciincontri.it</a>
+          Per assistenza, contatta <a href="mailto:support@incontridolci.com" className="text-rose-500 hover:underline">support@incontridolci.com</a>
         </p>
       </div>
     </div>

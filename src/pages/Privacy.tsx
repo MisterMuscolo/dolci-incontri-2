@@ -57,7 +57,7 @@ const Privacy = () => {
           </p>
           <h2 className="text-xl font-semibold mt-6 mb-2">7. Contatti</h2>
           <p>
-            Per qualsiasi domanda sulla presente Privacy Policy, ti preghiamo di contattarci all'indirizzo <a href="mailto:supporto@dolciincontri.com" className="text-rose-500 hover:underline">supporto@dolciincontri.com</a>.
+            Per qualsiasi domanda sulla presente Privacy Policy, ti preghiamo di contattarci all'indirizzo <a href="mailto:support@incontridolci.com" className="text-rose-500 hover:underline">support@incontridolci.com</a>.
           </p>
         </div>
       </div>

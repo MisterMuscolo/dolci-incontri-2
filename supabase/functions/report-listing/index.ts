@@ -86,7 +86,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         from: 'Incontri Dolci <onboarding@resend.dev>', // Sender email
-        to: ['supporto@dolciincontri.com'], // Recipient email for support
+        to: ['support@incontridolci.com'], // Recipient email for support
         subject: `Segnalazione Annuncio: ${listing.title} (ID: ${listingId})`,
         html: emailHtml,
         reply_to: reporterEmail, // Allow support to reply directly to the reporter

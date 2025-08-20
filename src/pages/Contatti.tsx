@@ -27,10 +27,10 @@ const Contatti = () => {
             Scrivici a:
           </p>
           <a 
-            href="mailto:supporto@dolciincontri.com" 
+            href="mailto:support@incontridolci.com" 
             className="text-rose-500 hover:underline text-xl font-semibold"
           >
-            supporto@dolciincontri.com
+            support@incontridolci.com
           </a>
           <p className="text-sm text-gray-500 mt-4">
             Risponderemo il prima possibile.
