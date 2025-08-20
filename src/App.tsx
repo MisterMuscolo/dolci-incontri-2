@@ -3,32 +3,34 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
-import AdminDashboard from "./pages/AdminDashboard";
+import { useEffect, useState, lazy, Suspense } from "react"; // Import lazy and Suspense
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
-import NewListing from "./pages/NewListing";
-import BuyCredits from "./pages/BuyCredits";
-import ProfileSettings from "./pages/ProfileSettings";
+import { showError } from "./utils/toast";
+import { LoadingScreen } from "./components/LoadingScreen";
 import Layout from "./components/Layout";
-import SearchResults from "./pages/SearchResults";
-import ListingDetails from "./pages/ListingDetails";
-import MyListings from "./pages/MyListings";
-import CreditHistory from "./pages/CreditHistory";
-import UserListingsAdminView from "./pages/UserListingsAdminView";
-import BannedUser from "./pages/BannedUser";
-import EditListing from "./pages/EditListing";
-import Termini from "./pages/Termini"; 
-import Privacy from "./pages/Privacy"; 
-import Contatti from "./pages/Contatti";
-import PromoteListingOptions from "./pages/PromoteListingOptions";
-import RegistrationSuccess from "./pages/RegistrationSuccess";
-import ChangePassword from "./pages/ChangePassword";
-import { showError } from "./utils/toast"; // Import showError
-import { LoadingScreen } from "./components/LoadingScreen"; // Import the new component
+
+// Lazy load all page components
+const Index = lazy(() => import("./pages/Index"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const NewListing = lazy(() => import("./pages/NewListing"));
+const BuyCredits = lazy(() => import("./pages/BuyCredits"));
+const ProfileSettings = lazy(() => import("./pages/ProfileSettings"));
+const SearchResults = lazy(() => import("./pages/SearchResults"));
+const ListingDetails = lazy(() => import("./pages/ListingDetails"));
+const MyListings = lazy(() => import("./pages/MyListings"));
+const CreditHistory = lazy(() => import("./pages/CreditHistory"));
+const UserListingsAdminView = lazy(() => import("./pages/UserListingsAdminView"));
+const BannedUser = lazy(() => import("./pages/BannedUser"));
+const EditListing = lazy(() => import("./pages/EditListing"));
+const Termini = lazy(() => import("./pages/Termini"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Contatti = lazy(() => import("./pages/Contatti"));
+const PromoteListingOptions = lazy(() => import("./pages/PromoteListingOptions"));
+const RegistrationSuccess = lazy(() => import("./pages/RegistrationSuccess"));
+const ChangePassword = lazy(() => import("./pages/ChangePassword"));
 
 const queryClient = new QueryClient();
 
@@ -40,7 +42,7 @@ const App = () => {
 
   // Function to fetch user role
   const fetchUserRole = async (userId: string) => {
-    try { // Added try-catch here for robustness
+    try {
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('role')
@@ -66,7 +68,7 @@ const App = () => {
         console.error("App.tsx: Error fetching profile:", error);
         setIsAdmin(false);
         setIsBanned(false);
-        showError("Errore nel recupero del ruolo utente."); // Show error to user
+        showError("Errore nel recupero del ruolo utente.");
       } else {
         console.log("App.tsx: No profile found for user, isAdmin/isBanned set to FALSE");
         setIsAdmin(false);
@@ -76,14 +78,14 @@ const App = () => {
       console.error("App.tsx: Unexpected error in fetchUserRole:", err);
       setIsAdmin(false);
       setIsBanned(false);
-      showError("Errore inatteso nel recupero del ruolo utente."); // Show error to user
+      showError("Errore inatteso nel recupero del ruolo utente.");
     }
   };
 
   useEffect(() => {
     const getInitialSessionAndRole = async () => {
       console.log("App.tsx: Fetching initial session and role...");
-      setLoading(true); // Ensure loading is true at the very start of this effect
+      setLoading(true);
       try {
         const { data: { session: initialSession }, error: sessionError } = await supabase.auth.getSession();
         if (sessionError) {
@@ -108,7 +110,7 @@ const App = () => {
         setIsAdmin(false);
         setIsBanned(false);
       } finally {
-        setLoading(false); // Ensure loading is set to false
+        setLoading(false);
       }
     };
 
@@ -117,7 +119,7 @@ const App = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
       console.log("App.tsx: Auth state changed. Event:", _event, "New Session:", newSession);
       setSession(newSession);
-      setLoading(true); // Set loading to true while fetching new role
+      setLoading(true);
 
       try {
         if (newSession) {
@@ -132,7 +134,7 @@ const App = () => {
         setIsAdmin(false);
         setIsBanned(false);
       } finally {
-        setLoading(false); // Ensure loading is set to false
+        setLoading(false);
       }
     });
 
@@ -141,7 +143,7 @@ const App = () => {
 
   if (loading) {
     console.log("App.tsx: Displaying loading screen.");
-    return <LoadingScreen />; // Use the new component here
+    return <LoadingScreen />;
   }
 
   console.log("App.tsx: Rendering Layout with isAdmin:", isAdmin, "isBanned:", isBanned, "Session exists:", !!session);
@@ -159,71 +161,115 @@ const App = () => {
             <Route path="/registration-success" element={<RegistrationSuccess />} />
 
             <Route element={<Layout session={session} isAdmin={isAdmin} />}>
-              <Route path="/" element={<Index session={session} />} />
-              <Route path="/search" element={<SearchResults />} />
-              <Route path="/listing/:id" element={<ListingDetails />} />
-              <Route path="/termini" element={<Termini />} /> 
-              <Route path="/privacy" element={<Privacy />} /> 
-              <Route path="/contatti" element={<Contatti />} />
+              <Route 
+                path="/" 
+                element={
+                  <Suspense fallback={<LoadingScreen />}>
+                    <Index session={session} />
+                  </Suspense>
+                } 
+              />
+              <Route 
+                path="/search" 
+                element={
+                  <Suspense fallback={<LoadingScreen />}>
+                    <SearchResults />
+                  </Suspense>
+                } 
+              />
+              <Route 
+                path="/listing/:id" 
+                element={
+                  <Suspense fallback={<LoadingScreen />}>
+                    <ListingDetails />
+                  </Suspense>
+                } 
+              />
+              <Route 
+                path="/termini" 
+                element={
+                  <Suspense fallback={<LoadingScreen />}>
+                    <Termini />
+                  </Suspense>
+                } 
+              />
+              <Route 
+                path="/privacy" 
+                element={
+                  <Suspense fallback={<LoadingScreen />}>
+                    <Privacy />
+                  </Suspense>
+                } 
+              />
+              <Route 
+                path="/contatti" 
+                element={
+                  <Suspense fallback={<LoadingScreen />}>
+                    <Contatti />
+                  </Suspense>
+                } 
+              />
               
               {/* Reindirizza gli utenti in base allo stato di autenticazione e al ruolo */}
               <Route 
                 path="/auth" 
                 element={
                   !session ? (
-                    <Auth />
+                    <Suspense fallback={<LoadingScreen />}>
+                      <Auth />
+                    </Suspense>
                   ) : isBanned ? (
                     <Navigate to="/banned" />
                   ) : isAdmin ? (
-                    <Navigate to="/admin" /> // Reindirizza gli admin a /admin
+                    <Navigate to="/admin" />
                   ) : (
-                    <Navigate to="/dashboard" /> // Reindirizza gli utenti normali a /dashboard
+                    <Navigate to="/dashboard" />
                   )
                 } 
               />
               <Route 
                 path="/dashboard" 
-                element={session ? (isBanned ? <Navigate to="/banned" /> : <Dashboard />) : <Navigate to="/auth" />} 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><Dashboard /></Suspense>) : <Navigate to="/auth" />} 
               />
               <Route 
                 path="/admin" 
-                element={isAdmin ? <AdminDashboard /> : <Navigate to="/" />} 
+                element={isAdmin ? <Suspense fallback={<LoadingScreen />}><AdminDashboard /></Suspense> : <Navigate to="/" />} 
               />
               <Route 
                 path="/admin/users/:userId/listings" 
-                element={isAdmin ? <UserListingsAdminView /> : <Navigate to="/" />} 
+                element={isAdmin ? <Suspense fallback={<LoadingScreen />}><UserListingsAdminView /></Suspense> : <Navigate to="/" />} 
               />
               <Route 
                 path="/new-listing" 
-                element={session ? (isBanned ? <Navigate to="/banned" /> : <NewListing />) : <Navigate to="/auth" />} 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><NewListing /></Suspense>) : <Navigate to="/auth" />} 
               />
               <Route 
                 path="/edit-listing/:id" 
-                element={session ? (isBanned ? <Navigate to="/banned" /> : <EditListing />) : <Navigate to="/auth" />} 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><EditListing /></Suspense>) : <Navigate to="/auth" />} 
               />
               <Route 
                 path="/promote-listing/:listingId" 
-                element={session ? (isBanned ? <Navigate to="/banned" /> : <PromoteListingOptions />) : <Navigate to="/auth" />} 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><PromoteListingOptions /></Suspense>) : <Navigate to="/auth" />} 
               />
               <Route 
                 path="/buy-credits" 
-                element={session ? (isBanned ? <Navigate to="/banned" /> : <BuyCredits />) : <Navigate to="/auth" />} 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><BuyCredits /></Suspense>) : <Navigate to="/auth" />} 
               />
               <Route 
                 path="/profile-settings" 
-                element={session ? (isBanned ? <Navigate to="/banned" /> : <ProfileSettings />) : <Navigate to="/auth" />} 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><ProfileSettings /></Suspense>) : <Navigate to="/auth" />} 
               />
               <Route 
                 path="/change-password" 
-                element={session ? (isBanned ? <Navigate to="/banned" /> : <ChangePassword />) : <Navigate to="/auth" />} 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><ChangePassword /></Suspense>) : <Navigate to="/auth" />} 
               />
               <Route 
                 path="/my-listings" 
-                element={session ? (isBanned ? <Navigate to="/banned" /> : <MyListings />) : <Navigate to="/auth" />} 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><MyListings /></Suspense>) : <Navigate to="/auth" />} 
               />
               <Route 
                 path="/credit-history" 
-                element={session ? (isBanned ? <Navigate to="/banned" /> : <CreditHistory />) : <Navigate to="/auth" />} 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><CreditHistory /></Suspense>) : <Navigate to="/auth" />} 
               />
               <Route path="*" element={<NotFound />} />
             </Route>
