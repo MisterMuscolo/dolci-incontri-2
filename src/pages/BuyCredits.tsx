@@ -22,11 +22,10 @@ interface CreditPackage {
 }
 
 // Pacchetti di crediti hardcoded
-// *** IMPORTANTE: SOSTITUISCI GLI 'id' CON I TUOI REALI STRIPE PRICE ID ***
 const hardcodedCreditPackages: CreditPackage[] = [
   {
-    id: "price_1PjX12abcdefghijklmn", // SOSTITUISCI CON IL TUO STRIPE PRICE ID REALE
-    name: "Pacchetto Piccolo",
+    id: "price_1RuxX009Cz6joKQcplKPQDd0",
+    name: "Pacchetto Mini",
     credits: 50,
     price: 5.00,
     description: "50 crediti per provare il servizio.",
@@ -34,8 +33,8 @@ const hardcodedCreditPackages: CreditPackage[] = [
     recommended: false,
   },
   {
-    id: "price_1PjY34opqrstuvwxyz", // SOSTITUISCI CON IL TUO STRIPE PRICE ID REALE
-    name: "Pacchetto Standard",
+    id: "price_1RuxXu09Cz6joKQcVmLS7nIF",
+    name: "Pacchetto Base",
     credits: 150,
     price: 12.00,
     originalPrice: 15.00,
@@ -44,8 +43,8 @@ const hardcodedCreditPackages: CreditPackage[] = [
     recommended: true,
   },
   {
-    id: "price_1PjZ56ABCDEFGHIJKL", // SOSTITUISCI CON IL TUO STRIPE PRICE ID REALE
-    name: "Pacchetto Grande",
+    id: "price_1RuxYY09Cz6joKQc2UTL0eAD",
+    name: "Pacchetto Popolare",
     credits: 300,
     price: 20.00,
     originalPrice: 30.00,
@@ -54,13 +53,33 @@ const hardcodedCreditPackages: CreditPackage[] = [
     recommended: false,
   },
   {
-    id: "price_1PkA78MNOPQRSTUV", // SOSTITUISCI CON IL TUO STRIPE PRICE ID REALE
-    name: "Pacchetto Illimitato",
+    id: "price_1RuxZ709Cz6joKQceGEihLfq",
+    name: "Pacchetto Avanzato",
     credits: 500,
     price: 30.00,
     originalPrice: 50.00,
     description: "500 crediti per la massima libertà.",
     features: ["500 crediti", "Risparmia 40%", "Il miglior valore!"],
+    recommended: false,
+  },
+  {
+    id: "price_1RuxZa09Cz6joKQcZspW2M3A",
+    name: "Pacchetto Pro",
+    credits: 750,
+    price: 40.00,
+    originalPrice: 70.00,
+    description: "750 crediti per utenti esperti.",
+    features: ["750 crediti", "Risparmia 43%", "Per professionisti!"],
+    recommended: false,
+  },
+  {
+    id: "price_1Ruxa609Cz6joKQcimcXs8IO",
+    name: "Pacchetto Dominatore",
+    credits: 1000,
+    price: 50.00,
+    originalPrice: 100.00,
+    description: "1000 crediti per dominare la piattaforma.",
+    features: ["1000 crediti", "Risparmia 50%", "Il massimo!"],
     recommended: false,
   },
 ];
