@@ -2,17 +2,17 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ChevronLeft, Loader2 } from 'lucide-react'; // Importa Loader2
+import { ChevronLeft, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { Badge } from '@/components/ui/badge';
 import { loadStripe, StripeElementsOptions } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils'; // Importa cn
+import { cn } from '@/lib/utils';
 
 interface CreditPackage {
-  id: string; // This will now be the Stripe Price ID
+  id: string;
   name: string;
   credits: number;
   price: number;
@@ -22,7 +22,6 @@ interface CreditPackage {
   recommended?: boolean;
 }
 
-// Pacchetti di crediti hardcoded
 const hardcodedCreditPackages: CreditPackage[] = [
   {
     id: "price_1RyIB10BGBtuYZR68bk2mj93",
@@ -84,46 +83,44 @@ const hardcodedCreditPackages: CreditPackage[] = [
   },
 ];
 
-// Load Stripe outside of a component render to avoid recreating it
 const stripePromise = loadStripe("pk_live_51RtvDm0BGBtuYZR6M3gRknP73OQDQ94YWI2yrqC1dWVM7mPd6aYMArTfcSjsOXJRNY2SHn0b0ShXnaQkBJs6HXUL00FEOsjI6C");
 
 const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage: CreditPackage | null; onPurchaseSuccess: () => void }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [message, setMessage] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false); // For form submission
-  const [isPaymentElementReady, setIsPaymentElementReady] = useState(false); // For PaymentElement readiness
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPaymentElementReady, setIsPaymentElementReady] = useState(false);
 
-  // Effect to detect if PaymentElement is stuck loading
   useEffect(() => {
+    console.log("CheckoutForm: selectedPackage changed or clientSecret/elements/stripe updated. selectedPackage:", selectedPackage?.id, "clientSecret present:", !!elements?.clientSecret, "isPaymentElementReady:", isPaymentElementReady);
     let timeoutId: ReturnType<typeof setTimeout>;
-    if (!isPaymentElementReady && selectedPackage && elements && stripe) { // Only if a package is selected and Stripe/Elements are available
+    if (!isPaymentElementReady && selectedPackage && elements && stripe) {
       timeoutId = setTimeout(() => {
         setMessage("Il modulo di pagamento sta impiegando troppo tempo per caricarsi. Controlla la tua connessione internet o prova a disabilitare estensioni del browser (es. ad-blocker).");
         showError("Il modulo di pagamento sta impiegando troppo tempo per caricarsi. Controlla la tua connessione internet o prova a disabilitare estensioni del browser (es. ad-blocker).");
-        // Do not set isLoading to false here, as it's for submission.
-        // The button will remain disabled due to !isPaymentElementReady.
-      }, 15000); // 15 seconds timeout
+      }, 15000);
     }
     return () => clearTimeout(timeoutId);
-  }, [isPaymentElementReady, selectedPackage, elements, stripe]); // Dependencies for the effect
+  }, [isPaymentElementReady, selectedPackage, elements, stripe]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!stripe || !elements || !selectedPackage) {
+      console.error("Stripe, Elements, or selectedPackage not available.");
       return;
     }
 
-    // Ensure PaymentElement is ready before proceeding
     const paymentElement = elements.getElement(PaymentElement);
     if (!paymentElement || !isPaymentElementReady) {
       setMessage("Errore: Il modulo di pagamento non è ancora pronto. Attendi un momento e riprova.");
       showError("Errore: Il modulo di pagamento non è ancora pronto. Attendi un momento e riprova.");
+      console.error("PaymentElement not ready or not found.");
       return;
     }
 
-    setIsLoading(true); // Set loading for submission
+    setIsLoading(true);
     const toastId = showLoading(`Elaborazione pagamento per ${selectedPackage.name}...`);
 
     try {
@@ -165,10 +162,8 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage:
 
       if (finalizeError) {
         let errorMessage = 'Errore durante l\'aggiornamento dei crediti dopo il pagamento.';
-        // @ts-ignore
         if (finalizeError.context && typeof finalizeError.context.body === 'string') {
           try {
-            // @ts-ignore
             const errorBody = JSON.parse(finalizeError.context.body);
             if (errorBody.error) {
               errorMessage = errorBody.error;
@@ -198,9 +193,11 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage:
           <p className="ml-2 text-gray-600">Caricamento modulo di pagamento...</p>
         </div>
       )}
-      <div className={cn({ 'hidden': !isPaymentElementReady })}>
+      {/* Rimosso il condizionale 'hidden' per il debug */}
+      <div> 
+        {console.log("CheckoutForm: Rendering PaymentElement. isPaymentElementReady:", isPaymentElementReady)}
         <PaymentElement id="payment-element" onReady={() => {
-          console.log("Stripe PaymentElement is ready!"); // Added console log
+          console.log("Stripe PaymentElement is ready!");
           setIsPaymentElementReady(true);
         }} />
       </div>
@@ -221,7 +218,6 @@ const BuyCredits = () => {
   const [selectedPackage, setSelectedPackage] = useState<CreditPackage | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loadingPaymentIntent, setLoadingPaymentIntent] = useState(false);
-  // Ora i pacchetti di crediti sono hardcoded
   const creditPackages = hardcodedCreditPackages; 
 
   const fetchCurrentCredits = useCallback(async () => {
@@ -250,28 +246,25 @@ const BuyCredits = () => {
 
   useEffect(() => {
     fetchCurrentCredits();
-    // Rimosso il fetching dei pacchetti da Edge Function
   }, [fetchCurrentCredits]);
 
   const handlePackageSelect = async (pkg: CreditPackage) => {
     setSelectedPackage(pkg);
-    setClientSecret(null); // Reset client secret
+    setClientSecret(null);
     setLoadingPaymentIntent(true);
     const toastId = showLoading(`Preparazione pagamento per ${pkg.name}...`);
 
     try {
       const { data, error } = await supabase.functions.invoke('create-payment-intent', {
-        body: { packageId: pkg.id }, // Pass Stripe Price ID
+        body: { packageId: pkg.id },
       });
 
       dismissToast(toastId);
 
       if (error) {
         let errorMessage = 'Errore nella preparazione del pagamento.';
-        // @ts-ignore
         if (error.context && typeof error.context.body === 'string') {
           try {
-            // @ts-ignore
             const errorBody = JSON.parse(error.context.body);
             if (errorBody.error) {
               errorMessage = errorBody.error;
@@ -284,12 +277,12 @@ const BuyCredits = () => {
       }
 
       setClientSecret(data.clientSecret);
-      console.log("Client Secret ricevuto:", data.clientSecret); // Log del clientSecret
+      console.log("Client Secret ricevuto:", data.clientSecret);
       showSuccess('Pagamento pronto!');
     } catch (error: any) {
       dismissToast(toastId);
       showError(error.message || 'Si è verificato un errore imprevisto.');
-      setSelectedPackage(null); // Clear selected package on error
+      setSelectedPackage(null);
     } finally {
       setLoadingPaymentIntent(false);
     }
@@ -302,10 +295,10 @@ const BuyCredits = () => {
   const appearance: StripeElementsOptions['appearance'] = {
     theme: 'stripe',
     variables: {
-      colorPrimary: '#E54A70', // Rose-500
+      colorPrimary: '#E54A70',
       colorText: '#333',
       colorBackground: '#fff',
-      colorDanger: '#ef4444', // Red-500
+      colorDanger: '#ef4444',
       fontFamily: 'Arial, sans-serif',
     },
   };
@@ -402,6 +395,7 @@ const BuyCredits = () => {
               <CardDescription>Stai acquistando: <span className="font-semibold">{selectedPackage.name} ({selectedPackage.credits} crediti)</span> per <span className="font-semibold">€{selectedPackage.price.toFixed(2)}</span></CardDescription>
             </CardHeader>
             <CardContent>
+              {console.log("Attempting to render Elements with clientSecret:", clientSecret)}
               <Elements options={{ clientSecret, appearance }} stripe={stripePromise}>
                 <CheckoutForm selectedPackage={selectedPackage} onPurchaseSuccess={handlePurchaseSuccess} />
               </Elements>
