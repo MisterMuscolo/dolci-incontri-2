@@ -2,13 +2,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Loader2 } from 'lucide-react'; // Importa Loader2
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { Badge } from '@/components/ui/badge';
 import { loadStripe, StripeElementsOptions } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils'; // Importa cn
 
 interface CreditPackage {
   id: string; // This will now be the Stripe Price ID
@@ -101,32 +102,20 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage:
     }
 
     // Controlla se il PaymentElement è pronto
-    if (!isPaymentElementReady) {
+    const paymentElement = elements.getElement(PaymentElement);
+    if (!paymentElement || !isPaymentElementReady) { // Combine checks
       setMessage("Errore: Il modulo di pagamento non è ancora pronto. Attendi un momento e riprova.");
       showError("Errore: Il modulo di pagamento non è ancora pronto. Attendi un momento e riprova.");
-      setIsLoading(false);
-      return; // Impedisci l'invio se non è pronto
+      return;
     }
 
-    setIsLoading(true);
+    setIsLoading(true); // Only set isLoading to true if ready to proceed
     const toastId = showLoading(`Elaborazione pagamento per ${selectedPackage.name}...`);
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         throw new Error('Devi essere autenticato per completare l\'acquisto.');
-      }
-
-      // Recupera esplicitamente l'istanza di PaymentElement
-      const paymentElement = elements.getElement(PaymentElement);
-
-      if (!paymentElement) {
-        // Errore di fallback, anche se meno probabile con il controllo onReady
-        setMessage("Errore: Il modulo di pagamento non è stato caricato correttamente. Riprova.");
-        showError("Errore: Il modulo di pagamento non è stato caricato correttamente. Riprova.");
-        setIsLoading(false);
-        dismissToast(toastId);
-        return;
       }
 
       // Conferma il pagamento lato client
@@ -192,8 +181,16 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage:
 
   return (
     <form id="payment-form" onSubmit={handleSubmit} className="space-y-6">
-      <PaymentElement id="payment-element" onReady={() => setIsPaymentElementReady(true)} /> {/* Aggiunto onReady */}
-      <Button disabled={isLoading || !stripe || !elements || !isPaymentElementReady} id="submit" className="w-full bg-rose-500 hover:bg-rose-600"> {/* Disabilita finché non è pronto */}
+      {!isPaymentElementReady && (
+        <div className="flex items-center justify-center h-32 bg-gray-100 rounded-md">
+          <Loader2 className="h-8 w-8 animate-spin text-rose-500" />
+          <p className="ml-2 text-gray-600">Caricamento modulo di pagamento...</p>
+        </div>
+      )}
+      <div className={cn({ 'hidden': !isPaymentElementReady })}> {/* Hide PaymentElement until ready */}
+        <PaymentElement id="payment-element" onReady={() => setIsPaymentElementReady(true)} />
+      </div>
+      <Button disabled={isLoading || !isPaymentElementReady} id="submit" className="w-full bg-rose-500 hover:bg-rose-600">
         <span id="button-text">
           {isLoading ? "Elaborazione..." : `Paga €${selectedPackage?.price.toFixed(2)}`}
         </span>
