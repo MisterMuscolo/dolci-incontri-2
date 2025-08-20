@@ -10,6 +10,16 @@ import { loadStripe, StripeElementsOptions } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog'; // Importa i componenti Dialog
 
 interface CreditPackage {
   id: string;
@@ -38,7 +48,7 @@ const hardcodedCreditPackages: CreditPackage[] = [
     credits: 50,
     price: 11.99,
     description: "50 crediti per le tue prime interazioni.",
-    features: ["50 crediti"],
+        features: ["50 crediti"],
     recommended: false,
   },
   {
@@ -193,9 +203,7 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage:
           <p className="ml-2 text-gray-600">Caricamento modulo di pagamento...</p>
         </div>
       )}
-      {/* Rimosso il condizionale 'hidden' per il debug */}
       <div> 
-        {console.log("CheckoutForm: Rendering PaymentElement. isPaymentElementReady:", isPaymentElementReady)}
         <PaymentElement id="payment-element" onReady={() => {
           console.log("Stripe PaymentElement is ready!");
           setIsPaymentElementReady(true);
@@ -218,6 +226,7 @@ const BuyCredits = () => {
   const [selectedPackage, setSelectedPackage] = useState<CreditPackage | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loadingPaymentIntent, setLoadingPaymentIntent] = useState(false);
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false); // Nuovo stato per il dialog
   const creditPackages = hardcodedCreditPackages; 
 
   const fetchCurrentCredits = useCallback(async () => {
@@ -250,7 +259,7 @@ const BuyCredits = () => {
 
   const handlePackageSelect = async (pkg: CreditPackage) => {
     setSelectedPackage(pkg);
-    setClientSecret(null);
+    setClientSecret(null); // Reset client secret
     setLoadingPaymentIntent(true);
     const toastId = showLoading(`Preparazione pagamento per ${pkg.name}...`);
 
@@ -279,6 +288,7 @@ const BuyCredits = () => {
       setClientSecret(data.clientSecret);
       console.log("Client Secret ricevuto:", data.clientSecret);
       showSuccess('Pagamento pronto!');
+      setIsPaymentDialogOpen(true); // Apri il dialog dopo aver ricevuto il client secret
     } catch (error: any) {
       dismissToast(toastId);
       showError(error.message || 'Si è verificato un errore imprevisto.');
@@ -289,6 +299,7 @@ const BuyCredits = () => {
   };
 
   const handlePurchaseSuccess = () => {
+    setIsPaymentDialogOpen(false); // Chiudi il dialog
     navigate('/credit-history');
   };
 
@@ -388,20 +399,31 @@ const BuyCredits = () => {
           </div>
         )}
 
-        {selectedPackage && clientSecret && (
-          <Card className="mt-8 p-6 shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold text-gray-800">Completa il tuo acquisto</CardTitle>
-              <CardDescription>Stai acquistando: <span className="font-semibold">{selectedPackage.name} ({selectedPackage.credits} crediti)</span> per <span className="font-semibold">€{selectedPackage.price.toFixed(2)}</span></CardDescription>
-            </CardHeader>
-            <CardContent>
-              {console.log("Attempting to render Elements with clientSecret:", clientSecret)}
-              <Elements options={{ clientSecret, appearance }} stripe={stripePromise}>
-                <CheckoutForm selectedPackage={selectedPackage} onPurchaseSuccess={handlePurchaseSuccess} />
-              </Elements>
-            </CardContent>
-          </Card>
-        )}
+        {/* Il Dialog per il pagamento */}
+        <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold text-gray-800">Completa il tuo acquisto</DialogTitle>
+              {selectedPackage && (
+                <DialogDescription>
+                  Stai acquistando: <span className="font-semibold">{selectedPackage.name} ({selectedPackage.credits} crediti)</span> per <span className="font-semibold">€{selectedPackage.price.toFixed(2)}</span>
+                </DialogDescription>
+              )}
+            </DialogHeader>
+            <div className="py-4">
+              {selectedPackage && clientSecret ? (
+                <Elements options={{ clientSecret, appearance }} stripe={stripePromise}>
+                  <CheckoutForm selectedPackage={selectedPackage} onPurchaseSuccess={handlePurchaseSuccess} />
+                </Elements>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-48">
+                  <Loader2 className="h-10 w-10 animate-spin text-rose-500 mb-4" />
+                  <p className="text-gray-600">Preparazione del modulo di pagamento...</p>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
 
         <div className="text-center mt-8">
           <Link to="/dashboard">
