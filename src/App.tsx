@@ -27,6 +27,7 @@ import Contatti from "./pages/Contatti";
 import PromoteListingOptions from "./pages/PromoteListingOptions";
 import RegistrationSuccess from "./pages/RegistrationSuccess";
 import ChangePassword from "./pages/ChangePassword";
+import { showError } from "./utils/toast"; // Import showError
 
 const queryClient = new QueryClient();
 
@@ -38,51 +39,75 @@ const App = () => {
 
   // Function to fetch user role
   const fetchUserRole = async (userId: string) => {
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', userId)
-      .single();
+    try { // Added try-catch here for robustness
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .single();
 
-    if (profile) {
-      console.log("App.tsx: Profile role fetched:", profile.role);
-      if (profile.role === 'admin') {
-        setIsAdmin(true);
-        setIsBanned(false);
-        console.log("App.tsx: isAdmin set to TRUE");
-      } else if (profile.role === 'banned') {
-        setIsBanned(true);
+      if (profile) {
+        console.log("App.tsx: Profile role fetched:", profile.role);
+        if (profile.role === 'admin') {
+          setIsAdmin(true);
+          setIsBanned(false);
+          console.log("App.tsx: isAdmin set to TRUE");
+        } else if (profile.role === 'banned') {
+          setIsBanned(true);
+          setIsAdmin(false);
+          console.log("App.tsx: isBanned set to TRUE");
+        } else {
+          setIsAdmin(false);
+          setIsBanned(false);
+          console.log("App.tsx: isAdmin/isBanned set to FALSE (role was:", profile.role, ")");
+        }
+      } else if (error) {
+        console.error("App.tsx: Error fetching profile:", error);
         setIsAdmin(false);
-        console.log("App.tsx: isBanned set to TRUE");
+        setIsBanned(false);
+        showError("Errore nel recupero del ruolo utente."); // Show error to user
       } else {
+        console.log("App.tsx: No profile found for user, isAdmin/isBanned set to FALSE");
         setIsAdmin(false);
         setIsBanned(false);
-        console.log("App.tsx: isAdmin/isBanned set to FALSE (role was:", profile.role, ")");
       }
-    } else if (error) {
-      console.error("App.tsx: Error fetching profile:", error);
+    } catch (err: any) {
+      console.error("App.tsx: Unexpected error in fetchUserRole:", err);
       setIsAdmin(false);
       setIsBanned(false);
-    } else {
-      console.log("App.tsx: No profile found for user, isAdmin/isBanned set to FALSE");
-      setIsAdmin(false);
-      setIsBanned(false);
+      showError("Errore inatteso nel recupero del ruolo utente."); // Show error to user
     }
   };
 
   useEffect(() => {
     const getInitialSessionAndRole = async () => {
       console.log("App.tsx: Fetching initial session and role...");
-      const { data: { session: initialSession } } = await supabase.auth.getSession();
-      setSession(initialSession);
-
-      if (initialSession) {
-        await fetchUserRole(initialSession.user.id);
-      } else {
+      try {
+        const { data: { session: initialSession }, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) {
+          console.error("App.tsx: Error getting initial session:", sessionError);
+          showError("Errore nel recupero della sessione utente.");
+          setSession(null);
+          setIsAdmin(false);
+          setIsBanned(false);
+        } else {
+          setSession(initialSession);
+          if (initialSession) {
+            await fetchUserRole(initialSession.user.id);
+          } else {
+            setIsAdmin(false);
+            setIsBanned(false);
+          }
+        }
+      } catch (err: any) {
+        console.error("App.tsx: Unexpected error during initial session fetch:", err);
+        showError("Errore inatteso durante il caricamento iniziale.");
+        setSession(null);
         setIsAdmin(false);
         setIsBanned(false);
+      } finally {
+        setLoading(false); // Ensure loading is set to false
       }
-      setLoading(false); // Set loading to false after initial check
     };
 
     getInitialSessionAndRole();
@@ -92,13 +117,21 @@ const App = () => {
       setSession(newSession);
       setLoading(true); // Set loading to true while fetching new role
 
-      if (newSession) {
-        await fetchUserRole(newSession.user.id);
-      } else {
+      try {
+        if (newSession) {
+          await fetchUserRole(newSession.user.id);
+        } else {
+          setIsAdmin(false);
+          setIsBanned(false);
+        }
+      } catch (err: any) {
+        console.error("App.tsx: Unexpected error during auth state change:", err);
+        showError("Errore inatteso durante il cambio di stato dell'autenticazione.");
         setIsAdmin(false);
         setIsBanned(false);
+      } finally {
+        setLoading(false); // Ensure loading is set to false
       }
-      setLoading(false); // Set loading to false after role is determined
     });
 
     return () => subscription.unsubscribe();
