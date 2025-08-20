@@ -177,7 +177,7 @@ const ListingDetails = () => {
             )}
             {/* Il pulsante "Rispondi" ora reindirizza alla pagina di contatto generica */}
             <Button
-              onClick={() => navigate('/contatti')}
+              onClick={() => navigate('/new-ticket')}
               className="w-full sm:w-auto bg-rose-500 hover:bg-rose-600 text-lg px-8 py-6 rounded-lg shadow-lg flex items-center justify-center gap-2"
             >
               <Mail className="h-6 w-6" /> Contatta l'autore

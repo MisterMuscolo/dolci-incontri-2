@@ -17,7 +17,7 @@ const newTicketSchema = z.object({
   messageContent: z.string().min(20, 'Il messaggio deve contenere almeno 20 caratteri.'),
 });
 
-const Contatti = () => {
+const NewTicket = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -132,12 +132,11 @@ const Contatti = () => {
                   <Send className="h-4 w-4 mr-2" /> {isSubmitting ? 'Invio in corso...' : 'Invia Ticket'}
                 </Button>
               </form>
-            </Form>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
-export default Contatti;
+export default NewTicket;

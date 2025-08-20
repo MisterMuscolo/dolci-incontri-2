@@ -27,7 +27,7 @@ const BannedUser = lazy(() => import("./pages/BannedUser"));
 const EditListing = lazy(() => import("./pages/EditListing"));
 const Termini = lazy(() => import("./pages/Termini"));
 const Privacy = lazy(() => import("./pages/Privacy"));
-const Contatti = lazy(() => import("./pages/Contatti")); // Ora è la pagina per creare un nuovo ticket
+const NewTicket = lazy(() => import("./pages/NewTicket")); // Aggiornato l'import
 const PromoteListingOptions = lazy(() => import("./pages/PromoteListingOptions"));
 const RegistrationSuccess = lazy(() => import("./pages/RegistrationSuccess"));
 const ChangePassword = lazy(() => import("./pages/ChangePassword"));
@@ -204,16 +204,12 @@ const App = () => {
                 } 
               />
               <Route 
-                path="/contatti" 
+                path="/new-ticket" // Aggiornato il path
                 element={
                   <Suspense fallback={<LoadingScreen />}>
-                    <Contatti /> {/* Ora è la pagina per creare un nuovo ticket */}
+                    <NewTicket /> {/* Aggiornato il componente */}
                   </Suspense>
                 } 
-              />
-              <Route 
-                path="/new-ticket" 
-                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><Contatti /></Suspense>) : <Navigate to="/auth" />} 
               />
               <Route 
                 path="/my-tickets" 
