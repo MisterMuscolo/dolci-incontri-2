@@ -400,7 +400,16 @@ const BuyCredits = () => {
         )}
 
         {/* Il Dialog per il pagamento */}
-        <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
+        <Dialog 
+          open={isPaymentDialogOpen} 
+          onOpenChange={(open) => {
+            setIsPaymentDialogOpen(open);
+            if (!open) { // Se il dialog si sta chiudendo
+              setSelectedPackage(null); // Resetta il pacchetto selezionato
+              setClientSecret(null); // Resetta il client secret
+            }
+          }}
+        >
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold text-gray-800">Completa il tuo acquisto</DialogTitle>
