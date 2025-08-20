@@ -40,7 +40,7 @@ serve(async (req) => {
       throw new Error('RESEND_API_KEY is not set in environment variables. Cannot send email.');
     }
 
-    const listingLink = `https://dolciincontri.it/listing/${listingId}`;
+    const listingLink = `https://incontridolci.com/listing/${listingId}`;
 
     const emailHtml = `
       <div style="text-align: center; margin-bottom: 20px;">
@@ -60,9 +60,9 @@ serve(async (req) => {
       </div>
       <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
       <div style="text-align: center;">
-        <a href="https://dolciincontri.it/termini" style="color: #E54A70; text-decoration: underline; margin: 0 10px;">Termini e Condizioni</a>
-        <a href="https://dolciincontri.it/privacy" style="color: #E54A70; text-decoration: underline; margin: 0 10px;">Privacy Policy</a>
-        <a href="https://dolciincontri.it/contatti" style="color: #E54A70; text-decoration: underline; margin: 0 10px;">Contatti</a>
+        <a href="https://incontridolci.com/termini" style="color: #E54A70; text-decoration: underline; margin: 0 10px;">Termini e Condizioni</a>
+        <a href="https://incontridolci.com/privacy" style="color: #E54A70; text-decoration: underline; margin: 0 10px;">Privacy Policy</a>
+        <a href="https://incontridolci.com/contatti" style="color: #E54A70; text-decoration: underline; margin: 0 10px;">Contatti</a>
       </div>
     `;
 
