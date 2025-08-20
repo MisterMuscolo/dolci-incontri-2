@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -132,11 +132,12 @@ const NewTicket = () => {
                   <Send className="h-4 w-4 mr-2" /> {isSubmitting ? 'Invio in corso...' : 'Invia Ticket'}
                 </Button>
               </form>
-            </CardContent>
-          </Card>
-        </div>
+            </Form>
+          </CardContent>
+        </Card>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
 export default NewTicket;
