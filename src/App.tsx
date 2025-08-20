@@ -200,3 +200,4 @@ const App = () => {
 };
 
 export default App;
+// Commento aggiunto per forzare un nuovo deployment su Vercel.
