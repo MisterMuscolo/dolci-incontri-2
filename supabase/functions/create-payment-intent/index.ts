@@ -7,48 +7,43 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Define credit packages (ideally fetched from DB for dynamic pricing)
-const creditPackages = [
-  { id: 'mini', name: 'Mini', credits: 20, price: 4.99 },
-  { id: 'base', name: 'Base', credits: 50, price: 11.99 },
-  { id: 'popolare', name: 'Popolare', credits: 110, price: 24.99 },
-  { id: 'avanzato', name: 'Avanzato', credits: 240, price: 49.99 },
-  { id: 'pro', name: 'Pro', credits: 500, price: 99.99 },
-  { id: 'dominatore', name: 'Dominatore', credits: 1200, price: 199.99 },
-];
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { packageId } = await req.json();
+    const { packageId } = await req.json(); // packageId will now be the Stripe Price ID
 
     if (!packageId) {
-      throw new Error('Missing packageId');
+      throw new Error('Missing packageId (Stripe Price ID)');
     }
-
-    const selectedPackage = creditPackages.find(pkg => pkg.id === packageId);
-
-    if (!selectedPackage) {
-      throw new Error('Invalid packageId');
-    }
-
-    const amountInCents = Math.round(selectedPackage.price * 100); // Stripe expects amount in cents
 
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
       apiVersion: '2024-06-20',
       httpClient: Stripe.createFetchHttpClient(),
     });
 
+    // Retrieve the price object from Stripe
+    const price = await stripe.prices.retrieve(packageId, { expand: ['product'] });
+
+    if (!price || price.type !== 'one_time' || price.currency !== 'eur' || price.unit_amount === null) {
+      throw new Error('Invalid or unsupported Stripe Price ID.');
+    }
+
+    const product = price.product as Stripe.Product; // Cast to Stripe.Product as it's expanded
+    const credits = price.metadata?.credits ? parseInt(price.metadata.credits as string, 10) : 0;
+    const packageName = product.name; // Use product name as package name
+
+    const amountInCents = price.unit_amount; // Amount is already in cents from Stripe Price
+
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountInCents,
       currency: 'eur',
       metadata: {
-        packageId: selectedPackage.id,
-        credits: selectedPackage.credits,
-        packageName: selectedPackage.name,
+        priceId: price.id, // Store Stripe Price ID
+        credits: credits,
+        packageName: packageName,
       },
     });
 

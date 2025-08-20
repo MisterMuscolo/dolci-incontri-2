@@ -11,7 +11,7 @@ import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface CreditPackage {
-  id: string;
+  id: string; // This will now be the Stripe Price ID
   name: string;
   credits: number;
   price: number;
@@ -20,62 +20,6 @@ interface CreditPackage {
   features: string[];
   recommended?: boolean;
 }
-
-const creditPackages: CreditPackage[] = [
-  {
-    id: 'mini',
-    name: 'Mini',
-    credits: 20,
-    price: 4.99,
-    description: 'Ideale per un piccolo inizio.',
-    features: ['20 crediti'],
-  },
-  {
-    id: 'base',
-    name: 'Base',
-    credits: 50,
-    price: 11.99,
-    description: 'Ideale per iniziare a esplorare.',
-    features: ['50 crediti'],
-  },
-  {
-    id: 'popolare',
-    name: 'Popolare',
-    credits: 110,
-    price: 24.99,
-    originalPrice: (110 / 50) * 11.99,
-    description: 'Più crediti per più opportunità.',
-    recommended: true,
-    features: ['110 crediti'],
-  },
-  {
-    id: 'avanzato',
-    name: 'Avanzato',
-    credits: 240,
-    price: 49.99,
-    originalPrice: (240 / 50) * 11.99,
-    description: 'Per chi cerca il meglio.',
-    features: ['240 crediti', 'Supporto prioritario'],
-  },
-  {
-    id: 'pro',
-    name: 'Pro',
-    credits: 500,
-    price: 99.99,
-    originalPrice: (500 / 50) * 11.99,
-    description: 'Massima visibilità e interazioni.',
-    features: ['500 crediti', 'Annunci in evidenza'],
-  },
-  {
-    id: 'dominatore',
-    name: 'Dominatore',
-    credits: 1200,
-    price: 199.99,
-    originalPrice: (1200 / 50) * 11.99,
-    description: 'Il pacchetto definitivo per i più attivi.',
-    features: ['1200 crediti', 'Tutti i vantaggi premium'],
-  },
-];
 
 // Load Stripe outside of a component render to avoid recreating it
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
@@ -183,6 +127,8 @@ const BuyCredits = () => {
   const [selectedPackage, setSelectedPackage] = useState<CreditPackage | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loadingPaymentIntent, setLoadingPaymentIntent] = useState(false);
+  const [creditPackages, setCreditPackages] = useState<CreditPackage[]>([]); // State for dynamic packages
+  const [loadingPackages, setLoadingPackages] = useState(true);
 
   const fetchCurrentCredits = useCallback(async () => {
     setLoadingCredits(true);
@@ -208,9 +154,39 @@ const BuyCredits = () => {
     setLoadingCredits(false);
   }, []);
 
+  const fetchCreditPackages = useCallback(async () => {
+    setLoadingPackages(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('list-credit-packages');
+      if (error) {
+        let errorMessage = 'Errore nel caricamento dei pacchetti di crediti.';
+        // @ts-ignore
+        if (error.context && typeof error.context.body === 'string') {
+          try {
+            // @ts-ignore
+            const errorBody = JSON.parse(error.context.body);
+            if (errorBody.error) {
+              errorMessage = errorBody.error;
+            }
+          } catch (e) {
+            console.error("Could not parse error response from edge function:", e);
+          }
+        }
+        throw new Error(errorMessage);
+      }
+      setCreditPackages(data as CreditPackage[]);
+    } catch (error: any) {
+      showError(error.message || 'Si è verificato un errore imprevisto durante il caricamento dei pacchetti.');
+      setCreditPackages([]);
+    } finally {
+      setLoadingPackages(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchCurrentCredits();
-  }, [fetchCurrentCredits]);
+    fetchCreditPackages();
+  }, [fetchCurrentCredits, fetchCreditPackages]);
 
   const handlePackageSelect = async (pkg: CreditPackage) => {
     setSelectedPackage(pkg);
@@ -220,7 +196,7 @@ const BuyCredits = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke('create-payment-intent', {
-        body: { packageId: pkg.id },
+        body: { packageId: pkg.id }, // Pass Stripe Price ID
       });
 
       dismissToast(toastId);
@@ -300,54 +276,62 @@ const BuyCredits = () => {
         </Card>
 
         <h2 className="text-2xl font-bold text-gray-800 mt-8 mb-6">Scegli il tuo pacchetto:</h2>
-        <div className="flex flex-col gap-6 mb-10">
-          {creditPackages.map((pkg) => {
-            const discountPercentage = pkg.originalPrice && pkg.originalPrice > pkg.price
-              ? ((1 - pkg.price / pkg.originalPrice) * 100).toFixed(0)
-              : null;
+        {loadingPackages ? (
+          <div className="space-y-6">
+            {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}
+          </div>
+        ) : creditPackages.length === 0 ? (
+          <p className="text-center text-gray-600">Nessun pacchetto di crediti disponibile. Riprova più tardi.</p>
+        ) : (
+          <div className="flex flex-col gap-6 mb-10">
+            {creditPackages.map((pkg) => {
+              const discountPercentage = pkg.originalPrice && pkg.originalPrice > pkg.price
+                ? ((1 - pkg.price / pkg.originalPrice) * 100).toFixed(0)
+                : null;
 
-            return (
-              <Card 
-                key={pkg.id} 
-                className={`w-full flex items-center justify-between p-4 shadow-lg hover:shadow-xl transition-shadow duration-300 relative ${pkg.recommended ? 'border-2 border-rose-500' : ''}`}
-              >
-                {pkg.recommended && (
-                  <Badge className="absolute -top-3 left-4 bg-rose-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">
-                    Consigliato
-                  </Badge>
-                )}
-                <div className="flex flex-col text-left flex-grow">
-                  <CardTitle className="text-lg font-bold text-rose-600">{pkg.name}</CardTitle>
-                  <p className="text-xl font-extrabold text-gray-900">
-                    {pkg.credits} <span className="text-gray-900">Crediti</span>
-                  </p>
-                </div>
-
-                <div className="flex flex-col items-end text-right mx-4">
-                  {pkg.originalPrice && discountPercentage ? (
-                    <>
-                      <p className="text-sm text-gray-500 line-through">€{pkg.originalPrice.toFixed(2)}</p>
-                      <p className="text-xl font-bold text-gray-900">€{pkg.price.toFixed(2)}</p>
-                      <p className="text-xs text-green-600 font-semibold">
-                        Risparmi {discountPercentage}%
-                      </p>
-                    </>
-                  ) : (
-                    <p className="text-xl font-bold text-gray-900">€{pkg.price.toFixed(2)}</p>
-                  )}
-                </div>
-
-                <Button
-                  className="bg-rose-500 hover:bg-rose-600 text-sm py-2 px-4 flex-shrink-0"
-                  onClick={() => handlePackageSelect(pkg)}
-                  disabled={loadingPaymentIntent || selectedPackage?.id === pkg.id}
+              return (
+                <Card 
+                  key={pkg.id} 
+                  className={`w-full flex items-center justify-between p-4 shadow-lg hover:shadow-xl transition-shadow duration-300 relative ${pkg.recommended ? 'border-2 border-rose-500' : ''}`}
                 >
-                  {selectedPackage?.id === pkg.id && loadingPaymentIntent ? 'Caricamento...' : 'Seleziona'}
-                </Button>
-              </Card>
-            );
-          })}
-        </div>
+                  {pkg.recommended && (
+                    <Badge className="absolute -top-3 left-4 bg-rose-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">
+                      Consigliato
+                    </Badge>
+                  )}
+                  <div className="flex flex-col text-left flex-grow">
+                    <CardTitle className="text-lg font-bold text-rose-600">{pkg.name}</CardTitle>
+                    <p className="text-xl font-extrabold text-gray-900">
+                      {pkg.credits} <span className="text-gray-900">Crediti</span>
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col items-end text-right mx-4">
+                    {pkg.originalPrice && discountPercentage ? (
+                      <>
+                        <p className="text-sm text-gray-500 line-through">€{pkg.originalPrice.toFixed(2)}</p>
+                        <p className="text-xl font-bold text-gray-900">€{pkg.price.toFixed(2)}</p>
+                        <p className="text-xs text-green-600 font-semibold">
+                          Risparmi {discountPercentage}%
+                        </p>
+                      </>
+                    ) : (
+                      <p className="text-xl font-bold text-gray-900">€{pkg.price.toFixed(2)}</p>
+                    )}
+                  </div>
+
+                  <Button
+                    className="bg-rose-500 hover:bg-rose-600 text-sm py-2 px-4 flex-shrink-0"
+                    onClick={() => handlePackageSelect(pkg)}
+                    disabled={loadingPaymentIntent || selectedPackage?.id === pkg.id}
+                  >
+                    {selectedPackage?.id === pkg.id && loadingPaymentIntent ? 'Caricamento...' : 'Seleziona'}
+                  </Button>
+                </Card>
+              );
+            })}
+          </div>
+        )}
 
         {selectedPackage && clientSecret && (
           <Card className="mt-8 p-6 shadow-lg">
