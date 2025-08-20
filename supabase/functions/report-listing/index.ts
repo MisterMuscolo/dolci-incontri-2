@@ -39,7 +39,10 @@ serve(async (req) => {
     console.log('Listing found:', listing.title);
     
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
+    const adminContactEmail = Deno.env.get('ADMIN_CONTACT_EMAIL') || 'admin@incontridolci.com'; // Use a configurable admin email
+
     console.log('RESEND_API_KEY status:', resendApiKey ? 'Set' : 'Not Set');
+    console.log('Admin contact email:', adminContactEmail);
 
     if (!resendApiKey) {
       console.error('RESEND_API_KEY is not set in environment variables.');
@@ -66,7 +69,7 @@ serve(async (req) => {
 
       <div style="border: 1px solid #eee; padding: 15px; margin-top: 30px; border-radius: 8px; background-color: #f9f9f9;">
         <p style="font-size: 14px; color: #555; text-align: center; margin: 0;">
-          Questo è un messaggio automatico. Non rispondere a questa email.
+          Questo è un messaggio automatico. Per rispondere al segnalatore, usa l'email fornita. Per altre domande, visita il nostro <a href="https://incontridolci.com/contatti" style="color: #E54A70; text-decoration: underline;">form di contatto</a>.
         </p>
       </div>
       <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
@@ -86,7 +89,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         from: 'Incontri Dolci <onboarding@resend.dev>', // Sender email
-        to: ['support@incontridolci.com'], // Recipient email for support
+        to: [adminContactEmail], // Recipient email for support
         subject: `Segnalazione Annuncio: ${listing.title} (ID: ${listingId})`,
         html: emailHtml,
         reply_to: reporterEmail, // Allow support to reply directly to the reporter
