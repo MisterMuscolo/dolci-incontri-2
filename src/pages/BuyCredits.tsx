@@ -84,7 +84,7 @@ const hardcodedCreditPackages: CreditPackage[] = [
 ];
 
 // Load Stripe outside of a component render to avoid recreating it
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+const stripePromise = loadStripe("pk_live_51RtvDm0BGBtuYZR6M3gRknP73OQDQ94YWI2yrqC1dWVM7mPd6aYMArTfcSjsOXJRNY2SHn0b0ShXnaQkBJs6HXUL00FEOsjI6C");
 
 const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage: CreditPackage | null; onPurchaseSuccess: () => void }) => {
   const stripe = useStripe();
