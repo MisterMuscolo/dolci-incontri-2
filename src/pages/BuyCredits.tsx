@@ -24,7 +24,7 @@ interface CreditPackage {
 // Pacchetti di crediti hardcoded
 const hardcodedCreditPackages: CreditPackage[] = [
   {
-    id: "price_1RuxX009Cz6joKQcplKPQDd0",
+    id: "price_1RyIB10BGBtuYZR68bk2mj93",
     name: "Pacchetto Mini",
     credits: 20,
     price: 4.99,
@@ -33,7 +33,7 @@ const hardcodedCreditPackages: CreditPackage[] = [
     recommended: false,
   },
   {
-    id: "price_1RuxXu09Cz6joKQcVmLS7nIF",
+    id: "price_1RyIBc0BGBtuYZR6ohwCZ8yT",
     name: "Pacchetto Base",
     credits: 50,
     price: 11.99,
@@ -42,7 +42,7 @@ const hardcodedCreditPackages: CreditPackage[] = [
     recommended: false,
   },
   {
-    id: "price_1RuxYY09Cz6joKQc2UTL0eAD",
+    id: "price_1RyIEU0BGBtuYZR6YPyxH78e",
     name: "Pacchetto Popolare",
     credits: 110,
     price: 24.99,
@@ -52,7 +52,7 @@ const hardcodedCreditPackages: CreditPackage[] = [
     recommended: true,
   },
   {
-    id: "price_1RuxZ709Cz6joKQceGEihLfq",
+    id: "price_1RyIEv0BGBtuYZR6D2Pz0eqS",
     name: "Pacchetto Avanzato",
     credits: 240,
     price: 49.99,
@@ -62,7 +62,7 @@ const hardcodedCreditPackages: CreditPackage[] = [
     recommended: false,
   },
   {
-    id: "price_1RuxZa09Cz6joKQcZspW2M3A",
+    id: "price_1RyIFm0BGBtuYZR6HEUJfkKm",
     name: "Pacchetto Pro",
     credits: 500,
     price: 99.99,
@@ -72,7 +72,7 @@ const hardcodedCreditPackages: CreditPackage[] = [
     recommended: false,
   },
   {
-    id: "price_1Ruxa609Cz6joKQcimcXs8IO",
+    id: "price_1RyIGV0BGBtuYZR6AdWmCp1o",
     name: "Pacchetto Dominatore",
     credits: 1200,
     price: 199.99,
