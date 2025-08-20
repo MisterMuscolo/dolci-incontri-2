@@ -91,8 +91,22 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage:
   const stripe = useStripe();
   const elements = useElements();
   const [message, setMessage] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isPaymentElementReady, setIsPaymentElementReady] = useState(false); // Nuovo stato
+  const [isLoading, setIsLoading] = useState(false); // For form submission
+  const [isPaymentElementReady, setIsPaymentElementReady] = useState(false); // For PaymentElement readiness
+
+  // Effect to detect if PaymentElement is stuck loading
+  useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+    if (!isPaymentElementReady && selectedPackage && elements && stripe) { // Only if a package is selected and Stripe/Elements are available
+      timeoutId = setTimeout(() => {
+        setMessage("Il modulo di pagamento sta impiegando troppo tempo per caricarsi. Controlla la tua connessione internet o prova a disabilitare estensioni del browser (es. ad-blocker).");
+        showError("Il modulo di pagamento sta impiegando troppo tempo per caricarsi. Controlla la tua connessione internet o prova a disabilitare estensioni del browser (es. ad-blocker).");
+        // Do not set isLoading to false here, as it's for submission.
+        // The button will remain disabled due to !isPaymentElementReady.
+      }, 15000); // 15 seconds timeout
+    }
+    return () => clearTimeout(timeoutId);
+  }, [isPaymentElementReady, selectedPackage, elements, stripe]); // Dependencies for the effect
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,15 +115,15 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage:
       return;
     }
 
-    // Controlla se il PaymentElement è pronto
+    // Ensure PaymentElement is ready before proceeding
     const paymentElement = elements.getElement(PaymentElement);
-    if (!paymentElement || !isPaymentElementReady) { // Combine checks
+    if (!paymentElement || !isPaymentElementReady) {
       setMessage("Errore: Il modulo di pagamento non è ancora pronto. Attendi un momento e riprova.");
       showError("Errore: Il modulo di pagamento non è ancora pronto. Attendi un momento e riprova.");
       return;
     }
 
-    setIsLoading(true); // Only set isLoading to true if ready to proceed
+    setIsLoading(true); // Set loading for submission
     const toastId = showLoading(`Elaborazione pagamento per ${selectedPackage.name}...`);
 
     try {
@@ -118,13 +132,12 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage:
         throw new Error('Devi essere autenticato per completare l\'acquisto.');
       }
 
-      // Conferma il pagamento lato client
       const { error: confirmError } = await stripe.confirmPayment({
-        elements: paymentElement, // Passa l'istanza specifica di PaymentElement
+        elements: paymentElement,
         confirmParams: {
-          return_url: `${window.location.origin}/credit-history`, // Reindirizza alla cronologia crediti in caso di successo
+          return_url: `${window.location.origin}/credit-history`,
         },
-        redirect: 'if_required', // Gestisci il reindirizzamento manualmente se necessario
+        redirect: 'if_required',
       });
 
       if (confirmError) {
@@ -140,8 +153,6 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage:
         return;
       }
 
-      // Se il pagamento ha successo (nessun reindirizzamento, o reindirizzamento gestito da Stripe e ritorno a questa pagina)
-      // Chiama la funzione Edge 'finalize-credit-purchase'
       const { error: finalizeError } = await supabase.functions.invoke('finalize-credit-purchase', {
         body: {
           userId: user.id,
@@ -170,7 +181,7 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage:
       }
 
       showSuccess(`Hai acquistato ${selectedPackage.credits} crediti con successo!`);
-      onPurchaseSuccess(); // Notifica il componente padre per la navigazione
+      onPurchaseSuccess();
     } catch (error: any) {
       dismissToast(toastId);
       showError(error.message || 'Si è verificato un errore imprevisto durante l\'acquisto.');
@@ -187,8 +198,11 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage:
           <p className="ml-2 text-gray-600">Caricamento modulo di pagamento...</p>
         </div>
       )}
-      <div className={cn({ 'hidden': !isPaymentElementReady })}> {/* Hide PaymentElement until ready */}
-        <PaymentElement id="payment-element" onReady={() => setIsPaymentElementReady(true)} />
+      <div className={cn({ 'hidden': !isPaymentElementReady })}>
+        <PaymentElement id="payment-element" onReady={() => {
+          console.log("Stripe PaymentElement is ready!"); // Added console log
+          setIsPaymentElementReady(true);
+        }} />
       </div>
       <Button disabled={isLoading || !isPaymentElementReady} id="submit" className="w-full bg-rose-500 hover:bg-rose-600">
         <span id="button-text">
