@@ -103,7 +103,7 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage:
   const [isPaymentElementReady, setIsPaymentElementReady] = useState(false);
 
   useEffect(() => {
-    console.log("CheckoutForm: selectedPackage changed or clientSecret/elements/stripe updated. selectedPackage:", selectedPackage?.id, "clientSecret present:", !!elements?.clientSecret, "isPaymentElementReady:", isPaymentElementReady);
+    console.log("CheckoutForm: selectedPackage changed or clientSecret/elements/stripe updated. selectedPackage:", selectedPackage?.id, "isPaymentElementReady:", isPaymentElementReady);
     let timeoutId: ReturnType<typeof setTimeout>;
     if (!isPaymentElementReady && selectedPackage && elements && stripe) {
       timeoutId = setTimeout(() => {
@@ -140,11 +140,11 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage:
       }
 
       const { error: confirmError } = await stripe.confirmPayment({
-        elements: paymentElement,
+        elements: elements, // Corrected: Pass the entire elements object
         confirmParams: {
           return_url: `${window.location.origin}/credit-history`,
         },
-        redirect: 'if_required',
+        // Removed: 'redirect: 'if_required'' as it's not a valid option for confirmPayment
       });
 
       if (confirmError) {
