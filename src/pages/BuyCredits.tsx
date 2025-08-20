@@ -108,9 +108,20 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage:
         throw new Error('Devi essere autenticato per completare l\'acquisto.');
       }
 
+      // Explicitly get the PaymentElement instance
+      const paymentElement = elements.getElement(PaymentElement);
+
+      if (!paymentElement) {
+        setMessage("Errore: Il modulo di pagamento non è stato caricato correttamente. Riprova.");
+        showError("Errore: Il modulo di pagamento non è stato caricato correttamente. Riprova.");
+        setIsLoading(false);
+        dismissToast(toastId);
+        return;
+      }
+
       // Confirm the payment on the client side
       const { error: confirmError } = await stripe.confirmPayment({
-        elements,
+        elements: paymentElement, // Pass the specific PaymentElement instance
         confirmParams: {
           return_url: `${window.location.origin}/credit-history`, // Redirect to credit history on success
         },
