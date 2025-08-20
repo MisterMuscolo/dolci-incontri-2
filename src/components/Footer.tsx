@@ -16,7 +16,7 @@ export const Footer = () => {
         <div className="flex justify-center gap-4 md:gap-6 mb-4 text-sm">
           <Link to="/termini" className="hover:text-rose-500 hover:underline">Termini e Condizioni</Link>
           <Link to="/privacy" className="hover:text-rose-500 hover:underline">Privacy Policy</Link>
-          <Link to="/contatti" className="hover:text-rose-500 hover:underline">Contatti</Link>
+          <a href="mailto:support@incontridolci.com" className="hover:text-rose-500 hover:underline">Contatti</a>
         </div>
 
         <p className="text-xs text-gray-500 mb-4">

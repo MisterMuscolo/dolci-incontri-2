@@ -69,14 +69,14 @@ serve(async (req) => {
 
       <div style="border: 1px solid #eee; padding: 15px; margin-top: 30px; border-radius: 8px; background-color: #f9f9f9;">
         <p style="font-size: 14px; color: #555; text-align: center; margin: 0;">
-          Questo è un messaggio automatico. Per rispondere al segnalatore, usa l'email fornita. Per altre domande, visita il nostro <a href="https://incontridolci.com/contatti" style="color: #E54A70; text-decoration: underline;">form di contatto</a>.
+          Questo è un messaggio automatico. Per rispondere al segnalatore, usa l'email fornita. Per altre domande, contattaci tramite <a href="mailto:support@incontridolci.com" style="color: #E54A70; text-decoration: underline;">support@incontridolci.com</a>.
         </p>
       </div>
       <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
       <div style="text-align: center;">
         <a href="https://incontridolci.com/termini" style="color: #E54A70; text-decoration: underline; margin: 0 10px;">Termini e Condizioni</a>
         <a href="https://incontridolci.com/privacy" style="color: #E54A70; text-decoration: underline; margin: 0 10px;">Privacy Policy</a>
-        <a href="https://incontridolci.com/contatti" style="color: #E54A70; text-decoration: underline; margin: 0 10px;">Contatti</a>
+        <a href="mailto:support@incontridolci.com" style="color: #E54A70; text-decoration: underline;">Contatti</a>
       </div>
     `;
 
