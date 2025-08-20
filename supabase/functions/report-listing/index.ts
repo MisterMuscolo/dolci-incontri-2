@@ -50,7 +50,7 @@ serve(async (req) => {
 
     const emailHtml = `
       <div style="text-align: center; margin-bottom: 20px;">
-        <p style="font-size: 24px; font-weight: bold; color: #E54A70; margin: 0;">❤️ Dolci Incontri</p>
+        <p style="font-size: 24px; font-weight: bold; color: #E54A70; margin: 0;">❤️ Incontri Dolci</p>
       </div>
       <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
       <p>Ciao Team di Supporto,</p>
@@ -85,7 +85,7 @@ serve(async (req) => {
         'Authorization': `Bearer ${resendApiKey}`,
       },
       body: JSON.stringify({
-        from: 'Dolci Incontri <onboarding@resend.dev>', // Sender email
+        from: 'Incontri Dolci <onboarding@resend.dev>', // Sender email
         to: ['supporto@dolciincontri.com'], // Recipient email for support
         subject: `Segnalazione Annuncio: ${listing.title} (ID: ${listingId})`,
         html: emailHtml,

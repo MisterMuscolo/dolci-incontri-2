@@ -31,7 +31,7 @@ export const Header = ({ session, isAdmin }: HeaderProps) => {
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <Link to="/" className="flex items-center gap-2 text-2xl font-bold text-rose-600">
           <Heart className="h-8 w-8" />
-          <span>Dolci Incontri</span>
+          <span>Incontri Dolci</span>
         </Link>
         <nav>
           {session ? (
