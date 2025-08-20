@@ -284,6 +284,7 @@ const BuyCredits = () => {
       }
 
       setClientSecret(data.clientSecret);
+      console.log("Client Secret ricevuto:", data.clientSecret); // Log del clientSecret
       showSuccess('Pagamento pronto!');
     } catch (error: any) {
       dismissToast(toastId);
