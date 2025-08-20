@@ -28,6 +28,7 @@ import PromoteListingOptions from "./pages/PromoteListingOptions";
 import RegistrationSuccess from "./pages/RegistrationSuccess";
 import ChangePassword from "./pages/ChangePassword";
 import { showError } from "./utils/toast"; // Import showError
+import { LoadingScreen } from "./components/LoadingScreen"; // Import the new component
 
 const queryClient = new QueryClient();
 
@@ -82,6 +83,7 @@ const App = () => {
   useEffect(() => {
     const getInitialSessionAndRole = async () => {
       console.log("App.tsx: Fetching initial session and role...");
+      setLoading(true); // Ensure loading is true at the very start of this effect
       try {
         const { data: { session: initialSession }, error: sessionError } = await supabase.auth.getSession();
         if (sessionError) {
@@ -139,7 +141,7 @@ const App = () => {
 
   if (loading) {
     console.log("App.tsx: Displaying loading screen.");
-    return <div className="flex justify-center items-center min-h-screen">Caricamento...</div>;
+    return <LoadingScreen />; // Use the new component here
   }
 
   console.log("App.tsx: Rendering Layout with isAdmin:", isAdmin, "isBanned:", isBanned, "Session exists:", !!session);
@@ -233,4 +235,3 @@ const App = () => {
 };
 
 export default App;
-// Commento aggiunto per forzare un nuovo deployment su Vercel. (Modifica innocua)
