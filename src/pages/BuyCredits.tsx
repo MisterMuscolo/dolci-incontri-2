@@ -1,21 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ChevronLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
-import { Badge } from '@/components/ui/badge'; // Importa Badge
+import { Badge } from '@/components/ui/badge';
+import { loadStripe, StripeElementsOptions } from '@stripe/stripe-js';
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface CreditPackage {
   id: string;
   name: string;
   credits: number;
-  price: number; // This is the discounted price
-  originalPrice?: number; // Original price for discount calculation
+  price: number;
+  originalPrice?: number;
   description: string;
-  features: string[]; // Keeping this for data structure, but not rendering
-  recommended?: boolean; // Nuovo campo per indicare se è consigliato
+  features: string[];
+  recommended?: boolean;
 }
 
 const creditPackages: CreditPackage[] = [
@@ -31,7 +34,7 @@ const creditPackages: CreditPackage[] = [
     id: 'base',
     name: 'Base',
     credits: 50,
-    price: 11.99, // Aggiornato
+    price: 11.99,
     description: 'Ideale per iniziare a esplorare.',
     features: ['50 crediti'],
   },
@@ -39,18 +42,18 @@ const creditPackages: CreditPackage[] = [
     id: 'popolare',
     name: 'Popolare',
     credits: 110,
-    price: 24.99, // Aggiornato
-    originalPrice: (110 / 50) * 11.99, // Ricalcolato
+    price: 24.99,
+    originalPrice: (110 / 50) * 11.99,
     description: 'Più crediti per più opportunità.',
+    recommended: true,
     features: ['110 crediti'],
-    recommended: true, // Questo è il pacchetto consigliato
   },
   {
     id: 'avanzato',
     name: 'Avanzato',
     credits: 240,
-    price: 49.99, // Aggiornato
-    originalPrice: (240 / 50) * 11.99, // Ricalcolato
+    price: 49.99,
+    originalPrice: (240 / 50) * 11.99,
     description: 'Per chi cerca il meglio.',
     features: ['240 crediti', 'Supporto prioritario'],
   },
@@ -58,8 +61,8 @@ const creditPackages: CreditPackage[] = [
     id: 'pro',
     name: 'Pro',
     credits: 500,
-    price: 99.99, // Aggiornato
-    originalPrice: (500 / 50) * 11.99, // Ricalcolato
+    price: 99.99,
+    originalPrice: (500 / 50) * 11.99,
     description: 'Massima visibilità e interazioni.',
     features: ['500 crediti', 'Annunci in evidenza'],
   },
@@ -67,40 +70,163 @@ const creditPackages: CreditPackage[] = [
     id: 'dominatore',
     name: 'Dominatore',
     credits: 1200,
-    price: 199.99, // Aggiornato
-    originalPrice: (1200 / 50) * 11.99, // Ricalcolato
+    price: 199.99,
+    originalPrice: (1200 / 50) * 11.99,
     description: 'Il pacchetto definitivo per i più attivi.',
     features: ['1200 crediti', 'Tutti i vantaggi premium'],
   },
 ];
 
-const BuyCredits = () => {
-  const navigate = useNavigate();
-  const [isProcessing, setIsProcessing] = useState(false);
+// Load Stripe outside of a component render to avoid recreating it
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
-  const handlePurchase = async (pkg: CreditPackage) => {
-    setIsProcessing(true);
-    const toastId = showLoading(`Acquisto ${pkg.name} in corso...`);
+const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage: CreditPackage | null; onPurchaseSuccess: () => void }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [message, setMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!stripe || !elements || !selectedPackage) {
+      return;
+    }
+
+    setIsLoading(true);
+    const toastId = showLoading(`Elaborazione pagamento per ${selectedPackage.name}...`);
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        throw new Error('Devi essere autenticato per acquistare crediti.');
+        throw new Error('Devi essere autenticato per completare l\'acquisto.');
       }
 
-      const { error } = await supabase.functions.invoke('manage-credits', {
+      // Confirm the payment on the client side
+      const { error: confirmError } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.origin}/credit-history`, // Redirect to credit history on success
+        },
+        redirect: 'if_required', // Handle redirect manually if needed
+      });
+
+      if (confirmError) {
+        if (confirmError.type === "card_error" || confirmError.type === "validation_error") {
+          setMessage(confirmError.message || "Errore nella carta o nei dati di pagamento.");
+          showError(confirmError.message || "Errore nella carta o nei dati di pagamento.");
+        } else {
+          setMessage("Si è verificato un errore imprevisto.");
+          showError("Si è verificato un errore imprevisto.");
+        }
+        dismissToast(toastId);
+        setIsLoading(false);
+        return;
+      }
+
+      // If payment is successful (no redirect, or redirect handled by Stripe and returned to this page)
+      // Call the finalize-credit-purchase Edge Function
+      const { error: finalizeError } = await supabase.functions.invoke('finalize-credit-purchase', {
         body: {
           userId: user.id,
-          amount: pkg.credits,
-          transactionType: 'purchase',
-          description: pkg.name,
+          amount: selectedPackage.credits,
+          packageName: selectedPackage.name,
         },
       });
 
       dismissToast(toastId);
 
+      if (finalizeError) {
+        let errorMessage = 'Errore durante l\'aggiornamento dei crediti dopo il pagamento.';
+        // @ts-ignore
+        if (finalizeError.context && typeof finalizeError.context.body === 'string') {
+          try {
+            // @ts-ignore
+            const errorBody = JSON.parse(finalizeError.context.body);
+            if (errorBody.error) {
+              errorMessage = errorBody.error;
+            }
+          } catch (e) {
+            console.error("Could not parse error response from edge function:", e);
+          }
+        }
+        throw new Error(errorMessage);
+      }
+
+      showSuccess(`Hai acquistato ${selectedPackage.credits} crediti con successo!`);
+      onPurchaseSuccess(); // Notify parent component to navigate
+    } catch (error: any) {
+      dismissToast(toastId);
+      showError(error.message || 'Si è verificato un errore imprevisto durante l\'acquisto.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <form id="payment-form" onSubmit={handleSubmit} className="space-y-6">
+      <PaymentElement id="payment-element" />
+      <Button disabled={isLoading || !stripe || !elements} id="submit" className="w-full bg-rose-500 hover:bg-rose-600">
+        <span id="button-text">
+          {isLoading ? "Elaborazione..." : `Paga €${selectedPackage?.price.toFixed(2)}`}
+        </span>
+      </Button>
+      {message && <div id="payment-message" className="text-red-500 text-sm mt-4">{message}</div>}
+    </form>
+  );
+};
+
+const BuyCredits = () => {
+  const navigate = useNavigate();
+  const [currentCredits, setCurrentCredits] = useState<number | null>(null);
+  const [loadingCredits, setLoadingCredits] = useState(true);
+  const [selectedPackage, setSelectedPackage] = useState<CreditPackage | null>(null);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [loadingPaymentIntent, setLoadingPaymentIntent] = useState(false);
+
+  const fetchCurrentCredits = useCallback(async () => {
+    setLoadingCredits(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setCurrentCredits(0);
+      setLoadingCredits(false);
+      return;
+    }
+
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('credits')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError) {
+      console.error("Errore nel recupero dei crediti:", profileError);
+      setCurrentCredits(0);
+    } else if (profileData) {
+      setCurrentCredits(profileData.credits);
+    }
+    setLoadingCredits(false);
+  }, []);
+
+  useEffect(() => {
+    fetchCurrentCredits();
+  }, [fetchCurrentCredits]);
+
+  const handlePackageSelect = async (pkg: CreditPackage) => {
+    setSelectedPackage(pkg);
+    setClientSecret(null); // Reset client secret
+    setLoadingPaymentIntent(true);
+    const toastId = showLoading(`Preparazione pagamento per ${pkg.name}...`);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('create-payment-intent', {
+        body: { packageId: pkg.id },
+      });
+
+      dismissToast(toastId);
+
       if (error) {
-        let errorMessage = 'Errore durante l\'acquisto dei crediti.';
+        let errorMessage = 'Errore nella preparazione del pagamento.';
         // @ts-ignore
         if (error.context && typeof error.context.body === 'string') {
           try {
@@ -116,14 +242,30 @@ const BuyCredits = () => {
         throw new Error(errorMessage);
       }
 
-      showSuccess(`Hai acquistato ${pkg.credits} crediti con successo!`);
-      navigate('/credit-history'); // Reindirizza alla cronologia crediti
+      setClientSecret(data.clientSecret);
+      showSuccess('Pagamento pronto!');
     } catch (error: any) {
       dismissToast(toastId);
-      showError(error.message || 'Si è verificato un errore imprevisto durante l\'acquisto.');
+      showError(error.message || 'Si è verificato un errore imprevisto.');
+      setSelectedPackage(null); // Clear selected package on error
     } finally {
-      setIsProcessing(false);
+      setLoadingPaymentIntent(false);
     }
+  };
+
+  const handlePurchaseSuccess = () => {
+    navigate('/credit-history');
+  };
+
+  const appearance: StripeElementsOptions['appearance'] = {
+    theme: 'stripe',
+    variables: {
+      colorPrimary: '#E54A70', // Rose-500
+      colorText: '#333',
+      colorBackground: '#fff',
+      colorDanger: '#ef4444', // Red-500
+      fontFamily: 'Arial, sans-serif',
+    },
   };
 
   return (
@@ -140,6 +282,24 @@ const BuyCredits = () => {
           Scegli il pacchetto di crediti più adatto alle tue esigenze e sblocca tutte le funzionalità!
         </p>
 
+        <Card className="bg-white shadow-md mb-8">
+          <CardHeader>
+            <CardTitle className="text-2xl font-semibold flex items-center gap-2">
+              Saldo Attuale
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loadingCredits ? (
+              <Skeleton className="h-10 w-32" />
+            ) : (
+              <p className="text-4xl font-bold text-gray-800">
+                {currentCredits !== null ? currentCredits : 0} <span className="text-rose-500">crediti</span>
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <h2 className="text-2xl font-bold text-gray-800 mt-8 mb-6">Scegli il tuo pacchetto:</h2>
         <div className="flex flex-col gap-6 mb-10">
           {creditPackages.map((pkg) => {
             const discountPercentage = pkg.originalPrice && pkg.originalPrice > pkg.price
@@ -156,7 +316,6 @@ const BuyCredits = () => {
                     Consigliato
                   </Badge>
                 )}
-                {/* Left section: Name and Credits */}
                 <div className="flex flex-col text-left flex-grow">
                   <CardTitle className="text-lg font-bold text-rose-600">{pkg.name}</CardTitle>
                   <p className="text-xl font-extrabold text-gray-900">
@@ -164,9 +323,8 @@ const BuyCredits = () => {
                   </p>
                 </div>
 
-                {/* Middle section: Prices and Savings */}
                 <div className="flex flex-col items-end text-right mx-4">
-                  {pkg.originalPrice && pkg.originalPrice > pkg.price ? (
+                  {pkg.originalPrice && discountPercentage ? (
                     <>
                       <p className="text-sm text-gray-500 line-through">€{pkg.originalPrice.toFixed(2)}</p>
                       <p className="text-xl font-bold text-gray-900">€{pkg.price.toFixed(2)}</p>
@@ -179,18 +337,31 @@ const BuyCredits = () => {
                   )}
                 </div>
 
-                {/* Right section: Buy Button */}
                 <Button
                   className="bg-rose-500 hover:bg-rose-600 text-sm py-2 px-4 flex-shrink-0"
-                  onClick={() => handlePurchase(pkg)}
-                  disabled={isProcessing}
+                  onClick={() => handlePackageSelect(pkg)}
+                  disabled={loadingPaymentIntent || selectedPackage?.id === pkg.id}
                 >
-                  {isProcessing ? 'Acquisto in corso...' : 'Acquista'}
+                  {selectedPackage?.id === pkg.id && loadingPaymentIntent ? 'Caricamento...' : 'Seleziona'}
                 </Button>
               </Card>
             );
           })}
         </div>
+
+        {selectedPackage && clientSecret && (
+          <Card className="mt-8 p-6 shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold text-gray-800">Completa il tuo acquisto</CardTitle>
+              <CardDescription>Stai acquistando: <span className="font-semibold">{selectedPackage.name} ({selectedPackage.credits} crediti)</span> per <span className="font-semibold">€{selectedPackage.price.toFixed(2)}</span></CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Elements options={{ clientSecret, appearance }} stripe={stripePromise}>
+                <CheckoutForm selectedPackage={selectedPackage} onPurchaseSuccess={handlePurchaseSuccess} />
+              </Elements>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="text-center mt-8">
           <Link to="/dashboard">
