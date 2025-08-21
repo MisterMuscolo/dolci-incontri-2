@@ -30,7 +30,7 @@ interface Ticket {
   status: 'open' | 'in_progress' | 'resolved' | 'closed';
   created_at: string;
   updated_at: string;
-  last_replied_by: 'user' | 'admin';
+  last_replied_by: 'user' | 'admin' | 'supporto'; // Aggiornato per includere 'supporto'
   profiles: { email: string } | null; // Corretto: singolo oggetto o null
   listings: { title: string } | null; // Corretto: singolo oggetto o null
 }
@@ -162,6 +162,19 @@ export const TicketManagementTable = () => {
     }
   };
 
+  const getLastRepliedByLabel = (lastRepliedBy: 'user' | 'admin' | 'supporto') => {
+    switch (lastRepliedBy) {
+      case 'user':
+        return 'Utente';
+      case 'admin':
+        return 'Admin';
+      case 'supporto':
+        return 'Supporto';
+      default:
+        return 'N/D';
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -212,7 +225,7 @@ export const TicketManagementTable = () => {
                       </Badge>
                     </TableCell>
                     <TableCell className="capitalize">
-                      {ticket.last_replied_by === 'user' ? 'Utente' : 'Admin'}
+                      {getLastRepliedByLabel(ticket.last_replied_by)}
                     </TableCell>
                     <TableCell>{format(new Date(ticket.created_at), 'dd/MM/yyyy', { locale: it })}</TableCell>
                     <TableCell className="text-right flex justify-end gap-2">

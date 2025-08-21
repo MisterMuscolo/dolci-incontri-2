@@ -56,8 +56,15 @@ serve(async (req) => {
       throw new Error('User profile not found.');
     }
 
-    // MODIFICA QUI: Classifica 'admin' e 'supporto' come 'admin' per last_replied_by
-    const senderRole = (profile.role === 'admin' || profile.role === 'supporto') ? 'admin' : 'user';
+    // MODIFICA QUI: Salva il ruolo esatto ('admin' o 'supporto')
+    let senderRole: 'user' | 'admin' | 'supporto';
+    if (profile.role === 'admin') {
+        senderRole = 'admin';
+    } else if (profile.role === 'supporto') {
+        senderRole = 'supporto';
+    } else {
+        senderRole = 'user';
+    }
 
     // Insert new message
     const { error: messageError } = await supabaseClient
@@ -78,7 +85,7 @@ serve(async (req) => {
       .update({
         updated_at: new Date().toISOString(),
         last_replied_by: senderRole,
-        status: (senderRole === 'admin' && ticket.status === 'open') ? 'in_progress' : ticket.status 
+        status: (senderRole !== 'user' && ticket.status === 'open') ? 'in_progress' : ticket.status 
       })
       .eq('id', ticketId);
 
@@ -92,8 +99,7 @@ serve(async (req) => {
         Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    if (senderRole === 'admin') {
-        // Admin replied: notify the user who owns the ticket
+    if (senderRole !== 'user') { // Admin or Supporto replied: notify the user who owns the ticket
         const { error: userNotificationError } = await supabaseAdmin
             .from('admin_notifications')
             .insert({

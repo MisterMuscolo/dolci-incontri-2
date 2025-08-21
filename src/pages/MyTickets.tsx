@@ -18,7 +18,7 @@ interface TicketItem {
   status: 'open' | 'in_progress' | 'resolved' | 'closed';
   created_at: string;
   updated_at: string;
-  last_replied_by: 'user' | 'admin';
+  last_replied_by: 'user' | 'admin' | 'supporto'; // Aggiornato per includere 'supporto'
   listing_id: string | null;
   listings: { title: string } | null; // Corretto: singolo oggetto o null
 }
@@ -96,6 +96,19 @@ const MyTickets = () => {
         return 'Chiuso';
       default:
         return status;
+    }
+  };
+
+  const getLastRepliedByLabel = (lastRepliedBy: 'user' | 'admin' | 'supporto') => {
+    switch (lastRepliedBy) {
+      case 'user':
+        return 'Tu';
+      case 'admin':
+        return 'Admin';
+      case 'supporto':
+        return 'Supporto';
+      default:
+        return 'N/D';
     }
   };
 
@@ -180,7 +193,7 @@ const MyTickets = () => {
                           </Badge>
                         </TableCell>
                         <TableCell className="capitalize">
-                          {ticket.last_replied_by === 'user' ? 'Tu' : 'Admin'}
+                          {getLastRepliedByLabel(ticket.last_replied_by)}
                         </TableCell>
                         <TableCell>{format(new Date(ticket.created_at), 'dd/MM/yyyy', { locale: it })}</TableCell>
                         <TableCell className="text-right">
