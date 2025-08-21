@@ -193,14 +193,14 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           !hasPhotosToRender && "w-full"
         )}>
           <div className="p-4 flex flex-col flex-grow">
-            {/* Categoria */}
-            <div className="flex items-center gap-2 mb-1">
-              <Badge variant="secondary" className="capitalize"><Tag className="h-4 w-4 mr-1.5" />{listing.category.replace(/-/g, ' ')}</Badge>
-            </div>
             {/* Data di pubblicazione */}
-            <div className="flex items-center text-xs text-gray-500 mb-2">
+            <div className="flex items-center text-xs text-gray-500 mb-1"> {/* Ridotto mb-2 a mb-1 */}
               <CalendarDays className="h-3 w-3 mr-1" />
               <span>{prefix} {formattedDate}</span>
+            </div>
+            {/* Categoria */}
+            <div className="flex items-center gap-2 mb-2"> {/* Aumentato mb-1 a mb-2 */}
+              <Badge variant="secondary" className="capitalize"><Tag className="h-4 w-4 mr-1.5" />{listing.category.replace(/-/g, ' ')}</Badge>
             </div>
             {/* Titolo */}
             <h3 className="text-xl font-semibold mb-2 text-rose-600 line-clamp-2">{listing.title}</h3>
