@@ -159,6 +159,24 @@ export const CreateTicketDialog = ({
             <Loader2 className="h-8 w-8 animate-spin text-rose-500 mb-4" />
             <p className="text-gray-600">Verifica stato autenticazione...</p>
           </div>
+        ) : !isAuthenticated ? (
+          <div className="text-center py-8 space-y-4">
+            <p className="text-lg text-gray-700">
+              Per aprire un ticket, devi essere autenticato.
+            </p>
+            <div className="flex flex-col gap-3">
+              <Link to={`/auth?tab=login&redirect=${encodeURIComponent(redirectPathOnAuth || '/new-ticket')}`}>
+                <Button className="w-full bg-rose-500 hover:bg-rose-600">
+                  <LogIn className="h-4 w-4 mr-2" /> Accedi
+                </Button>
+              </Link>
+              <Link to={`/auth?tab=register&redirect=${encodeURIComponent(redirectPathOnAuth || '/new-ticket')}`}>
+                <Button variant="outline" className="w-full border-rose-500 text-rose-500 hover:bg-rose-50 hover:text-rose-600">
+                  <UserPlus className="h-4 w-4 mr-2" /> Registrati
+                </Button>
+              </Link>
+            </div>
+          </div>
         ) : (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
