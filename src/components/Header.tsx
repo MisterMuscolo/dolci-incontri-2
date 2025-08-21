@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart, LogOut, User, PlusCircle, Shield, LogIn, LayoutGrid, Wallet, Settings, Ticket, Bell, Flag } from 'lucide-react'; // Importa Flag
+import { Heart, LogOut, User, PlusCircle, Shield, LogIn, LayoutGrid, Wallet, Settings, Ticket, Bell } from 'lucide-react'; // Rimossa Flag
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -142,10 +142,7 @@ export const Header = ({ session, isAdmin, isSupporto }: HeaderProps) => {
                         <Shield className="mr-2 h-4 w-4" />
                         <span>Pannello Controllo</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate('/admin')}> {/* Naviga alla dashboard admin */}
-                        <Flag className="mr-2 h-4 w-4" /> {/* Icona Flag */}
-                        <span>Segnalazioni</span>
-                      </DropdownMenuItem>
+                      {/* Rimosso l'elemento 'Segnalazioni' */}
                     </>
                   )}
                   <DropdownMenuItem onClick={() => navigate('/dashboard')}>
