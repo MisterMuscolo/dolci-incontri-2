@@ -14,13 +14,14 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Flag, Mail, LogIn, UserPlus, Loader2, MessageSquare } from 'lucide-react';
+import { Flag, Mail, LogIn, UserPlus, Loader2, MessageSquare, Lock } from 'lucide-react'; // Importato Lock
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { useNavigate, Link } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'; // Importato Card components
 
 const ticketSchema = z.object({
-  senderEmail: z.string().email("L'email non è valida.").min(1, "L'email è obbligatoria."),
+  senderEmail: z.string().email("L'email non è valida.").min(1, "L'email è obbligatoria.'),
   messageContent: z.string().min(20, 'Il messaggio deve contenere almeno 20 caratteri.'),
 });
 
@@ -160,11 +161,15 @@ export const CreateTicketDialog = ({
             <p className="text-gray-600">Verifica stato autenticazione...</p>
           </div>
         ) : !isAuthenticated ? (
-          <div className="text-center py-8 space-y-4">
-            <p className="text-lg text-gray-700">
-              Per aprire un ticket, devi essere autenticato.
-            </p>
-            <div className="flex flex-col gap-3">
+          <Card className="border-none shadow-none bg-transparent">
+            <CardHeader className="text-center pb-4">
+              <Lock className="mx-auto h-16 w-16 text-rose-500 mb-4" />
+              <CardTitle className="text-2xl font-bold text-gray-800">Accesso Richiesto</CardTitle>
+              <CardDescription className="text-gray-600">
+                Per aprire un ticket di supporto, devi essere autenticato.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
               <Link to={`/auth?tab=login&redirect=${encodeURIComponent(redirectPathOnAuth || '/new-ticket')}`}>
                 <Button className="w-full bg-rose-500 hover:bg-rose-600">
                   <LogIn className="h-4 w-4 mr-2" /> Accedi
@@ -175,8 +180,8 @@ export const CreateTicketDialog = ({
                   <UserPlus className="h-4 w-4 mr-2" /> Registrati
                 </Button>
               </Link>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         ) : (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
