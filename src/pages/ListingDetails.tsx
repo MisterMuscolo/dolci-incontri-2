@@ -117,23 +117,25 @@ const ListingDetails = () => {
         </div>
         <div className="max-w-3xl mx-auto space-y-6">
           <Card className="relative">
+            {isActivePremium && (
+              <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white text-base px-3 py-1 rounded-full font-semibold flex items-center gap-1 w-fit absolute top-4 right-4 z-10">
+                <Rocket className="h-4 w-4" /> In Evidenza
+              </Badge>
+            )}
             <CardHeader>
-              {/* Spostato il blocco dei tag sopra il titolo */}
+              {/* Blocco dei tag riorganizzato */}
               <div className="flex flex-wrap gap-2 mb-2">
-                <Badge variant="secondary" className="capitalize"><Tag className="h-4 w-4 mr-1.5" />{listing.category.replace(/-/g, ' ')}</Badge>
-                <Badge variant="outline"><MapPin className="h-4 w-4 mr-1.5" />{listing.city}{listing.zone && ` / ${listing.zone}`}</Badge>
-                <Badge variant="outline"><User className="h-4 w-4 mr-1.5" />{listing.age} anni</Badge>
+                {/* Data di pubblicazione per prima */}
                 <Badge variant="outline" className="text-xs">
                   <CalendarDays className="h-4 w-4 mr-1.5" />
                   {format(new Date(listing.created_at), 'dd MMMM', { locale: it })}
                 </Badge>
+                {/* Tag di città/zona */}
+                <Badge variant="outline"><MapPin className="h-4 w-4 mr-1.5" />{listing.city}{listing.zone && ` / ${listing.zone}`}</Badge>
+                {/* Tag età */}
+                <Badge variant="outline"><User className="h-4 w-4 mr-1.5" />{listing.age} anni</Badge>
               </div>
               <CardTitle className="text-3xl font-bold text-rose-600">{listing.title}</CardTitle>
-              {isActivePremium && (
-                <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white text-base px-3 py-1 rounded-full font-semibold flex items-center gap-1 w-fit absolute top-4 right-4">
-                  <Rocket className="h-4 w-4" /> In Evidenza
-                </Badge>
-              )}
             </CardHeader>
           </Card>
 
