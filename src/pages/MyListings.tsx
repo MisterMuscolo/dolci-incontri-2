@@ -11,7 +11,6 @@ import { ChevronLeft } from "lucide-react";
 const LISTINGS_PER_PAGE = 10;
 
 const MyListings = () => {
-  console.log("MyListings component is rendering."); // Aggiunto per il debug
   const navigate = useNavigate();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,12 +22,10 @@ const MyListings = () => {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      console.log("MyListings: Utente non autenticato.");
       setLoading(false);
       return;
     }
     setCurrentUserId(user.id); // Imposta l'ID utente corrente
-    console.log("MyListings: Utente autenticato con ID:", user.id);
 
     // Query per il conteggio totale degli annunci attivi dell'utente
     const { count, error: countError } = await supabase
@@ -45,7 +42,6 @@ const MyListings = () => {
 
     if (count !== null) {
       setTotalPages(Math.ceil(count / LISTINGS_PER_PAGE));
-      console.log("MyListings: Conteggio annunci attivi:", count, "Pagine totali:", totalPages);
     }
 
     const from = (currentPage - 1) * LISTINGS_PER_PAGE;
@@ -76,14 +72,11 @@ const MyListings = () => {
     if (error) {
       console.error("MyListings: Errore nel recupero degli annunci:", error.message, error.details);
     } else if (data) {
-      console.log("MyListings: Dati ricevuti prima dell'ordinamento:", data);
       // Client-side sorting for active premium listings
       const now = new Date();
       const sortedData = (data as Listing[]).sort((a, b) => {
         const aIsActivePremium = a.is_premium && a.promotion_start_at && a.promotion_end_at && new Date(a.promotion_start_at) <= now && new Date(a.promotion_end_at) >= now;
         const bIsActivePremium = b.is_premium && b.promotion_start_at && b.promotion_end_at && new Date(b.promotion_start_at) <= now && new Date(b.promotion_end_at) >= now;
-
-        console.log(`Sorting: ${a.title} (Premium: ${aIsActivePremium}, Bumped: ${a.last_bumped_at}, Created: ${a.created_at}) vs ${b.title} (Premium: ${bIsActivePremium}, Bumped: ${b.last_bumped_at}, Created: ${b.created_at})`);
 
         // Prioritize active premium listings
         if (aIsActivePremium && !bIsActivePremium) return -1;
@@ -94,14 +87,12 @@ const MyListings = () => {
         const aBumpedAt = a.last_bumped_at ? new Date(a.last_bumped_at).getTime() : new Date(a.created_at).getTime();
         const bBumpedAt = b.last_bumped_at ? new Date(b.last_bumped_at).getTime() : new Date(b.created_at).getTime();
         if (aBumpedAt !== bBumpedAt) {
-            console.log(`  -> Sorting by bumped/created: ${bBumpedAt - aBumpedAt}`);
             return bBumpedAt - aBumpedAt; // Descending
         }
 
         // Fallback to created_at (desc) if all else is equal
         const aCreatedAt = new Date(a.created_at).getTime();
         const bCreatedAt = new Date(b.created_at).getTime();
-        console.log(`  -> Sorting by created (fallback): ${bCreatedAt - aCreatedAt}`);
         return bCreatedAt - aCreatedAt;
       });
       setListings(sortedData);
@@ -186,7 +177,7 @@ const MyListings = () => {
               </div>
             )}
           </CardContent>
-        </Card>
+          </Card>
       </div>
     </div>
   );
