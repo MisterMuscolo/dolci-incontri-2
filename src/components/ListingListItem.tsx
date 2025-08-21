@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, CalendarDays, Rocket, User, ImageOff } from "lucide-react";
+import { Pencil, Trash2, CalendarDays, Rocket, User } from "lucide-react";
 import { format, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Link } from "react-router-dom";
@@ -27,7 +27,7 @@ import { ListingPhotoManagerDialog } from "./ListingPhotoManagerDialog";
 
 export interface Listing {
   id: string;
-  user_id: string; // Aggiunto user_id
+  user_id: string;
   title: string;
   category: string;
   city: string;
@@ -45,12 +45,12 @@ export interface Listing {
 
 interface ListingListItemProps {
   listing: Listing;
-  canEdit?: boolean; // Nuovo prop
-  canManagePhotos?: boolean; // Nuovo prop
-  canDelete?: boolean; // Nuovo prop
+  canEdit?: boolean;
+  canManagePhotos?: boolean;
+  canDelete?: boolean;
   showExpiryDate?: boolean;
   onListingUpdated?: () => void;
-  isAdminContext?: boolean; // Nuovo prop: true se visualizzato in un contesto admin
+  isAdminContext?: boolean;
 }
 
 export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = false, canDelete = false, showExpiryDate = false, onListingUpdated, isAdminContext = false }: ListingListItemProps) => {
@@ -64,14 +64,11 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
   const isPendingPremium = listing.is_premium && promoStart && promoStart > now;
 
   let photosToRender: { url: string; is_primary: boolean }[] = [];
-  const primaryPhoto = listing.listing_photos.find(p => p.is_primary) || listing.listing_photos[0];
-
-  if (isActivePremium) {
+  
+  // Solo gli annunci Premium attivi con foto mostrano le immagini
+  if (isActivePremium && listing.listing_photos && listing.listing_photos.length > 0) {
     photosToRender = listing.listing_photos.slice(0, 5); // Premium gets up to 5 photos
-  } else if (primaryPhoto) {
-    photosToRender = [primaryPhoto]; // Non-premium gets 1 photo if available
   }
-  // If no photos, photosToRender remains empty, and we'll render a placeholder.
 
   const hasPhotosToRender = photosToRender.length > 0;
 
@@ -174,50 +171,51 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
   return (
     <Card className={cn(
       "w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row relative",
-      isActivePremium && "border-2 border-rose-500 shadow-lg", // Rimosso bg-rose-50
+      isActivePremium && "border-2 border-rose-500 shadow-lg",
       (canEdit || canManagePhotos || canDelete) && isPendingPremium && "border-2 border-blue-400 shadow-lg bg-blue-50" 
     )}>
       <div className="flex flex-col sm:flex-row w-full">
-        <div className="sm:w-1/4 lg:w-1/5 flex-shrink-0 relative">
-          <AspectRatio ratio={16 / 9} className="w-full h-full">
-            {photosToRender.length > 1 ? (
-              <Carousel
-                plugins={[
-                  Autoplay({
-                    delay: 3000,
-                    stopOnInteraction: false,
-                    stopOnMouseEnter: true,
-                  }),
-                ]}
-                opts={{
-                  loop: true,
-                }}
-                className="w-full h-full"
-              >
-                <CarouselContent className="h-full">
-                  {photosToRender.map((photo, index) => (
-                    <CarouselItem key={index} className="h-full">
-                      <Link to={`/listing/${listing.id}`} className="block w-full h-full">
-                        <img src={photo.url} alt={`${listing.title} - ${index + 1}`} className="object-cover w-full h-full" />
-                      </Link>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10" />
-                <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10" />
-              </Carousel>
-            ) : photosToRender.length === 1 ? (
-              <Link to={`/listing/${listing.id}`} className="block w-full h-full">
-                <img src={photosToRender[0].url} alt={listing.title} className="object-cover w-full h-full" />
-              </Link>
-            ) : (
-              <div className="flex items-center justify-center w-full h-full bg-gray-200 text-gray-400">
-                <ImageOff className="h-16 w-16" />
-              </div>
-            )}
-          </AspectRatio>
-        </div>
-        <Link to={`/listing/${listing.id}`} className="flex-grow block hover:bg-gray-50/50">
+        {hasPhotosToRender && ( // Mostra il blocco immagine solo se ci sono foto da renderizzare
+          <div className="sm:w-1/4 lg:w-1/5 flex-shrink-0 relative">
+            <AspectRatio ratio={16 / 9} className="w-full h-full">
+              {photosToRender.length > 1 ? (
+                <Carousel
+                  plugins={[
+                    Autoplay({
+                      delay: 3000,
+                      stopOnInteraction: false,
+                      stopOnMouseEnter: true,
+                    }),
+                  ]}
+                  opts={{
+                    loop: true,
+                  }}
+                  className="w-full h-full"
+                >
+                  <CarouselContent className="h-full">
+                    {photosToRender.map((photo, index) => (
+                      <CarouselItem key={index} className="h-full">
+                        <Link to={`/listing/${listing.id}`} className="block w-full h-full">
+                          <img src={photo.url} alt={`${listing.title} - ${index + 1}`} className="object-cover w-full h-full" />
+                        </Link>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10" />
+                  <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10" />
+                </Carousel>
+              ) : (
+                <Link to={`/listing/${listing.id}`} className="block w-full h-full">
+                  <img src={photosToRender[0].url} alt={listing.title} className="object-cover w-full h-full" />
+                </Link>
+              )}
+            </AspectRatio>
+          </div>
+        )}
+        <Link to={`/listing/${listing.id}`} className={cn(
+          "flex-grow block hover:bg-gray-50/50",
+          !hasPhotosToRender && "w-full" // Se non ci sono foto, il link occupa tutta la larghezza disponibile
+        )}>
           <div className="p-4 flex flex-col flex-grow">
             <h3 className="text-xl font-semibold mb-2 text-gray-800 line-clamp-2">{listing.title}</h3>
             <div className="flex flex-wrap gap-2 mb-3">
