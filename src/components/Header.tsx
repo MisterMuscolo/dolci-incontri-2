@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart, LogOut, User, PlusCircle, Shield, LogIn, LayoutGrid, Wallet, Settings, Ticket, Bell } from 'lucide-react'; // Aggiunto Bell icona
+import { Heart, LogOut, User, PlusCircle, Shield, LogIn, LayoutGrid, Wallet, Settings, Ticket, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -10,10 +10,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useAdminNotifications } from '@/hooks/useAdminNotifications'; // Importa il nuovo hook
-import { Badge } from '@/components/ui/badge'; // Importa Badge
-import { formatDistanceToNow } from 'date-fns'; // Per formattare il tempo
-import { it } from 'date-fns/locale'; // Per la lingua italiana
+import { useAdminNotifications } from '@/hooks/useAdminNotifications';
+import { useUserNotifications } from '@/hooks/useUserNotifications'; // Importa il nuovo hook
+import { Badge } from '@/components/ui/badge';
+import { formatDistanceToNow } from 'date-fns';
+import { it } from 'date-fns/locale';
 
 interface HeaderProps {
   session: any;
@@ -22,7 +23,30 @@ interface HeaderProps {
 
 export const Header = ({ session, isAdmin }: HeaderProps) => {
   const navigate = useNavigate();
-  const { notifications, unreadCount, loading, markAsRead, markAllAsRead } = useAdminNotifications(isAdmin);
+  
+  // Conditionally use the appropriate notification hook
+  const { 
+    notifications: adminNotifications, 
+    unreadCount: adminUnreadCount, 
+    loading: adminLoading, 
+    markAsRead: markAdminAsRead, 
+    markAllAsRead: markAllAdminAsRead 
+  } = useAdminNotifications(isAdmin);
+
+  const { 
+    notifications: userNotifications, 
+    unreadCount: userUnreadCount, 
+    loading: userLoading, 
+    markAsRead: markUserAsRead, 
+    markAllAsRead: markAllUserAsRead 
+  } = useUserNotifications(session?.user?.id); // Pass user ID to the hook
+
+  // Determine which set of notifications to use
+  const notifications = isAdmin ? adminNotifications : userNotifications;
+  const unreadCount = isAdmin ? adminUnreadCount : userUnreadCount;
+  const loading = isAdmin ? adminLoading : userLoading;
+  const markAsRead = isAdmin ? markAdminAsRead : markUserAsRead;
+  const markAllAsRead = isAdmin ? markAllAdminAsRead : markAllUserAsRead;
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -33,12 +57,10 @@ export const Header = ({ session, isAdmin }: HeaderProps) => {
     markAsRead(notificationId);
     if (type === 'new_report') {
       navigate(`/admin`); // Reports are managed in admin dashboard
-    } else if (type === 'ticket_reply' || type === 'new_ticket') { // MODIFICA QUI: Aggiunto 'new_ticket'
+    } else if (type === 'ticket_reply' || type === 'new_ticket') {
       navigate(`/my-tickets/${entityId}`); // Navigate to ticket details
     }
   };
-
-  console.log("Header: isAdmin prop received:", isAdmin);
 
   return (
     <header className="bg-white/80 backdrop-blur-sm shadow-md sticky top-0 z-50">
@@ -50,50 +72,49 @@ export const Header = ({ session, isAdmin }: HeaderProps) => {
         <nav>
           {session ? (
             <div className="flex items-center gap-4">
-              {isAdmin && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                      <Bell className="h-6 w-6" />
-                      {unreadCount > 0 && (
-                        <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 rounded-full bg-red-500 text-white text-xs">
-                          {unreadCount}
-                        </Badge>
-                      )}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-80" align="end" forceMount>
-                    <DropdownMenuLabel className="font-normal flex justify-between items-center">
-                      <span>Notifiche ({unreadCount})</span>
-                      {unreadCount > 0 && (
-                        <Button variant="link" size="sm" onClick={markAllAsRead} className="h-auto p-0 text-xs">
-                          Segna tutte come lette
-                        </Button>
-                      )}
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {loading ? (
-                      <DropdownMenuItem disabled>Caricamento notifiche...</DropdownMenuItem>
-                    ) : notifications.length === 0 ? (
-                      <DropdownMenuItem disabled>Nessuna nuova notifica.</DropdownMenuItem>
-                    ) : (
-                      notifications.map((notification) => (
-                        <DropdownMenuItem
-                          key={notification.id}
-                          onClick={() => handleNotificationClick(notification.id, notification.type, notification.entity_id)}
-                          className="flex flex-col items-start space-y-1 py-2 cursor-pointer"
-                          style={{ backgroundColor: notification.is_read ? 'transparent' : 'rgba(255, 192, 203, 0.1)' }} // Light pink for unread
-                        >
-                          <p className="text-sm font-medium leading-none">{notification.message}</p>
-                          <p className="text-xs leading-none text-muted-foreground">
-                            {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: it })}
-                          </p>
-                        </DropdownMenuItem>
-                      ))
+              {/* Notification Bell for both Admins and Users */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                    <Bell className="h-6 w-6" />
+                    {unreadCount > 0 && (
+                      <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 rounded-full bg-red-500 text-white text-xs">
+                        {unreadCount}
+                      </Badge>
                     )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-80" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal flex justify-between items-center">
+                    <span>Notifiche ({unreadCount})</span>
+                    {unreadCount > 0 && (
+                      <Button variant="link" size="sm" onClick={markAllAsRead} className="h-auto p-0 text-xs">
+                        Segna tutte come lette
+                      </Button>
+                    )}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {loading ? (
+                    <DropdownMenuItem disabled>Caricamento notifiche...</DropdownMenuItem>
+                  ) : notifications.length === 0 ? (
+                    <DropdownMenuItem disabled>Nessuna nuova notifica.</DropdownMenuItem>
+                  ) : (
+                    notifications.map((notification) => (
+                      <DropdownMenuItem
+                        key={notification.id}
+                        onClick={() => handleNotificationClick(notification.id, notification.type, notification.entity_id)}
+                        className="flex flex-col items-start space-y-1 py-2 cursor-pointer"
+                        style={{ backgroundColor: notification.is_read ? 'transparent' : 'rgba(255, 192, 203, 0.1)' }} // Light pink for unread
+                      >
+                        <p className="text-sm font-medium leading-none">{notification.message}</p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                          {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: it })}
+                        </p>
+                      </DropdownMenuItem>
+                    ))
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               <Link to="/new-listing">
                 <Button className="bg-rose-500 hover:bg-rose-600 hidden sm:flex items-center gap-2">
@@ -124,18 +145,18 @@ export const Header = ({ session, isAdmin }: HeaderProps) => {
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuItem onClick={() => navigate('/dashboard')}>
-                    <User className="mr-2 h-4 w-4" /> {/* Icona Utente per Dashboard */}
+                    <User className="mr-2 h-4 w-4" />
                     <span>Dashboard</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/my-listings')}>
-                    <LayoutGrid className="mr-2 h-4 w-4" /> {/* Icona 4 quadrati per I miei Annunci */}
+                    <LayoutGrid className="mr-2 h-4 w-4" />
                     <span>I miei Annunci</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/credit-history')}>
                     <Wallet className="mr-2 h-4 w-4" />
                     <span>Crediti</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/my-tickets')}> {/* Nuovo link per I Miei Ticket */}
+                  <DropdownMenuItem onClick={() => navigate('/my-tickets')}>
                     <Ticket className="mr-2 h-4 w-4" />
                     <span>I Miei Ticket</span>
                   </DropdownMenuItem>

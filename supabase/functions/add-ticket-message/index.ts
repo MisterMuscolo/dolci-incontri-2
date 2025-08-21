@@ -85,22 +85,38 @@ serve(async (req) => {
       console.error('Failed to update ticket status/timestamp:', updateTicketError.message);
     }
 
-    // NEW: Insert notification if user replied to an admin's message
-    // Use supabaseAdmin for inserting into admin_notifications as it bypasses RLS
-    if (senderRole === 'user') {
-        const supabaseAdmin = createClient( // Create admin client here
-            Deno.env.get('SUPABASE_URL') ?? '',
-            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-        );
-        const { error: notificationError } = await supabaseAdmin
+    // Insert notification if admin replied to a user's message
+    // Or if user replied to an admin's message (for admin notifications)
+    const supabaseAdmin = createClient( // Create admin client here
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    if (senderRole === 'admin') {
+        // Notify the user who owns the ticket
+        const { error: userNotificationError } = await supabaseAdmin
+            .from('admin_notifications') // Using the same table, now with user_id
+            .insert({
+                type: 'ticket_reply',
+                entity_id: ticketId,
+                message: `L'amministratore ha risposto al tuo ticket: ${ticket.subject}`,
+                user_id: ticket.user_id, // Associate with the user
+            });
+        if (userNotificationError) {
+            console.error('Failed to insert user notification for admin reply:', userNotificationError.message);
+        }
+    } else { // senderRole === 'user'
+        // Notify admin about user reply (existing logic)
+        const { error: adminNotificationError } = await supabaseAdmin
             .from('admin_notifications')
             .insert({
                 type: 'ticket_reply',
                 entity_id: ticketId,
                 message: `Nuova risposta utente nel ticket: ${ticket.subject}`,
+                // user_id is null for admin notifications, or you could set it to a specific admin ID if needed
             });
-        if (notificationError) {
-            console.error('Failed to insert ticket reply notification:', notificationError.message);
+        if (adminNotificationError) {
+            console.error('Failed to insert admin notification for user reply:', adminNotificationError.message);
         }
     }
 
