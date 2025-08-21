@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { italianProvinces } from '@/data/provinces';
-import { Heart, MapPin, Search, Users, User } from 'lucide-react';
+import { Heart, MapPin, Search, Users, User, Apple, Android } from 'lucide-react'; // Importa Apple e Android
 import { Card, CardContent } from '@/components/ui/card';
 
 interface IndexProps {
@@ -45,7 +45,36 @@ export default function Index({ session }: IndexProps) {
     <>
       <div className="bg-gradient-to-br from-rose-100 via-white to-sky-100">
         <div className="container mx-auto px-4 py-16 text-center">
-          
+          {/* Nuovi pulsanti per il download dell'app */}
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-8">
+            <a 
+              href="https://www.apple.com/it/app-store/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto"
+            >
+              <Button 
+                variant="outline" 
+                className="w-full border-gray-400 text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-2 px-6 py-3 text-lg"
+              >
+                <Apple className="h-6 w-6" /> Scarica su App Store
+              </Button>
+            </a>
+            <a 
+              href="https://play.google.com/store" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto"
+            >
+              <Button 
+                variant="outline" 
+                className="w-full border-gray-400 text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-2 px-6 py-3 text-lg"
+              >
+                <Android className="h-6 w-6" /> Disponibile su Google Play
+              </Button>
+            </a>
+          </div>
+
           <h1 className="text-5xl font-bold text-rose-600 mb-4">
             IncontriDolci
           </h1>
