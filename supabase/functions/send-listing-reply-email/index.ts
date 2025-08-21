@@ -14,9 +14,16 @@ serve(async (req) => {
 
   try {
     const { listingId, senderEmail, messageContent } = await req.json();
+    console.log('Received payload for send-listing-reply-email:', { listingId, senderEmail, messageContent }); // Log del payload ricevuto
 
-    if (!listingId || !senderEmail || !messageContent) {
-      throw new Error('Missing required fields: listingId, senderEmail, messageContent');
+    if (!listingId) {
+      throw new Error('Missing required field: listingId');
+    }
+    if (!senderEmail) {
+      throw new Error('Missing required field: senderEmail');
+    }
+    if (!messageContent) {
+      throw new Error('Missing required field: messageContent');
     }
 
     // Use the service role key to fetch listing details, bypassing RLS
@@ -32,6 +39,7 @@ serve(async (req) => {
       .single();
 
     if (listingError || !listing || !listing.email) {
+      console.error('Error fetching listing details in Edge Function:', listingError?.message); // Log dell'errore di fetching
       throw new Error('Listing not found or creator email not available.');
     }
 
@@ -53,7 +61,7 @@ serve(async (req) => {
     });
 
     if (resendError) {
-      console.error('Error sending email via Resend:', resendError);
+      console.error('Error sending email via Resend in Edge Function:', resendError); // Log dell'errore di Resend
       throw new Error(`Failed to send email: ${resendError.message}`);
     }
 
@@ -63,6 +71,7 @@ serve(async (req) => {
     });
 
   } catch (error) {
+    console.error('Edge Function caught error:', error.message); // Log dell'errore catturato
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,
