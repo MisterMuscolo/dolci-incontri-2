@@ -21,7 +21,8 @@ const ProfileSettings = lazy(() => import("./pages/ProfileSettings"));
 const SearchResults = lazy(() => import("./pages/SearchResults"));
 const ListingDetails = lazy(() => import("./pages/ListingDetails"));
 import MyListings from "./pages/MyListings"; // MyListings rimane importato direttamente
-const CreditHistory = lazy(() => import("./pages/CreditHistory")); // Ripristinato lazy loading
+import CreditHistory from "./pages/CreditHistory"; // CreditHistory rimane importato direttamente
+import MyTickets from "./pages/MyTickets"; // Importa MyTickets direttamente
 const UserListingsAdminView = lazy(() => import("./pages/UserListingsAdminView"));
 const BannedUser = lazy(() => import("./pages/BannedUser"));
 const EditListing = lazy(() => import("./pages/EditListing"));
@@ -31,7 +32,6 @@ const NewTicket = lazy(() => import("./pages/NewTicket"));
 const PromoteListingOptions = lazy(() => import("./pages/PromoteListingOptions"));
 const RegistrationSuccess = lazy(() => import("./pages/RegistrationSuccess"));
 const ChangePassword = lazy(() => import("./pages/ChangePassword")); // Percorso corretto
-const MyTickets = lazy(() => import("./pages/MyTickets"));
 const TicketDetails = lazy(() => import("./pages/TicketDetails"));
 
 const queryClient = new QueryClient();
