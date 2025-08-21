@@ -33,7 +33,7 @@ export const Header = ({ session, isAdmin }: HeaderProps) => {
     markAsRead(notificationId);
     if (type === 'new_report') {
       navigate(`/admin`); // Reports are managed in admin dashboard
-    } else if (type === 'ticket_reply') {
+    } else if (type === 'ticket_reply' || type === 'new_ticket') { // MODIFICA QUI: Aggiunto 'new_ticket'
       navigate(`/my-tickets/${entityId}`); // Navigate to ticket details
     }
   };
