@@ -69,6 +69,7 @@ const NewListing = () => {
         ...restOfValues,
         age: parseInt(age, 10),
         user_id: user.id,
+        last_bumped_at: new Date().toISOString(), // Aggiunto per far apparire i nuovi annunci in cima
       };
 
       const { data: listingData, error: listingError } = await supabase
