@@ -42,6 +42,7 @@ export const TicketManagementTable = () => {
 
   const fetchTickets = async () => {
     setLoading(true);
+    console.log("TicketManagementTable: Inizio fetchTickets...");
     const { data, error } = await supabase
       .from('tickets')
       .select(`
@@ -59,12 +60,17 @@ export const TicketManagementTable = () => {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error("Error fetching tickets:", error);
+      console.error("TicketManagementTable: Errore nel recupero dei ticket:", error);
       showError("Impossibile caricare i ticket.");
     } else {
+      console.log("TicketManagementTable: Dati ticket ricevuti:", data);
+      if (data && data.length === 0) {
+        console.log("TicketManagementTable: Nessun ticket trovato nel database per l'admin.");
+      }
       setTickets(data as Ticket[]);
     }
     setLoading(false);
+    console.log("TicketManagementTable: Fine fetchTickets.");
   };
 
   useEffect(() => {
