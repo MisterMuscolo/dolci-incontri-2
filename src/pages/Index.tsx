@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { italianProvinces } from '@/data/provinces';
 import { Heart, MapPin, Search } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-// Rimosso: import { PWAInstallInstructions } from '@/components/PWAInstallInstructions'; // Importa il nuovo componente
+import { PWAInstallInstructions } from '@/components/PWAInstallInstructions'; // Importa il nuovo componente
 
 interface IndexProps {
   session: any;
@@ -131,8 +131,6 @@ export default function Index({ session }: IndexProps) {
             </div>
           </div>
 
-          {/* Rimosso: <PWAInstallInstructions /> */}
-
           {/* Sezione per le categorie cliccabili */}
           <div className="mt-16">
             <h2 className="text-3xl font-bold text-gray-800 mb-8">Esplora per Categoria</h2>
@@ -153,6 +151,10 @@ export default function Index({ session }: IndexProps) {
               })}
             </div>
           </div>
+          
+          {/* Nuova sezione per le istruzioni PWA, ora solo sulla homepage */}
+          <PWAInstallInstructions />
+
         </div>
       </div>
     </>
