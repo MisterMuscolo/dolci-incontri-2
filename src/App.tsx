@@ -30,7 +30,7 @@ const Privacy = lazy(() => import("./pages/Privacy"));
 const NewTicket = lazy(() => import("./pages/NewTicket"));
 const PromoteListingOptions = lazy(() => import("./pages/PromoteListingOptions"));
 const RegistrationSuccess = lazy(() => import("./pages/RegistrationSuccess"));
-const ChangePassword = lazy(() => import("./pages/Change/Password"));
+const ChangePassword = lazy(() => import("./pages/ChangePassword")); // Percorso corretto
 const MyTickets = lazy(() => import("./pages/MyTickets"));
 const TicketDetails = lazy(() => import("./pages/TicketDetails"));
 
