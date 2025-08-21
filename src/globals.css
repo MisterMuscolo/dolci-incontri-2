@@ -99,8 +99,3 @@
     @apply bg-background text-foreground;
   }
 }
-
-@keyframes watermark-flow {
-  0% { background-position: 100% 0; }
-  100% { background-position: -100% 0; }
-}
