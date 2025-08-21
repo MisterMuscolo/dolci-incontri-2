@@ -86,7 +86,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
     } else if (mode === 'night') {
         return 'Il tuo annuncio avrà massima visibilità durante le ore notturne, con 5 risalite più frequenti durante il periodo. Apparirà in cima ai risultati di ricerca e potrà avere fino a 5 foto.';
     }
-    return 'Gli annunci Premium appaiono in cima ai risultati di ricerca e possono avere fino a 5 foto.';
+    return 'Gli annunci in Cima appaiono in cima ai risultati di ricerca e possono avere fino a 5 foto.';
   };
 
   const getPromotionPeriodDetails = () => {
@@ -171,7 +171,6 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
   return (
     <Card className={cn(
       "w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row relative",
-      // Rimosso il bordo e l'ombra per gli annunci Premium attivi
       (canEdit || canManagePhotos || canDelete) && isPendingPremium && "border-2 border-blue-400 shadow-lg bg-blue-50" 
     )}>
       <div className="flex flex-col sm:flex-row w-full">
@@ -218,7 +217,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
         )}>
           <div className="p-4 flex flex-col flex-grow">
             <h3 className="text-xl font-semibold mb-2 text-gray-800 line-clamp-2">{listing.title}</h3>
-            <p className="text-sm text-gray-600 mb-3 line-clamp-3">{listing.description}</p> {/* Aggiunta la descrizione qui */}
+            <p className="text-sm text-gray-600 mb-3 line-clamp-3">{listing.description}</p>
             <div className="flex flex-wrap gap-2 mb-3">
               <Badge variant="secondary" className="capitalize">{listing.category.replace(/-/g, ' ')}</Badge>
               <Badge variant="outline">{listing.city}</Badge>
@@ -237,7 +236,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
       </div>
       {!(canEdit || canManagePhotos || canDelete) && isActivePremium && (
         <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white absolute top-2 right-2 z-20">
-          <Rocket className="h-3 w-3 mr-1" /> Premium
+          <Rocket className="h-3 w-3 mr-1" /> Cima
         </Badge>
       )}
       {(canEdit || canManagePhotos || canDelete) && (
@@ -259,7 +258,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
             />
           )}
 
-          {/* Mostra i dettagli Premium/In Attesa ma nasconde i pulsanti di acquisto/promozione se isAdminContext */}
+          {/* Mostra i dettagli Cima/In Attesa ma nasconde i pulsanti di acquisto/promozione se isAdminContext */}
           {isActivePremium ? (
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -268,12 +267,12 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                   size="sm" 
                   className="w-full bg-yellow-500 hover:bg-yellow-600 text-white flex items-center gap-1"
                 >
-                  <Rocket className="h-4 w-4" /> Premium
+                  <Rocket className="h-4 w-4" /> Cima
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Annuncio Premium Attivo</AlertDialogTitle>
+                  <AlertDialogTitle>Annuncio in Cima Attivo</AlertDialogTitle>
                   <AlertDialogDescription>
                     {getPromotionPeriodDetails()}
                   </AlertDialogDescription>
