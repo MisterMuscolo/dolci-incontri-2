@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Info, Share, MoreVertical } from 'lucide-react'; // Importa le nuove icone
+import { Info, Share, MoreVertical } from 'lucide-react';
 
 type OSType = 'iOS' | 'Android' | 'Other';
 
@@ -46,10 +46,13 @@ export const PWAInstallInstructions = () => {
             </h3>
             <ol className="list-decimal list-inside text-gray-600 space-y-1">
               <li>Apri il browser Chrome e visita questo sito.</li>
-              <li>Tocca l'icona del menu (tre puntini verticali) nell'angolo in alto a destra.</li>
+              <li>Tocca l'icona del menu (<MoreVertical className="inline-block h-4 w-4 align-middle" /> tre puntini verticali) nell'angolo in alto a destra.</li>
               <li>Seleziona "Aggiungi a schermata Home" o "Installa app".</li>
               <li>Conferma l'installazione.</li>
             </ol>
+            <p className="text-sm text-gray-500 mt-2">
+              *Le Progressive Web App (PWA) si installano direttamente dal browser, non dal Play Store.
+            </p>
           </div>
         )}
         {os === 'iOS' && (
@@ -59,7 +62,7 @@ export const PWAInstallInstructions = () => {
             </h3>
             <ol className="list-decimal list-inside text-gray-600 space-y-1">
               <li>Apri il browser Safari e visita questo sito.</li>
-              <li>Tocca l'icona "Condividi" (il quadrato con la freccia che punta verso l'alto) nella barra inferiore.</li>
+              <li>Tocca l'icona "Condividi" (<Share className="inline-block h-4 w-4 align-middle" /> il quadrato con la freccia che punta verso l'alto) nella barra inferiore.</li>
               <li>Scorri verso il basso e seleziona "Aggiungi alla schermata Home".</li>
               <li>Tocca "Aggiungi" nell'angolo in alto a destra.</li>
             </ol>
