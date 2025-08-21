@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Wallet, Settings, LayoutGrid, Ticket, PlusCircle } from "lucide-react"; // Importa Ticket e PlusCircle
+import { Wallet, Settings, LayoutGrid, Ticket, PlusCircle, MessageSquare } from "lucide-react"; // Importa Ticket, PlusCircle e MessageSquare
 import { CreateTicketDialog } from "@/components/CreateTicketDialog"; // Importa il nuovo componente
 
 const Dashboard = () => {
@@ -143,28 +143,33 @@ const Dashboard = () => {
           {/* Nuova Card per I Miei Ticket */}
           <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
             <CardHeader>
-              <Link to="/my-tickets" className="block">
-                <CardTitle className="text-2xl font-semibold flex items-center gap-4">
-                  <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center">
-                    <Ticket className="h-10 w-10 text-rose-500" />
-                  </div>
-                  <span>I Miei Ticket</span>
-                </CardTitle>
-              </Link>
+              <CardTitle className="text-2xl font-semibold flex items-center gap-4">
+                <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center">
+                  <Ticket className="h-10 w-10 text-rose-500" />
+                </div>
+                <span>I Miei Ticket</span>
+              </CardTitle>
               <CardDescription className="ml-[88px]">Visualizza e gestisci le tue richieste di supporto.</CardDescription>
             </CardHeader>
             <CardContent>
-              <CreateTicketDialog
-                triggerButton={
-                  <Button className="bg-rose-500 hover:bg-rose-600 mt-4">
-                    <PlusCircle className="h-4 w-4 mr-2" /> Apri un nuovo ticket
+              <div className="flex flex-wrap gap-4 mt-4"> {/* Aggiunto contenitore flex per i pulsanti */}
+                <Link to="/my-tickets">
+                  <Button variant="outline" className="border-rose-500 text-rose-500 hover:bg-rose-50 hover:text-rose-600">
+                    <MessageSquare className="h-4 w-4 mr-2" /> Visualizza i miei ticket
                   </Button>
-                }
-                dialogTitle="Apri un nuovo Ticket"
-                dialogDescription="Compila il modulo sottostante per inviare una richiesta di supporto o una domanda."
-                icon={Ticket}
-                redirectPathOnAuth="/dashboard"
-              />
+                </Link>
+                <CreateTicketDialog
+                  triggerButton={
+                    <Button className="bg-rose-500 hover:bg-rose-600">
+                      <PlusCircle className="h-4 w-4 mr-2" /> Apri un nuovo ticket
+                    </Button>
+                  }
+                  dialogTitle="Apri un nuovo Ticket"
+                  dialogDescription="Compila il modulo sottostante per inviare una richiesta di supporto o una domanda."
+                  icon={Ticket}
+                  redirectPathOnAuth="/dashboard"
+                />
+              </div>
             </CardContent>
           </Card>
           
