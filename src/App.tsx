@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useEffect, useState, lazy, Suspense } from "react"; // Import lazy and Suspense
+import { useEffect, useState, lazy, Suspense, startTransition } from "react"; // Import lazy, Suspense, and startTransition
 import { supabase } from "@/integrations/supabase/client";
 import { showError } from "./utils/toast";
 import { LoadingScreen } from "./components/LoadingScreen";
@@ -27,12 +27,12 @@ const BannedUser = lazy(() => import("./pages/BannedUser"));
 const EditListing = lazy(() => import("./pages/EditListing"));
 const Termini = lazy(() => import("./pages/Termini"));
 const Privacy = lazy(() => import("./pages/Privacy"));
-const NewTicket = lazy(() => import("./pages/NewTicket")); // Aggiornato l'import
+const NewTicket = lazy(() => import("./pages/NewTicket"));
 const PromoteListingOptions = lazy(() => import("./pages/PromoteListingOptions"));
 const RegistrationSuccess = lazy(() => import("./pages/RegistrationSuccess"));
 const ChangePassword = lazy(() => import("./pages/ChangePassword"));
-const MyTickets = lazy(() => import("./pages/MyTickets")); // Nuova pagina
-const TicketDetails = lazy(() => import("./pages/TicketDetails")); // Nuova pagina
+const MyTickets = lazy(() => import("./pages/MyTickets"));
+const TicketDetails = lazy(() => import("./pages/TicketDetails"));
 
 const queryClient = new QueryClient();
 
@@ -51,68 +51,69 @@ const App = () => {
         .eq('id', userId)
         .single();
 
-      if (profile) {
-        console.log("App.tsx: Profile role fetched:", profile.role);
-        if (profile.role === 'admin') {
-          setIsAdmin(true);
-          setIsBanned(false);
-          console.log("App.tsx: isAdmin set to TRUE");
-        } else if (profile.role === 'banned') {
-          setIsBanned(true);
+      startTransition(() => { // Wrap state updates in startTransition
+        if (profile) {
+          console.log("App.tsx: Profile role fetched:", profile.role);
+          if (profile.role === 'admin') {
+            setIsAdmin(true);
+            setIsBanned(false);
+            console.log("App.tsx: isAdmin set to TRUE");
+          } else if (profile.role === 'banned') {
+            setIsBanned(true);
+            setIsAdmin(false);
+            console.log("App.tsx: isBanned set to TRUE");
+          } else {
+            setIsAdmin(false);
+            setIsBanned(false);
+            console.log("App.tsx: isAdmin/isBanned set to FALSE (role was:", profile.role, ")");
+          }
+        } else if (error) {
+          console.error("App.tsx: Error fetching profile:", error);
           setIsAdmin(false);
-          console.log("App.tsx: isBanned set to TRUE");
+          setIsBanned(false);
+          showError("Errore nel recupero del ruolo utente.");
         } else {
+          console.log("App.tsx: No profile found for user, isAdmin/isBanned set to FALSE");
           setIsAdmin(false);
           setIsBanned(false);
-          console.log("App.tsx: isAdmin/isBanned set to FALSE (role was:", profile.role, ")");
         }
-      } else if (error) {
-        console.error("App.tsx: Error fetching profile:", error);
-        setIsAdmin(false);
-        setIsBanned(false);
-        showError("Errore nel recupero del ruolo utente.");
-      } else {
-        console.log("App.tsx: No profile found for user, isAdmin/isBanned set to FALSE");
-        setIsAdmin(false);
-        setIsBanned(false);
-      }
+      });
     } catch (err: any) {
-      console.error("App.tsx: Unexpected error in fetchUserRole:", err);
-      setIsAdmin(false);
-      setIsBanned(false);
-      showError("Errore inatteso nel recupero del ruolo utente.");
+      startTransition(() => { // Wrap state updates in startTransition
+        console.error("App.tsx: Unexpected error in fetchUserRole:", err);
+        setIsAdmin(false);
+        setIsBanned(false);
+        showError("Errore inatteso nel recupero del ruolo utente.");
+      });
     }
   };
 
   useEffect(() => {
     const getInitialSessionAndRole = async () => {
       console.log("App.tsx: Fetching initial session and role...");
-      setLoading(true);
+      setLoading(true); // This is fine to be synchronous to show loading immediately
       try {
         const { data: { session: initialSession }, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError) {
-          console.error("App.tsx: Error getting initial session:", sessionError);
-          showError("Errore nel recupero della sessione utente.");
-          setSession(null);
-          setIsAdmin(false);
-          setIsBanned(false);
-        } else {
+        
+        startTransition(() => { // Wrap session update in startTransition
           setSession(initialSession);
-          if (initialSession) {
-            await fetchUserRole(initialSession.user.id);
-          } else {
-            setIsAdmin(false);
-            setIsBanned(false);
-          }
+        });
+
+        if (initialSession) {
+          await fetchUserRole(initialSession.user.id);
         }
       } catch (err: any) {
         console.error("App.tsx: Unexpected error during initial session fetch:", err);
         showError("Errore inatteso durante il caricamento iniziale.");
-        setSession(null);
-        setIsAdmin(false);
-        setIsBanned(false);
+        startTransition(() => { // Wrap state updates in startTransition
+          setSession(null);
+          setIsAdmin(false);
+          setIsBanned(false);
+        });
       } finally {
-        setLoading(false);
+        startTransition(() => { // Wrap final loading state update in startTransition
+          setLoading(false);
+        });
       }
     };
 
@@ -120,23 +121,31 @@ const App = () => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
       console.log("App.tsx: Auth state changed. Event:", _event, "New Session:", newSession);
-      setSession(newSession);
-      setLoading(true);
+      setLoading(true); // This is fine to be synchronous to show loading immediately
+      startTransition(() => { // Wrap session update in startTransition
+        setSession(newSession);
+      });
 
       try {
         if (newSession) {
           await fetchUserRole(newSession.user.id);
         } else {
-          setIsAdmin(false);
-          setIsBanned(false);
+          startTransition(() => { // Wrap state updates in startTransition
+            setIsAdmin(false);
+            setIsBanned(false);
+          });
         }
       } catch (err: any) {
         console.error("App.tsx: Unexpected error during auth state change:", err);
         showError("Errore inatteso durante il cambio di stato dell'autenticazione.");
-        setIsAdmin(false);
-        setIsBanned(false);
+        startTransition(() => { // Wrap state updates in startTransition
+          setIsAdmin(false);
+          setIsBanned(false);
+        });
       } finally {
-        setLoading(false);
+        startTransition(() => { // Wrap final loading state update in startTransition
+          setLoading(false);
+        });
       }
     });
 
@@ -204,12 +213,8 @@ const App = () => {
                 } 
               />
               <Route 
-                path="/new-ticket" // Aggiornato il path
-                element={
-                  <Suspense fallback={<LoadingScreen />}>
-                    <NewTicket /> {/* Aggiornato il componente */}
-                  </Suspense>
-                } 
+                path="/new-ticket" 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><NewTicket /></Suspense>) : <Navigate to="/auth" />} 
               />
               <Route 
                 path="/my-tickets" 
