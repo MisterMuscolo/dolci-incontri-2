@@ -315,6 +315,7 @@ const TicketDetails = () => {
                             ) : (
                               <User className="h-4 w-4" />
                             )}
+                            {' '} {/* Aggiunto uno spazio qui */}
                             {(message.profiles?.role === 'admin' || message.profiles?.role === 'supporto') ? 'Supporto' : message.profiles?.email || 'Utente Sconosciuto'}
                           </>
                         )}
