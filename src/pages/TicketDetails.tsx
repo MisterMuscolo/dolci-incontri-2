@@ -30,6 +30,7 @@ interface TicketDetailsData {
   listing_id: string | null;
   listings: { title: string } | null; // Corretto: singolo oggetto o null
   ticket_messages: TicketMessage[];
+  user_id: string; // Aggiunto per notificare l'utente
 }
 
 const TicketDetails = () => {
@@ -56,6 +57,7 @@ const TicketDetails = () => {
       .from('tickets')
       .select(`
         id,
+        user_id,
         subject,
         status,
         created_at,
@@ -173,15 +175,15 @@ const TicketDetails = () => {
     }
   };
 
-  const handleCloseTicket = async () => {
-    if (!ticketId) return;
-    setIsSending(true); // Use isSending for this action too
-    const toastId = showLoading('Chiusura ticket in corso...');
+  const handleResolveTicket = async () => { // Renamed function
+    if (!ticketId || !ticket) return;
+    setIsSending(true);
+    const toastId = showLoading('Risoluzione ticket in corso...');
 
     try {
       const { error } = await supabase
         .from('tickets')
-        .update({ status: 'closed', updated_at: new Date().toISOString() })
+        .update({ status: 'resolved', updated_at: new Date().toISOString(), last_replied_by: 'admin' }) // Set to 'resolved'
         .eq('id', ticketId);
 
       dismissToast(toastId);
@@ -190,11 +192,29 @@ const TicketDetails = () => {
         throw new Error(error.message);
       }
 
-      showSuccess('Ticket chiuso con successo!');
+      showSuccess('Ticket risolto con successo!');
+      
+      // Notify the user about the resolved status
+      const { error: notifyError } = await supabase.functions.invoke('notify-user-ticket-status', {
+        body: {
+          ticketId: ticket.id,
+          newStatus: 'resolved',
+          userId: ticket.user_id,
+          ticketSubject: ticket.subject,
+        },
+      });
+
+      if (notifyError) {
+        console.error("Error notifying user about ticket status:", notifyError);
+        showError("Errore durante la notifica all'utente.");
+      } else {
+        showSuccess("Notifica inviata all'utente.");
+      }
+
       fetchTicketDetails(); // Refresh ticket status
     } catch (error: any) {
       dismissToast(toastId);
-      showError(error.message || 'Errore durante la chiusura del ticket.');
+      showError(error.message || 'Errore durante la risoluzione del ticket.');
     } finally {
       setIsSending(false);
     }
@@ -308,11 +328,11 @@ const TicketDetails = () => {
                   {ticket.status !== 'closed' && (
                     <Button
                       variant="outline"
-                      onClick={handleCloseTicket}
+                      onClick={handleResolveTicket} // Changed to handleResolveTicket
                       disabled={isSending}
                       className="border-gray-400 text-gray-600 hover:bg-gray-100"
                     >
-                      Chiudi Ticket
+                      Risolvi Ticket {/* Changed button text */}
                     </Button>
                   )}
                 </div>
