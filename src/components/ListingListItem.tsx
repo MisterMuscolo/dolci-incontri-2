@@ -169,15 +169,15 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
   };
 
   return (
-    <div className="relative"> {/* Nuovo contenitore relativo */}
+    <div className="relative">
       <Card className={cn(
-        "w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row", // Rimosso 'relative' da qui
+        "w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row",
         (canEdit || canManagePhotos || canDelete) && isPendingPremium && "border-2 border-blue-400 shadow-lg bg-blue-50" 
       )}>
         <div className="flex flex-col sm:flex-row w-full">
-          {hasPhotosToRender && ( // Mostra il blocco immagine solo se ci sono foto da renderizzare
-            <div className="md:w-2/5 lg:w-1/3 flex-shrink-0 relative"> {/* Modificato qui */}
-              <AspectRatio ratio={16 / 9} className="w-full h-full">
+          {hasPhotosToRender && (
+            <div className="md:w-1/4 lg:w-1/5 flex-shrink-0 relative"> {/* Modificato qui per larghezza */}
+              <AspectRatio ratio={3 / 4} className="w-full h-full"> {/* Modificato qui per aspect ratio */}
                 {photosToRender.length > 1 ? (
                   <Carousel
                     plugins={[
@@ -214,16 +214,15 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           )}
           <Link to={`/listing/${listing.id}`} className={cn(
             "flex-grow block hover:bg-gray-50/50",
-            !hasPhotosToRender && "w-full" // Se non ci sono foto, il link occupa tutta la larghezza disponibile
+            !hasPhotosToRender && "w-full"
           )}>
             <div className="p-4 flex flex-col flex-grow">
-              {/* Data e Categoria spostate sopra il titolo */}
-              <div className="flex items-center gap-2 mb-1"> {/* Usa gap-2 per spaziatura tra gli elementi */}
-                <div className="flex items-center text-xs text-gray-500"> {/* Testo più piccolo per la data */}
-                  <CalendarDays className="h-3 w-3 mr-1" /> {/* Icona più piccola */}
+              <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center text-xs text-gray-500">
+                  <CalendarDays className="h-3 w-3 mr-1" />
                   <span>{prefix} {formattedDate}</span>
                 </div>
-                <Badge variant="secondary" className="capitalize text-xs">{listing.category.replace(/-/g, ' ')}</Badge> {/* Assicurati che il badge sia anche text-xs */}
+                <Badge variant="secondary" className="capitalize text-xs">{listing.category.replace(/-/g, ' ')}</Badge>
               </div>
               <h3 className="text-xl font-semibold mb-2 text-rose-600 line-clamp-2">{listing.title}</h3>
               <p className="text-base text-gray-600 mb-3 line-clamp-3">{listing.description}</p>
@@ -257,7 +256,6 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
               />
             )}
 
-            {/* Mostra i dettagli In Evidenza/In Attesa ma nasconde i pulsanti di acquisto/promozione se isAdminContext */}
             {isActivePremium ? (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -278,7 +276,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Chiudi</AlertDialogCancel>
-                    {!isAdminContext && ( // Nascondi il pulsante "Acquista Crediti" se isAdminContext
+                    {!isAdminContext && (
                       <Link to="/buy-credits">
                         <AlertDialogAction className="bg-rose-500 hover:bg-rose-600">
                           Acquista Crediti
@@ -308,7 +306,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Chiudi</AlertDialogCancel>
-                    {!isAdminContext && ( // Nascondi il pulsante "Acquista Crediti" se isAdminContext
+                    {!isAdminContext && (
                       <Link to="/buy-credits">
                         <AlertDialogAction className="bg-rose-500 hover:bg-rose-600">
                           Acquista Crediti
@@ -319,7 +317,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                 </AlertDialogContent>
               </AlertDialog>
             ) : (
-              !isAdminContext && ( // Nascondi il pulsante "Promuovi" se isAdminContext
+              !isAdminContext && (
                 <Link to={`/promote-listing/${listing.id}`} className="w-full">
                   <Button variant="default" size="sm" className="w-full bg-green-500 hover:bg-green-600 text-white">
                     <Rocket className="h-4 w-4 md:mr-2" />
