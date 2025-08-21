@@ -83,39 +83,47 @@ const Dashboard = () => {
         </div>
 
         <div className="space-y-4">
-          <Link to="/my-listings">
-            <Card className="w-full transition-shadow hover:shadow-lg cursor-pointer bg-white hover:bg-gray-50">
-              <CardHeader>
-                <CardTitle className="text-2xl font-semibold flex items-center gap-4">
-                  <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center">
-                    <LayoutGrid className="h-10 w-10 text-rose-500" />
-                  </div>
-                  <span className="text-gray-800">I Miei Annunci</span>
-                </CardTitle>
-                <CardDescription className="ml-[88px]">Visualizza e gestisci i tuoi annunci.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <Skeleton className="h-8 w-3/4" />
-                ) : (
-                  <p className="text-gray-600 text-xl">
-                    Hai <span className="font-bold text-rose-500">{totalListingsCount}</span> annunci attivi
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </Link>
+          <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
+            <CardHeader>
+              <CardTitle className="text-2xl font-semibold flex items-center gap-4">
+                <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center">
+                  <LayoutGrid className="h-10 w-10 text-rose-500" />
+                </div>
+                <span className="text-gray-800">I Miei Annunci</span>
+              </CardTitle>
+              <CardDescription className="ml-[88px]">Visualizza e gestisci i tuoi annunci.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <Skeleton className="h-8 w-3/4" />
+              ) : (
+                <p className="text-gray-600 text-xl">
+                  Hai <span className="font-bold text-rose-500">{totalListingsCount}</span> annunci attivi
+                </p>
+              )}
+              <div className="flex flex-wrap gap-4 mt-4">
+                <Link to="/my-listings">
+                  <Button variant="outline" className="border-rose-500 text-rose-500 hover:bg-rose-50 hover:text-rose-600">
+                    <LayoutGrid className="h-4 w-4 mr-2" /> Visualizza i miei annunci
+                  </Button>
+                </Link>
+                <Link to="/new-listing">
+                  <Button className="bg-rose-500 hover:bg-rose-600">
+                    <PlusCircle className="h-4 w-4 mr-2" /> Crea nuovo annuncio
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
 
           <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
             <CardHeader>
-              <Link to="/credit-history" className="block">
-                <CardTitle className="text-2xl font-semibold flex items-center gap-4">
-                  <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center">
-                    <Wallet className="h-10 w-10 text-rose-500" />
-                  </div>
-                  <span>Crediti</span>
-                </CardTitle>
-              </Link>
+              <CardTitle className="text-2xl font-semibold flex items-center gap-4">
+                <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center">
+                  <Wallet className="h-10 w-10 text-rose-500" />
+                </div>
+                <span>Crediti</span>
+              </CardTitle>
               <CardDescription className="ml-[88px]">Acquista e gestisci i tuoi crediti.</CardDescription>
             </CardHeader>
             <CardContent>
@@ -134,9 +142,16 @@ const Dashboard = () => {
                   </p>
                 </div>
               )}
-              <Link to="/buy-credits">
-                <Button className="bg-rose-500 hover:bg-rose-600 mt-4">Acquista crediti</Button>
-              </Link>
+              <div className="flex flex-wrap gap-4 mt-4">
+                <Link to="/credit-history">
+                  <Button variant="outline" className="border-rose-500 text-rose-500 hover:bg-rose-50 hover:text-rose-600">
+                    <MessageSquare className="h-4 w-4 mr-2" /> Visualizza cronologia crediti
+                  </Button>
+                </Link>
+                <Link to="/buy-credits">
+                  <Button className="bg-rose-500 hover:bg-rose-600">Acquista crediti</Button>
+                </Link>
+              </div>
             </CardContent>
           </Card>
 
@@ -175,18 +190,20 @@ const Dashboard = () => {
           
           <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
             <CardHeader>
-              <Link to="/profile-settings" className="block">
-                <CardTitle className="text-2xl font-semibold flex items-center gap-4">
-                  <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center">
-                    <Settings className="h-10 w-10 text-rose-500" />
-                  </div>
-                  <span>Impostazioni</span>
-                </CardTitle>
-              </Link>
+              <CardTitle className="text-2xl font-semibold flex items-center gap-4">
+                <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center">
+                  <Settings className="h-10 w-10 text-rose-500" />
+                </div>
+                <span>Impostazioni</span>
+              </CardTitle>
               <CardDescription className="ml-[88px]">Gestisci le impostazioni del tuo account.</CardDescription>
             </CardHeader>
             <CardContent>
-              {/* Il pulsante "Cambia Password" è stato rimosso da qui */}
+              <Link to="/profile-settings">
+                <Button variant="outline" className="border-rose-500 text-rose-500 hover:bg-rose-50 hover:text-rose-600 mt-4">
+                  <Settings className="h-4 w-4 mr-2" /> Gestisci impostazioni
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         </div>
