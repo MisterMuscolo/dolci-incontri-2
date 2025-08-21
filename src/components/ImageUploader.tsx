@@ -263,14 +263,14 @@ export const ImageUploader = ({
           <div 
             key={photo.id} 
             className={cn(
-              "relative group aspect-square", // Questo div avvolge l'immagine e gestisce il ring
+              "relative group aspect-square rounded-md", // Aggiunto rounded-md qui
               photo.is_primary && "ring-4 ring-offset-2 ring-rose-500"
             )}
           >
             <img
               src={photo.url}
               alt={`Foto esistente ${index + 1}`}
-              className="w-full h-full object-cover rounded-md transition-all" // L'immagine è arrotondata
+              className="w-full h-full object-cover rounded-md transition-all" // Mantenuto rounded-md qui
               onClick={() => setActivePreviewUrl(photo.url ?? null)}
             />
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center gap-2">
@@ -307,14 +307,14 @@ export const ImageUploader = ({
           <div 
             key={`new-${index}`} 
             className={cn(
-              "relative group aspect-square", // Questo div avvolge l'immagine e gestisce il ring
+              "relative group aspect-square rounded-md", // Aggiunto rounded-md qui
               (newlySelectedPrimaryIndex === index && existingPhotosState.length === 0) && "ring-4 ring-offset-2 ring-rose-500"
             )}
           >
             <img
               src={preview}
               alt={`Nuova foto ${index + 1}`}
-              className="w-full h-full object-cover rounded-md transition-all" // L'immagine è arrotondata
+              className="w-full h-full object-cover rounded-md transition-all" // Mantenuto rounded-md qui
               onClick={() => setActivePreviewUrl(preview ?? null)}
             />
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center gap-2">

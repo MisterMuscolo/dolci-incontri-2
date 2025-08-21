@@ -148,15 +148,15 @@ const ListingDetails = () => {
                     <div 
                       key={photo.id} 
                       className={cn(
-                        "relative w-24 h-24 flex-shrink-0", // Questo div avvolge il pulsante e gestisce il ring
+                        "relative w-24 h-24 flex-shrink-0 rounded-md", // Aggiunto rounded-md qui
                         activePhoto === photo.url && 'ring-2 ring-rose-500 ring-offset-2 ring-offset-gray-50'
                       )}
                     >
                       <button 
                         onClick={() => setActivePhoto(photo.url)} 
-                        className="w-full h-full rounded-md overflow-hidden" // Il pulsante è arrotondato e nasconde l'overflow
+                        className="w-full h-full" // Rimosso rounded-md e overflow-hidden
                       >
-                        <WatermarkedImage src={photo.url} alt="Thumbnail" imageClassName="object-contain bg-gray-200" />
+                        <WatermarkedImage src={photo.url} alt="Thumbnail" imageClassName="object-contain bg-gray-200 rounded-md" />
                       </button>
                     </div>
                   ))}
