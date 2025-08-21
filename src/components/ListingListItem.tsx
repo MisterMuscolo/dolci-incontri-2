@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, CalendarDays, Rocket, User } from "lucide-react";
+import { Pencil, Trash2, CalendarDays, Rocket, User, Camera } from "lucide-react"; // Importa Camera
 import { format, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Link } from "react-router-dom";
@@ -18,8 +18,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { supabase } from '@/integrations/supabase/client';
-// Rimosse le importazioni del carosello: Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext
-// Rimosso l'importazione di Autoplay
 import { cn } from '@/lib/utils';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { useState } from "react";
@@ -178,11 +176,15 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           {hasPhotosToRender && (
             <div className="md:w-1/4 lg:w-1/5 flex-shrink-0 relative">
               <AspectRatio ratio={3 / 4} className="w-full h-full">
-                {/* Mostra sempre solo la prima foto, senza carosello */}
                 <Link to={`/listing/${listing.id}`} className="block w-full h-full">
                   <img src={photosToRender[0].url} alt={listing.title} className="object-cover w-full h-full bg-gray-200" />
                 </Link>
               </AspectRatio>
+              {isActivePremium && photosToRender.length > 1 && (
+                <Badge className="absolute top-2 right-2 bg-black/60 text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
+                  <Camera className="h-3 w-3" /> {photosToRender.length}
+                </Badge>
+              )}
             </div>
           )}
           <Link to={`/listing/${listing.id}`} className={cn(
