@@ -87,12 +87,25 @@ export const TicketManagementTable = () => {
         throw new Error('Utente non autenticato.');
       }
 
+      // Fetch the current user's role
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError || !profile) {
+        throw new Error('Impossibile recuperare il ruolo dell\'utente corrente.');
+      }
+
+      const senderRole = profile.role as 'admin' | 'supporto'; // Cast to the expected type
+
       const { error } = await supabase
         .from('tickets')
         .update({ 
           status: newStatus,
           updated_at: new Date().toISOString(),
-          last_replied_by: 'admin', // Assume admin is changing status
+          last_replied_by: senderRole, // Usa il ruolo effettivo dell'utente
         })
         .eq('id', ticketId);
 
