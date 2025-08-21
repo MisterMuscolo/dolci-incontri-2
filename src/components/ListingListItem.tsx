@@ -171,7 +171,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
   return (
     <Card className={cn(
       "w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row relative",
-      isActivePremium && "border-2 border-rose-500 shadow-lg",
+      // Rimosso il bordo e l'ombra per gli annunci Premium attivi
       (canEdit || canManagePhotos || canDelete) && isPendingPremium && "border-2 border-blue-400 shadow-lg bg-blue-50" 
     )}>
       <div className="flex flex-col sm:flex-row w-full">
