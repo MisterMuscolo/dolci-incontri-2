@@ -201,16 +201,7 @@ export const TicketManagementTable = () => {
                           <Eye className="h-4 w-4 mr-1" /> Visualizza
                         </Button>
                       </Link>
-                      {ticket.status === 'open' && (
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => handleUpdateTicketStatus(ticket.id, 'in_progress')}
-                          disabled={actionLoadingId === ticket.id}
-                        >
-                          <CheckCircle className="h-4 w-4 mr-1" /> In Corso
-                        </Button>
-                      )}
+                      {/* Rimosso il pulsante "In Corso" */}
                       {(ticket.status === 'open' || ticket.status === 'in_progress') && (
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
