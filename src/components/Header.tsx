@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart, LogOut, User, PlusCircle, Shield, LogIn, LayoutGrid, Wallet, Settings, Ticket, Bell } from 'lucide-react'; // Rimossa Flag
+import { Heart, LogOut, User, PlusCircle, Shield, LogIn, LayoutGrid, Wallet, Settings, Ticket, Bell, Tag } from 'lucide-react'; // Aggiunta Tag
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -156,6 +156,10 @@ export const Header = ({ session, isAdmin, isSupporto }: HeaderProps) => {
                   <DropdownMenuItem onClick={() => navigate('/credit-history')}>
                     <Wallet className="mr-2 h-4 w-4" />
                     <span>Crediti</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/my-coupons')}>
+                    <Tag className="mr-2 h-4 w-4" />
+                    <span>I Miei Coupon</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/my-tickets')}>
                     <Ticket className="mr-2 h-4 w-4" />

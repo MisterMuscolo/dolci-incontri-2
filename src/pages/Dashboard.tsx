@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Wallet, Settings, LayoutGrid, Ticket, PlusCircle, MessageSquare } from "lucide-react";
+import { Wallet, Settings, LayoutGrid, Ticket, PlusCircle, MessageSquare, Tag } from "lucide-react"; // Importa Tag
 import { CreateTicketDialog } from "@/components/CreateTicketDialog";
 
 const Dashboard = () => {
@@ -154,6 +154,26 @@ const Dashboard = () => {
             </CardContent>
           </Card>
           
+          {/* Nuova Card per I Miei Coupon */}
+          <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
+            <CardHeader>
+              <CardTitle className="text-2xl font-semibold flex items-center gap-4">
+                <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center">
+                  <Tag className="h-10 w-10 text-rose-500" />
+                </div>
+                <span>I Miei Coupon</span>
+              </CardTitle>
+              <CardDescription className="ml-[88px]">Visualizza e gestisci i tuoi codici sconto.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link to="/my-coupons">
+                <Button variant="outline" className="border-rose-500 text-rose-500 hover:bg-rose-50 hover:text-rose-600 mt-4">
+                  <Tag className="h-4 w-4 mr-2" /> Gestisci i miei coupon
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
           <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
             <CardHeader>
               <CardTitle className="text-2xl font-semibold flex items-center gap-4">

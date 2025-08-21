@@ -33,6 +33,7 @@ const PromoteListingOptions = lazy(() => import("./pages/PromoteListingOptions")
 const RegistrationSuccess = lazy(() => import("./pages/RegistrationSuccess"));
 const ChangePassword = lazy(() => import("./pages/ChangePassword")); // Percorso corretto
 const TicketDetails = lazy(() => import("./pages/TicketDetails"));
+const MyCoupons = lazy(() => import("./pages/MyCoupons")); // Importa la nuova pagina MyCoupons
 
 const queryClient = new QueryClient();
 
@@ -239,6 +240,10 @@ const App = () => {
               <Route 
                 path="/credit-history" 
                 element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><CreditHistory /></Suspense>) : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/my-coupons" 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><MyCoupons /></Suspense>) : <Navigate to="/auth" />} 
               />
             </Route> {/* Chiusura della rotta del Layout */}
           </Routes>
