@@ -258,10 +258,10 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Chiudi</AlertDialogCancel>
-                    {!isAdminContext && listing.promotion_mode && ( // Only show "Promuovi" if not admin context and promotion_mode exists
+                    {!isAdminContext && listing.promotion_mode && ( // Only show "Estendi" if not admin context and promotion_mode exists
                       <Link to={`/promote-listing/${listing.id}?mode=${listing.promotion_mode}`}>
                         <AlertDialogAction className="bg-rose-500 hover:bg-rose-600">
-                          Promuovi
+                          Estendi
                         </AlertDialogAction>
                       </Link>
                     )}
