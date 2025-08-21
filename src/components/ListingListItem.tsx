@@ -39,6 +39,7 @@ export interface Listing {
   last_bumped_at: string | null;
   listing_photos: { url: string; is_primary: boolean }[];
   age?: number;
+  zone?: string | null; // Aggiunto per chiarezza
 }
 
 interface ListingListItemProps {
@@ -203,7 +204,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
               <p className="text-base text-gray-600 mb-3 line-clamp-3">{listing.description}</p>
               <div className="flex flex-wrap gap-2 mb-3">
                 <Badge variant="outline">
-                  <MapPin className="h-3 w-3 mr-1" /> {listing.city}
+                  <MapPin className="h-3 w-3 mr-1" /> {listing.city}{listing.zone && ` / ${listing.zone}`}
                 </Badge>
                 {listing.age && (
                   <Badge variant="outline">
