@@ -14,7 +14,7 @@ serve(async (req) => {
 
   try {
     const { listingId, senderEmail, messageContent } = await req.json();
-    console.log('Received payload for send-listing-reply-email:', { listingId, senderEmail, messageContent }); // Log del payload ricevuto
+    console.log('Received payload for send-listing-reply-email:', { listingId, senderEmail, messageContent });
 
     if (!listingId) {
       throw new Error('Missing required field: listingId');
@@ -26,7 +26,6 @@ serve(async (req) => {
       throw new Error('Missing required field: messageContent');
     }
 
-    // Use the service role key to fetch listing details, bypassing RLS
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -39,29 +38,55 @@ serve(async (req) => {
       .single();
 
     if (listingError || !listing || !listing.email) {
-      console.error('Error fetching listing details in Edge Function:', listingError?.message); // Log dell'errore di fetching
+      console.error('Error fetching listing details in Edge Function:', listingError?.message);
       throw new Error('Listing not found or creator email not available.');
     }
 
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
 
     const { data, error: resendError } = await resend.emails.send({
-      from: 'Incontri Dolci <noreply@incontridolci.it>', // Modificato qui: da .com a .it
+      from: 'Incontri Dolci <noreply@incontridolci.it>',
       to: [listing.email],
-      reply_to: senderEmail, // Set reply-to to the sender's email
+      reply_to: senderEmail,
       subject: `Nuova risposta al tuo annuncio: "${listing.title}"`,
       html: `
-        <p>Ciao,</p>
-        <p>Hai ricevuto una nuova risposta al tuo annuncio "${listing.title}" da parte di ${senderEmail}.</p>
-        <p><strong>Messaggio:</strong></p>
-        <p>${messageContent.replace(/\n/g, '<br>')}</p>
-        <p>Puoi rispondere direttamente a questa email per contattare l'utente.</p>
-        <p>Grazie,<br>Il team di Incontri Dolci</p>
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.05);">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <img src="https://placehold.co/150x50/E54A70/white?text=Incontri+Dolci" alt="Incontri Dolci Logo" style="max-width: 150px; height: auto; display: block; margin: 0 auto;">
+          </div>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+
+          <p>Ciao,</p>
+          <p>Hai ricevuto una nuova risposta al tuo annuncio "<strong>${listing.title}</strong>" da parte di <strong>${senderEmail}</strong>.</p>
+          <p style="font-weight: bold; margin-top: 20px;">Messaggio:</p>
+          <div style="background-color: #f9f9f9; border-left: 4px solid #E54A70; padding: 15px; margin: 10px 0; border-radius: 4px;">
+            <p style="margin: 0;">${messageContent.replace(/\n/g, '<br>')}</p>
+          </div>
+          <p style="margin-top: 20px;">Puoi rispondere direttamente a questa email per contattare l'utente.</p>
+
+          <div style="background-color: #f0f8ff; border: 1px solid #d0e8ff; padding: 20px; margin: 30px 0; text-align: center; border-radius: 8px;">
+            <p style="font-size: 1.1em; font-weight: bold; color: #333;">Hai bisogno di assistenza?</p>
+            <p style="margin-top: 10px; color: #555;">Non esitare a contattare il nostro team di supporto per qualsiasi domanda o problema.</p>
+            <a href="https://incontridolci.it/new-ticket" style="display: inline-block; background-color: #E54A70; color: #ffffff; padding: 10px 20px; margin-top: 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Contatta l'Assistenza</a>
+          </div>
+
+          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+
+          <div style="text-align: center; margin-top: 20px;">
+            <a href="https://incontridolci.it/termini" style="display: inline-block; background-color: #f0f0f0; color: #333; padding: 8px 15px; margin: 5px; text-decoration: none; border-radius: 5px; border: 1px solid #ddd;">Termini e Condizioni</a>
+            <a href="https://incontridolci.it/privacy" style="display: inline-block; background-color: #f0f0f0; color: #333; padding: 8px 15px; margin: 5px; text-decoration: none; border-radius: 5px; border: 1px solid #ddd;">Privacy Policy</a>
+            <a href="https://incontridolci.it/new-ticket" style="display: inline-block; background-color: #f0f0f0; color: #333; padding: 8px 15px; margin: 5px; text-decoration: none; border-radius: 5px; border: 1px solid #ddd;">Assistenza</a>
+          </div>
+
+          <p style="text-align: center; font-size: 0.8em; color: #888; margin-top: 20px;">
+            © ${new Date().getFullYear()} Incontri Dolci. Tutti i diritti riservati.
+          </p>
+        </div>
       `,
     });
 
     if (resendError) {
-      console.error('Error sending email via Resend in Edge Function:', resendError); // Log dell'errore di Resend
+      console.error('Error sending email via Resend in Edge Function:', resendError);
       throw new Error(`Failed to send email: ${resendError.message}`);
     }
 
@@ -71,7 +96,7 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Edge Function caught error:', error.message); // Log dell'errore catturato
+    console.error('Edge Function caught error:', error.message);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,
