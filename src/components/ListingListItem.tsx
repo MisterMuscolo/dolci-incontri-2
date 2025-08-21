@@ -193,11 +193,11 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           !hasPhotosToRender && "w-full"
         )}>
           <div className="p-4 flex flex-col flex-grow">
-            {/* Data di pubblicazione */}
-            <div className="flex items-center text-xs text-gray-500 mb-1">
+            {/* Data di pubblicazione come Badge */}
+            <Badge variant="outline" className="w-fit mb-1 text-xs">
               <CalendarDays className="h-3 w-3 mr-1" />
               <span>{prefix} {formattedDate}</span>
-            </div>
+            </Badge>
             {/* Categoria */}
             <div className="flex items-center gap-2 mb-2">
               <Badge variant="secondary" className="capitalize"><Tag className="h-4 w-4 mr-1.5" />{listing.category.replace(/-/g, ' ')}</Badge>
@@ -207,14 +207,14 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
             {/* Descrizione */}
             <p className="text-base text-gray-600 mb-3 line-clamp-3">{listing.description}</p>
             {/* Tag di città/zona */}
-            <div className="flex flex-wrap gap-2 mb-1"> {/* Ridotto mb-3 a mb-1 */}
+            <div className="flex flex-wrap gap-2 mb-1">
               <Badge variant="outline">
                 <MapPin className="h-3 w-3 mr-1" /> {listing.city}{listing.zone && ` / ${listing.zone}`}
               </Badge>
             </div>
             {/* Tag età */}
             {listing.age && (
-              <div className="flex flex-wrap gap-2 mb-3"> {/* Aggiunto un nuovo div per il tag età */}
+              <div className="flex flex-wrap gap-2 mb-3">
                 <Badge variant="outline">
                   <User className="h-3 w-3 mr-1" /> {listing.age} anni
                 </Badge>
