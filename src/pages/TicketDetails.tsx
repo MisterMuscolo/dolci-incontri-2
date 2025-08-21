@@ -43,6 +43,7 @@ const TicketDetails = () => {
   const [newMessage, setNewMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [currentUserRole, setCurrentUserRole] = useState<string | null>(null); // Nuovo stato per il ruolo dell'utente
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const fetchTicketDetails = async () => {
@@ -54,6 +55,21 @@ const TicketDetails = () => {
       return;
     }
     setCurrentUserId(user.id);
+
+    // Fetch user role
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !profile) {
+      console.error("Error fetching user profile:", profileError);
+      showError("Impossibile recuperare il ruolo dell'utente.");
+      setCurrentUserRole(null);
+    } else {
+      setCurrentUserRole(profile.role);
+    }
 
     const { data, error } = await supabase
       .from('tickets')
@@ -257,6 +273,7 @@ const TicketDetails = () => {
   }
 
   const isTicketClosed = ticket.status === 'resolved' || ticket.status === 'closed';
+  const canResolveTicket = currentUserRole === 'admin' || currentUserRole === 'supporto'; // Controllo del ruolo
 
   const getSenderDisplay = (message: TicketMessage) => {
     // Determine if the sender is the current user
@@ -391,7 +408,7 @@ const TicketDetails = () => {
                   >
                     <Send className="h-4 w-4 mr-2" /> {isSending ? 'Invio...' : 'Invia Messaggio'}
                   </Button>
-                  {ticket.status !== 'closed' && (
+                  {canResolveTicket && ticket.status !== 'closed' && ( // Condizione aggiunta qui
                     <Button
                       variant="outline"
                       onClick={handleResolveTicket}
