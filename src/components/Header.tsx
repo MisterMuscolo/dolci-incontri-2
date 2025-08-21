@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart, LogOut, User, PlusCircle, Shield, LogIn, LayoutGrid, Wallet, Settings, Ticket, Bell } from 'lucide-react';
+import { Heart, LogOut, User, PlusCircle, Shield, LogIn, LayoutGrid, Wallet, Settings, Ticket, Bell, Flag } from 'lucide-react'; // Importa Flag
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useAdminNotifications } from '@/hooks/useAdminNotifications';
-import { useUserNotifications } from '@/hooks/useUserNotifications'; // Importa il nuovo hook
+import { useUserNotifications } from '@/hooks/useUserNotifications';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -19,20 +19,19 @@ import { it } from 'date-fns/locale';
 interface HeaderProps {
   session: any;
   isAdmin: boolean;
-  isSupporto: boolean; // Rinomina da isCollaborator a isSupporto
+  isSupporto: boolean;
 }
 
 export const Header = ({ session, isAdmin, isSupporto }: HeaderProps) => {
   const navigate = useNavigate();
   
-  // Conditionally use the appropriate notification hook
   const { 
     notifications: adminNotifications, 
     unreadCount: adminUnreadCount, 
     loading: adminLoading, 
     markAsRead: markAdminAsRead, 
     markAllAsRead: markAllAdminAsRead 
-  } = useAdminNotifications(isAdmin || isSupporto); // MODIFICA QUI: Passa isAdmin O isSupporto
+  } = useAdminNotifications(isAdmin || isSupporto);
 
   const { 
     notifications: userNotifications, 
@@ -40,9 +39,8 @@ export const Header = ({ session, isAdmin, isSupporto }: HeaderProps) => {
     loading: userLoading, 
     markAsRead: markUserAsRead, 
     markAllAsRead: markAllUserAsRead 
-  } = useUserNotifications(session?.user?.id); // Pass user ID to the hook
+  } = useUserNotifications(session?.user?.id);
 
-  // Determine which set of notifications to use
   const notifications = isAdmin || isSupporto ? adminNotifications : userNotifications;
   const unreadCount = isAdmin || isSupporto ? adminUnreadCount : userUnreadCount;
   const loading = isAdmin || isSupporto ? adminLoading : userLoading;
@@ -57,9 +55,9 @@ export const Header = ({ session, isAdmin, isSupporto }: HeaderProps) => {
   const handleNotificationClick = (notificationId: string, type: string, entityId: string) => {
     markAsRead(notificationId);
     if (type === 'new_report') {
-      navigate(`/admin`); // Reports are managed in admin dashboard
-    } else if (type === 'ticket_reply' || type === 'new_ticket' || type === 'ticket_resolved') { // Aggiunto ticket_resolved
-      navigate(`/my-tickets/${entityId}`); // Navigate to ticket details
+      navigate(`/admin`);
+    } else if (type === 'ticket_reply' || type === 'new_ticket' || type === 'ticket_resolved') {
+      navigate(`/my-tickets/${entityId}`);
     }
   };
 
@@ -73,7 +71,6 @@ export const Header = ({ session, isAdmin, isSupporto }: HeaderProps) => {
         <nav>
           {session ? (
             <div className="flex items-center gap-4">
-              {/* Notification Bell for both Admins and Users */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-10 w-10 rounded-full">
@@ -105,7 +102,7 @@ export const Header = ({ session, isAdmin, isSupporto }: HeaderProps) => {
                         key={notification.id}
                         onClick={() => handleNotificationClick(notification.id, notification.type, notification.entity_id)}
                         className="flex flex-col items-start space-y-1 py-2 cursor-pointer"
-                        style={{ backgroundColor: notification.is_read ? 'transparent' : 'rgba(255, 192, 203, 0.1)' }} // Light pink for unread
+                        style={{ backgroundColor: notification.is_read ? 'transparent' : 'rgba(255, 192, 203, 0.1)' }}
                       >
                         <p className="text-sm font-medium leading-none">{notification.message}</p>
                         <p className="text-xs leading-none text-muted-foreground">
@@ -139,11 +136,17 @@ export const Header = ({ session, isAdmin, isSupporto }: HeaderProps) => {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  {(isAdmin || isSupporto) && ( // Visibile per admin e supporto
-                    <DropdownMenuItem onClick={() => navigate('/admin')}>
-                      <Shield className="mr-2 h-4 w-4" />
-                      <span>Pannello Controllo</span>
-                    </DropdownMenuItem>
+                  {(isAdmin || isSupporto) && (
+                    <>
+                      <DropdownMenuItem onClick={() => navigate('/admin')}>
+                        <Shield className="mr-2 h-4 w-4" />
+                        <span>Pannello Controllo</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate('/admin')}> {/* Naviga alla dashboard admin */}
+                        <Flag className="mr-2 h-4 w-4" /> {/* Icona Flag */}
+                        <span>Segnalazioni</span>
+                      </DropdownMenuItem>
+                    </>
                   )}
                   <DropdownMenuItem onClick={() => navigate('/dashboard')}>
                     <User className="mr-2 h-4 w-4" />
