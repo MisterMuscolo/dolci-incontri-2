@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Info, Share, MoreVertical } from 'lucide-react';
+import { Info, Share } from 'lucide-react'; // Rimosso MoreVertical, non più necessario qui
+import { InstallPWAButton } from './InstallPWAButton'; // Importa il nuovo componente
 
 type OSType = 'iOS' | 'Android' | 'Other';
 
@@ -41,16 +42,9 @@ export const PWAInstallInstructions = () => {
       <CardContent className="space-y-6">
         {os === 'Android' && (
           <div>
-            <h3 className="font-semibold text-lg text-gray-700 mb-2 flex items-center gap-2">
-              <MoreVertical className="h-5 w-5 text-gray-600" /> Per Android (Chrome):
-            </h3>
-            <ol className="list-decimal list-inside text-gray-600 space-y-1">
-              <li>Apri il browser Chrome e visita questo sito.</li>
-              <li>Tocca l'icona del menu (<MoreVertical className="inline-block h-4 w-4 align-middle" /> tre puntini verticali) nell'angolo in alto a destra.</li>
-              <li>Seleziona "Aggiungi a schermata Home" o "Installa app".</li>
-              <li>Conferma l'installazione.</li>
-            </ol>
-            <p className="text-sm text-gray-500 mt-2">
+            <h3 className="font-semibold text-lg text-gray-700 mb-4">Per Android:</h3>
+            <InstallPWAButton />
+            <p className="text-sm text-gray-500 mt-4">
               *Le Progressive Web App (PWA) si installano direttamente dal browser, non dal Play Store.
             </p>
           </div>
