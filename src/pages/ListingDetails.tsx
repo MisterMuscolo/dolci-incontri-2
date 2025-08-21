@@ -199,7 +199,7 @@ const ListingDetails = () => {
                   <Mail className="h-6 w-6" /> Rispondi
                 </Button>
               }
-              dialogTitle="Contatta l'autore"
+              dialogTitle="Contatta l'utente"
               dialogDescription={`Invia un messaggio all'autore dell'annuncio "${listing.title}".`}
               initialSubject={`Richiesta informazioni annuncio: ${listing.title}`}
               listingId={listing.id}

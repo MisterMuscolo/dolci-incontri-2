@@ -203,7 +203,7 @@ export const CreateTicketDialog = ({
                 )}
               />
               <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600" disabled={isSubmitting}>
-                <Mail className="h-4 w-4 mr-2" /> {isSubmitting ? 'Invio in corso...' : 'Invia Richiesta'}
+                <Mail className="h-4 w-4 mr-2" /> {isSubmitting ? 'Invio in corso...' : 'Invia Messaggio'}
               </Button>
             </form>
           </Form>
