@@ -35,10 +35,9 @@ serve(async (req) => {
     }
 
     // Verify user has access to this ticket (via RLS on tickets table)
-    // MODIFICA QUI: Includi 'status' nella selezione
     const { data: ticket, error: ticketFetchError } = await supabaseClient
       .from('tickets')
-      .select('id, user_id, status') // Aggiunto 'status'
+      .select('id, user_id, subject, status') // Added 'subject' for notification message
       .eq('id', ticketId)
       .single();
 
@@ -78,14 +77,31 @@ serve(async (req) => {
       .update({
         updated_at: new Date().toISOString(),
         last_replied_by: senderRole,
-        // Se l'admin risponde a un ticket 'open', lo stato diventa 'in_progress'
         status: (senderRole === 'admin' && ticket.status === 'open') ? 'in_progress' : ticket.status 
       })
       .eq('id', ticketId);
 
     if (updateTicketError) {
       console.error('Failed to update ticket status/timestamp:', updateTicketError.message);
-      // Don't throw, as message was successfully added, but log the issue
+    }
+
+    // NEW: Insert notification if user replied to an admin's message
+    // Use supabaseAdmin for inserting into admin_notifications as it bypasses RLS
+    if (senderRole === 'user') {
+        const supabaseAdmin = createClient( // Create admin client here
+            Deno.env.get('SUPABASE_URL') ?? '',
+            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+        );
+        const { error: notificationError } = await supabaseAdmin
+            .from('admin_notifications')
+            .insert({
+                type: 'ticket_reply',
+                entity_id: ticketId,
+                message: `Nuova risposta utente nel ticket: ${ticket.subject}`,
+            });
+        if (notificationError) {
+            console.error('Failed to insert ticket reply notification:', notificationError.message);
+        }
     }
 
     return new Response(JSON.stringify({ success: true, message: 'Message added successfully.' }), {
