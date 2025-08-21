@@ -216,11 +216,6 @@ export const TicketManagementTable = () => {
                     </TableCell>
                     <TableCell>{format(new Date(ticket.created_at), 'dd/MM/yyyy', { locale: it })}</TableCell>
                     <TableCell className="text-right flex justify-end gap-2">
-                      <Link to={`/my-tickets/${ticket.id}`}> {/* Gli admin usano la stessa pagina di dettaglio */}
-                        <Button variant="outline" size="sm">
-                          <Eye className="h-4 w-4 mr-1" /> Visualizza
-                        </Button>
-                      </Link>
                       {(ticket.status === 'open' || ticket.status === 'in_progress') && (
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
@@ -247,6 +242,11 @@ export const TicketManagementTable = () => {
                           </AlertDialogContent>
                         </AlertDialog>
                       )}
+                      <Link to={`/my-tickets/${ticket.id}`}> {/* Gli admin usano la stessa pagina di dettaglio */}
+                        <Button variant="outline" size="sm">
+                          <Eye className="h-4 w-4 mr-1" /> Visualizza
+                        </Button>
+                      </Link>
                     </TableCell>
                   </TableRow>
                 ))}
