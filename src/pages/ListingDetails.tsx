@@ -138,13 +138,13 @@ const ListingDetails = () => {
           {hasPhotos && (
             <div>
               <AspectRatio ratio={16 / 10} className="bg-gray-100 rounded-lg overflow-hidden mb-4">
-                <img src={activePhoto!} alt={listing.title} className="w-full h-full object-cover" />
+                <img src={activePhoto!} alt={listing.title} className="w-full h-full object-contain bg-gray-200" />
               </AspectRatio>
               {listing.listing_photos.length > 1 && (
                 <div className="flex gap-2 overflow-x-auto pb-2">
                   {listing.listing_photos.map((photo) => (
                     <button key={photo.id} onClick={() => setActivePhoto(photo.url)} className={cn("w-24 h-24 rounded-md overflow-hidden flex-shrink-0 ring-offset-2 ring-offset-gray-50", activePhoto === photo.url && 'ring-2 ring-rose-500')}>
-                      <img src={photo.url} alt="Thumbnail" className="w-full h-full object-cover" />
+                      <img src={photo.url} alt="Thumbnail" className="w-full h-full object-contain bg-gray-200" />
                     </button>
                   ))}
                 </div>
