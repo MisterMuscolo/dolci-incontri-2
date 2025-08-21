@@ -194,29 +194,32 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
         )}>
           <div className="p-4 flex flex-col flex-grow">
             {/* Data di pubblicazione */}
-            <div className="flex items-center text-xs text-gray-500 mb-1"> {/* Ridotto mb-2 a mb-1 */}
+            <div className="flex items-center text-xs text-gray-500 mb-1">
               <CalendarDays className="h-3 w-3 mr-1" />
               <span>{prefix} {formattedDate}</span>
             </div>
             {/* Categoria */}
-            <div className="flex items-center gap-2 mb-2"> {/* Aumentato mb-1 a mb-2 */}
+            <div className="flex items-center gap-2 mb-2">
               <Badge variant="secondary" className="capitalize"><Tag className="h-4 w-4 mr-1.5" />{listing.category.replace(/-/g, ' ')}</Badge>
             </div>
             {/* Titolo */}
             <h3 className="text-xl font-semibold mb-2 text-rose-600 line-clamp-2">{listing.title}</h3>
-            {/* Tag di città/zona ed età */}
-            <div className="flex flex-wrap gap-2 mb-3">
+            {/* Descrizione */}
+            <p className="text-base text-gray-600 mb-3 line-clamp-3">{listing.description}</p>
+            {/* Tag di città/zona */}
+            <div className="flex flex-wrap gap-2 mb-1"> {/* Ridotto mb-3 a mb-1 */}
               <Badge variant="outline">
                 <MapPin className="h-3 w-3 mr-1" /> {listing.city}{listing.zone && ` / ${listing.zone}`}
               </Badge>
-              {listing.age && (
+            </div>
+            {/* Tag età */}
+            {listing.age && (
+              <div className="flex flex-wrap gap-2 mb-3"> {/* Aggiunto un nuovo div per il tag età */}
                 <Badge variant="outline">
                   <User className="h-3 w-3 mr-1" /> {listing.age} anni
                 </Badge>
-              )}
-            </div>
-            {/* Descrizione */}
-            <p className="text-base text-gray-600 mb-3 line-clamp-3">{listing.description}</p>
+              </div>
+            )}
           </div>
         </Link>
       </div>
