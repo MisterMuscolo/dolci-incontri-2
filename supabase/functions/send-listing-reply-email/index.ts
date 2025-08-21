@@ -52,7 +52,10 @@ serve(async (req) => {
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.05);">
           <div style="text-align: center; margin-bottom: 20px;">
-            <img src="https://placehold.co/150x50/E54A70/white?text=Incontri+Dolci" alt="Incontri Dolci Logo" style="max-width: 150px; height: auto; display: block; margin: 0 auto;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 28px; font-weight: bold; color: #E54A70;">
+              <span style="font-size: 32px;">❤️</span>
+              <span>Incontri Dolci</span>
+            </div>
           </div>
           <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
 
