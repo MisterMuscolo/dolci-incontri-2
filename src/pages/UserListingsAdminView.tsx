@@ -77,8 +77,9 @@ const UserListingsAdminView = () => {
         if (!aIsActivePremium && bIsActivePremium) return 1;
 
         // If both are active premium or both are not, then sort by last_bumped_at (desc)
-        const aBumpedAt = a.last_bumped_at ? new Date(a.last_bumped_at).getTime() : 0;
-        const bBumpedAt = b.last_bumped_at ? new Date(b.last_bumped_at).getTime() : 0;
+        // Use created_at as fallback for last_bumped_at if it's null
+        const aBumpedAt = a.last_bumped_at ? new Date(a.last_bumped_at).getTime() : new Date(a.created_at).getTime();
+        const bBumpedAt = b.last_bumped_at ? new Date(b.last_bumped_at).getTime() : new Date(b.created_at).getTime();
         if (aBumpedAt !== bBumpedAt) {
             return bBumpedAt - aBumpedAt; // Descending
         }
