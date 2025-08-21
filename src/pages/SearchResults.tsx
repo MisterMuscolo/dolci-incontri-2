@@ -34,6 +34,7 @@ const SearchResults = () => {
         category,
         city,
         zone,
+        age,
         description,
         created_at,
         expires_at,
