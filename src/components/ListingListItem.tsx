@@ -86,7 +86,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
     } else if (mode === 'night') {
         return 'Il tuo annuncio avrà massima visibilità durante le ore notturne, con 5 risalite più frequenti durante il periodo. Apparirà in cima ai risultati di ricerca e potrà avere fino a 5 foto.';
     }
-    return 'Gli annunci in Cima appaiono in cima ai risultati di ricerca e possono avere fino a 5 foto.';
+    return 'Gli annunci in Evidenza appaiono in cima ai risultati di ricerca e possono avere fino a 5 foto.';
   };
 
   const getPromotionPeriodDetails = () => {
@@ -235,8 +235,8 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
         </Link>
       </div>
       {!(canEdit || canManagePhotos || canDelete) && isActivePremium && (
-        <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white absolute top-2 right-2 z-20">
-          <Rocket className="h-3 w-3 mr-1" /> Cima
+        <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white absolute top-2 right-2 z-20 text-xs px-2 py-0.5 rounded-full font-semibold">
+          <Rocket className="h-3 w-3 mr-1" /> In Evidenza
         </Badge>
       )}
       {(canEdit || canManagePhotos || canDelete) && (
@@ -258,7 +258,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
             />
           )}
 
-          {/* Mostra i dettagli Cima/In Attesa ma nasconde i pulsanti di acquisto/promozione se isAdminContext */}
+          {/* Mostra i dettagli In Evidenza/In Attesa ma nasconde i pulsanti di acquisto/promozione se isAdminContext */}
           {isActivePremium ? (
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -267,12 +267,12 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                   size="sm" 
                   className="w-full bg-yellow-500 hover:bg-yellow-600 text-white flex items-center gap-1"
                 >
-                  <Rocket className="h-4 w-4" /> Cima
+                  <Rocket className="h-4 w-4" /> In Evidenza
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Annuncio in Cima Attivo</AlertDialogTitle>
+                  <AlertDialogTitle>Annuncio In Evidenza Attivo</AlertDialogTitle>
                   <AlertDialogDescription>
                     {getPromotionPeriodDetails()}
                   </AlertDialogDescription>
