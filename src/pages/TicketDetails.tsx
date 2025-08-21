@@ -259,25 +259,51 @@ const TicketDetails = () => {
   const isTicketClosed = ticket.status === 'resolved' || ticket.status === 'closed';
 
   const getSenderDisplay = (message: TicketMessage) => {
-    if (message.sender_id === currentUserId) {
+    // Determine if the sender is the current user
+    const isCurrentUserSender = message.sender_id === currentUserId;
+
+    // Determine if the sender is an Admin or Supporto
+    const isSenderAdmin = message.profiles?.role === 'admin';
+    const isSenderSupporto = message.profiles?.role === 'supporto';
+
+    // Display for Admin
+    if (isSenderAdmin) {
       return (
         <>
-          <User className="h-4 w-4" /> Tu
+          <Shield className="h-4 w-4 text-purple-400" /> Admin
         </>
       );
-    } else if (message.profiles?.role === 'admin' || message.profiles?.role === 'supporto') {
+    }
+    // Display for Supporto
+    else if (isSenderSupporto) {
       return (
         <>
           <Shield className="h-4 w-4 text-purple-400" /> Supporto
         </>
       );
-    } else if (message.sender_email) { // Fallback to sender_email if sender_id is null and not admin/supporto
+    }
+    // Display for the current user (who is not admin/supporto)
+    else if (isCurrentUserSender) {
+      // Use the email from the message's profile if available, otherwise fallback to reporter_email from the ticket
+      const displayEmail = message.profiles?.email || ticket?.reporter_email || 'Email non disponibile';
       return (
         <>
-          <User className="h-4 w-4" /> {message.sender_email}
+          <User className="h-4 w-4" /> Utente ({displayEmail})
         </>
       );
-    } else {
+    );
+    }
+    // Display for other users (e.g., if an admin is viewing a ticket from another user)
+    // Or for initial messages from unauthenticated users (sender_id is null, sender_email is present)
+    else if (message.sender_email) {
+      return (
+        <>
+          <User className="h-4 w-4" /> Utente ({message.sender_email})
+        </>
+      );
+    }
+    // Fallback for unknown sender
+    else {
       return (
         <>
           <User className="h-4 w-4" /> Utente Sconosciuto
