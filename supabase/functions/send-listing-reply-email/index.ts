@@ -70,7 +70,8 @@ serve(async (req) => {
           <div style="background-color: #f0f8ff; border: 1px solid #d0e8ff; padding: 20px; margin: 30px 0; text-align: center; border-radius: 8px;">
             <p style="font-size: 1.1em; font-weight: bold; color: #333;">Hai bisogno di assistenza?</p>
             <p style="margin-top: 10px; color: #555;">Non esitare a contattare il nostro team di supporto per qualsiasi domanda o problema.</p>
-            </div>
+            <a href="https://incontridolci.it/new-ticket" style="display: inline-block; background-color: #f0f0f0; color: #333; padding: 8px 15px; margin-top: 15px; text-decoration: none; border-radius: 5px; border: 1px solid #ddd;">Contatta Assistenza</a>
+          </div>
 
           <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
 
