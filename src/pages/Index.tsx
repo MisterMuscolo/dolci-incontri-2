@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { italianProvinces } from '@/data/provinces';
-import { Heart, MapPin, Search, Users, User, Download } from 'lucide-react'; // Corretto: rimosso Apple e Android, aggiunto Download
-import { Card, CardContent } from '@/components/ui/card';
+import { Heart, MapPin, Search, Users, User, Info } from 'lucide-react'; // Aggiunto Info
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'; // Importato CardHeader, CardTitle, CardDescription
 
 interface IndexProps {
   session: any;
@@ -45,35 +45,7 @@ export default function Index({ session }: IndexProps) {
     <>
       <div className="bg-gradient-to-br from-rose-100 via-white to-sky-100">
         <div className="container mx-auto px-4 py-16 text-center">
-          {/* Nuovi pulsanti per il download dell'app */}
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-8">
-            <a 
-              href="https://www.apple.com/it/app-store/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="w-full sm:w-auto"
-            >
-              <Button 
-                variant="outline" 
-                className="w-full border-gray-400 text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-2 px-6 py-3 text-lg"
-              >
-                <Download className="h-6 w-6" /> Scarica su App Store
-              </Button>
-            </a>
-            <a 
-              href="https://play.google.com/store" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="w-full sm:w-auto"
-            >
-              <Button 
-                variant="outline" 
-                className="w-full border-gray-400 text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-2 px-6 py-3 text-lg"
-              >
-                <Download className="h-6 w-6" /> Disponibile su Google Play
-              </Button>
-            </a>
-          </div>
+          {/* Rimosso i pulsanti di download */}
 
           <h1 className="text-5xl font-bold text-rose-600 mb-4">
             IncontriDolci
@@ -158,7 +130,40 @@ export default function Index({ session }: IndexProps) {
             </div>
           </div>
 
-          {/* Nuova sezione per le categorie cliccabili */}
+          {/* Nuova sezione per le istruzioni PWA */}
+          <Card className="max-w-2xl mx-auto bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-8 mt-8 text-left">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-2xl font-semibold text-gray-700">
+                <Info className="h-6 w-6 text-rose-500" />
+                Installa IncontriDolci sul tuo telefono!
+              </CardTitle>
+              <CardDescription className="text-gray-600">
+                Aggiungi la nostra app alla schermata Home per un accesso rapido e un'esperienza a schermo intero.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <h3 className="font-semibold text-lg text-gray-700 mb-2">Per Android (Chrome):</h3>
+                <ol className="list-decimal list-inside text-gray-600 space-y-1">
+                  <li>Apri il browser Chrome e visita questo sito.</li>
+                  <li>Tocca l'icona del menu (tre puntini verticali) nell'angolo in alto a destra.</li>
+                  <li>Seleziona "Aggiungi a schermata Home" o "Installa app".</li>
+                  <li>Conferma l'installazione.</li>
+                </ol>
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg text-gray-700 mb-2">Per iOS (Safari):</h3>
+                <ol className="list-decimal list-inside text-gray-600 space-y-1">
+                  <li>Apri il browser Safari e visita questo sito.</li>
+                  <li>Tocca l'icona "Condividi" (il quadrato con la freccia che punta verso l'alto) nella barra inferiore.</li>
+                  <li>Scorri verso il basso e seleziona "Aggiungi alla schermata Home".</li>
+                  <li>Tocca "Aggiungi" nell'angolo in alto a destra.</li>
+                </ol>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Sezione per le categorie cliccabili */}
           <div className="mt-16">
             <h2 className="text-3xl font-bold text-gray-800 mb-8">Esplora per Categoria</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
@@ -170,9 +175,8 @@ export default function Index({ session }: IndexProps) {
                     onClick={() => handleCategoryCardClick(cat.value)}
                   >
                     <CardContent className="flex flex-col items-center justify-center p-6 text-center">
-                      {/* Rimosso l'elemento Icon e aggiunto un div per l'emoji */}
-                      <div className="text-5xl mb-4">{cat.label.split(' ')[0]}</div> {/* Estrae solo l'emoji */}
-                      <p className="text-lg font-semibold text-gray-700">{cat.label.substring(cat.label.indexOf(' ') + 1)}</p> {/* Estrae il testo */}
+                      <div className="text-5xl mb-4">{cat.label.split(' ')[0]}</div>
+                      <p className="text-lg font-semibold text-gray-700">{cat.label.substring(cat.label.indexOf(' ') + 1)}</p>
                     </CardContent>
                   </Card>
                 );
