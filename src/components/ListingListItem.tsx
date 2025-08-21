@@ -169,196 +169,198 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
   };
 
   return (
-    <Card className={cn(
-      "w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row relative",
-      (canEdit || canManagePhotos || canDelete) && isPendingPremium && "border-2 border-blue-400 shadow-lg bg-blue-50" 
-    )}>
-      <div className="flex flex-col sm:flex-row w-full">
-        {hasPhotosToRender && ( // Mostra il blocco immagine solo se ci sono foto da renderizzare
-          <div className="sm:w-1/4 lg:w-1/5 flex-shrink-0 relative">
-            <AspectRatio ratio={16 / 9} className="w-full h-full">
-              {photosToRender.length > 1 ? (
-                <Carousel
-                  plugins={[
-                    Autoplay({
-                      delay: 3000,
-                      stopOnInteraction: false,
-                      stopOnMouseEnter: true,
-                    }),
-                  ]}
-                  opts={{
-                    loop: true,
-                  }}
-                  className="w-full h-full"
-                >
-                  <CarouselContent className="h-full">
-                    {photosToRender.map((photo, index) => (
-                      <CarouselItem key={index} className="h-full">
-                        <Link to={`/listing/${listing.id}`} className="block w-full h-full">
-                          <img src={photo.url} alt={`${listing.title} - ${index + 1}`} className="object-cover w-full h-full" />
-                        </Link>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10" />
-                  <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10" />
-                </Carousel>
-              ) : (
-                <Link to={`/listing/${listing.id}`} className="block w-full h-full">
-                  <img src={photosToRender[0].url} alt={listing.title} className="object-cover w-full h-full" />
+    <div className="relative"> {/* Nuovo contenitore relativo */}
+      <Card className={cn(
+        "w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row", // Rimosso 'relative' da qui
+        (canEdit || canManagePhotos || canDelete) && isPendingPremium && "border-2 border-blue-400 shadow-lg bg-blue-50" 
+      )}>
+        <div className="flex flex-col sm:flex-row w-full">
+          {hasPhotosToRender && ( // Mostra il blocco immagine solo se ci sono foto da renderizzare
+            <div className="sm:w-1/4 lg:w-1/5 flex-shrink-0 relative">
+              <AspectRatio ratio={16 / 9} className="w-full h-full">
+                {photosToRender.length > 1 ? (
+                  <Carousel
+                    plugins={[
+                      Autoplay({
+                        delay: 3000,
+                        stopOnInteraction: false,
+                        stopOnMouseEnter: true,
+                      }),
+                    ]}
+                    opts={{
+                      loop: true,
+                    }}
+                    className="w-full h-full"
+                  >
+                    <CarouselContent className="h-full">
+                      {photosToRender.map((photo, index) => (
+                        <CarouselItem key={index} className="h-full">
+                          <Link to={`/listing/${listing.id}`} className="block w-full h-full">
+                            <img src={photo.url} alt={`${listing.title} - ${index + 1}`} className="object-cover w-full h-full" />
+                          </Link>
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10" />
+                    <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10" />
+                  </Carousel>
+                ) : (
+                  <Link to={`/listing/${listing.id}`} className="block w-full h-full">
+                    <img src={photosToRender[0].url} alt={listing.title} className="object-cover w-full h-full" />
+                  </Link>
+                )}
+              </AspectRatio>
+            </div>
+          )}
+          <Link to={`/listing/${listing.id}`} className={cn(
+            "flex-grow block hover:bg-gray-50/50",
+            !hasPhotosToRender && "w-full" // Se non ci sono foto, il link occupa tutta la larghezza disponibile
+          )}>
+            <div className="p-4 flex flex-col flex-grow">
+              <h3 className="text-xl font-semibold mb-2 text-gray-800 line-clamp-2">{listing.title}</h3>
+              <p className="text-sm text-gray-600 mb-3 line-clamp-3">{listing.description}</p>
+              <div className="flex flex-wrap gap-2 mb-3">
+                <Badge variant="secondary" className="capitalize">{listing.category.replace(/-/g, ' ')}</Badge>
+                <Badge variant="outline">{listing.city}</Badge>
+                {listing.age && (
+                  <Badge variant="outline">
+                    <User className="h-3 w-3 mr-1" /> {listing.age} anni
+                  </Badge>
+                )}
+              </div>
+              <div className="mt-auto flex items-center text-xs text-gray-500">
+                <CalendarDays className="h-4 w-4 mr-2" />
+                <span>{prefix} {formattedDate}</span>
+              </div>
+            </div>
+          </Link>
+        </div>
+        {(canEdit || canManagePhotos || canDelete) && (
+          <div className="flex-shrink-0 flex md:flex-col justify-end md:justify-center items-center gap-2 p-4 border-t md:border-t-0 md:border-l">
+            {canEdit && (
+              <Link to={`/edit-listing/${listing.id}`} className="w-full">
+                <Button variant="outline" size="sm" className="w-full">
+                  <Pencil className="h-4 w-4 md:mr-2" />
+                  <span className="hidden md:inline">Modifica</span>
+                </Button>
+              </Link>
+            )}
+            {canManagePhotos && (
+              <ListingPhotoManagerDialog 
+                listingId={listing.id} 
+                listingTitle={listing.title} 
+                userId={listing.user_id}
+                onPhotosUpdated={onListingUpdated || (() => {})}
+              />
+            )}
+
+            {/* Mostra i dettagli In Evidenza/In Attesa ma nasconde i pulsanti di acquisto/promozione se isAdminContext */}
+            {isActivePremium ? (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-white flex items-center gap-1"
+                  >
+                    <Rocket className="h-4 w-4" /> In Evidenza
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Annuncio In Evidenza Attivo</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {getPromotionPeriodDetails()}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Chiudi</AlertDialogCancel>
+                    {!isAdminContext && ( // Nascondi il pulsante "Acquista Crediti" se isAdminContext
+                      <Link to="/buy-credits">
+                        <AlertDialogAction className="bg-rose-500 hover:bg-rose-600">
+                          Acquista Crediti
+                        </AlertDialogAction>
+                      </Link>
+                    )}
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            ) : isPendingPremium ? (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    className="w-full bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-1"
+                  >
+                    <Rocket className="h-4 w-4" /> In Attesa
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Promozione in Attesa</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {getPromotionPeriodDetails()}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Chiudi</AlertDialogCancel>
+                    {!isAdminContext && ( // Nascondi il pulsante "Acquista Crediti" se isAdminContext
+                      <Link to="/buy-credits">
+                        <AlertDialogAction className="bg-rose-500 hover:bg-rose-600">
+                          Acquista Crediti
+                        </AlertDialogAction>
+                      </Link>
+                    )}
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            ) : (
+              !isAdminContext && ( // Nascondi il pulsante "Promuovi" se isAdminContext
+                <Link to={`/promote-listing/${listing.id}`} className="w-full">
+                  <Button variant="default" size="sm" className="w-full bg-green-500 hover:bg-green-600 text-white">
+                    <Rocket className="h-4 w-4 md:mr-2" />
+                    <span className="hidden md:inline">Promuovi</span>
+                  </Button>
                 </Link>
-              )}
-            </AspectRatio>
+              )
+            )}
+            {canDelete && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm" className="w-full" disabled={isDeleting}>
+                    <Trash2 className="h-4 w-4 md:mr-2" />
+                    <span className="hidden md:inline">Elimina</span>
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Sei assolutamente sicuro?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Questa azione eliminerà definitivamente l'annuncio "{listing.title}" e tutte le sue foto.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Annulla</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDeleteListing}
+                      className="bg-destructive hover:bg-destructive/90"
+                      disabled={isDeleting}
+                    >
+                      {isDeleting ? 'Eliminazione...' : 'Sì, elimina'}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </div>
         )}
-        <Link to={`/listing/${listing.id}`} className={cn(
-          "flex-grow block hover:bg-gray-50/50",
-          !hasPhotosToRender && "w-full" // Se non ci sono foto, il link occupa tutta la larghezza disponibile
-        )}>
-          <div className="p-4 flex flex-col flex-grow">
-            <h3 className="text-xl font-semibold mb-2 text-gray-800 line-clamp-2">{listing.title}</h3>
-            <p className="text-sm text-gray-600 mb-3 line-clamp-3">{listing.description}</p>
-            <div className="flex flex-wrap gap-2 mb-3">
-              <Badge variant="secondary" className="capitalize">{listing.category.replace(/-/g, ' ')}</Badge>
-              <Badge variant="outline">{listing.city}</Badge>
-              {listing.age && (
-                <Badge variant="outline">
-                  <User className="h-3 w-3 mr-1" /> {listing.age} anni
-                </Badge>
-              )}
-            </div>
-            <div className="mt-auto flex items-center text-xs text-gray-500">
-              <CalendarDays className="h-4 w-4 mr-2" />
-              <span>{prefix} {formattedDate}</span>
-            </div>
-          </div>
-        </Link>
-      </div>
+      </Card>
       {!(canEdit || canManagePhotos || canDelete) && isActivePremium && (
-        <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white absolute top-2 right-2 z-20 text-xs px-2 py-0.5 rounded-full font-semibold">
+        <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white absolute -top-2 right-2 z-20 text-xs px-2 py-0.5 rounded-full font-semibold transform translate-x-1/2">
           <Rocket className="h-3 w-3 mr-1" /> In Evidenza
         </Badge>
       )}
-      {(canEdit || canManagePhotos || canDelete) && (
-        <div className="flex-shrink-0 flex md:flex-col justify-end md:justify-center items-center gap-2 p-4 border-t md:border-t-0 md:border-l">
-          {canEdit && (
-            <Link to={`/edit-listing/${listing.id}`} className="w-full">
-              <Button variant="outline" size="sm" className="w-full">
-                <Pencil className="h-4 w-4 md:mr-2" />
-                <span className="hidden md:inline">Modifica</span>
-              </Button>
-            </Link>
-          )}
-          {canManagePhotos && (
-            <ListingPhotoManagerDialog 
-              listingId={listing.id} 
-              listingTitle={listing.title} 
-              userId={listing.user_id}
-              onPhotosUpdated={onListingUpdated || (() => {})}
-            />
-          )}
-
-          {/* Mostra i dettagli In Evidenza/In Attesa ma nasconde i pulsanti di acquisto/promozione se isAdminContext */}
-          {isActivePremium ? (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button 
-                  variant="default" 
-                  size="sm" 
-                  className="w-full bg-yellow-500 hover:bg-yellow-600 text-white flex items-center gap-1"
-                >
-                  <Rocket className="h-4 w-4" /> In Evidenza
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Annuncio In Evidenza Attivo</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    {getPromotionPeriodDetails()}
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Chiudi</AlertDialogCancel>
-                  {!isAdminContext && ( // Nascondi il pulsante "Acquista Crediti" se isAdminContext
-                    <Link to="/buy-credits">
-                      <AlertDialogAction className="bg-rose-500 hover:bg-rose-600">
-                        Acquista Crediti
-                      </AlertDialogAction>
-                    </Link>
-                  )}
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          ) : isPendingPremium ? (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button 
-                  variant="default" 
-                  size="sm" 
-                  className="w-full bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-1"
-                >
-                  <Rocket className="h-4 w-4" /> In Attesa
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Promozione in Attesa</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    {getPromotionPeriodDetails()}
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Chiudi</AlertDialogCancel>
-                  {!isAdminContext && ( // Nascondi il pulsante "Acquista Crediti" se isAdminContext
-                    <Link to="/buy-credits">
-                      <AlertDialogAction className="bg-rose-500 hover:bg-rose-600">
-                        Acquista Crediti
-                      </AlertDialogAction>
-                    </Link>
-                  )}
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          ) : (
-            !isAdminContext && ( // Nascondi il pulsante "Promuovi" se isAdminContext
-              <Link to={`/promote-listing/${listing.id}`} className="w-full">
-                <Button variant="default" size="sm" className="w-full bg-green-500 hover:bg-green-600 text-white">
-                  <Rocket className="h-4 w-4 md:mr-2" />
-                  <span className="hidden md:inline">Promuovi</span>
-                </Button>
-              </Link>
-            )
-          )}
-          {canDelete && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm" className="w-full" disabled={isDeleting}>
-                  <Trash2 className="h-4 w-4 md:mr-2" />
-                  <span className="hidden md:inline">Elimina</span>
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Sei assolutamente sicuro?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Questa azione eliminerà definitivamente l'annuncio "{listing.title}" e tutte le sue foto.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Annulla</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDeleteListing}
-                    className="bg-destructive hover:bg-destructive/90"
-                    disabled={isDeleting}
-                  >
-                    {isDeleting ? 'Eliminazione...' : 'Sì, elimina'}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
-        </div>
-      )}
-    </Card>
+    </div>
   );
 };
