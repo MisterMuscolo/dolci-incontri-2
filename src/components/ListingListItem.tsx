@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, CalendarDays, Rocket, User, Camera, MapPin } from "lucide-react"; // Importa MapPin
+import { Pencil, Trash2, CalendarDays, Rocket, User, Camera, MapPin, Tag } from "lucide-react"; // Importa MapPin e Tag
 import { format, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Link } from "react-router-dom";
@@ -198,7 +198,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                   <CalendarDays className="h-3 w-3 mr-1" />
                   <span>{prefix} {formattedDate}</span>
                 </div>
-                <Badge variant="secondary" className="capitalize text-xs">{listing.category.replace(/-/g, ' ')}</Badge>
+                <Badge variant="secondary" className="capitalize"><Tag className="h-4 w-4 mr-1.5" />{listing.category.replace(/-/g, ' ')}</Badge>
               </div>
               <h3 className="text-xl font-semibold mb-2 text-rose-600 line-clamp-2">{listing.title}</h3>
               <p className="text-base text-gray-600 mb-3 line-clamp-3">{listing.description}</p>
