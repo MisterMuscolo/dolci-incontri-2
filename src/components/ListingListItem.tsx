@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, CalendarDays, Rocket, User, Camera } from "lucide-react"; // Importa Camera
+import { Pencil, Trash2, CalendarDays, Rocket, User, Camera, MapPin } from "lucide-react"; // Importa MapPin
 import { format, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Link } from "react-router-dom";
@@ -202,7 +202,9 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
               <h3 className="text-xl font-semibold mb-2 text-rose-600 line-clamp-2">{listing.title}</h3>
               <p className="text-base text-gray-600 mb-3 line-clamp-3">{listing.description}</p>
               <div className="flex flex-wrap gap-2 mb-3">
-                <Badge variant="outline">{listing.city}</Badge>
+                <Badge variant="outline">
+                  <MapPin className="h-3 w-3 mr-1" /> {listing.city}
+                </Badge>
                 {listing.age && (
                   <Badge variant="outline">
                     <User className="h-3 w-3 mr-1" /> {listing.age} anni
