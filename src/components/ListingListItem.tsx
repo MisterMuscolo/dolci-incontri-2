@@ -182,7 +182,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
               </Link>
             </AspectRatio>
             {isActivePremium && photosToRender.length > 1 && (
-              <Badge className="absolute top-2 right-2 bg-black/60 text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
+              <Badge className="absolute bottom-2 right-2 bg-black/60 text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
                 <Camera className="h-3 w-3" /> {photosToRender.length}
               </Badge>
             )}
