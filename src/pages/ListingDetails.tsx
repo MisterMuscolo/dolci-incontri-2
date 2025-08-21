@@ -125,7 +125,7 @@ const ListingDetails = () => {
               )}
               <div className="flex flex-wrap gap-2 pt-4">
                 <Badge variant="secondary" className="capitalize"><Tag className="h-4 w-4 mr-1.5" />{listing.category.replace(/-/g, ' ')}</Badge>
-                <Badge variant="outline"><MapPin className="h-4 w-4 mr-1.5" />{listing.city}{listing.zone && `, ${listing.zone}`}</Badge>
+                <Badge variant="outline"><MapPin className="h-4 w-4 mr-1.5" />{listing.city}{listing.zone && ` / ${listing.zone}`}</Badge>
                 <Badge variant="outline"><User className="h-4 w-4 mr-1.5" />{listing.age} anni</Badge>
                 <Badge variant="outline" className="text-xs">
                   <CalendarDays className="h-4 w-4 mr-1.5" />
