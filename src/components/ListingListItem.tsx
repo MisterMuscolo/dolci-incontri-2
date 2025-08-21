@@ -170,7 +170,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
 
   return (
     <Card className={cn(
-      "w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row relative", // Aggiunto 'relative' qui
+      "w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row relative", 
       (canEdit || canManagePhotos || canDelete) && isPendingPremium && "border-2 border-blue-400 shadow-lg bg-blue-50" 
     )}>
       <div className="flex flex-col sm:flex-row w-full">
@@ -193,15 +193,18 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           !hasPhotosToRender && "w-full"
         )}>
           <div className="p-4 flex flex-col flex-grow">
+            {/* Categoria */}
             <div className="flex items-center gap-2 mb-1">
-              <div className="flex items-center text-xs text-gray-500">
-                <CalendarDays className="h-3 w-3 mr-1" />
-                <span>{prefix} {formattedDate}</span>
-              </div>
               <Badge variant="secondary" className="capitalize"><Tag className="h-4 w-4 mr-1.5" />{listing.category.replace(/-/g, ' ')}</Badge>
             </div>
+            {/* Data di pubblicazione */}
+            <div className="flex items-center text-xs text-gray-500 mb-2">
+              <CalendarDays className="h-3 w-3 mr-1" />
+              <span>{prefix} {formattedDate}</span>
+            </div>
+            {/* Titolo */}
             <h3 className="text-xl font-semibold mb-2 text-rose-600 line-clamp-2">{listing.title}</h3>
-            <p className="text-base text-gray-600 mb-3 line-clamp-3">{listing.description}</p>
+            {/* Tag di città/zona ed età */}
             <div className="flex flex-wrap gap-2 mb-3">
               <Badge variant="outline">
                 <MapPin className="h-3 w-3 mr-1" /> {listing.city}{listing.zone && ` / ${listing.zone}`}
@@ -212,6 +215,8 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                 </Badge>
               )}
             </div>
+            {/* Descrizione */}
+            <p className="text-base text-gray-600 mb-3 line-clamp-3">{listing.description}</p>
           </div>
         </Link>
       </div>
@@ -234,7 +239,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
             />
           )}
 
-          {isActivePremium || isPendingPremium ? ( // Combined condition for showing promotion details
+          {isActivePremium || isPendingPremium ? ( 
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button 
@@ -257,7 +262,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Chiudi</AlertDialogCancel>
-                  {!isAdminContext && listing.promotion_mode && ( // Only show "Estendi" if not admin context and promotion_mode exists
+                  {!isAdminContext && listing.promotion_mode && ( 
                     <Link to={`/promote-listing/${listing.id}?mode=${listing.promotion_mode}`}>
                       <AlertDialogAction className="bg-rose-500 hover:bg-rose-600">
                         Estendi
@@ -307,9 +312,9 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           )}
         </div>
       )}
-      {/* Il badge è ora un figlio diretto della Card */}
+      {/* Il badge è ora un figlio diretto della Card e posizionato all'interno */}
       {!(canEdit || canManagePhotos || canDelete) && isActivePremium && (
-        <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white absolute -top-2 right-0 z-20 text-xs px-2 py-0.5 rounded-full font-semibold">
+        <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white absolute top-2 right-2 z-20 text-xs px-2 py-0.5 rounded-full font-semibold">
           <Rocket className="h-3 w-3 mr-1" /> In Evidenza
         </Badge>
       )}
