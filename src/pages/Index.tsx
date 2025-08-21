@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { italianProvinces } from '@/data/provinces';
-import { Heart, MapPin, Search, Users, User, Apple, Android } from 'lucide-react'; // Importa Apple e Android
+import { Heart, MapPin, Search, Users, User, Download } from 'lucide-react'; // Corretto: rimosso Apple e Android, aggiunto Download
 import { Card, CardContent } from '@/components/ui/card';
 
 interface IndexProps {
@@ -57,7 +57,7 @@ export default function Index({ session }: IndexProps) {
                 variant="outline" 
                 className="w-full border-gray-400 text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-2 px-6 py-3 text-lg"
               >
-                <Apple className="h-6 w-6" /> Scarica su App Store
+                <Download className="h-6 w-6" /> Scarica su App Store
               </Button>
             </a>
             <a 
@@ -70,7 +70,7 @@ export default function Index({ session }: IndexProps) {
                 variant="outline" 
                 className="w-full border-gray-400 text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-2 px-6 py-3 text-lg"
               >
-                <Android className="h-6 w-6" /> Disponibile su Google Play
+                <Download className="h-6 w-6" /> Disponibile su Google Play
               </Button>
             </a>
           </div>
