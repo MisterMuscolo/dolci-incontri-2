@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom';
 import { Header } from './Header';
+import { Footer } from './Footer'; // Importa il componente Footer
 
 interface LayoutProps {
   session: any;
