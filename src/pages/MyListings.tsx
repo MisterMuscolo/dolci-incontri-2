@@ -11,6 +11,7 @@ import { ChevronLeft } from "lucide-react";
 const LISTINGS_PER_PAGE = 10;
 
 const MyListings = () => {
+  console.log("MyListings component is rendering."); // Aggiunto per il debug
   const navigate = useNavigate();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);

@@ -172,7 +172,7 @@ const App = () => {
               />
               <Route 
                 path="/my-tickets" 
-                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><MyTickets /></Suspense>) : <Navigate to="/auth" />} 
+                element={session ? <MyTickets /> : <Navigate to="/auth" />} 
               />
               <Route 
                 path="/my-tickets/:ticketId" 
