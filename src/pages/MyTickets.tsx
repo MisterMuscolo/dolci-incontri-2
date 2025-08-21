@@ -20,7 +20,7 @@ interface TicketItem {
   updated_at: string;
   last_replied_by: 'user' | 'admin';
   listing_id: string | null;
-  listings: { title: string } | null; // Modificato da array a singolo oggetto o null
+  listings: { title: string } | null; // Corretto: singolo oggetto o null
 }
 
 const MyTickets = () => {

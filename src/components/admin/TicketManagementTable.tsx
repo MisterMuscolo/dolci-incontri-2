@@ -31,8 +31,8 @@ interface Ticket {
   created_at: string;
   updated_at: string;
   last_replied_by: 'user' | 'admin';
-  profiles: { email: string } | null; // Modificato da array a singolo oggetto o null
-  listings: { title: string } | null; // Modificato da array a singolo oggetto o null
+  profiles: { email: string } | null; // Corretto: singolo oggetto o null
+  listings: { title: string } | null; // Corretto: singolo oggetto o null
 }
 
 export const TicketManagementTable = () => {

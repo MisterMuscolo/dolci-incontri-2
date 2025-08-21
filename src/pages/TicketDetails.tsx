@@ -17,7 +17,7 @@ interface TicketMessage {
   sender_id: string;
   message_content: string;
   created_at: string;
-  profiles: { email: string; role: string } | null; // Modificato da array a singolo oggetto o null
+  profiles: { email: string; role: string } | null; // Corretto: singolo oggetto o null
 }
 
 interface TicketDetailsData {
@@ -28,7 +28,7 @@ interface TicketDetailsData {
   updated_at: string;
   last_replied_by: 'user' | 'admin';
   listing_id: string | null;
-  listings: { title: string } | null; // Modificato da array a singolo oggetto o null
+  listings: { title: string } | null; // Corretto: singolo oggetto o null
   ticket_messages: TicketMessage[];
 }
 
