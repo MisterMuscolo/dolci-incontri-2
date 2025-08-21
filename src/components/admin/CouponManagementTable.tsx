@@ -353,7 +353,7 @@ export const CouponManagementTable = () => {
       )}
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingCoupon ? 'Modifica Coupon' : 'Crea Nuovo Coupon'}</DialogTitle>
             <DialogDescription>
@@ -486,7 +486,7 @@ export const CouponManagementTable = () => {
                     >
                       <FormControl><SelectTrigger><SelectValue placeholder="Tutti gli utenti" /></SelectTrigger></FormControl>
                       <SelectContent className="max-h-60">
-                        <SelectItem value="all">Tutti gli utenti</SelectItem> {/* Changed value from "" to "all" */}
+                        <SelectItem value="all">Tutti gli utenti</SelectItem>
                         {users.map((user) => (
                           <SelectItem key={user.id} value={user.id}>{user.email}</SelectItem>
                         ))}
