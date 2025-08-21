@@ -5,7 +5,12 @@ import { AllCreditTransactionsTable } from "@/components/admin/AllCreditTransact
 import { ReportManagementTable } from "@/components/admin/ReportManagementTable";
 import { TicketManagementTable } from "@/components/admin/TicketManagementTable"; // Importa il nuovo componente
 
-const AdminDashboard = () => {
+interface AdminDashboardProps {
+  isAdmin: boolean;
+  isCollaborator: boolean;
+}
+
+const AdminDashboard = ({ isAdmin, isCollaborator }: AdminDashboardProps) => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -13,17 +18,19 @@ const AdminDashboard = () => {
         
         <OverviewStats />
         
-        <CreditManagement />
+        {isAdmin && ( // Visibile solo per gli amministratori
+          <>
+            <CreditManagement />
+            <AllCreditTransactionsTable />
+          </>
+        )}
 
-        <AllCreditTransactionsTable />
-
-        <ReportManagementTable />
+        {/* ReportManagementTable rimosso */}
         
-        <TicketManagementTable /> {/* Aggiunto il componente per la gestione dei ticket */}
+        <TicketManagementTable /> {/* Visibile per admin e collaboratori */}
         
-        <UserManagementTable />
+        <UserManagementTable isAdmin={isAdmin} isCollaborator={isCollaborator} /> {/* Passa i ruoli */}
         
-        {/* La sezione ListingManagementTable è stata rimossa come richiesto */}
       </div>
     </div>
   );

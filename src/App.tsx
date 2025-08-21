@@ -40,11 +40,13 @@ const App = () => {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isCollaborator, setIsCollaborator] = useState(false); // Nuovo stato
   const [isBanned, setIsBanned] = useState(false);
 
   useEffect(() => {
     const handleAuthAndRoleUpdate = async (currentSession: any | null) => {
       let newIsAdmin = false;
+      let newIsCollaborator = false; // Nuovo stato
       let newIsBanned = false;
 
       if (currentSession) {
@@ -57,6 +59,7 @@ const App = () => {
 
           if (profile) {
             newIsAdmin = profile.role === 'admin';
+            newIsCollaborator = profile.role === 'collaborator'; // Imposta il nuovo stato
             newIsBanned = profile.role === 'banned';
           } else if (error) {
             console.error("App.tsx: Error fetching profile:", error);
@@ -72,6 +75,7 @@ const App = () => {
       startTransition(() => {
         setSession(currentSession);
         setIsAdmin(newIsAdmin);
+        setIsCollaborator(newIsCollaborator); // Imposta il nuovo stato
         setIsBanned(newIsBanned);
         setLoading(false); // Set loading to false after all data is processed
       });
@@ -86,6 +90,7 @@ const App = () => {
       startTransition(() => {
         setSession(null);
         setIsAdmin(false);
+        setIsCollaborator(false); // Imposta il nuovo stato
         setIsBanned(false);
         setLoading(false);
       });
@@ -106,7 +111,7 @@ const App = () => {
     return <LoadingScreen />;
   }
 
-  console.log("App.tsx: Rendering Layout with isAdmin:", isAdmin, "isBanned:", isBanned, "Session exists:", !!session);
+  console.log("App.tsx: Rendering Layout with isAdmin:", isAdmin, "isCollaborator:", isCollaborator, "isBanned:", isBanned, "Session exists:", !!session);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -120,7 +125,7 @@ const App = () => {
             {/* Nuova rotta per la conferma registrazione */}
             <Route path="/registration-success" element={<RegistrationSuccess />} />
 
-            <Route element={<Layout session={session} isAdmin={isAdmin} />}>
+            <Route element={<Layout session={session} isAdmin={isAdmin} isCollaborator={isCollaborator} />}>
               <Route 
                 path="/" 
                 element={
@@ -184,7 +189,7 @@ const App = () => {
                     </Suspense>
                   ) : isBanned ? (
                     <Navigate to="/banned" />
-                  ) : isAdmin ? (
+                  ) : (isAdmin || isCollaborator) ? ( // Reindirizza admin/collaborator alla dashboard admin
                     <Navigate to="/admin" />
                   ) : (
                     <Navigate to="/dashboard" />
@@ -197,11 +202,11 @@ const App = () => {
               />
               <Route 
                 path="/admin" 
-                element={isAdmin ? <Suspense fallback={<LoadingScreen />}><AdminDashboard /></Suspense> : <Navigate to="/" />} 
+                element={(isAdmin || isCollaborator) ? <Suspense fallback={<LoadingScreen />}><AdminDashboard isAdmin={isAdmin} isCollaborator={isCollaborator} /></Suspense> : <Navigate to="/" />} 
               />
               <Route 
                 path="/admin/users/:userId/listings" 
-                element={isAdmin ? <Suspense fallback={<LoadingScreen />}><UserListingsAdminView /></Suspense> : <Navigate to="/" />} 
+                element={(isAdmin || isCollaborator) ? <Suspense fallback={<LoadingScreen />}><UserListingsAdminView /></Suspense> : <Navigate to="/" />} 
               />
               <Route 
                 path="/new-listing" 

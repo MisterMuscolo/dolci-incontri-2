@@ -50,9 +50,10 @@ interface ListingListItemProps {
   canDelete?: boolean; // Nuovo prop
   showExpiryDate?: boolean;
   onListingUpdated?: () => void;
+  isAdminContext?: boolean; // Nuovo prop: true se visualizzato in un contesto admin
 }
 
-export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = false, canDelete = false, showExpiryDate = false, onListingUpdated }: ListingListItemProps) => {
+export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = false, canDelete = false, showExpiryDate = false, onListingUpdated, isAdminContext = false }: ListingListItemProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const now = new Date();
@@ -261,6 +262,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
             />
           )}
 
+          {/* Mostra i dettagli Premium/In Attesa ma nasconde i pulsanti di acquisto/promozione se isAdminContext */}
           {isActivePremium ? (
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -281,11 +283,13 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Chiudi</AlertDialogCancel>
-                  <Link to="/buy-credits">
-                    <AlertDialogAction className="bg-rose-500 hover:bg-rose-600">
-                      Acquista Crediti
-                    </AlertDialogAction>
-                  </Link>
+                  {!isAdminContext && ( // Nascondi il pulsante "Acquista Crediti" se isAdminContext
+                    <Link to="/buy-credits">
+                      <AlertDialogAction className="bg-rose-500 hover:bg-rose-600">
+                        Acquista Crediti
+                      </AlertDialogAction>
+                    </Link>
+                  )}
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -309,21 +313,25 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Chiudi</AlertDialogCancel>
-                  <Link to="/buy-credits">
-                    <AlertDialogAction className="bg-rose-500 hover:bg-rose-600">
-                      Acquista Crediti
-                    </AlertDialogAction>
-                  </Link>
+                  {!isAdminContext && ( // Nascondi il pulsante "Acquista Crediti" se isAdminContext
+                    <Link to="/buy-credits">
+                      <AlertDialogAction className="bg-rose-500 hover:bg-rose-600">
+                        Acquista Crediti
+                      </AlertDialogAction>
+                    </Link>
+                  )}
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
           ) : (
-            <Link to={`/promote-listing/${listing.id}`} className="w-full">
-              <Button variant="default" size="sm" className="w-full bg-green-500 hover:bg-green-600 text-white">
-                <Rocket className="h-4 w-4 md:mr-2" />
-                <span className="hidden md:inline">Promuovi</span>
-              </Button>
-            </Link>
+            !isAdminContext && ( // Nascondi il pulsante "Promuovi" se isAdminContext
+              <Link to={`/promote-listing/${listing.id}`} className="w-full">
+                <Button variant="default" size="sm" className="w-full bg-green-500 hover:bg-green-600 text-white">
+                  <Rocket className="h-4 w-4 md:mr-2" />
+                  <span className="hidden md:inline">Promuovi</span>
+                </Button>
+              </Link>
+            )
           )}
           {canDelete && (
             <AlertDialog>

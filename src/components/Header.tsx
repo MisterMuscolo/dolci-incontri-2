@@ -19,9 +19,10 @@ import { it } from 'date-fns/locale';
 interface HeaderProps {
   session: any;
   isAdmin: boolean;
+  isCollaborator: boolean; // Nuovo prop
 }
 
-export const Header = ({ session, isAdmin }: HeaderProps) => {
+export const Header = ({ session, isAdmin, isCollaborator }: HeaderProps) => {
   const navigate = useNavigate();
   
   // Conditionally use the appropriate notification hook
@@ -57,7 +58,7 @@ export const Header = ({ session, isAdmin }: HeaderProps) => {
     markAsRead(notificationId);
     if (type === 'new_report') {
       navigate(`/admin`); // Reports are managed in admin dashboard
-    } else if (type === 'ticket_reply' || type === 'new_ticket') {
+    } else if (type === 'ticket_reply' || type === 'new_ticket' || type === 'ticket_resolved') { // Aggiunto ticket_resolved
       navigate(`/my-tickets/${entityId}`); // Navigate to ticket details
     }
   };
@@ -138,7 +139,7 @@ export const Header = ({ session, isAdmin }: HeaderProps) => {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  {isAdmin && (
+                  {(isAdmin || isCollaborator) && ( // Visibile per admin e collaboratori
                     <DropdownMenuItem onClick={() => navigate('/admin')}>
                       <Shield className="mr-2 h-4 w-4" />
                       <span>Pannello Controllo</span>

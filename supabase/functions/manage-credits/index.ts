@@ -18,7 +18,38 @@ serve(async (req) => {
       throw new Error('Missing required fields: userId, amount, transactionType');
     }
 
-    // Create a Supabase client with the service role key for admin operations
+    // Create a Supabase client with the user's JWT for RLS checks
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+    )
+
+    // Get the current user (caller of the function)
+    const { data: { user: callerUser } } = await supabaseClient.auth.getUser();
+
+    if (!callerUser) {
+      return new Response(JSON.stringify({ error: 'Unauthorized: No user session' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      });
+    }
+
+    // Check if the caller is an admin
+    const { data: callerProfile, error: callerProfileError } = await supabaseClient
+      .from('profiles')
+      .select('role')
+      .eq('id', callerUser.id)
+      .single();
+
+    if (callerProfileError || callerProfile?.role !== 'admin') {
+      return new Response(JSON.stringify({ error: 'Forbidden: Only administrators can manage credits' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 403,
+      });
+    }
+
+    // Use the service role key for the actual update to bypass RLS for admin operations
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''

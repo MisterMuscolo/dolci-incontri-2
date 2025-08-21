@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Eye, Ban, CheckCircle } from 'lucide-react';
+import { Eye, Ban, CheckCircle, UserCog } from 'lucide-react'; // Aggiunto UserCog
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,6 +18,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface UserProfile {
   id: string;
@@ -27,7 +34,12 @@ interface UserProfile {
   created_at: string;
 }
 
-export const UserManagementTable = () => {
+interface UserManagementTableProps {
+  isAdmin: boolean;
+  isCollaborator: boolean;
+}
+
+export const UserManagementTable = ({ isAdmin, isCollaborator }: UserManagementTableProps) => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
@@ -116,7 +128,7 @@ export const UserManagementTable = () => {
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">{user.email}</TableCell>
                   <TableCell>
-                    <Badge variant={user.role === 'admin' ? 'default' : user.role === 'banned' ? 'destructive' : 'secondary'} className="capitalize">
+                    <Badge variant={user.role === 'admin' ? 'default' : user.role === 'banned' ? 'destructive' : user.role === 'collaborator' ? 'secondary' : 'outline'} className="capitalize">
                       {user.role}
                     </Badge>
                   </TableCell>
@@ -128,59 +140,23 @@ export const UserManagementTable = () => {
                         <Eye className="h-4 w-4 mr-1" /> Annunci
                       </Button>
                     </Link>
-                    {user.role !== 'admin' && ( // Non permettere di bannare/sbloccare gli admin
-                      user.role === 'banned' ? (
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="secondary" size="sm" disabled={actionLoadingId === user.id}>
-                              <CheckCircle className="h-4 w-4 mr-1" /> Sblocca
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Conferma sblocco utente</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Sei sicuro di voler sbloccare l'utente "{user.email}"? Questo ripristinerà il suo accesso.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Annulla</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleRoleChange(user.id, 'user', user.email)}
-                                disabled={actionLoadingId === user.id}
-                              >
-                                {actionLoadingId === user.id ? 'Sblocco...' : 'Sì, sblocca'}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      ) : (
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="destructive" size="sm" disabled={actionLoadingId === user.id}>
-                              <Ban className="h-4 w-4 mr-1" /> Banna
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Conferma ban utente</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Sei sicuro di voler bannare l'utente "{user.email}"? Questo limiterà il suo accesso e le sue funzionalità.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Annulla</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleRoleChange(user.id, 'banned', user.email)}
-                                className="bg-destructive hover:bg-destructive/90"
-                                disabled={actionLoadingId === user.id}
-                              >
-                                {actionLoadingId === user.id ? 'Banning...' : 'Sì, banna'}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      )
+                    {isAdmin && ( // Solo gli admin possono cambiare i ruoli
+                      <Select
+                        onValueChange={(newRole) => handleRoleChange(user.id, newRole, user.email)}
+                        value={user.role}
+                        disabled={actionLoadingId === user.id || user.role === 'admin'} // Non permettere di cambiare il ruolo di un altro admin
+                      >
+                        <SelectTrigger className="w-[120px] h-8 text-xs">
+                          <UserCog className="h-4 w-4 mr-1" />
+                          <SelectValue placeholder="Cambia Ruolo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="user">Utente</SelectItem>
+                          <SelectItem value="collaborator">Collaboratore</SelectItem>
+                          <SelectItem value="admin" disabled={user.role === 'admin'}>Admin</SelectItem> {/* Non permettere di declassare un admin */}
+                          <SelectItem value="banned">Bannato</SelectItem>
+                        </SelectContent>
+                      </Select>
                     )}
                   </TableCell>
                 </TableRow>

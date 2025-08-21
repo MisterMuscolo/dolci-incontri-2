@@ -132,7 +132,8 @@ const UserListingsAdminView = () => {
                     canManagePhotos={true} // Gli amministratori possono gestire le foto
                     canDelete={true} // Gli amministratori possono eliminare
                     showExpiryDate={true} 
-                    onListingUpdated={fetchUserDataAndListings} 
+                    onListingUpdated={fetchUserDataAndListings}
+                    isAdminContext={true} // Passa la prop per nascondere i pulsanti di promozione/acquisto
                   />
                 ))}
               </div>
