@@ -18,8 +18,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '@/components/ui/carousel';
-import Autoplay from 'embla-carousel-autoplay';
+// Rimosse le importazioni del carosello: Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext
+// Rimosso l'importazione di Autoplay
 import { cn } from '@/lib/utils';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { useState } from "react";
@@ -178,37 +178,10 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           {hasPhotosToRender && (
             <div className="md:w-1/4 lg:w-1/5 flex-shrink-0 relative">
               <AspectRatio ratio={3 / 4} className="w-full h-full">
-                {photosToRender.length > 1 ? (
-                  <Carousel
-                    plugins={[
-                      Autoplay({
-                        delay: 3000,
-                        stopOnInteraction: false,
-                        stopOnMouseEnter: true,
-                      }),
-                    ]}
-                    opts={{
-                      loop: true,
-                    }}
-                    className="w-full h-full"
-                  >
-                    <CarouselContent className="h-full">
-                      {photosToRender.map((photo, index) => (
-                        <CarouselItem key={index} className="h-full">
-                          <Link to={`/listing/${listing.id}`} className="block w-full h-full">
-                            <img src={photo.url} alt={`${listing.title} - ${index + 1}`} className="object-cover w-full h-full bg-gray-200" /> {/* Modificato qui */}
-                          </Link>
-                        </CarouselItem>
-                      ))}
-                    </CarouselContent>
-                    <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10" />
-                    <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10" />
-                  </Carousel>
-                ) : (
-                  <Link to={`/listing/${listing.id}`} className="block w-full h-full">
-                    <img src={photosToRender[0].url} alt={listing.title} className="object-cover w-full h-full bg-gray-200" /> {/* Modificato qui */}
-                  </Link>
-                )}
+                {/* Mostra sempre solo la prima foto, senza carosello */}
+                <Link to={`/listing/${listing.id}`} className="block w-full h-full">
+                  <img src={photosToRender[0].url} alt={listing.title} className="object-cover w-full h-full bg-gray-200" />
+                </Link>
               </AspectRatio>
             </div>
           )}
