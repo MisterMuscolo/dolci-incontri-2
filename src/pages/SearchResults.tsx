@@ -1,15 +1,17 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom'; // Importa useNavigate
 import { supabase } from '@/integrations/supabase/client';
 import { ListingListItem, Listing } from '@/components/ListingListItem';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { ChevronLeft } from 'lucide-react'; // Importa l'icona
 
 const LISTINGS_PER_PAGE = 10;
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate(); // Inizializza useNavigate
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -165,7 +167,13 @@ const SearchResults = () => {
   return (
     <div className="bg-gray-50 p-6 flex-grow">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Risultati della ricerca</h1>
+        <div className="flex items-center gap-4 mb-6"> {/* Aggiunto il div per il pulsante Indietro */}
+          <Button variant="ghost" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">
+            <ChevronLeft className="h-5 w-5 mr-2" />
+            Indietro
+          </Button>
+          <h1 className="text-3xl font-bold">Risultati della ricerca</h1>
+        </div>
         {renderContent()}
       </div>
     </div>
