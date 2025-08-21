@@ -196,7 +196,7 @@ const ListingDetails = () => {
                 <Button
                   className="w-full sm:w-auto bg-rose-500 hover:bg-rose-600 text-lg px-8 py-6 rounded-lg shadow-lg flex items-center justify-center gap-2"
                 >
-                  <Mail className="h-6 w-6" /> Contatta l'autore
+                  <Mail className="h-6 w-6" /> Rispondi
                 </Button>
               }
               dialogTitle="Contatta l'autore"
