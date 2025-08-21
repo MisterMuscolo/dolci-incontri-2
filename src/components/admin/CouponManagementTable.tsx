@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Edit, Trash2, Tag, CalendarDays, User, Percent, Euro } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, Tag, CalendarDays, User, Percent, Euro, Sparkles } from 'lucide-react'; // Importa Sparkles
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import {
   Dialog,
@@ -140,6 +140,19 @@ export const CouponManagementTable = () => {
   useEffect(() => {
     fetchCouponsAndUsers();
   }, []);
+
+  const generateRandomCode = (length = 8) => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  };
+
+  const handleGenerateCode = () => {
+    form.setValue('code', generateRandomCode());
+  };
 
   const handleOpenDialog = (coupon?: Coupon) => {
     setEditingCoupon(coupon || null);
@@ -368,7 +381,14 @@ export const CouponManagementTable = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Codice Coupon</FormLabel>
-                    <FormControl><Input placeholder="Es. SCONTO10" {...field} disabled={editingCoupon ? true : isSubmitting} /></FormControl>
+                    <div className="flex gap-2">
+                      <FormControl><Input placeholder="Es. SCONTO10" {...field} disabled={editingCoupon ? true : isSubmitting} /></FormControl>
+                      {!editingCoupon && ( // Mostra il pulsante solo per la creazione di un nuovo coupon
+                        <Button type="button" variant="outline" onClick={handleGenerateCode} disabled={isSubmitting}>
+                          <Sparkles className="h-4 w-4 mr-2" /> Genera
+                        </Button>
+                      )}
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
