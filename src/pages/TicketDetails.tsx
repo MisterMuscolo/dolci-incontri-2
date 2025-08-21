@@ -291,7 +291,9 @@ const TicketDetails = () => {
               {ticket.ticket_messages.length === 0 ? (
                 <p className="text-center text-gray-600">Nessun messaggio in questo ticket.</p>
               ) : (
-                ticket.ticket_messages.map((message) => (
+                ticket.ticket_messages.map((message) => {
+                  console.log("Message Profile Data:", message.profiles); // ADDED LOG
+                  return (
                   <div
                     key={message.id}
                     className={`flex ${message.sender_id === currentUserId ? 'justify-end' : 'justify-start'}`}
@@ -329,7 +331,7 @@ const TicketDetails = () => {
                       </p>
                     </div>
                   </div>
-                ))
+                )})
               )}
               <div ref={messagesEndRef} />
             </div>

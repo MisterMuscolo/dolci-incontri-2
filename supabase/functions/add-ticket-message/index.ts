@@ -66,6 +66,9 @@ serve(async (req) => {
         senderRole = 'user';
     }
 
+    console.log(`add-ticket-message: User ID: ${user.id}, Profile Role: ${profile.role}, Determined Sender Role: ${senderRole}`);
+
+
     // Insert new message
     const { error: messageError } = await supabaseClient
       .from('ticket_messages')
