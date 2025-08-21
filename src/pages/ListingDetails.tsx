@@ -11,7 +11,8 @@ import { MapPin, Tag, User, Mail, BookText, ChevronLeft, CalendarDays, Rocket, P
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { CreateTicketDialog } from '@/components/CreateTicketDialog'; // Importa il nuovo componente
+import { CreateTicketDialog } from '@/components/CreateTicketDialog';
+import { ReplyToListingDialog } from '@/components/ReplyToListingDialog'; // Importa il nuovo componente
 
 type FullListing = {
   id: string;
@@ -191,7 +192,9 @@ const ListingDetails = () => {
                 </Button>
               </a>
             )}
-            <CreateTicketDialog
+            <ReplyToListingDialog
+              listingId={listing.id}
+              listingTitle={listing.title}
               triggerButton={
                 <Button
                   className="w-full sm:w-auto bg-rose-500 hover:bg-rose-600 text-lg px-8 py-6 rounded-lg shadow-lg flex items-center justify-center gap-2"
@@ -199,12 +202,6 @@ const ListingDetails = () => {
                   <Mail className="h-6 w-6" /> Rispondi
                 </Button>
               }
-              dialogTitle="Contatta l'utente"
-              dialogDescription={`Invia un messaggio all'autore dell'annuncio "${listing.title}".`}
-              initialSubject={`Richiesta informazioni annuncio: ${listing.title}`}
-              listingId={listing.id}
-              icon={Mail}
-              redirectPathOnAuth={`/listing/${listing.id}`}
             />
           </div>
         </div>
