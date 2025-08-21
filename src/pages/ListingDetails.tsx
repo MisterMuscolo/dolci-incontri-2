@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { showError } from '@/utils/toast';
 import { MapPin, Tag, User, Mail, BookText, ChevronLeft, CalendarDays, Rocket, Phone, Flag } from 'lucide-react';
-import { cn } => '@/lib/utils';
+import { cn } from '@/lib/utils'; // Corretto: da '=>' a 'from'
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { CreateTicketDialog } from '@/components/CreateTicketDialog';
