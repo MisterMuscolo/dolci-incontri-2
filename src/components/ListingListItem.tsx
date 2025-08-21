@@ -176,8 +176,8 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
       )}>
         <div className="flex flex-col sm:flex-row w-full">
           {hasPhotosToRender && (
-            <div className="md:w-1/4 lg:w-1/5 flex-shrink-0 relative"> {/* Modificato qui per larghezza */}
-              <AspectRatio ratio={3 / 4} className="w-full h-full"> {/* Modificato qui per aspect ratio */}
+            <div className="md:w-1/4 lg:w-1/5 flex-shrink-0 relative">
+              <AspectRatio ratio={3 / 4} className="w-full h-full">
                 {photosToRender.length > 1 ? (
                   <Carousel
                     plugins={[
@@ -196,7 +196,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                       {photosToRender.map((photo, index) => (
                         <CarouselItem key={index} className="h-full">
                           <Link to={`/listing/${listing.id}`} className="block w-full h-full">
-                            <img src={photo.url} alt={`${listing.title} - ${index + 1}`} className="object-cover w-full h-full" />
+                            <img src={photo.url} alt={`${listing.title} - ${index + 1}`} className="object-contain w-full h-full bg-gray-200" /> {/* Modificato qui */}
                           </Link>
                         </CarouselItem>
                       ))}
@@ -206,7 +206,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                   </Carousel>
                 ) : (
                   <Link to={`/listing/${listing.id}`} className="block w-full h-full">
-                    <img src={photosToRender[0].url} alt={listing.title} className="object-cover w-full h-full" />
+                    <img src={photosToRender[0].url} alt={listing.title} className="object-contain w-full h-full bg-gray-200" /> {/* Modificato qui */}
                   </Link>
                 )}
               </AspectRatio>
