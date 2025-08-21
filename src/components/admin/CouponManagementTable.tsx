@@ -68,13 +68,7 @@ const couponSchema = z.object({
   is_active: z.boolean().default(true),
   max_uses: z.coerce.number().int().min(1, "Il numero massimo di utilizzi deve essere almeno 1.").nullable().optional(),
 }).superRefine((data, ctx) => {
-  if (data.type === 'reusable' && data.max_uses === null) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "Per i coupon riutilizzabili, il numero massimo di utilizzi è obbligatorio.",
-      path: ['max_uses'],
-    });
-  }
+  // Rimosso il controllo che rendeva max_uses obbligatorio per i coupon riutilizzabili
   if (data.type === 'single_use' && data.max_uses !== null) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
@@ -446,8 +440,9 @@ export const CouponManagementTable = () => {
                   name="max_uses"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Numero Massimo di Utilizzi (per Riutilizzabile)</FormLabel>
+                      <FormLabel>Numero Massimo di Utilizzi (Opzionale)</FormLabel>
                       <FormControl><Input type="number" placeholder="Es. 100" {...field} disabled={isSubmitting} /></FormControl>
+                      <FormDescription>Lascia vuoto per utilizzi illimitati.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
