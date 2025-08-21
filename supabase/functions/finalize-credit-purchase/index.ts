@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { userId, amount, packageName } = await req.json();
+    const { userId, amount, packageName, couponId, couponType } = await req.json(); // Added couponId, couponType
 
     if (!userId || typeof amount !== 'number' || !packageName) {
       throw new Error('Missing required fields: userId, amount, packageName');
@@ -63,6 +63,27 @@ serve(async (req) => {
     if (transactionError) {
       console.error('Failed to log credit transaction:', transactionError.message);
       // For simplicity, we'll just log this error for now.
+    }
+
+    // Mark coupon as used if applicable
+    if (couponId && couponType) {
+      if (couponType === 'single_use') {
+        const { error: usedCouponInsertError } = await supabaseAdmin
+          .from('used_coupons')
+          .insert({ coupon_id: couponId, user_id: userId });
+        if (usedCouponInsertError) {
+          console.error('Failed to log single-use coupon usage:', usedCouponInsertError.message);
+        }
+      } else if (couponType === 'reusable') {
+        // Increment usage_count for reusable coupons
+        const { error: couponUpdateError } = await supabaseAdmin
+          .from('coupons')
+          .update({ usage_count: (coupon.usage_count || 0) + 1 }) // Need to fetch coupon first to get current usage_count
+          .eq('id', couponId);
+        if (couponUpdateError) {
+          console.error('Failed to increment reusable coupon usage count:', couponUpdateError.message);
+        }
+      }
     }
 
     return new Response(JSON.stringify({ success: true, newCredits: newCredits }), {

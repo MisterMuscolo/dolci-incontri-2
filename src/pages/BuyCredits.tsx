@@ -19,7 +19,8 @@ import {
   DialogTrigger,
   DialogFooter,
   DialogClose,
-} from '@/components/ui/dialog'; // Importa i componenti Dialog
+} from '@/components/ui/dialog';
+import { ApplyCouponForm } from '@/components/user/ApplyCouponForm'; // Importa il componente
 
 interface CreditPackage {
   id: string;
@@ -30,6 +31,14 @@ interface CreditPackage {
   description: string;
   features: string[];
   recommended?: boolean;
+}
+
+interface AppliedCoupon {
+  type: 'percentage' | 'flat_amount';
+  value: number;
+  couponId: string;
+  couponType: 'single_use' | 'reusable';
+  code: string; // Aggiunto per visualizzazione
 }
 
 const hardcodedCreditPackages: CreditPackage[] = [
@@ -95,7 +104,7 @@ const hardcodedCreditPackages: CreditPackage[] = [
 
 const stripePromise = loadStripe("pk_live_51RtvDm0BGBtuYZR6M3gRknP73OQDQ94YWI2yrqC1dWVM7mPd6aYMArTfcSjsOXJRNY2SHn0b0ShxnaQkBJs6HXUL00FEOsjI6C");
 
-const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage: CreditPackage | null; onPurchaseSuccess: () => void }) => {
+const CheckoutForm = ({ selectedPackage, onPurchaseSuccess, finalAmount, couponDetails }: { selectedPackage: CreditPackage | null; onPurchaseSuccess: () => void; finalAmount: number; couponDetails: AppliedCoupon | null }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [message, setMessage] = useState<string | null>(null);
@@ -125,7 +134,7 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage:
     const paymentElement = elements.getElement(PaymentElement);
     if (!paymentElement || !isPaymentElementReady) {
       setMessage("Errore: Il modulo di pagamento non è ancora pronto. Attendi un momento e riprova.");
-      showError("Errore: Il modulo di pagamento non è ancora pronto. Attendi un momento e riprova.");
+      showError("Errore: Il modulo di pagamento non è ancora pronto. Attendi un momento e ripr ova.");
       console.error("PaymentElement not ready or not found.");
       return;
     }
@@ -139,12 +148,12 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage:
         throw new Error('Devi essere autenticato per completare l\'acquisto.');
       }
 
-      const { error: confirmError } = await stripe.confirmPayment({
-        elements: elements, // Corrected: Pass the entire elements object
+      const { error: confirmError, paymentIntent } = await stripe.confirmPayment({
+        elements: elements,
         confirmParams: {
           return_url: `${window.location.origin}/credit-history`,
         },
-        // Removed: 'redirect: 'if_required'' as it's not a valid option for confirmPayment
+        redirect: 'if_required', // Aggiunto redirect: 'if_required' per gestire i 3D Secure
       });
 
       if (confirmError) {
@@ -160,33 +169,48 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage:
         return;
       }
 
-      const { error: finalizeError } = await supabase.functions.invoke('finalize-credit-purchase', {
-        body: {
-          userId: user.id,
-          amount: selectedPackage.credits,
-          packageName: selectedPackage.name,
-        },
-      });
+      // If payment requires action (e.g., 3D Secure), Stripe handles the redirect.
+      // The finalize-credit-purchase function will be called by a webhook or on return_url.
+      // For simplicity, we'll call it directly here if no redirect is needed.
+      if (paymentIntent && paymentIntent.status === 'succeeded') {
+        const { error: finalizeError } = await supabase.functions.invoke('finalize-credit-purchase', {
+          body: {
+            userId: user.id,
+            amount: selectedPackage.credits,
+            packageName: selectedPackage.name,
+            couponId: couponDetails?.couponId || null, // Pass coupon details
+            couponType: couponDetails?.couponType || null, // Pass coupon details
+          },
+        });
 
-      dismissToast(toastId);
+        dismissToast(toastId);
 
-      if (finalizeError) {
-        let errorMessage = 'Errore durante l\'aggiornamento dei crediti dopo il pagamento.';
-        if (finalizeError.context && typeof finalizeError.context.body === 'string') {
-          try {
-            const errorBody = JSON.parse(finalizeError.context.body);
-            if (errorBody.error) {
-              errorMessage = errorBody.error;
+        if (finalizeError) {
+          let errorMessage = 'Errore durante l\'aggiornamento dei crediti dopo il pagamento.';
+          if (finalizeError.context && typeof finalizeError.context.body === 'string') {
+            try {
+              const errorBody = JSON.parse(finalizeError.context.body);
+              if (errorBody.error) {
+                errorMessage = errorBody.error;
+              }
+            } catch (e) {
+              console.error("Could not parse error response from edge function:", e);
             }
-          } catch (e) {
-            console.error("Could not parse error response from edge function:", e);
           }
+          throw new Error(errorMessage);
         }
-        throw new Error(errorMessage);
+
+        showSuccess(`Hai acquistato ${selectedPackage.credits} crediti con successo!`);
+        onPurchaseSuccess();
+      } else {
+        // Handle other paymentIntent statuses if necessary (e.g., 'processing', 'requires_action')
+        // For 'requires_action', Stripe's redirect handles it.
+        // For 'processing', the user might need to wait.
+        dismissToast(toastId);
+        showSuccess("Pagamento in elaborazione o richiede ulteriori azioni. Controlla la cronologia crediti tra poco.");
+        onPurchaseSuccess(); // Still navigate away, as payment is initiated
       }
 
-      showSuccess(`Hai acquistato ${selectedPackage.credits} crediti con successo!`);
-      onPurchaseSuccess();
     } catch (error: any) {
       dismissToast(toastId);
       showError(error.message || 'Si è verificato un errore imprevisto durante l\'acquisto.');
@@ -211,7 +235,7 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess }: { selectedPackage:
       </div>
       <Button disabled={isLoading || !isPaymentElementReady} id="submit" className="w-full bg-rose-500 hover:bg-rose-600">
         <span id="button-text">
-          {isLoading ? "Elaborazione..." : `Paga €${selectedPackage?.price.toFixed(2)}`}
+          {isLoading ? "Elaborazione..." : `Paga €${finalAmount.toFixed(2)}`}
         </span>
       </Button>
       {message && <div id="payment-message" className="text-red-500 text-sm mt-4">{message}</div>}
@@ -226,7 +250,8 @@ const BuyCredits = () => {
   const [selectedPackage, setSelectedPackage] = useState<CreditPackage | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loadingPaymentIntent, setLoadingPaymentIntent] = useState(false);
-  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false); // Nuovo stato per il dialog
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null); // Stato per il coupon applicato
   const creditPackages = hardcodedCreditPackages; 
 
   const fetchCurrentCredits = useCallback(async () => {
@@ -257,15 +282,31 @@ const BuyCredits = () => {
     fetchCurrentCredits();
   }, [fetchCurrentCredits]);
 
+  const calculateFinalPrice = (originalPrice: number, coupon: AppliedCoupon | null) => {
+    if (!coupon) return originalPrice;
+    let price = originalPrice;
+    if (coupon.type === 'percentage') {
+      price = originalPrice * (1 - coupon.value / 100);
+    } else if (coupon.type === 'flat_amount') {
+      price = originalPrice - coupon.value;
+    }
+    return Math.max(0, price); // Ensure price doesn't go below zero
+  };
+
   const handlePackageSelect = async (pkg: CreditPackage) => {
     setSelectedPackage(pkg);
     setClientSecret(null); // Reset client secret
     setLoadingPaymentIntent(true);
     const toastId = showLoading(`Preparazione pagamento per ${pkg.name}...`);
 
+    const finalPrice = calculateFinalPrice(pkg.price, appliedCoupon);
+
     try {
       const { data, error } = await supabase.functions.invoke('create-payment-intent', {
-        body: { packageId: pkg.id },
+        body: { 
+          packageId: pkg.id,
+          couponCode: appliedCoupon?.code || null, // Pass coupon code to Edge Function
+        },
       });
 
       dismissToast(toastId);
@@ -300,7 +341,18 @@ const BuyCredits = () => {
 
   const handlePurchaseSuccess = () => {
     setIsPaymentDialogOpen(false); // Chiudi il dialog
+    setAppliedCoupon(null); // Resetta il coupon dopo l'acquisto
     navigate('/credit-history');
+  };
+
+  const handleCouponApplied = (discount: { type: 'percentage' | 'flat_amount'; value: number; couponId: string; couponType: 'single_use' | 'reusable' }) => {
+    setAppliedCoupon({ ...discount, code: 'APPLIED_CODE' }); // 'APPLIED_CODE' è un placeholder, il codice reale non è necessario qui
+    showSuccess('Coupon applicato con successo!');
+  };
+
+  const handleCouponRemoved = () => {
+    setAppliedCoupon(null);
+    showSuccess('Coupon rimosso.');
   };
 
   const appearance: StripeElementsOptions['appearance'] = {
@@ -345,15 +397,25 @@ const BuyCredits = () => {
           </CardContent>
         </Card>
 
+        {/* Sezione per applicare il coupon */}
+        <div className="mb-8">
+          <ApplyCouponForm
+            onCouponApplied={handleCouponApplied}
+            onCouponRemoved={handleCouponRemoved}
+            currentAppliedCoupon={appliedCoupon}
+          />
+        </div>
+
         <h2 className="text-2xl font-bold text-gray-800 mt-8 mb-6">Scegli il tuo pacchetto:</h2>
         {creditPackages.length === 0 ? (
           <p className="text-center text-gray-600">Nessun pacchetto di crediti disponibile. Riprova più tardi.</p>
         ) : (
           <div className="flex flex-col gap-6 mb-10">
             {creditPackages.map((pkg) => {
-              const discountPercentage = pkg.originalPrice && pkg.originalPrice > pkg.price
-                ? ((1 - pkg.price / pkg.originalPrice) * 100).toFixed(0)
-                : null;
+              const originalPrice = pkg.price;
+              const finalPrice = calculateFinalPrice(originalPrice, appliedCoupon);
+              const discountAmount = originalPrice - finalPrice;
+              const hasDiscount = discountAmount > 0.01; // Check if there's a significant discount
 
               return (
                 <Card 
@@ -373,16 +435,14 @@ const BuyCredits = () => {
                   </div>
 
                   <div className="flex flex-col items-end text-right mx-4">
-                    {pkg.originalPrice && discountPercentage ? (
-                      <>
-                        <p className="text-sm text-gray-500 line-through">€{pkg.originalPrice.toFixed(2)}</p>
-                        <p className="text-xl font-bold text-gray-900">€{pkg.price.toFixed(2)}</p>
-                        <p className="text-xs text-green-600 font-semibold">
-                          Risparmi {discountPercentage}%
-                        </p>
-                      </>
-                    ) : (
-                      <p className="text-xl font-bold text-gray-900">€{pkg.price.toFixed(2)}</p>
+                    {hasDiscount && (
+                      <p className="text-sm text-gray-500 line-through">€{originalPrice.toFixed(2)}</p>
+                    )}
+                    <p className="text-xl font-bold text-gray-900">€{finalPrice.toFixed(2)}</p>
+                    {hasDiscount && (
+                      <p className="text-xs text-green-600 font-semibold">
+                        Risparmi €{discountAmount.toFixed(2)}
+                      </p>
                     )}
                   </div>
 
@@ -415,14 +475,24 @@ const BuyCredits = () => {
               <DialogTitle className="text-2xl font-bold text-gray-800">Completa il tuo acquisto</DialogTitle>
               {selectedPackage && (
                 <DialogDescription>
-                  Stai acquistando: <span className="font-semibold">{selectedPackage.name} ({selectedPackage.credits} crediti)</span> per <span className="font-semibold">€{selectedPackage.price.toFixed(2)}</span>
+                  Stai acquistando: <span className="font-semibold">{selectedPackage.name} ({selectedPackage.credits} crediti)</span> per <span className="font-semibold">€{calculateFinalPrice(selectedPackage.price, appliedCoupon).toFixed(2)}</span>
+                  {appliedCoupon && (
+                    <span className="block text-sm text-green-600 mt-1">
+                      Coupon "{appliedCoupon.code}" applicato!
+                    </span>
+                  )}
                 </DialogDescription>
               )}
             </DialogHeader>
             <div className="py-4">
               {selectedPackage && clientSecret ? (
                 <Elements options={{ clientSecret, appearance }} stripe={stripePromise}>
-                  <CheckoutForm selectedPackage={selectedPackage} onPurchaseSuccess={handlePurchaseSuccess} />
+                  <CheckoutForm 
+                    selectedPackage={selectedPackage} 
+                    onPurchaseSuccess={handlePurchaseSuccess} 
+                    finalAmount={calculateFinalPrice(selectedPackage.price, appliedCoupon)}
+                    couponDetails={appliedCoupon}
+                  />
                 </Elements>
               ) : (
                 <div className="flex flex-col items-center justify-center h-48">

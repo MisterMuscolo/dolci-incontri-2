@@ -4,16 +4,14 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Wallet, Settings, LayoutGrid, Ticket, PlusCircle, MessageSquare, Tag } from "lucide-react"; // Importa Tag
+import { Wallet, Settings, LayoutGrid, Ticket, PlusCircle, MessageSquare } from "lucide-react";
 import { CreateTicketDialog } from "@/components/CreateTicketDialog";
-import { ApplyCouponForm } from "@/components/user/ApplyCouponForm"; // Importa il nuovo componente
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [totalListingsCount, setTotalListingsCount] = useState(0);
   const [currentCredits, setCurrentCredits] = useState<number | null>(0);
   const [totalCreditsSpent, setTotalCreditsSpent] = useState<number>(0);
-  const [appliedCoupon, setAppliedCoupon] = useState<{ type: 'percentage' | 'flat_amount'; value: number; code: string; couponId: string; couponType: 'single_use' | 'reusable' } | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -72,16 +70,6 @@ const Dashboard = () => {
 
     fetchData();
   }, []);
-
-  const handleCouponApplied = (discount: { type: 'percentage' | 'flat_amount'; value: number; couponId: string; couponType: 'single_use' | 'reusable' }) => {
-    // For now, we just store the applied coupon details.
-    // In a real scenario, this would be integrated into a purchase flow.
-    setAppliedCoupon({ ...discount, code: 'APPLIED_CODE', couponId: discount.couponId, couponType: discount.couponType }); // Placeholder code
-  };
-
-  const handleCouponRemoved = () => {
-    setAppliedCoupon(null);
-  };
 
   return (
     <div className="bg-gray-50 p-6 flex-grow">
@@ -165,13 +153,6 @@ const Dashboard = () => {
               </div>
             </CardContent>
           </Card>
-
-          {/* Nuova Card per i Coupon */}
-          <ApplyCouponForm
-            onCouponApplied={handleCouponApplied}
-            onCouponRemoved={handleCouponRemoved}
-            currentAppliedCoupon={appliedCoupon}
-          />
           
           <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
             <CardHeader>
