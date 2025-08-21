@@ -31,8 +31,8 @@ interface Ticket {
   created_at: string;
   updated_at: string;
   last_replied_by: 'user' | 'admin';
-  profiles: { email: string } | null; // Per ottenere l'email dell'utente che ha aperto il ticket
-  listings: { title: string } | null; // Per ottenere il titolo dell'annuncio se collegato
+  profiles: { email: string } | null; // Modificato da array a singolo oggetto o null
+  listings: { title: string } | null; // Modificato da array a singolo oggetto o null
 }
 
 export const TicketManagementTable = () => {
@@ -76,6 +76,11 @@ export const TicketManagementTable = () => {
     const toastId = showLoading(`Aggiornamento stato ticket...`);
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('Utente non autenticato.');
+      }
+
       const { error } = await supabase
         .from('tickets')
         .update({ 
