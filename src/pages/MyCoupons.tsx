@@ -57,20 +57,29 @@ const MyCoupons = () => {
     }
     setCurrentUserId(user.id);
 
-    // Fetch all coupons visible to the user (RLS handles initial filtering)
-    const { data: couponsData, error: couponsError } = await supabase
-      .from('coupons')
-      .select('*')
-      .order('created_at', { ascending: false });
+    // MODIFIED LOGIC: Fetch coupons linked via user_coupons table
+    const { data: userCouponsData, error: userCouponsError } = await supabase
+      .from('user_coupons')
+      .select(`
+        coupon_id,
+        coupons (
+          id, code, type, discount_type, discount_value, expires_at, applies_to_user_id, created_at, is_active, max_uses, usage_count
+        )
+      `)
+      .eq('user_id', user.id)
+      .order('applied_at', { ascending: false }); // Order by when they were applied
 
-    if (couponsError) {
-      console.error("Error fetching coupons:", couponsError);
-      setError("Impossibile caricare i coupon.");
+    if (userCouponsError) {
+      console.error("Error fetching user's applied coupons:", userCouponsError);
+      setError("Impossibile caricare i tuoi coupon applicati.");
       setLoading(false);
       return;
     }
 
-    // Fetch all coupons used by the current user
+    // Extract coupon details from the nested `coupons` object
+    const rawCoupons = userCouponsData.map(uc => uc.coupons).filter(Boolean) as Coupon[];
+
+    // Fetch all coupons used by the current user (still needed for single_use status)
     const { data: usedCouponsData, error: usedCouponsError } = await supabase
       .from('used_coupons')
       .select('coupon_id')
@@ -83,7 +92,7 @@ const MyCoupons = () => {
     const usedCouponIds = new Set(usedCouponsData?.map(uc => uc.coupon_id));
 
     const now = new Date();
-    const processedCoupons: CouponDisplayItem[] = couponsData.map(coupon => {
+    const processedCoupons: CouponDisplayItem[] = rawCoupons.map(coupon => {
       let status: CouponDisplayItem['status'] = 'active';
       let usedByCurrentUser = false;
 
@@ -96,8 +105,13 @@ const MyCoupons = () => {
         usedByCurrentUser = true;
       } else if (coupon.type === 'reusable' && coupon.max_uses !== null && coupon.usage_count >= coupon.max_uses) {
         status = 'maxed_out';
-      } else if (coupon.applies_to_user_id && coupon.applies_to_user_id !== user.id) {
-        status = 'not_applicable'; // Coupon is for a specific user, but not this one
+      }
+      // The `applies_to_user_id` check is implicitly handled by the `user_coupons` join,
+      // as only coupons linked to the user will be fetched.
+      // However, if a coupon was applied and then its `applies_to_user_id` was changed by an admin,
+      // this check would still be relevant. For now, we assume `applies_to_user_id` doesn't change post-application.
+      else if (coupon.applies_to_user_id && coupon.applies_to_user_id !== user.id) {
+        status = 'not_applicable'; // This case should ideally not happen if `user_coupons` is correctly populated
       }
 
       return {

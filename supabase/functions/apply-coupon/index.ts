@@ -56,7 +56,7 @@ serve(async (req) => {
       throw new Error('Questo coupon non è valido per il tuo account.');
     }
 
-    // Handle single-use coupons
+    // Check if single-use coupon has already been used by the current user
     if (coupon.type === 'single_use') {
       const { data: usedCoupon, error: usedCouponError } = await supabaseClient
         .from('used_coupons')
@@ -77,6 +77,27 @@ serve(async (req) => {
     if (coupon.type === 'reusable' && coupon.max_uses !== null && coupon.usage_count >= coupon.max_uses) {
       throw new Error('Questo coupon ha raggiunto il numero massimo di utilizzi.');
     }
+
+    // NEW LOGIC: Record that the user has applied/discovered this coupon
+    // Use the user's client for this insert, as RLS on `user_coupons` will allow it.
+    const { error: userCouponInsertError } = await supabaseClient
+      .from('user_coupons')
+      .insert({
+        user_id: user.id,
+        coupon_id: coupon.id,
+      });
+
+    if (userCouponInsertError) {
+      // If the error is a unique constraint violation (user already applied this coupon),
+      // we can treat it as a success for the "application" part, but inform the user.
+      if (userCouponInsertError.code === '23505') { // Unique violation error code
+        console.warn(`Coupon ${coupon.code} already applied by user ${user.id}.`);
+        // We can still proceed to return success, as the coupon is valid and "known" by the user.
+      } else {
+        throw new Error(`Failed to record coupon application: ${userCouponInsertError.message}`);
+      }
+    }
+    // END NEW LOGIC
 
     // If all checks pass, return the coupon details for application
     return new Response(JSON.stringify({
