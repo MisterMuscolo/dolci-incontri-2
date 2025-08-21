@@ -357,7 +357,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
         )}
       </Card>
       {!(canEdit || canManagePhotos || canDelete) && isActivePremium && (
-        <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white absolute -top-2 right-2 z-20 text-xs px-2 py-0.5 rounded-full font-semibold transform translate-x-1/2">
+        <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white absolute -top-2 right-0 z-20 text-xs px-2 py-0.5 rounded-full font-semibold">
           <Rocket className="h-3 w-3 mr-1" /> In Evidenza
         </Badge>
       )}
