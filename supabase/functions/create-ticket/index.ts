@@ -18,7 +18,7 @@ serve(async (req) => {
       throw new Error('Missing required fields: senderEmail, messageContent');
     }
 
-    // Create a Supabase client with the user's JWT for RLS checks
+    // Create a Supabase client with the user's JWT for RLS checks (to get user ID if authenticated)
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -32,7 +32,14 @@ serve(async (req) => {
 
     let ticketSubject = initialSubject || `Nuova richiesta di supporto da ${senderEmail}`;
 
+    // Use the service role key for the actual inserts to bypass RLS
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
     if (listingId) {
+      // Fetch listing title using supabaseClient (user's RLS applies here)
       const { data: listingData, error: listingError } = await supabaseClient
         .from('listings')
         .select('title')
@@ -47,8 +54,8 @@ serve(async (req) => {
       }
     }
 
-    // Insert new ticket
-    const { data: newTicket, error: ticketError } = await supabaseClient
+    // Insert new ticket using supabaseAdmin
+    const { data: newTicket, error: ticketError } = await supabaseAdmin
       .from('tickets')
       .insert({
         user_id: ticketUserId, // Can be null for unauthenticated users
@@ -65,8 +72,8 @@ serve(async (req) => {
       throw new Error(`Failed to create ticket: ${ticketError?.message}`);
     }
 
-    // Insert initial message
-    const { error: messageError } = await supabaseClient
+    // Insert initial message using supabaseAdmin
+    const { error: messageError } = await supabaseAdmin
       .from('ticket_messages')
       .insert({
         ticket_id: newTicket.id,
@@ -80,11 +87,7 @@ serve(async (req) => {
       throw new Error('Ticket created, but failed to save initial message. Please contact support.');
     }
 
-    // NEW: Insert notification for admin about new ticket
-    const supabaseAdmin = createClient(
-        Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    // Insert notification for admin about new ticket (already using supabaseAdmin)
     const { error: notificationError } = await supabaseAdmin
         .from('admin_notifications')
         .insert({
