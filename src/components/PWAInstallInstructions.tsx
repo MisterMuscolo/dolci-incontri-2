@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Info, Share } from 'lucide-react'; // Rimosso MoreVertical, non più necessario qui
-import { InstallPWAButton } from './InstallPWAButton'; // Importa il nuovo componente
+import { Info, Share } from 'lucide-react';
+import { InstallPWAButton } from './InstallPWAButton';
 
 type OSType = 'iOS' | 'Android' | 'Other';
 
@@ -19,13 +19,25 @@ const getOS = (): OSType => {
 
 export const PWAInstallInstructions = () => {
   const [os, setOs] = useState<OSType>('Other');
+  const [isInstalled, setIsInstalled] = useState(false); // Nuovo stato per l'installazione
 
   useEffect(() => {
     setOs(getOS());
+
+    // Controlla se l'app è già installata (modalità standalone)
+    if (window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone) {
+      setIsInstalled(true);
+    }
   }, []);
 
+  // Se l'app è già installata, non mostrare le istruzioni
+  if (isInstalled) {
+    return null;
+  }
+
+  // Se non è un dispositivo mobile riconosciuto, non mostrare le istruzioni
   if (os === 'Other') {
-    return null; // Non mostrare le istruzioni se non è un dispositivo mobile riconosciuto
+    return null;
   }
 
   return (

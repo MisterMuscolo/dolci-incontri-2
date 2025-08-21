@@ -5,21 +5,14 @@ import { showSuccess, showError } from '@/utils/toast';
 
 export const InstallPWAButton = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<Event | null>(null);
-  const [isInstalled, setIsInstalled] = useState(false);
+  // Rimosso lo stato isInstalled da qui, poiché il componente padre gestirà la visibilità complessiva
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
-      // Previene che il browser mostri il suo prompt di installazione predefinito
       e.preventDefault();
-      // Salva l'evento in modo da poterlo attivare in seguito
       setDeferredPrompt(e);
       console.log('beforeinstallprompt fired');
     };
-
-    // Controlla se l'app è già installata (modalità standalone)
-    if (window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone) {
-      setIsInstalled(true);
-    }
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
@@ -30,33 +23,22 @@ export const InstallPWAButton = () => {
 
   const handleInstallClick = async () => {
     if (deferredPrompt) {
-      // Mostra il prompt di installazione
       deferredPrompt.prompt();
-      // Attendi la scelta dell'utente
       const { outcome } = await (deferredPrompt as any).userChoice;
       console.log(`User response to the install prompt: ${outcome}`);
 
       if (outcome === 'accepted') {
         showSuccess('IncontriDolci è stato aggiunto alla tua schermata Home!');
-        setIsInstalled(true); // Aggiorna lo stato a installato
+        // Non è necessario aggiornare isInstalled qui, il componente padre PWAInstallInstructions si ri-valuterà
       } else {
         showError('Installazione annullata.');
       }
-      // Resetta il prompt dopo che è stato gestito
       setDeferredPrompt(null);
     }
   };
 
-  // Se l'app è già installata, mostra un messaggio
-  if (isInstalled) {
-    return (
-      <p className="text-center text-green-600 font-medium">
-        IncontriDolci è già installato sul tuo dispositivo!
-      </p>
-    );
-  }
-
-  // Se non c'è un prompt disponibile (es. non è Android/Chrome o già installato), non mostrare il pulsante
+  // Se non c'è un prompt disponibile (es. non è Android/Chrome o è già installato), non mostrare il pulsante.
+  // Il componente padre PWAInstallInstructions gestirà il controllo complessivo "è installato".
   if (!deferredPrompt) {
     return null;
   }
