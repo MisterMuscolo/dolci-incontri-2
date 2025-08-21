@@ -18,7 +18,17 @@ export const Footer = () => {
         <div className="flex justify-center gap-4 md:gap-6 mb-4 text-sm">
           <Link to="/termini" className="hover:text-rose-500 hover:underline">Termini e Condizioni</Link>
           <Link to="/privacy" className="hover:text-rose-500 hover:underline">Privacy Policy</Link>
-          <Link to="/new-ticket" className="hover:text-rose-500 hover:underline">Assistenza</Link> {/* Ripristinato il link Assistenza */}
+          {/* Modificato il link Assistenza per aprire un dialogo */}
+          <CreateTicketDialog
+            triggerButton={
+              <button className="hover:text-rose-500 hover:underline">Assistenza</button>
+            }
+            dialogTitle="Apri un nuovo Ticket di Supporto"
+            dialogDescription="Compila il modulo sottostante per inviare una richiesta di supporto o una domanda generale."
+            icon={Mail}
+            initialSubject="Nuova richiesta di supporto generale"
+            redirectPathOnAuth="/my-tickets"
+          />
         </div>
 
         <p className="text-xs text-gray-500 mb-4">
