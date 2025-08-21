@@ -20,8 +20,8 @@ const BuyCredits = lazy(() => import("./pages/BuyCredits"));
 const ProfileSettings = lazy(() => import("./pages/ProfileSettings"));
 const SearchResults = lazy(() => import("./pages/SearchResults"));
 const ListingDetails = lazy(() => import("./pages/ListingDetails"));
-import MyListings from "./pages/MyListings"; // Importa MyListings direttamente
-import CreditHistory from "./pages/CreditHistory"; // Importa CreditHistory direttamente
+import MyListings from "./pages/MyListings"; // MyListings rimane importato direttamente
+const CreditHistory = lazy(() => import("./pages/CreditHistory")); // Ripristinato lazy loading
 const UserListingsAdminView = lazy(() => import("./pages/UserListingsAdminView"));
 const BannedUser = lazy(() => import("./pages/BannedUser"));
 const EditListing = lazy(() => import("./pages/EditListing"));
@@ -235,6 +235,10 @@ const App = () => {
               <Route 
                 path="/my-listings" 
                 element={session ? (isBanned ? <Navigate to="/banned" /> : <MyListings />) : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/credit-history" 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><CreditHistory /></Suspense>) : <Navigate to="/auth" />} 
               />
             </Route> {/* Chiusura della rotta del Layout */}
           </Routes>
