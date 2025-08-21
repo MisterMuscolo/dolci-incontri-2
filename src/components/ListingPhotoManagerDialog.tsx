@@ -275,7 +275,7 @@ export const ListingPhotoManagerDialog = ({ listingId, listingTitle, userId, onP
                 <div 
                   key={photo.id} 
                   className={cn(
-                    "relative group aspect-square rounded-md", // Aggiunto rounded-md qui
+                    "relative group aspect-square", // Rimosso rounded-md
                     activePreviewUrl === photo.url && "ring-2 ring-rose-500 ring-offset-2 ring-offset-gray-50"
                   )}
                 >
@@ -283,7 +283,7 @@ export const ListingPhotoManagerDialog = ({ listingId, listingTitle, userId, onP
                     src={photo.url}
                     alt="Miniatura foto"
                     className={cn(
-                      "w-full h-full object-cover rounded-md transition-all cursor-pointer", // Mantenuto rounded-md qui
+                      "w-full h-full object-cover transition-all cursor-pointer", // Rimosso rounded-md
                       photo.is_primary && "border-2 border-yellow-400" // Highlight primary with a border
                     )}
                     onClick={() => setActivePreviewUrl(photo.url)}
