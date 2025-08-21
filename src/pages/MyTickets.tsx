@@ -100,6 +100,7 @@ const MyTickets = () => {
   };
 
   const getLastRepliedByLabel = (lastRepliedBy: 'user' | 'admin' | 'supporto') => {
+    console.log("MyTickets: last_replied_by value:", lastRepliedBy); // ADDED LOG
     switch (lastRepliedBy) {
       case 'user':
         return 'Tu';

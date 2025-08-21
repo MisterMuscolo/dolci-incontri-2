@@ -56,7 +56,6 @@ serve(async (req) => {
       throw new Error('User profile not found.');
     }
 
-    // MODIFICA QUI: Salva il ruolo esatto ('admin' o 'supporto')
     let senderRole: 'user' | 'admin' | 'supporto';
     if (profile.role === 'admin') {
         senderRole = 'admin';
@@ -67,6 +66,7 @@ serve(async (req) => {
     }
 
     console.log(`add-ticket-message: User ID: ${user.id}, Profile Role: ${profile.role}, Determined Sender Role: ${senderRole}`);
+    console.log(`add-ticket-message: Ticket current status: ${ticket.status}`);
 
 
     // Insert new message
@@ -83,12 +83,15 @@ serve(async (req) => {
     }
 
     // Update ticket's updated_at and last_replied_by
+    const newTicketStatus = (senderRole !== 'user' && ticket.status === 'open') ? 'in_progress' : ticket.status;
+    console.log(`add-ticket-message: New ticket status calculated: ${newTicketStatus}`);
+
     const { error: updateTicketError } = await supabaseClient
       .from('tickets')
       .update({
         updated_at: new Date().toISOString(),
         last_replied_by: senderRole,
-        status: (senderRole !== 'user' && ticket.status === 'open') ? 'in_progress' : ticket.status 
+        status: newTicketStatus 
       })
       .eq('id', ticketId);
 

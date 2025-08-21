@@ -311,7 +311,7 @@ const TicketDetails = () => {
                         ) : (
                           <>
                             {(message.profiles?.role === 'admin' || message.profiles?.role === 'supporto') ? (
-                              <Shield className="h-4 w-4 text-purple-400" /> // Icona e colore unificati
+                              <Shield className="h-4 w-4 text-purple-400" /> {/* Icona e colore unificati */}
                             ) : (
                               <User className="h-4 w-4" />
                             )}
