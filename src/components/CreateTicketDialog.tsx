@@ -21,7 +21,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'; // Importato Card components
 
 const ticketSchema = z.object({
-  senderEmail: z.string().email("L'email non è valida.").min(1, "L'email è obbligatoria.'),
+  senderEmail: z.string().email("L'email non è valida.").min(1, "L'email è obbligatoria.'),"),
   messageContent: z.string().min(20, 'Il messaggio deve contenere almeno 20 caratteri.'),
 });
 
