@@ -3,14 +3,25 @@ import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import { showSuccess, showError } from '@/utils/toast';
 
+// Definisci l'interfaccia per BeforeInstallPromptEvent
+interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: Array<string>;
+  readonly userChoice: Promise<{
+    outcome: 'accepted' | 'dismissed';
+    platform: string;
+  }>;
+  prompt(): Promise<void>;
+}
+
 export const InstallPWAButton = () => {
-  const [deferredPrompt, setDeferredPrompt] = useState<Event | null>(null);
-  // Rimosso lo stato isInstalled da qui, poiché il componente padre gestirà la visibilità complessiva
+  // Tipizza deferredPrompt con la nuova interfaccia
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
-      setDeferredPrompt(e);
+      // Assicurati che l'evento sia del tipo corretto prima di salvarlo
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
       console.log('beforeinstallprompt fired');
     };
 
@@ -24,12 +35,11 @@ export const InstallPWAButton = () => {
   const handleInstallClick = async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
-      const { outcome } = await (deferredPrompt as any).userChoice;
+      const { outcome } = await deferredPrompt.userChoice; // Non è più necessario il cast 'as any'
       console.log(`User response to the install prompt: ${outcome}`);
 
       if (outcome === 'accepted') {
         showSuccess('IncontriDolci è stato aggiunto alla tua schermata Home!');
-        // Non è necessario aggiornare isInstalled qui, il componente padre PWAInstallInstructions si ri-valuterà
       } else {
         showError('Installazione annullata.');
       }
@@ -37,8 +47,6 @@ export const InstallPWAButton = () => {
     }
   };
 
-  // Se non c'è un prompt disponibile (es. non è Android/Chrome o è già installato), non mostrare il pulsante.
-  // Il componente padre PWAInstallInstructions gestirà il controllo complessivo "è installato".
   if (!deferredPrompt) {
     return null;
   }
