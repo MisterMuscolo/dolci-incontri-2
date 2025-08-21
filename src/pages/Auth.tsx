@@ -47,7 +47,13 @@ export default function Auth() {
       showError('Credenziali non valide');
     } else {
       showSuccess('Accesso effettuato!');
-      // Rimosso il reindirizzamento esplicito, App.tsx gestirà il reindirizzamento in base al ruolo
+      const redirectPath = searchParams.get('redirect');
+      if (redirectPath) {
+        navigate(redirectPath); // Naviga al percorso di reindirizzamento specificato
+      } else {
+        // App.tsx gestirà il reindirizzamento predefinito in base al ruolo
+        // Non è necessaria una navigazione esplicita qui se App.tsx la gestisce
+      }
     }
   };
 
@@ -65,7 +71,12 @@ export default function Auth() {
       showError(error.message);
     } else {
       showSuccess('Registrazione completata! Verifica la tua email.');
-      navigate('/registration-success'); // Reindirizza alla pagina di successo
+      const redirectPath = searchParams.get('redirect');
+      if (redirectPath) {
+        navigate(redirectPath); // Naviga al percorso di reindirizzamento specificato
+      } else {
+        navigate('/registration-success'); // Reindirizzamento predefinito per la registrazione
+      }
     }
   };
 

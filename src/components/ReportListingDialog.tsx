@@ -10,15 +10,14 @@ import {
   DialogTitle,
   DialogDescription,
   DialogTrigger,
-  DialogClose,
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Flag, Mail } from 'lucide-react';
+import { Flag, Mail, LogIn, UserPlus, Loader2 } from 'lucide-react'; // Aggiunto Loader2
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
-import { useNavigate } from 'react-router-dom'; // Importa useNavigate
+import { useNavigate, Link } from 'react-router-dom'; // Importa Link
 
 const reportSchema = z.object({
   reportMessage: z.string().min(20, 'Il messaggio di segnalazione deve contenere almeno 20 caratteri.'),
@@ -33,7 +32,9 @@ interface ReportListingDialogProps {
 export const ReportListingDialog = ({ listingId, listingTitle, buttonSize = "default" }: ReportListingDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate(); // Inizializza useNavigate
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null); // Stato per l'autenticazione
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true); // Stato per il caricamento dello stato di autenticazione
+  const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof reportSchema>>({
     resolver: zodResolver(reportSchema),
@@ -42,12 +43,26 @@ export const ReportListingDialog = ({ listingId, listingTitle, buttonSize = "def
     },
   });
 
+  useEffect(() => {
+    const checkAuth = async () => {
+      setIsLoadingAuth(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
+      setIsLoadingAuth(false);
+    };
+    checkAuth();
+
+    // Ascolta i cambiamenti dello stato di autenticazione
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   const onSubmit = async (values: z.infer<typeof reportSchema>) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    if (!isAuthenticated) {
       showError('Devi essere autenticato per segnalare un annuncio.');
-      navigate('/auth?tab=login'); // Reindirizza al login
-      setIsOpen(false); // Chiudi il dialog
       return;
     }
 
@@ -100,6 +115,7 @@ export const ReportListingDialog = ({ listingId, listingTitle, buttonSize = "def
           variant="outline"
           size={buttonSize}
           className="text-red-500 border-red-500 hover:bg-red-50 hover:text-red-600 flex items-center gap-2"
+          disabled={isLoadingAuth} // Disabilita il pulsante mentre controlla lo stato di autenticazione
         >
           <Flag className="h-5 w-5" /> Segnala Annuncio
         </Button>
@@ -109,27 +125,54 @@ export const ReportListingDialog = ({ listingId, listingTitle, buttonSize = "def
           <DialogTitle className="flex items-center gap-2"><Flag className="h-5 w-5 text-red-500" /> Segnala Annuncio</DialogTitle>
           <DialogDescription>
             Segnala l'annuncio "{listingTitle}" se ritieni che violi le nostre linee guida.
-            Per inviare una segnalazione, devi essere autenticato.
           </DialogDescription>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-            <FormField
-              control={form.control}
-              name="reportMessage"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Motivo della segnalazione</FormLabel>
-                  <FormControl><Textarea placeholder="Descrivi il motivo della segnalazione..." className="min-h-[100px]" {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" className="w-full bg-red-500 hover:bg-red-600" disabled={isSubmitting}>
-              {isSubmitting ? 'Invio in corso...' : 'Invia Segnalazione'}
-            </Button>
-          </form>
-        </Form>
+        
+        {isLoadingAuth ? (
+          <div className="flex flex-col items-center justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-rose-500 mb-4" />
+            <p className="text-gray-600">Verifica stato autenticazione...</p>
+          </div>
+        ) : !isAuthenticated ? (
+          <div className="text-center py-4 space-y-6">
+            <Mail className="mx-auto h-20 w-20 text-rose-500" />
+            <h2 className="text-2xl font-bold text-gray-800">Accedi o Registrati</h2>
+            <p className="text-lg text-gray-600">
+              Per inviare una segnalazione, devi prima accedere al tuo account o registrarti.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to={`/auth?tab=login&redirect=/listing/${listingId}`}>
+                <Button className="w-full sm:w-auto bg-rose-500 hover:bg-rose-600">
+                  <LogIn className="h-5 w-5 mr-2" /> Accedi
+                </Button>
+              </Link>
+              <Link to={`/auth?tab=register&redirect=/listing/${listingId}`}>
+                <Button variant="outline" className="w-full sm:w-auto border-rose-500 text-rose-500 hover:bg-rose-50 hover:text-rose-600">
+                  <UserPlus className="h-5 w-5 mr-2" /> Registrati
+                </Button>
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+              <FormField
+                control={form.control}
+                name="reportMessage"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Motivo della segnalazione</FormLabel>
+                    <FormControl><Textarea placeholder="Descrivi il motivo della segnalazione..." className="min-h-[100px]" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full bg-red-500 hover:bg-red-600" disabled={isSubmitting}>
+                {isSubmitting ? 'Invio in corso...' : 'Invia Segnalazione'}
+              </Button>
+            </form>
+          </Form>
+        )}
       </DialogContent>
     </Dialog>
   );
