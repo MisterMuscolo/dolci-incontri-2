@@ -35,9 +35,10 @@ serve(async (req) => {
     }
 
     // Verify user has access to this ticket (via RLS on tickets table)
+    // MODIFICA QUI: Includi 'status' nella selezione
     const { data: ticket, error: ticketFetchError } = await supabaseClient
       .from('tickets')
-      .select('id, user_id')
+      .select('id, user_id, status') // Aggiunto 'status'
       .eq('id', ticketId)
       .single();
 
@@ -77,7 +78,8 @@ serve(async (req) => {
       .update({
         updated_at: new Date().toISOString(),
         last_replied_by: senderRole,
-        status: (senderRole === 'admin' && ticket.status === 'open') ? 'in_progress' : ticket.status // If admin replies to an open ticket, set to in_progress
+        // Se l'admin risponde a un ticket 'open', lo stato diventa 'in_progress'
+        status: (senderRole === 'admin' && ticket.status === 'open') ? 'in_progress' : ticket.status 
       })
       .eq('id', ticketId);
 
