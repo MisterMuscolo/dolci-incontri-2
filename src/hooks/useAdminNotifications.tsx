@@ -18,7 +18,13 @@ export const useAdminNotifications = (isAdmin: boolean) => {
   const [loading, setLoading] = useState(true);
 
   const fetchNotifications = useCallback(async () => {
-    if (!isAdmin) {
+    // The `isAdmin` prop here should reflect if the user is 'admin' OR 'supporto'
+    // This hook is used in Header.tsx where isAdmin and isSupporto are passed.
+    // The RLS policy will handle the actual database access based on the user's role.
+    // So, we just need to ensure this hook is *called* if the user is admin or supporto.
+    // The `isAdmin` parameter here is actually `isAdmin || isSupporto` from Header.tsx.
+    // If it's false, we don't fetch.
+    if (!isAdmin) { // This `isAdmin` parameter now represents `isAdmin || isSupporto` from the caller
       setNotifications([]);
       setUnreadCount(0);
       setLoading(false);
