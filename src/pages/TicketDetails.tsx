@@ -17,7 +17,7 @@ interface TicketMessage {
   sender_id: string;
   message_content: string;
   created_at: string;
-  profiles: { email: string; role: string } | null; // Corretto: singolo oggetto o null
+  profiles: { email: string; role: string } | null;
 }
 
 interface TicketDetailsData {
@@ -28,9 +28,9 @@ interface TicketDetailsData {
   updated_at: string;
   last_replied_by: 'user' | 'admin' | 'supporto';
   listing_id: string | null;
-  listings: { title: string } | null; // Corretto: singolo oggetto o null
+  listings: { title: string } | null;
   ticket_messages: TicketMessage[];
-  user_id: string; // Aggiunto per notificare l'utente
+  user_id: string;
 }
 
 const TicketDetails = () => {
@@ -81,7 +81,6 @@ const TicketDetails = () => {
       showError("Impossibile caricare i dettagli del ticket.");
       navigate('/my-tickets');
     } else {
-      // Sort messages by created_at
       const sortedMessages = (data.ticket_messages || []).sort((a, b) =>
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
       );
@@ -136,7 +135,7 @@ const TicketDetails = () => {
 
       showSuccess('Messaggio inviato!');
       setNewMessage('');
-      fetchTicketDetails(); // Refresh messages
+      fetchTicketDetails();
     } catch (error: any) {
       dismissToast(toastId);
       showError(error.message || 'Si è verificato un errore imprevisto.');
@@ -175,7 +174,7 @@ const TicketDetails = () => {
     }
   };
 
-  const handleResolveTicket = async () => { // Renamed function
+  const handleResolveTicket = async () => {
     if (!ticketId || !ticket) return;
     setIsSending(true);
     const toastId = showLoading('Risoluzione ticket in corso...');
@@ -186,7 +185,6 @@ const TicketDetails = () => {
         throw new Error('Utente non autenticato.');
       }
 
-      // Fetch the current user's role
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role')
@@ -197,11 +195,11 @@ const TicketDetails = () => {
         throw new Error('Impossibile recuperare il ruolo dell\'utente corrente.');
       }
 
-      const senderRole = profile.role as 'admin' | 'supporto'; // Cast to the expected type
+      const senderRole = profile.role as 'admin' | 'supporto';
 
       const { error } = await supabase
         .from('tickets')
-        .update({ status: 'resolved', updated_at: new Date().toISOString(), last_replied_by: senderRole }) // Set to 'resolved'
+        .update({ status: 'resolved', updated_at: new Date().toISOString(), last_replied_by: senderRole })
         .eq('id', ticketId);
 
       dismissToast(toastId);
@@ -212,7 +210,6 @@ const TicketDetails = () => {
 
       showSuccess('Ticket risolto con successo!');
       
-      // Notify the user about the resolved status
       const { error: notifyError } = await supabase.functions.invoke('notify-user-ticket-status', {
         body: {
           ticketId: ticket.id,
@@ -229,7 +226,7 @@ const TicketDetails = () => {
         showSuccess("Notifica inviata all'utente.");
       }
 
-      fetchTicketDetails(); // Refresh ticket status
+      fetchTicketDetails();
     } catch (error: any) {
       dismissToast(toastId);
       showError(error.message || 'Errore durante la risoluzione del ticket.');
@@ -256,6 +253,28 @@ const TicketDetails = () => {
   }
 
   const isTicketClosed = ticket.status === 'resolved' || ticket.status === 'closed';
+
+  const getSenderDisplay = (message: TicketMessage) => {
+    if (message.sender_id === currentUserId) {
+      return (
+        <>
+          <User className="h-4 w-4" /> Tu
+        </>
+      );
+    } else {
+      const isSupportOrAdmin = message.profiles?.role === 'admin' || message.profiles?.role === 'supporto';
+      return (
+        <>
+          {isSupportOrAdmin ? (
+            <Shield className="h-4 w-4 text-purple-400" />
+          ) : (
+            <User className="h-4 w-4" />
+          )}
+          {isSupportOrAdmin ? ' Supporto' : ` ${message.profiles?.email || 'Utente Sconosciuto'}`}
+        </>
+      );
+    }
+  };
 
   return (
     <div className="bg-gray-50 p-4 sm:p-6 md:p-8 min-h-screen">
@@ -304,21 +323,7 @@ const TicketDetails = () => {
                       }`}
                     >
                       <p className="font-semibold text-sm mb-1 flex items-center gap-1">
-                        {message.sender_id === currentUserId ? (
-                          <>
-                            <User className="h-4 w-4" /> Tu
-                          </>
-                        ) : (
-                          <>
-                            {(message.profiles?.role === 'admin' || message.profiles?.role === 'supporto') ? (
-                              <Shield className="h-4 w-4 text-purple-400" /> {/* Icona e colore unificati */}
-                            ) : (
-                              <User className="h-4 w-4" />
-                            )}
-                            {' '} {/* Aggiunto uno spazio qui */}
-                            {(message.profiles?.role === 'admin' || message.profiles?.role === 'supporto') ? 'Supporto' : message.profiles?.email || 'Utente Sconosciuto'}
-                          </>
-                        )}
+                        {getSenderDisplay(message)}
                       </p>
                       <p className="text-sm">{message.message_content}</p>
                       <p className="text-xs mt-1 opacity-80">
@@ -351,11 +356,11 @@ const TicketDetails = () => {
                   {ticket.status !== 'closed' && (
                     <Button
                       variant="outline"
-                      onClick={handleResolveTicket} // Changed to handleResolveTicket
+                      onClick={handleResolveTicket}
                       disabled={isSending}
                       className="border-gray-400 text-gray-600 hover:bg-gray-100"
                     >
-                      Risolvi Ticket {/* Changed button text */}
+                      Risolvi Ticket
                     </Button>
                   )}
                 </div>
