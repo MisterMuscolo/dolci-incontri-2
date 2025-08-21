@@ -29,6 +29,7 @@ export interface Listing {
   id: string;
   user_id: string;
   title: string;
+  description: string;
   category: string;
   city: string;
   created_at: string;
@@ -39,7 +40,6 @@ export interface Listing {
   promotion_end_at: string | null;
   last_bumped_at: string | null;
   listing_photos: { url: string; is_primary: boolean }[];
-  description?: string;
   age?: number;
 }
 
@@ -218,6 +218,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
         )}>
           <div className="p-4 flex flex-col flex-grow">
             <h3 className="text-xl font-semibold mb-2 text-gray-800 line-clamp-2">{listing.title}</h3>
+            <p className="text-sm text-gray-600 mb-3 line-clamp-3">{listing.description}</p> {/* Aggiunta la descrizione qui */}
             <div className="flex flex-wrap gap-2 mb-3">
               <Badge variant="secondary" className="capitalize">{listing.category.replace(/-/g, ' ')}</Badge>
               <Badge variant="outline">{listing.city}</Badge>
