@@ -38,7 +38,6 @@ const SearchResults = () => {
         created_at,
         expires_at,
         is_premium,
-        age,
         promotion_mode,
         promotion_start_at,
         promotion_end_at,
@@ -77,7 +76,7 @@ const SearchResults = () => {
         const now = new Date();
         const sortedData = (data as Listing[]).sort((a, b) => {
           const aIsActivePremium = a.is_premium && a.promotion_start_at && a.promotion_end_at && new Date(a.promotion_start_at) <= now && new Date(a.promotion_end_at) >= now;
-          const bIsActivePremium = b.is_premium && b.promotion_start_at && b.promotion_end_at && new Date(b.promotion_end_at) >= now;
+          const bIsActivePremium = b.is_premium && b.promotion_start_at && b.promotion_end_at && new Date(b.promotion_start_at) <= now && new Date(b.promotion_end_at) >= now;
 
           // Prioritize active premium listings
           if (aIsActivePremium && !bIsActivePremium) return -1;
