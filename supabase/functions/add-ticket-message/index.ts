@@ -85,17 +85,16 @@ serve(async (req) => {
       console.error('Failed to update ticket status/timestamp:', updateTicketError.message);
     }
 
-    // Insert notification if admin replied to a user's message
-    // Or if user replied to an admin's message (for admin notifications)
+    // Insert notification based on sender role
     const supabaseAdmin = createClient( // Create admin client here
         Deno.env.get('SUPABASE_URL') ?? '',
         Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
     if (senderRole === 'admin') {
-        // Notify the user who owns the ticket
+        // Admin replied: notify the user who owns the ticket
         const { error: userNotificationError } = await supabaseAdmin
-            .from('admin_notifications') // Using the same table, now with user_id
+            .from('admin_notifications')
             .insert({
                 type: 'ticket_reply',
                 entity_id: ticketId,
@@ -106,14 +105,14 @@ serve(async (req) => {
             console.error('Failed to insert user notification for admin reply:', userNotificationError.message);
         }
     } else { // senderRole === 'user'
-        // Notify admin about user reply (existing logic)
+        // User replied: notify admin
         const { error: adminNotificationError } = await supabaseAdmin
             .from('admin_notifications')
             .insert({
                 type: 'ticket_reply',
                 entity_id: ticketId,
                 message: `Nuova risposta utente nel ticket: ${ticket.subject}`,
-                // user_id is null for admin notifications, or you could set it to a specific admin ID if needed
+                user_id: null, // Null for admin-specific notifications
             });
         if (adminNotificationError) {
             console.error('Failed to insert admin notification for user reply:', adminNotificationError.message);

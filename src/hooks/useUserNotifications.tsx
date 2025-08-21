@@ -4,7 +4,7 @@ import { showError } from '@/utils/toast';
 
 export interface UserNotification {
   id: string;
-  type: 'ticket_reply'; // Only ticket replies for users for now
+  type: 'ticket_reply' | 'ticket_resolved'; // Added 'ticket_resolved' type
   entity_id: string;
   message: string;
   is_read: boolean;

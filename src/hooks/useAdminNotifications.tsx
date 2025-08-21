@@ -4,11 +4,12 @@ import { showError } from '@/utils/toast';
 
 export interface AdminNotification {
   id: string;
-  type: 'new_report' | 'ticket_reply';
+  type: 'new_report' | 'ticket_reply' | 'new_ticket'; // Added 'new_ticket' type
   entity_id: string;
   message: string;
   is_read: boolean;
   created_at: string;
+  user_id: string | null; // Can be null for admin-specific notifications
 }
 
 export const useAdminNotifications = (isAdmin: boolean) => {
@@ -28,6 +29,7 @@ export const useAdminNotifications = (isAdmin: boolean) => {
     const { data, error } = await supabase
       .from('admin_notifications')
       .select('*')
+      .is('user_id', null) // Filter for admin-specific notifications
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -46,15 +48,23 @@ export const useAdminNotifications = (isAdmin: boolean) => {
   useEffect(() => {
     fetchNotifications();
 
-    // Realtime subscription for new notifications
+    // Realtime subscription for new notifications for admins (user_id is null)
     const channel = supabase
       .channel('admin_notifications_channel')
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'admin_notifications' },
+        { event: 'INSERT', schema: 'public', table: 'admin_notifications', filter: 'user_id=is.null' },
         (payload) => {
-          console.log('New notification received:', payload);
+          console.log('New admin notification received:', payload);
           fetchNotifications(); // Re-fetch all notifications on new insert
+        }
+      )
+      .on( // Also listen for updates to mark as read
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'admin_notifications', filter: 'user_id=is.null' },
+        (payload) => {
+          console.log('Admin notification updated:', payload);
+          fetchNotifications(); // Re-fetch all notifications on update
         }
       )
       .subscribe();
@@ -68,7 +78,8 @@ export const useAdminNotifications = (isAdmin: boolean) => {
     const { error } = await supabase
       .from('admin_notifications')
       .update({ is_read: true })
-      .eq('id', notificationId);
+      .eq('id', notificationId)
+      .is('user_id', null); // Ensure only admin-specific notifications are marked
 
     if (error) {
       console.error("Error marking notification as read:", error);
@@ -86,7 +97,8 @@ export const useAdminNotifications = (isAdmin: boolean) => {
     const { error } = await supabase
       .from('admin_notifications')
       .update({ is_read: true })
-      .in('id', unreadIds);
+      .in('id', unreadIds)
+      .is('user_id', null); // Ensure only admin-specific notifications are marked
 
     if (error) {
       console.error("Error marking all notifications as read:", error);

@@ -77,7 +77,7 @@ export const TicketManagementTable = () => {
     fetchTickets();
   }, []);
 
-  const handleUpdateTicketStatus = async (ticketId: string, newStatus: 'in_progress' | 'resolved' | 'closed') => {
+  const handleUpdateTicketStatus = async (ticketId: string, newStatus: 'in_progress' | 'resolved' | 'closed', userId: string, ticketSubject: string) => {
     setActionLoadingId(ticketId);
     const toastId = showLoading(`Aggiornamento stato ticket...`);
 
@@ -103,6 +103,26 @@ export const TicketManagementTable = () => {
       }
 
       showSuccess(`Stato ticket aggiornato a "${newStatus}" con successo!`);
+      
+      // If status is resolved, notify the user
+      if (newStatus === 'resolved') {
+        const { error: notifyError } = await supabase.functions.invoke('notify-user-ticket-status', {
+          body: {
+            ticketId: ticketId,
+            newStatus: newStatus,
+            userId: userId,
+            ticketSubject: ticketSubject,
+          },
+        });
+
+        if (notifyError) {
+          console.error("Error notifying user about ticket status:", notifyError);
+          showError("Errore durante la notifica all'utente.");
+        } else {
+          showSuccess("Notifica inviata all'utente.");
+        }
+      }
+
       fetchTickets(); // Refresh the list
     } catch (error: any) {
       dismissToast(toastId);
@@ -201,7 +221,6 @@ export const TicketManagementTable = () => {
                           <Eye className="h-4 w-4 mr-1" /> Visualizza
                         </Button>
                       </Link>
-                      {/* Rimosso il pulsante "In Corso" */}
                       {(ticket.status === 'open' || ticket.status === 'in_progress') && (
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
@@ -219,7 +238,7 @@ export const TicketManagementTable = () => {
                             <AlertDialogFooter>
                               <AlertDialogCancel>Annulla</AlertDialogCancel>
                               <AlertDialogAction
-                                onClick={() => handleUpdateTicketStatus(ticket.id, 'resolved')}
+                                onClick={() => handleUpdateTicketStatus(ticket.id, 'resolved', ticket.user_id, ticket.subject)}
                                 disabled={actionLoadingId === ticket.id}
                               >
                                 {actionLoadingId === ticket.id ? 'Risoluzione...' : 'Sì, risolvi'}
@@ -228,7 +247,6 @@ export const TicketManagementTable = () => {
                           </AlertDialogContent>
                         </AlertDialog>
                       )}
-                      {/* Rimosso il pulsante "Chiudi" */}
                     </TableCell>
                   </TableRow>
                 ))}
