@@ -291,9 +291,7 @@ const TicketDetails = () => {
               {ticket.ticket_messages.length === 0 ? (
                 <p className="text-center text-gray-600">Nessun messaggio in questo ticket.</p>
               ) : (
-                ticket.ticket_messages.map((message) => {
-                  console.log("Message Profile Data:", message.profiles); // ADDED LOG
-                  return (
+                ticket.ticket_messages.map((message) => (
                   <div
                     key={message.id}
                     className={`flex ${message.sender_id === currentUserId ? 'justify-end' : 'justify-start'}`}
@@ -312,16 +310,12 @@ const TicketDetails = () => {
                           </>
                         ) : (
                           <>
-                            {message.profiles?.role === 'admin' ? (
-                              <Shield className="h-4 w-4 text-blue-400" />
-                            ) : message.profiles?.role === 'supporto' ? (
-                              <Shield className="h-4 w-4 text-purple-400" />
+                            {(message.profiles?.role === 'admin' || message.profiles?.role === 'supporto') ? (
+                              <Shield className="h-4 w-4 text-purple-400" /> // Icona e colore unificati
                             ) : (
                               <User className="h-4 w-4" />
                             )}
-                            {message.profiles?.role === 'admin' ? 'Admin' :
-                             message.profiles?.role === 'supporto' ? 'Supporto' :
-                             message.profiles?.email || 'Utente Sconosciuto'}
+                            {(message.profiles?.role === 'admin' || message.profiles?.role === 'supporto') ? 'Supporto' : message.profiles?.email || 'Utente Sconosciuto'}
                           </>
                         )}
                       </p>
@@ -331,7 +325,7 @@ const TicketDetails = () => {
                       </p>
                     </div>
                   </div>
-                )})
+                ))
               )}
               <div ref={messagesEndRef} />
             </div>

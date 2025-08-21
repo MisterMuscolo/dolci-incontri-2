@@ -104,8 +104,7 @@ const MyTickets = () => {
       case 'user':
         return 'Tu';
       case 'admin':
-        return 'Admin';
-      case 'supporto':
+      case 'supporto': // Unifica Admin e Supporto
         return 'Supporto';
       default:
         return 'N/D';
