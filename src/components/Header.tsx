@@ -102,7 +102,7 @@ export const Header = ({ session, isAdmin, isSupporto }: HeaderProps) => {
                         key={notification.id}
                         onClick={() => handleNotificationClick(notification.id, notification.type, notification.entity_id)}
                         className="flex flex-col items-start space-y-1 py-2 cursor-pointer"
-                        style={{ backgroundColor: notification.is_read ? 'transparent' : 'rgba(255, 192, 203, 0.1)' }}
+                        style={{ backgroundColor: notification.is_read ? 'transparent' : 'rgba(255, 192, 203, 0.3)' }}
                       >
                         <p className="text-sm font-medium leading-none">{notification.message}</p>
                         <p className="text-xs leading-none text-muted-foreground">
