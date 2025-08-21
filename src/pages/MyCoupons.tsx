@@ -89,7 +89,7 @@ const MyCoupons = () => {
     // Fetch all coupons used by the current user (still needed for single_use status)
     const { data: usedCouponsData, error: usedCouponsError } = await supabase
       .from('used_coupons')
-      .select('coupon_id')
+      .select('coupon_id') // Select only 'coupon_id'
       .eq('user_id', user.id);
 
     if (usedCouponsError) {

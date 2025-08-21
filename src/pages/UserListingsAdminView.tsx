@@ -29,7 +29,7 @@ const UserListingsAdminView = () => {
     // Fetch user email
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
-      .select('email')
+      .select('email') // Select only 'email'
       .eq('id', userId)
       .single();
 
@@ -50,10 +50,12 @@ const UserListingsAdminView = () => {
         title,
         category,
         city,
+        zone,
+        age,
+        description,
         created_at,
         expires_at,
         is_premium,
-        age,
         promotion_mode,
         promotion_start_at,
         promotion_end_at,

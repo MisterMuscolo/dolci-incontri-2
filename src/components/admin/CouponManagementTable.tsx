@@ -105,9 +105,9 @@ export const CouponManagementTable = () => {
     const { data: couponsData, error: couponsError } = await supabase
       .from('coupons')
       .select(`
-        *,
+        id, code, type, discount_type, discount_value, expires_at, applies_to_user_id, created_at, is_active, max_uses, usage_count,
         profiles ( email )
-      `)
+      `) // Select specific fields
       .order('created_at', { ascending: false });
 
     if (couponsError) {
@@ -119,7 +119,7 @@ export const CouponManagementTable = () => {
 
     const { data: usersData, error: usersError } = await supabase
       .from('profiles')
-      .select('id, email')
+      .select('id, email') // Select specific fields
       .order('email', { ascending: true });
 
     if (usersError) {

@@ -15,13 +15,12 @@ interface CreditTransaction {
   type: string;
   package_name: string | null;
   created_at: string;
-  profiles: { email: string }[] | null; // Keep this for the initial fetch
   userEmail?: string; // Add a field to store fetched email
 }
 
 // Nuova interfaccia per il tipo di dato restituito dalla query Supabase
 interface CreditTransactionWithProfile extends CreditTransaction {
-  profiles: { email: string }[] | null;
+  profiles: { email: string } | null; // Modificato per essere un singolo oggetto o null
 }
 
 export const AllCreditTransactionsTable = () => {
@@ -40,7 +39,7 @@ export const AllCreditTransactionsTable = () => {
         package_name,
         created_at,
         profiles ( email )
-      `)
+      `) // Select specific fields
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -49,27 +48,9 @@ export const AllCreditTransactionsTable = () => {
       setTransactions([]); // Ensure transactions are cleared on error
     } else {
       // Post-process data to ensure email is displayed
-      const processedTransactions: CreditTransaction[] = await Promise.all(
-        (data as CreditTransactionWithProfile[] || []).map(async (transaction) => {
-          if (transaction.profiles?.[0]?.email) {
-            return { ...transaction, userEmail: transaction.profiles[0].email };
-          } else if (transaction.user_id) {
-            // If nested select failed, try fetching profile directly
-            const { data: profileData, error: profileError } = await supabase
-              .from('profiles')
-              .select('email')
-              .eq('id', transaction.user_id)
-              .single();
-
-            if (profileData) {
-              return { ...transaction, userEmail: profileData.email };
-            } else if (profileError) {
-              console.warn(`Failed to fetch email for user_id ${transaction.user_id}:`, profileError.message);
-            }
-          }
-          return { ...transaction, userEmail: 'N/D' }; // Fallback
-        })
-      );
+      const processedTransactions: CreditTransaction[] = (data as CreditTransactionWithProfile[] || []).map((transaction) => {
+          return { ...transaction, userEmail: transaction.profiles?.email || 'N/D' };
+      });
       setTransactions(processedTransactions);
     }
     setLoading(false);

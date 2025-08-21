@@ -17,7 +17,7 @@ export const OverviewStats = () => {
         // Fetch total users from profiles table
         const { count: usersCount, error: usersError } = await supabase
           .from('profiles')
-          .select('*', { count: 'exact', head: true });
+          .select('id', { count: 'exact', head: true }); // Select only 'id' for count
 
         if (usersError) {
           throw new Error(usersError.message);
@@ -27,7 +27,7 @@ export const OverviewStats = () => {
         // Fetch active listings (not expired)
         const { count: listingsCount, error: listingsError } = await supabase
           .from('listings')
-          .select('*', { count: 'exact', head: true })
+          .select('id', { count: 'exact', head: true }) // Select only 'id' for count
           .gt('expires_at', new Date().toISOString());
 
         if (listingsError) {

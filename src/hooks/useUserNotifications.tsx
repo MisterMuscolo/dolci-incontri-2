@@ -26,21 +26,12 @@ export const useUserNotifications = (userId: string | undefined) => {
     }
 
     setLoading(true);
-    const { data: { user } } = await supabase.auth.getUser(); // Get current user to filter by email if needed
-
-    let query = supabase
+    // Fetch notifications explicitly for this user
+    const { data, error } = await supabase
       .from('admin_notifications')
-      .select('*')
+      .select('id, type, entity_id, message, is_read, created_at, user_id') // Select specific fields
+      .eq('user_id', userId) // Filter for specific user
       .order('created_at', { ascending: false });
-
-    // Filter by user_id OR if user_id is null and reporter_email matches current user's email
-    if (user) {
-      query = query.or(`user_id.eq.${user.id},user_id.is.null`); // RLS should handle this, but explicit filter helps
-    } else {
-      query = query.is('user_id', null); // Only show notifications not tied to a specific user if not logged in
-    }
-
-    const { data, error } = await query;
 
     if (error) {
       console.error("Error fetching user notifications:", error);
@@ -48,20 +39,8 @@ export const useUserNotifications = (userId: string | undefined) => {
       setNotifications([]);
       setUnreadCount(0);
     } else {
-      // Client-side filter for notifications where user_id is null but message is for this user's email
-      const filteredData = data.filter(n => {
-        if (n.user_id === userId) return true; // Notifications directly for this user
-        // If user_id is null, it's an admin notification. We don't want to show these to regular users.
-        // The RLS policy "Users can view their own notifications" should prevent this.
-        // The `user_id` in `admin_notifications` is for *who* the notification is *for*.
-        // If it's null, it's for admins. If it's a UUID, it's for that user.
-        // So, the filter `eq('user_id', userId)` is correct.
-        // The `user_id.is.null` part in the query above was for admin notifications, which should be handled by `useAdminNotifications`.
-        // Let's simplify the query to only fetch notifications explicitly for this user.
-        return false; // Should not reach here if RLS is correct
-      });
-      const unread = filteredData.filter(n => !n.is_read);
-      setNotifications(filteredData as UserNotification[]);
+      const unread = data.filter(n => !n.is_read);
+      setNotifications(data as UserNotification[]);
       setUnreadCount(unread.length);
     }
     setLoading(false);

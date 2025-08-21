@@ -30,7 +30,7 @@ const MyListings = () => {
     // Query per il conteggio totale degli annunci attivi dell'utente
     const { count, error: countError } = await supabase
       .from('listings')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact', head: true }) // Select only 'id' for count
       .eq('user_id', user.id)
       .gt('expires_at', new Date().toISOString()); // Filtra solo gli annunci attivi
 

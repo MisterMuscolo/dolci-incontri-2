@@ -75,13 +75,23 @@ serve(async (req) => {
           console.error('Failed to log single-use coupon usage:', usedCouponInsertError.message);
         }
       } else if (couponType === 'reusable') {
-        // Increment usage_count for reusable coupons
-        const { error: couponUpdateError } = await supabaseAdmin
+        // Fetch the coupon to get its current usage_count before incrementing
+        const { data: couponData, error: fetchCouponError } = await supabaseAdmin
           .from('coupons')
-          .update({ usage_count: (coupon.usage_count || 0) + 1 }) // Need to fetch coupon first to get current usage_count
-          .eq('id', couponId);
-        if (couponUpdateError) {
-          console.error('Failed to increment reusable coupon usage count:', couponUpdateError.message);
+          .select('usage_count')
+          .eq('id', couponId)
+          .single();
+
+        if (fetchCouponError || !couponData) {
+          console.error('Failed to fetch coupon for usage count increment:', fetchCouponError?.message);
+        } else {
+          const { error: couponUpdateError } = await supabaseAdmin
+            .from('coupons')
+            .update({ usage_count: (couponData.usage_count || 0) + 1 })
+            .eq('id', couponId);
+          if (couponUpdateError) {
+            console.error('Failed to increment reusable coupon usage count:', couponUpdateError.message);
+          }
         }
       }
     }
@@ -95,6 +105,6 @@ serve(async (req) => {
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,
-    });
+    })
   }
-});
+})

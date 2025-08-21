@@ -25,7 +25,7 @@ const Dashboard = () => {
       // Fetch listings count
       const { count: listingsCount, error: countError } = await supabase
         .from('listings')
-        .select('*', { count: 'exact', head: true })
+        .select('id', { count: 'exact', head: true }) // Select only 'id' for count
         .eq('user_id', user.id)
         .gt('expires_at', new Date().toISOString());
 
@@ -38,7 +38,7 @@ const Dashboard = () => {
       // Fetch current credits from profiles table
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('credits')
+        .select('credits') // Select only 'credits'
         .eq('id', user.id)
         .single();
 
@@ -52,7 +52,7 @@ const Dashboard = () => {
       // Fetch credit transactions to calculate total spent
       const { data: transactionsData, error: transactionsError } = await supabase
         .from('credit_transactions')
-        .select('amount')
+        .select('amount') // Select only 'amount'
         .eq('user_id', user.id);
 
       if (transactionsError) {

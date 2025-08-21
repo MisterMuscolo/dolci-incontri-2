@@ -31,7 +31,7 @@ interface Report {
   created_at: string;
   reviewed_at: string | null;
   reviewer_id: string | null;
-  listings: { title: string }[] | null; // Modificato per essere un array di oggetti listing
+  listings: { title: string } | null; // Modificato per essere un singolo oggetto listing o null
 }
 
 export const ReportManagementTable = () => {
@@ -149,7 +149,7 @@ export const ReportManagementTable = () => {
                   <TableRow key={report.id}>
                     <TableCell>{format(new Date(report.created_at), 'dd/MM/yyyy HH:mm', { locale: it })}</TableCell>
                     <TableCell className="font-medium">
-                      {report.listings?.[0]?.title || 'Annuncio Sconosciuto'}
+                      {report.listings?.title || 'Annuncio Sconosciuto'}
                       {report.listing_id && (
                         <Link to={`/listing/${report.listing_id}`} className="ml-2 text-blue-500 hover:underline">
                           <Eye className="h-4 w-4 inline-block" />

@@ -34,7 +34,7 @@ export const useAdminNotifications = (isAdmin: boolean) => {
     setLoading(true);
     const { data, error } = await supabase
       .from('admin_notifications')
-      .select('*')
+      .select('id, type, entity_id, message, is_read, created_at, user_id') // Select specific fields
       .is('user_id', null) // Filter for admin-specific notifications
       .order('created_at', { ascending: false });
 

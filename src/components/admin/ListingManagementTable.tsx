@@ -37,7 +37,7 @@ export const ListingManagementTable = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from('listings')
-      .select('*')
+      .select('id, title, category, city, user_id, created_at, expires_at') // Select specific fields
       .order('created_at', { ascending: false });
 
     if (error) {

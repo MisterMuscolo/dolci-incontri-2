@@ -40,7 +40,7 @@ const CreditHistory = () => {
       // Fetch current credits
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('credits')
+        .select('credits') // Select only 'credits'
         .eq('id', user.id)
         .single();
 
@@ -55,7 +55,7 @@ const CreditHistory = () => {
       // Fetch transactions
       const { data: transactionsData, error: transactionsError } = await supabase
         .from('credit_transactions')
-        .select('*')
+        .select('id, amount, type, package_name, created_at') // Select specific fields
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 

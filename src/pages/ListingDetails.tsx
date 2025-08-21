@@ -46,7 +46,7 @@ const ListingDetails = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from('listings')
-        .select('*, listing_photos(*)')
+        .select('id, title, description, category, city, zone, age, phone, created_at, expires_at, is_premium, promotion_mode, promotion_start_at, promotion_end_at, listing_photos(id, url)') // Select specific fields
         .eq('id', id)
         .single();
 

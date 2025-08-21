@@ -29,7 +29,7 @@ export const CreditManagement = () => {
     try {
       const { data: profiles, error } = await supabase
         .from('profiles')
-        .select('id, email, credits')
+        .select('id, email, credits') // Select specific fields
         .ilike('email', `%${searchEmail}%`)
         .limit(1); // Assuming unique emails or we only care about the first match
 
@@ -98,7 +98,7 @@ export const CreditManagement = () => {
       // Refresh selected user's credits
       const { data: updatedProfile, error: fetchError } = await supabase
         .from('profiles')
-        .select('credits')
+        .select('credits') // Select only 'credits'
         .eq('id', selectedUser.id)
         .single();
 

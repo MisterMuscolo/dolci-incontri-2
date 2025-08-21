@@ -46,9 +46,9 @@ serve(async (req) => {
         Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
       );
 
-      const { data: coupon, error: couponError } = await supabaseAdmin
+      let { data: coupon, error: couponError } = await supabaseAdmin
         .from('coupons')
-        .select('*')
+        .select('id, is_active, expires_at, type, discount_type, discount_value, max_uses, usage_count') // Select specific fields
         .eq('code', couponCode)
         .single();
 
@@ -59,8 +59,10 @@ serve(async (req) => {
         // Perform server-side validation for the coupon
         if (!coupon.is_active) {
           console.warn(`Coupon "${couponCode}" is not active.`);
+          coupon = null;
         } else if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
           console.warn(`Coupon "${couponCode}" is expired.`);
+          coupon = null;
         } else if (coupon.type === 'single_use') {
           // Check if single-use coupon has already been used by the current user
           const supabaseClient = createClient( // Use user's client for RLS on used_coupons
@@ -71,6 +73,7 @@ serve(async (req) => {
           const { data: { user } } = await supabaseClient.auth.getUser();
           if (!user) {
             console.warn('User not authenticated for single-use coupon check.');
+            coupon = null;
           } else {
             const { data: usedCoupon, error: usedCouponError } = await supabaseClient
               .from('used_coupons')
@@ -81,16 +84,15 @@ serve(async (req) => {
 
             if (usedCouponError && usedCouponError.code !== 'PGRST116') { // PGRST116 means no rows found
               console.error(`Error checking used coupon: ${usedCouponError.message}`);
+              coupon = null;
             }
             if (usedCoupon) {
               console.warn(`Single-use coupon "${couponCode}" already used by user ${user.id}.`);
-              // Do not apply coupon if already used
               coupon = null; // Invalidate coupon for this transaction
             }
           }
         } else if (coupon.type === 'reusable' && coupon.max_uses !== null && coupon.usage_count >= coupon.max_uses) {
           console.warn(`Reusable coupon "${couponCode}" has reached max uses.`);
-          // Do not apply coupon if max uses reached
           coupon = null; // Invalidate coupon for this transaction
         }
 

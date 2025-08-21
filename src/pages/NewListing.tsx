@@ -75,7 +75,7 @@ const NewListing = () => {
       const { data: listingData, error: listingError } = await supabase
         .from('listings')
         .insert(submissionData)
-        .select('id')
+        .select('id') // Select only 'id'
         .single();
 
       if (listingError || !listingData) {

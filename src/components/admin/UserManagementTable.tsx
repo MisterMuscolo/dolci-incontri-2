@@ -48,7 +48,7 @@ export const UserManagementTable = ({ isAdmin, isSupporto }: UserManagementTable
     setLoading(true);
     const { data: profiles, error } = await supabase
       .from('profiles')
-      .select('*')
+      .select('id, email, credits, role, created_at') // Select specific fields
       .order('created_at', { ascending: false });
 
     if (error) {

@@ -79,7 +79,7 @@ const EditListing = () => {
     setIsLoading(true);
     const { data, error } = await supabase
       .from('listings')
-      .select('*, listing_photos(*)')
+      .select('id, title, description, category, city, zone, age, phone, email, user_id, is_premium, promotion_mode, promotion_start_at, promotion_end_at, listing_photos(id, url, is_primary)') // Select specific fields
       .eq('id', id)
       .single();
 
