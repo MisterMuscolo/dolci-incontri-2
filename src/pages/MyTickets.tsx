@@ -109,9 +109,10 @@ const MyTickets = () => {
     console.log("MyTickets: last_replied_by value:", lastRepliedBy); // ADDED LOG
     switch (lastRepliedBy) {
       case 'user':
-        return 'Tu';
+        return 'Utente';
       case 'admin':
-      case 'supporto': // Unifica Admin e Supporto
+        return 'Admin';
+      case 'supporto':
         return 'Supporto';
       default:
         return 'N/D';
