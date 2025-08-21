@@ -32,7 +32,7 @@ export const Header = ({ session, isAdmin, isSupporto }: HeaderProps) => {
     loading: adminLoading, 
     markAsRead: markAdminAsRead, 
     markAllAsRead: markAllAdminAsRead 
-  } = useAdminNotifications(isAdmin);
+  } = useAdminNotifications(isAdmin || isSupporto); // MODIFICA QUI: Passa isAdmin O isSupporto
 
   const { 
     notifications: userNotifications, 
@@ -43,11 +43,11 @@ export const Header = ({ session, isAdmin, isSupporto }: HeaderProps) => {
   } = useUserNotifications(session?.user?.id); // Pass user ID to the hook
 
   // Determine which set of notifications to use
-  const notifications = isAdmin ? adminNotifications : userNotifications;
-  const unreadCount = isAdmin ? adminUnreadCount : userUnreadCount;
-  const loading = isAdmin ? adminLoading : userLoading;
-  const markAsRead = isAdmin ? markAdminAsRead : markUserAsRead;
-  const markAllAsRead = isAdmin ? markAllAdminAsRead : markAllUserAsRead;
+  const notifications = isAdmin || isSupporto ? adminNotifications : userNotifications;
+  const unreadCount = isAdmin || isSupporto ? adminUnreadCount : userUnreadCount;
+  const loading = isAdmin || isSupporto ? adminLoading : userLoading;
+  const markAsRead = isAdmin || isSupporto ? markAdminAsRead : markUserAsRead;
+  const markAllAsRead = isAdmin || isSupporto ? markAllAdminAsRead : markAllUserAsRead;
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
