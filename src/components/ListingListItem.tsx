@@ -176,7 +176,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
       )}>
         <div className="flex flex-col sm:flex-row w-full">
           {hasPhotosToRender && ( // Mostra il blocco immagine solo se ci sono foto da renderizzare
-            <div className="sm:w-1/4 lg:w-1/5 flex-shrink-0 relative">
+            <div className="md:w-2/5 lg:w-1/3 flex-shrink-0 relative"> {/* Modificato qui */}
               <AspectRatio ratio={16 / 9} className="w-full h-full">
                 {photosToRender.length > 1 ? (
                   <Carousel
