@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Ticket, PlusCircle, ChevronLeft, MessageSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { CreateTicketDialog } from '@/components/CreateTicketDialog'; // Importa il nuovo componente
 
 interface TicketItem {
   id: string;
@@ -115,11 +116,17 @@ const MyTickets = () => {
               <Ticket className="h-6 w-6 text-rose-500" />
               Le tue richieste di supporto
             </CardTitle>
-            <Link to="/new-ticket">
-              <Button className="bg-rose-500 hover:bg-rose-600">
-                <PlusCircle className="h-4 w-4 mr-2" /> Nuovo Ticket
-              </Button>
-            </Link>
+            <CreateTicketDialog
+              triggerButton={
+                <Button className="bg-rose-500 hover:bg-rose-600">
+                  <PlusCircle className="h-4 w-4 mr-2" /> Nuovo Ticket
+                </Button>
+              }
+              dialogTitle="Apri un nuovo Ticket"
+              dialogDescription="Compila il modulo sottostante per inviare una richiesta di supporto o una domanda."
+              icon={Ticket}
+              redirectPathOnAuth="/my-tickets"
+            />
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -131,9 +138,15 @@ const MyTickets = () => {
             ) : tickets.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-gray-600">Non hai ancora aperto nessun ticket.</p>
-                <Link to="/new-ticket" className="mt-4 inline-block">
-                  <Button className="bg-rose-500 hover:bg-rose-600">Apri il tuo primo ticket</Button>
-                </Link>
+                <CreateTicketDialog
+                  triggerButton={
+                    <Button className="bg-rose-500 hover:bg-rose-600 mt-4">Apri il tuo primo ticket</Button>
+                  }
+                  dialogTitle="Apri un nuovo Ticket"
+                  dialogDescription="Compila il modulo sottostante per inviare una richiesta di supporto o una domanda."
+                  icon={Ticket}
+                  redirectPathOnAuth="/my-tickets"
+                />
               </div>
             ) : (
               <div className="overflow-x-auto rounded-md border">

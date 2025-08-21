@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; // Importa Link
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -8,10 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ChevronLeft, Mail, Send, LogIn, UserPlus } from 'lucide-react'; // Importa nuove icone
+import { ChevronLeft, Mail, Send } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
-import { Skeleton } from '@/components/ui/skeleton'; // Importa Skeleton per il caricamento
 
 const newTicketSchema = z.object({
   subject: z.string().min(10, 'L\'oggetto deve contenere almeno 10 caratteri.').max(100, 'L\'oggetto non può superare i 100 caratteri.'),
@@ -20,8 +19,7 @@ const newTicketSchema = z.object({
 
 const NewTicket = () => {
   const navigate = useNavigate();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null); // Stato per l'autenticazione
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const form = useForm<z.infer<typeof newTicketSchema>>({
     resolver: zodResolver(newTicketSchema),
@@ -30,14 +28,6 @@ const NewTicket = () => {
       messageContent: '',
     },
   });
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setIsAuthenticated(!!user); // Imposta lo stato di autenticazione
-    };
-    checkAuth();
-  }, []); // Esegui solo al mount
 
   const onSubmit = async (values: z.infer<typeof newTicketSchema>) => {
     setIsSubmitting(true);
@@ -80,45 +70,6 @@ const NewTicket = () => {
       setIsSubmitting(false);
     }
   };
-
-  if (isAuthenticated === null) {
-    // Mostra uno skeleton o un messaggio di caricamento mentre controlla l'autenticazione
-    return (
-      <div className="bg-gray-50 p-4 sm:p-6 md:p-8 min-h-screen flex items-center justify-center">
-        <Skeleton className="h-64 w-full max-w-md" />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-rose-100 via-white to-sky-100 p-4">
-        <div className="text-center bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-8 max-w-md w-full space-y-6">
-          <Mail className="mx-auto h-20 w-20 text-rose-500" />
-          <h1 className="text-3xl font-bold text-gray-800">Apri un Ticket di Supporto</h1>
-          <p className="text-lg text-gray-600">
-            Per inviare una richiesta di supporto o una domanda, devi prima accedere al tuo account o registrarti.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/auth?tab=login">
-              <Button className="w-full sm:w-auto bg-rose-500 hover:bg-rose-600">
-                <LogIn className="h-5 w-5 mr-2" /> Accedi
-              </Button>
-            </Link>
-            <Link to="/auth?tab=register">
-              <Button variant="outline" className="w-full sm:w-auto border-rose-500 text-rose-500 hover:bg-rose-50 hover:text-rose-600">
-                <UserPlus className="h-5 w-5 mr-2" /> Registrati
-              </Button>
-            </Link>
-          </div>
-          <Button variant="ghost" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800 mt-4">
-            <ChevronLeft className="h-5 w-5 mr-2" />
-            Indietro
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-gray-50 p-4 sm:p-6 md:p-8 min-h-screen">

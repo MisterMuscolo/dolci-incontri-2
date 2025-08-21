@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Wallet, Settings, LayoutGrid, Ticket } from "lucide-react"; // Importa Ticket
+import { Wallet, Settings, LayoutGrid, Ticket, PlusCircle } from "lucide-react"; // Importa Ticket e PlusCircle
+import { CreateTicketDialog } from "@/components/CreateTicketDialog"; // Importa il nuovo componente
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -121,7 +122,7 @@ const Dashboard = () => {
               {loading ? (
                 <div className="space-y-2">
                   <Skeleton className="h-6 w-full" />
-                  <Skeleton className="h-6 w-full" />
+                  <Skeleton className="h-6 w-6" />
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">
@@ -153,9 +154,17 @@ const Dashboard = () => {
               <CardDescription className="ml-[88px]">Visualizza e gestisci le tue richieste di supporto.</CardDescription>
             </CardHeader>
             <CardContent>
-              <Link to="/new-ticket">
-                <Button className="bg-rose-500 hover:bg-rose-600 mt-4">Apri un nuovo ticket</Button>
-              </Link>
+              <CreateTicketDialog
+                triggerButton={
+                  <Button className="bg-rose-500 hover:bg-rose-600 mt-4">
+                    <PlusCircle className="h-4 w-4 mr-2" /> Apri un nuovo ticket
+                  </Button>
+                }
+                dialogTitle="Apri un nuovo Ticket"
+                dialogDescription="Compila il modulo sottostante per inviare una richiesta di supporto o una domanda."
+                icon={Ticket}
+                redirectPathOnAuth="/dashboard"
+              />
             </CardContent>
           </Card>
           

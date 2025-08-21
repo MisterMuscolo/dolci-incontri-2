@@ -7,11 +7,11 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { showError } from '@/utils/toast';
-import { MapPin, Tag, User, Mail, BookText, ChevronLeft, CalendarDays, Rocket, Phone } from 'lucide-react';
+import { MapPin, Tag, User, Mail, BookText, ChevronLeft, CalendarDays, Rocket, Phone, Flag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ReportListingDialog } from '@/components/ReportListingDialog';
+import { CreateTicketDialog } from '@/components/CreateTicketDialog'; // Importa il nuovo componente
 
 type FullListing = {
   id: string;
@@ -152,7 +152,23 @@ const ListingDetails = () => {
           )}
 
           <div className="flex justify-end -mt-4 mb-4">
-            <ReportListingDialog listingId={listing.id} listingTitle={listing.title} buttonSize="sm" />
+            <CreateTicketDialog
+              triggerButton={
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-red-500 border-red-500 hover:bg-red-50 hover:text-red-600 flex items-center gap-2"
+                >
+                  <Flag className="h-5 w-5" /> Segnala Annuncio
+                </Button>
+              }
+              dialogTitle="Segnala Annuncio"
+              dialogDescription={`Segnala l'annuncio "${listing.title}" se ritieni che violi le nostre linee guida.`}
+              initialSubject={`Segnalazione annuncio: ${listing.title}`}
+              listingId={listing.id}
+              icon={Flag}
+              redirectPathOnAuth={`/listing/${listing.id}`}
+            />
           </div>
 
           <Card>
@@ -175,13 +191,21 @@ const ListingDetails = () => {
                 </Button>
               </a>
             )}
-            {/* Il pulsante "Rispondi" ora reindirizza alla pagina di contatto generica */}
-            <Button
-              onClick={() => navigate('/new-ticket')}
-              className="w-full sm:w-auto bg-rose-500 hover:bg-rose-600 text-lg px-8 py-6 rounded-lg shadow-lg flex items-center justify-center gap-2"
-            >
-              <Mail className="h-6 w-6" /> Contatta l'autore
-            </Button>
+            <CreateTicketDialog
+              triggerButton={
+                <Button
+                  className="w-full sm:w-auto bg-rose-500 hover:bg-rose-600 text-lg px-8 py-6 rounded-lg shadow-lg flex items-center justify-center gap-2"
+                >
+                  <Mail className="h-6 w-6" /> Contatta l'autore
+                </Button>
+              }
+              dialogTitle="Contatta l'autore"
+              dialogDescription={`Invia un messaggio all'autore dell'annuncio "${listing.title}".`}
+              initialSubject={`Richiesta informazioni annuncio: ${listing.title}`}
+              listingId={listing.id}
+              icon={Mail}
+              redirectPathOnAuth={`/listing/${listing.id}`}
+            />
           </div>
         </div>
       </div>

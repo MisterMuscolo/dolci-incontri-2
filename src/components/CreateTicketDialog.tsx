@@ -14,34 +14,59 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Flag, Mail, LogIn, UserPlus, Loader2 } from 'lucide-react'; // Aggiunto Loader2
+import { Flag, Mail, LogIn, UserPlus, Loader2, MessageSquare } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
-import { useNavigate, Link } from 'react-router-dom'; // Importa Link
+import { useNavigate, Link } from 'react-router-dom';
 
-const reportSchema = z.object({
-  reportMessage: z.string().min(20, 'Il messaggio di segnalazione deve contenere almeno 20 caratteri.'),
+const ticketSchema = z.object({
+  subject: z.string().min(10, 'L\'oggetto deve contenere almeno 10 caratteri.').max(100, 'L\'oggetto non può superare i 100 caratteri.'),
+  messageContent: z.string().min(20, 'Il messaggio deve contenere almeno 20 caratteri.'),
 });
 
-interface ReportListingDialogProps {
-  listingId: string;
-  listingTitle: string;
-  buttonSize?: "default" | "sm" | "lg" | "icon" | null | undefined;
+interface CreateTicketDialogProps {
+  triggerButton: React.ReactNode; // The button that opens the dialog
+  dialogTitle: string;
+  dialogDescription: string;
+  initialSubject?: string;
+  initialMessage?: string;
+  listingId?: string; // Optional for listing reports
+  icon: React.ElementType; // Icon for the dialog title
+  redirectPathOnAuth?: string; // Path to redirect to after login/register if coming from this dialog
+  onTicketCreated?: () => void; // Callback after successful ticket creation
 }
 
-export const ReportListingDialog = ({ listingId, listingTitle, buttonSize = "default" }: ReportListingDialogProps) => {
+export const CreateTicketDialog = ({
+  triggerButton,
+  dialogTitle,
+  dialogDescription,
+  initialSubject = '',
+  initialMessage = '',
+  listingId,
+  icon: Icon,
+  redirectPathOnAuth,
+  onTicketCreated,
+}: CreateTicketDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null); // Stato per l'autenticazione
-  const [isLoadingAuth, setIsLoadingAuth] = useState(true); // Stato per il caricamento dello stato di autenticazione
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const navigate = useNavigate();
 
-  const form = useForm<z.infer<typeof reportSchema>>({
-    resolver: zodResolver(reportSchema),
+  const form = useForm<z.infer<typeof ticketSchema>>({
+    resolver: zodResolver(ticketSchema),
     defaultValues: {
-      reportMessage: '',
+      subject: initialSubject,
+      messageContent: initialMessage,
     },
   });
+
+  useEffect(() => {
+    form.reset({
+      subject: initialSubject,
+      messageContent: initialMessage,
+    });
+  }, [initialSubject, initialMessage, form]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -52,7 +77,6 @@ export const ReportListingDialog = ({ listingId, listingTitle, buttonSize = "def
     };
     checkAuth();
 
-    // Ascolta i cambiamenti dello stato di autenticazione
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthenticated(!!session);
     });
@@ -60,28 +84,28 @@ export const ReportListingDialog = ({ listingId, listingTitle, buttonSize = "def
     return () => subscription.unsubscribe();
   }, []);
 
-  const onSubmit = async (values: z.infer<typeof reportSchema>) => {
+  const onSubmit = async (values: z.infer<typeof ticketSchema>) => {
     if (!isAuthenticated) {
-      showError('Devi essere autenticato per segnalare un annuncio.');
+      showError('Devi essere autenticato per inviare una richiesta.');
       return;
     }
 
     setIsSubmitting(true);
-    const toastId = showLoading('Invio segnalazione in corso...');
+    const toastId = showLoading('Invio richiesta in corso...');
 
     try {
       const { error } = await supabase.functions.invoke('create-ticket', {
         body: {
-          listingId: listingId,
-          subject: `Segnalazione annuncio: ${listingTitle}`,
-          messageContent: values.reportMessage,
+          listingId: listingId || null,
+          subject: values.subject,
+          messageContent: values.messageContent,
         },
       });
 
       dismissToast(toastId);
 
       if (error) {
-        let errorMessage = 'Impossibile inviare la segnalazione. Riprova più tardi.';
+        let errorMessage = 'Impossibile inviare la richiesta. Riprova più tardi.';
         // @ts-ignore
         if (error.context && typeof error.context.body === 'string') {
           try {
@@ -97,9 +121,14 @@ export const ReportListingDialog = ({ listingId, listingTitle, buttonSize = "def
         throw new Error(errorMessage);
       }
 
-      showSuccess('Segnalazione inviata con successo! Puoi visualizzare lo stato nella sezione "I miei ticket".');
+      showSuccess('Richiesta inviata con successo! Puoi visualizzare lo stato nella sezione "I miei ticket".');
       form.reset();
-      setIsOpen(false); // Chiudi il dialog dopo l'invio
+      setIsOpen(false);
+      if (onTicketCreated) {
+        onTicketCreated();
+      } else {
+        navigate('/my-tickets'); // Default redirect after ticket creation
+      }
     } catch (error: any) {
       dismissToast(toastId);
       showError(error.message || 'Si è verificato un errore imprevisto.');
@@ -111,20 +140,15 @@ export const ReportListingDialog = ({ listingId, listingTitle, buttonSize = "def
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          size={buttonSize}
-          className="text-red-500 border-red-500 hover:bg-red-50 hover:text-red-600 flex items-center gap-2"
-          disabled={isLoadingAuth} // Disabilita il pulsante mentre controlla lo stato di autenticazione
-        >
-          <Flag className="h-5 w-5" /> Segnala Annuncio
-        </Button>
+        {triggerButton}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2"><Flag className="h-5 w-5 text-red-500" /> Segnala Annuncio</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Icon className="h-5 w-5 text-rose-500" /> {dialogTitle}
+          </DialogTitle>
           <DialogDescription>
-            Segnala l'annuncio "{listingTitle}" se ritieni che violi le nostre linee guida.
+            {dialogDescription}
           </DialogDescription>
         </DialogHeader>
         
@@ -138,15 +162,15 @@ export const ReportListingDialog = ({ listingId, listingTitle, buttonSize = "def
             <Mail className="mx-auto h-20 w-20 text-rose-500" />
             <h2 className="text-2xl font-bold text-gray-800">Accedi o Registrati</h2>
             <p className="text-lg text-gray-600">
-              Per inviare una segnalazione, devi prima accedere al tuo account o registrarti.
+              Per inviare una richiesta, devi prima accedere al tuo account o registrarti.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to={`/auth?tab=login&redirect=/listing/${listingId}`}>
+              <Link to={`/auth?tab=login${redirectPathOnAuth ? `&redirect=${encodeURIComponent(redirectPathOnAuth)}` : ''}`}>
                 <Button className="w-full sm:w-auto bg-rose-500 hover:bg-rose-600">
                   <LogIn className="h-5 w-5 mr-2" /> Accedi
                 </Button>
               </Link>
-              <Link to={`/auth?tab=register&redirect=/listing/${listingId}`}>
+              <Link to={`/auth?tab=register${redirectPathOnAuth ? `&redirect=${encodeURIComponent(redirectPathOnAuth)}` : ''}`}>
                 <Button variant="outline" className="w-full sm:w-auto border-rose-500 text-rose-500 hover:bg-rose-50 hover:text-rose-600">
                   <UserPlus className="h-5 w-5 mr-2" /> Registrati
                 </Button>
@@ -158,17 +182,28 @@ export const ReportListingDialog = ({ listingId, listingTitle, buttonSize = "def
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
               <FormField
                 control={form.control}
-                name="reportMessage"
+                name="subject"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Motivo della segnalazione</FormLabel>
-                    <FormControl><Textarea placeholder="Descrivi il motivo della segnalazione..." className="min-h-[100px]" {...field} /></FormControl>
+                    <FormLabel>Oggetto *</FormLabel>
+                    <FormControl><Input placeholder="Es. Problema con il login, Segnalazione annuncio" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full bg-red-500 hover:bg-red-600" disabled={isSubmitting}>
-                {isSubmitting ? 'Invio in corso...' : 'Invia Segnalazione'}
+              <FormField
+                control={form.control}
+                name="messageContent"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Messaggio *</FormLabel>
+                    <FormControl><Textarea placeholder="Descrivi dettagliatamente la tua richiesta..." className="min-h-[100px]" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600" disabled={isSubmitting}>
+                <Mail className="h-4 w-4 mr-2" /> {isSubmitting ? 'Invio in corso...' : 'Invia Richiesta'}
               </Button>
             </form>
           </Form>
