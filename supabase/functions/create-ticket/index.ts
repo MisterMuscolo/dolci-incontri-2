@@ -66,6 +66,22 @@ serve(async (req) => {
       throw new Error('Ticket created, but failed to save initial message. Please contact support.');
     }
 
+    // NEW: Insert notification for admin about new ticket
+    const supabaseAdmin = createClient( // Create admin client here
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+    const { error: notificationError } = await supabaseAdmin
+        .from('admin_notifications')
+        .insert({
+            type: 'new_ticket', // New type for new tickets
+            entity_id: newTicket.id,
+            message: `Nuovo ticket aperto: ${subject}`,
+        });
+    if (notificationError) {
+        console.error('Failed to insert new ticket notification:', notificationError.message);
+    }
+
     return new Response(JSON.stringify({ success: true, ticketId: newTicket.id }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
