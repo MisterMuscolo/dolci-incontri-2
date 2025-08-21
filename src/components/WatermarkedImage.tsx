@@ -13,7 +13,7 @@ interface WatermarkedImageProps extends React.ImgHTMLAttributes<HTMLImageElement
 export const WatermarkedImage = ({
   src,
   alt,
-  watermarkText = "Cuore IncontriDolci",
+  watermarkText = "❤️ IncontriDolci", // Modificato qui per usare l'emoji
   className,
   imageClassName,
   watermarkClassName,
