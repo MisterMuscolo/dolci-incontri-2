@@ -348,6 +348,7 @@ const EditListing = () => {
                     onFilesChange={setNewFiles}
                     onPrimaryIndexChange={setNewPrimaryIndex}
                     onExistingPhotosUpdated={setExistingPhotos} // Update existingPhotos state when changes occur
+                    hideMainPreview={true} // Aggiunto per nascondere l'anteprima principale
                   />
                 </div>
                 <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600" disabled={isSubmitting}>
