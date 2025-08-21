@@ -174,6 +174,7 @@ const MyTickets = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead>ID Ticket</TableHead> {/* Nuova colonna */}
                       <TableHead>Oggetto</TableHead>
                       <TableHead>Annuncio</TableHead>
                       <TableHead>Stato</TableHead>
@@ -185,6 +186,7 @@ const MyTickets = () => {
                   <TableBody>
                     {tickets.map((ticket) => (
                       <TableRow key={ticket.id}>
+                        <TableCell className="font-medium">{ticket.id.substring(0, 8)}</TableCell> {/* Visualizza ID */}
                         <TableCell className="font-medium">{ticket.subject}</TableCell>
                         <TableCell>
                           {ticket.listing_id ? (
