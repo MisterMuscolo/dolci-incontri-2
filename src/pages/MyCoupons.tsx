@@ -11,6 +11,7 @@ import { it } from 'date-fns/locale';
 import { ChevronLeft, Tag, Percent, Euro, CheckCircle, XCircle, Clock, Ban, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { ApplyCouponForm } from '@/components/user/ApplyCouponForm';
+import { PostgrestError } from '@supabase/supabase-js'; // Importa PostgrestError
 
 interface Coupon {
   id: string;
@@ -37,6 +38,12 @@ interface AppliedCouponDetails {
   couponId: string;
   couponType: 'single_use' | 'reusable';
   code: string;
+}
+
+// Nuova interfaccia per tipizzare il risultato della join
+interface UserCouponJoin {
+  coupon_id: string;
+  coupons: Coupon | null;
 }
 
 const MyCoupons = () => {
@@ -67,7 +74,7 @@ const MyCoupons = () => {
         )
       `)
       .eq('user_id', user.id)
-      .order('applied_at', { ascending: false }); // Order by when they were applied
+      .order('applied_at', { ascending: false }) as { data: UserCouponJoin[] | null, error: PostgrestError | null };
 
     if (userCouponsError) {
       console.error("Error fetching user's applied coupons:", userCouponsError);
@@ -77,7 +84,7 @@ const MyCoupons = () => {
     }
 
     // Extract coupon details from the nested `coupons` object
-    const rawCoupons = userCouponsData.map(uc => uc.coupons).filter(Boolean) as Coupon[];
+    const rawCoupons = (userCouponsData || []).map(uc => uc.coupons).filter(Boolean) as Coupon[];
 
     // Fetch all coupons used by the current user (still needed for single_use status)
     const { data: usedCouponsData, error: usedCouponsError } = await supabase

@@ -19,6 +19,11 @@ interface CreditTransaction {
   userEmail?: string; // Add a field to store fetched email
 }
 
+// Nuova interfaccia per il tipo di dato restituito dalla query Supabase
+interface CreditTransactionWithProfile extends CreditTransaction {
+  profiles: { email: string }[] | null;
+}
+
 export const AllCreditTransactionsTable = () => {
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,7 +39,7 @@ export const AllCreditTransactionsTable = () => {
         type,
         package_name,
         created_at,
-        profiles ( email ) // Still try to fetch this way first
+        profiles ( email )
       `)
       .order('created_at', { ascending: false });
 
@@ -45,7 +50,7 @@ export const AllCreditTransactionsTable = () => {
     } else {
       // Post-process data to ensure email is displayed
       const processedTransactions: CreditTransaction[] = await Promise.all(
-        (data || []).map(async (transaction: CreditTransaction) => {
+        (data as CreditTransactionWithProfile[] || []).map(async (transaction) => {
           if (transaction.profiles?.[0]?.email) {
             return { ...transaction, userEmail: transaction.profiles[0].email };
           } else if (transaction.user_id) {

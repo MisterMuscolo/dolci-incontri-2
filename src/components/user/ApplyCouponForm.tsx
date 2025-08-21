@@ -87,7 +87,7 @@ export const ApplyCouponForm = ({ onCouponApplied, onCouponRemoved, currentAppli
             <div>
               <p className="font-semibold">Coupon applicato: {currentAppliedCoupon.code}</p>
               <p className="text-sm">
-                Sconto: {currentAppliedCoupon.discountType === 'percentage' ? `${currentAppliedCoupon.value}%` : `€${currentAppliedCoupon.value.toFixed(2)}`}
+                Sconto: {currentAppliedCoupon.type === 'percentage' ? `${currentAppliedCoupon.value}%` : `€${currentAppliedCoupon.value.toFixed(2)}`}
               </p>
             </div>
             <Button variant="outline" size="sm" onClick={handleRemoveCoupon} disabled={isLoading}>
