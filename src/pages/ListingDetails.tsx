@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { showError } from '@/utils/toast';
 import { MapPin, Tag, User, Mail, BookText, ChevronLeft, CalendarDays, Rocket, Phone, Flag } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } => '@/lib/utils';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { CreateTicketDialog } from '@/components/CreateTicketDialog';
@@ -123,16 +123,16 @@ const ListingDetails = () => {
               </Badge>
             )}
             <CardHeader>
-              {/* Blocco dei tag riorganizzato */}
-              <div className="flex flex-wrap gap-2 mb-2">
-                {/* Data di pubblicazione per prima */}
+              {/* Data di pubblicazione per prima */}
+              <div className="mb-2">
                 <Badge variant="outline" className="text-xs">
                   <CalendarDays className="h-4 w-4 mr-1.5" />
                   {format(new Date(listing.created_at), 'dd MMMM', { locale: it })}
                 </Badge>
-                {/* Tag di città/zona */}
+              </div>
+              {/* Tag di città/zona e età */}
+              <div className="flex flex-wrap gap-2 mb-2">
                 <Badge variant="outline"><MapPin className="h-4 w-4 mr-1.5" />{listing.city}{listing.zone && ` / ${listing.zone}`}</Badge>
-                {/* Tag età */}
                 <Badge variant="outline"><User className="h-4 w-4 mr-1.5" />{listing.age} anni</Badge>
               </div>
               <CardTitle className="text-3xl font-bold text-rose-600">{listing.title}</CardTitle>
