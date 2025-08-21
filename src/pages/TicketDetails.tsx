@@ -26,7 +26,7 @@ interface TicketDetailsData {
   status: 'open' | 'in_progress' | 'resolved' | 'closed';
   created_at: string;
   updated_at: string;
-  last_replied_by: 'user' | 'admin';
+  last_replied_by: 'user' | 'admin' | 'supporto';
   listing_id: string | null;
   listings: { title: string } | null; // Corretto: singolo oggetto o null
   ticket_messages: TicketMessage[];
@@ -181,9 +181,27 @@ const TicketDetails = () => {
     const toastId = showLoading('Risoluzione ticket in corso...');
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('Utente non autenticato.');
+      }
+
+      // Fetch the current user's role
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError || !profile) {
+        throw new Error('Impossibile recuperare il ruolo dell\'utente corrente.');
+      }
+
+      const senderRole = profile.role as 'admin' | 'supporto'; // Cast to the expected type
+
       const { error } = await supabase
         .from('tickets')
-        .update({ status: 'resolved', updated_at: new Date().toISOString(), last_replied_by: 'admin' }) // Set to 'resolved'
+        .update({ status: 'resolved', updated_at: new Date().toISOString(), last_replied_by: senderRole }) // Set to 'resolved'
         .eq('id', ticketId);
 
       dismissToast(toastId);
@@ -292,8 +310,16 @@ const TicketDetails = () => {
                           </>
                         ) : (
                           <>
-                            {message.profiles?.role === 'admin' ? <Shield className="h-4 w-4 text-blue-400" /> : <User className="h-4 w-4" />}
-                            {message.profiles?.email || 'Utente Sconosciuto'}
+                            {message.profiles?.role === 'admin' ? (
+                              <Shield className="h-4 w-4 text-blue-400" />
+                            ) : message.profiles?.role === 'supporto' ? (
+                              <Shield className="h-4 w-4 text-purple-400" />
+                            ) : (
+                              <User className="h-4 w-4" />
+                            )}
+                            {message.profiles?.role === 'admin' ? 'Admin' :
+                             message.profiles?.role === 'supporto' ? 'Supporto' :
+                             message.profiles?.email || 'Utente Sconosciuto'}
                           </>
                         )}
                       </p>
