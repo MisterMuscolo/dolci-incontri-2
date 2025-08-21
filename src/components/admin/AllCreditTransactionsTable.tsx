@@ -15,7 +15,8 @@ interface CreditTransaction {
   type: string;
   package_name: string | null;
   created_at: string;
-  profiles: { email: string }[] | null; // Corretto: ora è un array di oggetti
+  profiles: { email: string }[] | null; // Keep this for the initial fetch
+  userEmail?: string; // Add a field to store fetched email
 }
 
 export const AllCreditTransactionsTable = () => {
@@ -33,15 +34,38 @@ export const AllCreditTransactionsTable = () => {
         type,
         package_name,
         created_at,
-        profiles ( email )
+        profiles ( email ) // Still try to fetch this way first
       `)
       .order('created_at', { ascending: false });
 
     if (error) {
       console.error("Error fetching all credit transactions:", error);
       showError("Impossibile caricare la cronologia delle transazioni di credito.");
+      setTransactions([]); // Ensure transactions are cleared on error
     } else {
-      setTransactions(data as CreditTransaction[]);
+      // Post-process data to ensure email is displayed
+      const processedTransactions: CreditTransaction[] = await Promise.all(
+        (data || []).map(async (transaction: CreditTransaction) => {
+          if (transaction.profiles?.[0]?.email) {
+            return { ...transaction, userEmail: transaction.profiles[0].email };
+          } else if (transaction.user_id) {
+            // If nested select failed, try fetching profile directly
+            const { data: profileData, error: profileError } = await supabase
+              .from('profiles')
+              .select('email')
+              .eq('id', transaction.user_id)
+              .single();
+
+            if (profileData) {
+              return { ...transaction, userEmail: profileData.email };
+            } else if (profileError) {
+              console.warn(`Failed to fetch email for user_id ${transaction.user_id}:`, profileError.message);
+            }
+          }
+          return { ...transaction, userEmail: 'N/D' }; // Fallback
+        })
+      );
+      setTransactions(processedTransactions);
     }
     setLoading(false);
   };
@@ -97,7 +121,7 @@ export const AllCreditTransactionsTable = () => {
                 {transactions.map((transaction) => (
                   <TableRow key={transaction.id}>
                     <TableCell>{format(new Date(transaction.created_at), 'dd/MM/yyyy HH:mm', { locale: it })}</TableCell>
-                    <TableCell className="font-medium">{transaction.profiles?.[0]?.email || 'N/D'}</TableCell>
+                    <TableCell className="font-medium">{transaction.userEmail || 'N/D'}</TableCell>
                     <TableCell>{getTransactionTypeLabel(transaction.type)}</TableCell>
                     <TableCell>{transaction.package_name || '-'}</TableCell>
                     <TableCell className="text-right font-medium">
