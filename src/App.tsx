@@ -9,7 +9,7 @@ import { showError } from "./utils/toast";
 import { LoadingScreen } from "./components/LoadingScreen";
 import Layout from "./components/Layout";
 
-// Lazy load all page components
+// Lazy load all page components (except MyListings for now)
 const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -20,7 +20,7 @@ const BuyCredits = lazy(() => import("./pages/BuyCredits"));
 const ProfileSettings = lazy(() => import("./pages/ProfileSettings"));
 const SearchResults = lazy(() => import("./pages/SearchResults"));
 const ListingDetails = lazy(() => import("./pages/ListingDetails"));
-const MyListings = lazy(() => import("./pages/MyListings"));
+import MyListings from "./pages/MyListings"; // Importa MyListings direttamente
 const CreditHistory = lazy(() => import("./pages/CreditHistory"));
 const UserListingsAdminView = lazy(() => import("./pages/UserListingsAdminView"));
 const BannedUser = lazy(() => import("./pages/BannedUser"));
@@ -231,6 +231,10 @@ const App = () => {
               <Route 
                 path="/change-password" 
                 element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><ChangePassword /></Suspense>) : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/my-listings" 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <MyListings />) : <Navigate to="/auth" />} 
               />
             </Route> {/* Chiusura della rotta del Layout */}
           </Routes>
