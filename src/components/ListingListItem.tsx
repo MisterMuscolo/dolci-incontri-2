@@ -217,8 +217,13 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
             !hasPhotosToRender && "w-full" // Se non ci sono foto, il link occupa tutta la larghezza disponibile
           )}>
             <div className="p-4 flex flex-col flex-grow">
-              <h3 className="text-xl font-semibold mb-2 text-gray-800 line-clamp-2">{listing.title}</h3>
-              <p className="text-sm text-gray-600 mb-3 line-clamp-3">{listing.description}</p>
+              {/* Data spostata sopra il titolo */}
+              <div className="flex items-center text-sm text-gray-500 mb-1">
+                <CalendarDays className="h-4 w-4 mr-2" />
+                <span>{prefix} {formattedDate}</span>
+              </div>
+              <h3 className="text-xl font-semibold mb-2 text-rose-600 line-clamp-2">{listing.title}</h3>
+              <p className="text-base text-gray-600 mb-3 line-clamp-3">{listing.description}</p>
               <div className="flex flex-wrap gap-2 mb-3">
                 <Badge variant="secondary" className="capitalize">{listing.category.replace(/-/g, ' ')}</Badge>
                 <Badge variant="outline">{listing.city}</Badge>
@@ -227,10 +232,6 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                     <User className="h-3 w-3 mr-1" /> {listing.age} anni
                   </Badge>
                 )}
-              </div>
-              <div className="mt-auto flex items-center text-xs text-gray-500">
-                <CalendarDays className="h-4 w-4 mr-2" />
-                <span>{prefix} {formattedDate}</span>
               </div>
             </div>
           </Link>
