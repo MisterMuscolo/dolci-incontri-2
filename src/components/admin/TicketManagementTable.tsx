@@ -228,33 +228,7 @@ export const TicketManagementTable = () => {
                           </AlertDialogContent>
                         </AlertDialog>
                       )}
-                      {ticket.status !== 'closed' && (
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="destructive" size="sm" disabled={actionLoadingId === ticket.id}>
-                              <XCircle className="h-4 w-4 mr-1" /> Chiudi
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Conferma chiusura ticket</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Sei sicuro di voler chiudere questo ticket? Non sarà più possibile inviare messaggi.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Annulla</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleUpdateTicketStatus(ticket.id, 'closed')}
-                                className="bg-destructive hover:bg-destructive/90"
-                                disabled={actionLoadingId === ticket.id}
-                              >
-                                {actionLoadingId === ticket.id ? 'Chiusura...' : 'Sì, chiudi'}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      )}
+                      {/* Rimosso il pulsante "Chiudi" */}
                     </TableCell>
                   </TableRow>
                 ))}
