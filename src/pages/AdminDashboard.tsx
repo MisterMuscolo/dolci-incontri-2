@@ -3,6 +3,7 @@ import { OverviewStats } from "@/components/admin/OverviewStats";
 import { CreditManagement } from "@/components/admin/CreditManagement";
 import { AllCreditTransactionsTable } from "@/components/admin/AllCreditTransactionsTable";
 import { TicketManagementTable } from "@/components/admin/TicketManagementTable";
+import { CouponManagementTable } from "@/components/admin/CouponManagementTable"; // Importa il nuovo componente
 
 interface AdminDashboardProps {
   isAdmin: boolean;
@@ -21,6 +22,7 @@ const AdminDashboard = ({ isAdmin, isSupporto }: AdminDashboardProps) => {
           <>
             <CreditManagement />
             <AllCreditTransactionsTable />
+            <CouponManagementTable /> {/* Aggiunto il componente di gestione coupon */}
           </>
         )}
         

@@ -4,14 +4,16 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Wallet, Settings, LayoutGrid, Ticket, PlusCircle, MessageSquare } from "lucide-react"; // Importa Ticket, PlusCircle e MessageSquare
-import { CreateTicketDialog } from "@/components/CreateTicketDialog"; // Importa il nuovo componente
+import { Wallet, Settings, LayoutGrid, Ticket, PlusCircle, MessageSquare, Tag } from "lucide-react"; // Importa Tag
+import { CreateTicketDialog } from "@/components/CreateTicketDialog";
+import { ApplyCouponForm } from "@/components/user/ApplyCouponForm"; // Importa il nuovo componente
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [totalListingsCount, setTotalListingsCount] = useState(0);
   const [currentCredits, setCurrentCredits] = useState<number | null>(0);
   const [totalCreditsSpent, setTotalCreditsSpent] = useState<number>(0);
+  const [appliedCoupon, setAppliedCoupon] = useState<{ type: 'percentage' | 'flat_amount'; value: number; code: string; couponId: string; couponType: 'single_use' | 'reusable' } | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -71,6 +73,16 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
+  const handleCouponApplied = (discount: { type: 'percentage' | 'flat_amount'; value: number; couponId: string; couponType: 'single_use' | 'reusable' }) => {
+    // For now, we just store the applied coupon details.
+    // In a real scenario, this would be integrated into a purchase flow.
+    setAppliedCoupon({ ...discount, code: 'APPLIED_CODE', couponId: discount.couponId, couponType: discount.couponType }); // Placeholder code
+  };
+
+  const handleCouponRemoved = () => {
+    setAppliedCoupon(null);
+  };
+
   return (
     <div className="bg-gray-50 p-6 flex-grow">
       <div className="max-w-7xl mx-auto">
@@ -79,7 +91,6 @@ const Dashboard = () => {
             <h1 className="text-3xl font-bold">La Mia Dashboard</h1>
             <p className="text-gray-600 text-sm mt-1">Gestisci i tuoi annunci, crediti e impostazioni del tuo account.</p>
           </div>
-          {/* Il pulsante "Crea nuovo annuncio" è stato rimosso da qui */}
         </div>
 
         <div className="space-y-4">
@@ -155,7 +166,13 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Nuova Card per I Miei Ticket */}
+          {/* Nuova Card per i Coupon */}
+          <ApplyCouponForm
+            onCouponApplied={handleCouponApplied}
+            onCouponRemoved={handleCouponRemoved}
+            currentAppliedCoupon={appliedCoupon}
+          />
+          
           <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
             <CardHeader>
               <CardTitle className="text-2xl font-semibold flex items-center gap-4">
@@ -167,7 +184,7 @@ const Dashboard = () => {
               <CardDescription className="ml-[88px]">Visualizza e gestisci le tue richieste di supporto.</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-wrap gap-4 mt-4"> {/* Aggiunto contenitore flex per i pulsanti */}
+              <div className="flex flex-wrap gap-4 mt-4">
                 <Link to="/my-tickets">
                   <Button variant="outline" className="border-rose-500 text-rose-500 hover:bg-rose-50 hover:text-rose-600">
                     <MessageSquare className="h-4 w-4 mr-2" /> Visualizza i miei ticket
@@ -182,7 +199,7 @@ const Dashboard = () => {
                   dialogTitle="Apri un nuovo Ticket"
                   dialogDescription="Compila il modulo sottostante per inviare una richiesta di supporto o una domanda."
                   icon={Ticket}
-                  initialSubject="Nuovo ticket di supporto" // Passa un soggetto iniziale
+                  initialSubject="Nuovo ticket di supporto"
                   redirectPathOnAuth="/dashboard"
                 />
               </div>
