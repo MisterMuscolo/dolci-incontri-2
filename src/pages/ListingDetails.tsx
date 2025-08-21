@@ -145,8 +145,8 @@ const ListingDetails = () => {
               {listing.listing_photos.length > 1 && (
                 <div className="flex gap-2 overflow-x-auto pb-2">
                   {listing.listing_photos.map((photo) => (
-                    <button key={photo.id} onClick={() => setActivePhoto(photo.url)} className={cn("w-24 h-24 rounded-md flex-shrink-0 ring-offset-2 ring-offset-gray-50", activePhoto === photo.url && 'ring-2 ring-rose-500')}>
-                      <WatermarkedImage src={photo.url} alt="Thumbnail" imageClassName="object-contain bg-gray-200" />
+                    <button key={photo.id} onClick={() => setActivePhoto(photo.url)} className={cn("w-24 h-24 flex-shrink-0 ring-offset-2 ring-offset-gray-50", activePhoto === photo.url && 'ring-2 ring-rose-500')}>
+                      <WatermarkedImage src={photo.url} alt="Thumbnail" imageClassName="object-contain bg-gray-200 rounded-md" />
                     </button>
                   ))}
                 </div>
