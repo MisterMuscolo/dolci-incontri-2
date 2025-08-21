@@ -260,14 +260,17 @@ export const ImageUploader = ({
       <p className="text-sm text-gray-500 mb-2">Gestisci le tue foto:</p>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
         {existingPhotosState.map((photo, index) => (
-          <div key={photo.id} className="relative group aspect-square">
+          <div 
+            key={photo.id} 
+            className={cn(
+              "relative group aspect-square", // Questo div avvolge l'immagine e gestisce il ring
+              photo.is_primary && "ring-4 ring-offset-2 ring-rose-500"
+            )}
+          >
             <img
               src={photo.url}
               alt={`Foto esistente ${index + 1}`}
-              className={cn(
-                "w-full h-full object-cover rounded-md transition-all",
-                photo.is_primary && "ring-4 ring-offset-2 ring-rose-500"
-              )}
+              className="w-full h-full object-cover rounded-md transition-all" // L'immagine è arrotondata
               onClick={() => setActivePreviewUrl(photo.url ?? null)}
             />
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center gap-2">
@@ -301,14 +304,17 @@ export const ImageUploader = ({
         ))}
 
         {newlySelectedPreviews.map((preview, index) => (
-          <div key={`new-${index}`} className="relative group aspect-square">
+          <div 
+            key={`new-${index}`} 
+            className={cn(
+              "relative group aspect-square", // Questo div avvolge l'immagine e gestisce il ring
+              (newlySelectedPrimaryIndex === index && existingPhotosState.length === 0) && "ring-4 ring-offset-2 ring-rose-500"
+            )}
+          >
             <img
               src={preview}
               alt={`Nuova foto ${index + 1}`}
-              className={cn(
-                "w-full h-full object-cover rounded-md transition-all",
-                (newlySelectedPrimaryIndex === index && existingPhotosState.length === 0) && "ring-4 ring-offset-2 ring-rose-500"
-              )}
+              className="w-full h-full object-cover rounded-md transition-all" // L'immagine è arrotondata
               onClick={() => setActivePreviewUrl(preview ?? null)}
             />
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center gap-2">
