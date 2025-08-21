@@ -9,7 +9,7 @@ import { showError } from "./utils/toast";
 import { LoadingScreen } from "./components/LoadingScreen";
 import Layout from "./components/Layout";
 
-// Lazy load all page components (except MyListings for now)
+// Lazy load all page components
 const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -21,7 +21,7 @@ const ProfileSettings = lazy(() => import("./pages/ProfileSettings"));
 const SearchResults = lazy(() => import("./pages/SearchResults"));
 const ListingDetails = lazy(() => import("./pages/ListingDetails"));
 import MyListings from "./pages/MyListings"; // Importa MyListings direttamente
-const CreditHistory = lazy(() => import("./pages/CreditHistory"));
+import CreditHistory from "./pages/CreditHistory"; // Importa CreditHistory direttamente
 const UserListingsAdminView = lazy(() => import("./pages/UserListingsAdminView"));
 const BannedUser = lazy(() => import("./pages/BannedUser"));
 const EditListing = lazy(() => import("./pages/EditListing"));

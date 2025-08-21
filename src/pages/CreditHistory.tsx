@@ -18,6 +18,7 @@ interface CreditTransaction {
 }
 
 const CreditHistory = () => {
+  console.log("CreditHistory component is rendering."); // Aggiunto per il debug
   const navigate = useNavigate();
   const [currentCredits, setCurrentCredits] = useState<number | null>(0); // Initialize with 0
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
