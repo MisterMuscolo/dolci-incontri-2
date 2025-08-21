@@ -2,7 +2,6 @@ import { UserManagementTable } from "@/components/admin/UserManagementTable";
 import { OverviewStats } from "@/components/admin/OverviewStats";
 import { CreditManagement } from "@/components/admin/CreditManagement";
 import { AllCreditTransactionsTable } from "@/components/admin/AllCreditTransactionsTable";
-import { ReportManagementTable } from "@/components/admin/ReportManagementTable"; // Importa il componente
 import { TicketManagementTable } from "@/components/admin/TicketManagementTable";
 
 interface AdminDashboardProps {
@@ -24,8 +23,6 @@ const AdminDashboard = ({ isAdmin, isSupporto }: AdminDashboardProps) => {
             <AllCreditTransactionsTable />
           </>
         )}
-
-        <ReportManagementTable /> {/* Aggiunto qui, visibile per admin e supporto */}
         
         <TicketManagementTable />
         
