@@ -45,7 +45,7 @@ serve(async (req) => {
       throw new Error('Ticket not found or you do not have permission to access it.');
     }
 
-    // Determine sender role (user or admin)
+    // Determine sender role (user or admin/supporto)
     const { data: profile, error: profileError } = await supabaseClient
       .from('profiles')
       .select('role')
@@ -56,7 +56,8 @@ serve(async (req) => {
       throw new Error('User profile not found.');
     }
 
-    const senderRole = profile.role === 'admin' ? 'admin' : 'user';
+    // MODIFICA QUI: Classifica 'admin' e 'supporto' come 'admin' per last_replied_by
+    const senderRole = (profile.role === 'admin' || profile.role === 'supporto') ? 'admin' : 'user';
 
     // Insert new message
     const { error: messageError } = await supabaseClient
