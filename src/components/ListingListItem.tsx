@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { useState } from "react";
 import { ListingPhotoManagerDialog } from "./ListingPhotoManagerDialog";
+import { WatermarkedImage } from "./WatermarkedImage"; // Importa il nuovo componente
 
 export interface Listing {
   id: string;
@@ -178,7 +179,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
             <div className="md:w-1/4 lg:w-1/5 flex-shrink-0 relative">
               <AspectRatio ratio={3 / 4} className="w-full h-full">
                 <Link to={`/listing/${listing.id}`} className="block w-full h-full">
-                  <img src={photosToRender[0].url} alt={listing.title} className="object-cover w-full h-full bg-gray-200" />
+                  <WatermarkedImage src={photosToRender[0].url} alt={listing.title} imageClassName="object-cover" />
                 </Link>
               </AspectRatio>
               {isActivePremium && photosToRender.length > 1 && (
