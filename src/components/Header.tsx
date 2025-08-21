@@ -19,10 +19,10 @@ import { it } from 'date-fns/locale';
 interface HeaderProps {
   session: any;
   isAdmin: boolean;
-  isCollaborator: boolean; // Nuovo prop
+  isSupporto: boolean; // Rinomina da isCollaborator a isSupporto
 }
 
-export const Header = ({ session, isAdmin, isCollaborator }: HeaderProps) => {
+export const Header = ({ session, isAdmin, isSupporto }: HeaderProps) => {
   const navigate = useNavigate();
   
   // Conditionally use the appropriate notification hook
@@ -139,7 +139,7 @@ export const Header = ({ session, isAdmin, isCollaborator }: HeaderProps) => {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  {(isAdmin || isCollaborator) && ( // Visibile per admin e collaboratori
+                  {(isAdmin || isSupporto) && ( // Visibile per admin e supporto
                     <DropdownMenuItem onClick={() => navigate('/admin')}>
                       <Shield className="mr-2 h-4 w-4" />
                       <span>Pannello Controllo</span>

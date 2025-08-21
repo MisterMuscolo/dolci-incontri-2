@@ -7,10 +7,10 @@ import { TicketManagementTable } from "@/components/admin/TicketManagementTable"
 
 interface AdminDashboardProps {
   isAdmin: boolean;
-  isCollaborator: boolean;
+  isSupporto: boolean; // Rinomina da isCollaborator a isSupporto
 }
 
-const AdminDashboard = ({ isAdmin, isCollaborator }: AdminDashboardProps) => {
+const AdminDashboard = ({ isAdmin, isSupporto }: AdminDashboardProps) => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -27,9 +27,9 @@ const AdminDashboard = ({ isAdmin, isCollaborator }: AdminDashboardProps) => {
 
         {/* ReportManagementTable rimosso */}
         
-        <TicketManagementTable /> {/* Visibile per admin e collaboratori */}
+        <TicketManagementTable /> {/* Visibile per admin e supporto */}
         
-        <UserManagementTable isAdmin={isAdmin} isCollaborator={isCollaborator} /> {/* Passa i ruoli */}
+        <UserManagementTable isAdmin={isAdmin} isSupporto={isSupporto} /> {/* Passa i ruoli */}
         
       </div>
     </div>

@@ -36,10 +36,10 @@ interface UserProfile {
 
 interface UserManagementTableProps {
   isAdmin: boolean;
-  isCollaborator: boolean;
+  isSupporto: boolean; // Rinomina da isCollaborator a isSupporto
 }
 
-export const UserManagementTable = ({ isAdmin, isCollaborator }: UserManagementTableProps) => {
+export const UserManagementTable = ({ isAdmin, isSupporto }: UserManagementTableTableProps) => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
@@ -128,7 +128,7 @@ export const UserManagementTable = ({ isAdmin, isCollaborator }: UserManagementT
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">{user.email}</TableCell>
                   <TableCell>
-                    <Badge variant={user.role === 'admin' ? 'default' : user.role === 'banned' ? 'destructive' : user.role === 'collaborator' ? 'secondary' : 'outline'} className="capitalize">
+                    <Badge variant={user.role === 'admin' ? 'default' : user.role === 'banned' ? 'destructive' : user.role === 'supporto' ? 'secondary' : 'outline'} className="capitalize">
                       {user.role}
                     </Badge>
                   </TableCell>
@@ -152,7 +152,7 @@ export const UserManagementTable = ({ isAdmin, isCollaborator }: UserManagementT
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="user">Utente</SelectItem>
-                          <SelectItem value="collaborator">Collaboratore</SelectItem>
+                          <SelectItem value="supporto">Supporto</SelectItem> {/* Rinomina da Collaboratore a Supporto */}
                           <SelectItem value="admin" disabled={user.role === 'admin'}>Admin</SelectItem> {/* Non permettere di declassare un admin */}
                           <SelectItem value="banned">Bannato</SelectItem>
                         </SelectContent>
