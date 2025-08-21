@@ -1,10 +1,11 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { Heart } from 'lucide-react'; // Importa l'icona Heart
 
 interface WatermarkedImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
   alt: string;
-  watermarkText?: string;
+  watermarkText?: React.ReactNode; // Cambiato il tipo per accettare JSX
   className?: string;
   imageClassName?: string; // Classi specifiche per l'elemento img
   watermarkClassName?: string; // Classi specifiche per la filigrana
@@ -13,7 +14,12 @@ interface WatermarkedImageProps extends React.ImgHTMLAttributes<HTMLImageElement
 export const WatermarkedImage = ({
   src,
   alt,
-  watermarkText = "❤️ IncontriDolci", // Modificato qui per usare l'emoji
+  watermarkText = ( // Il valore predefinito ora include l'icona Heart
+    <div className="flex items-center justify-center gap-2">
+      <Heart className="h-8 w-8" /> {/* Icona del cuore outline */}
+      <span>IncontriDolci</span>
+    </div>
+  ),
   className,
   imageClassName,
   watermarkClassName,
