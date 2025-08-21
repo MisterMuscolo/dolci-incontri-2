@@ -291,7 +291,6 @@ const TicketDetails = () => {
           <User className="h-4 w-4" /> Utente ({displayEmail})
         </>
       );
-    );
     }
     // Display for other users (e.g., if an admin is viewing a ticket from another user)
     // Or for initial messages from unauthenticated users (sender_id is null, sender_email is present)
