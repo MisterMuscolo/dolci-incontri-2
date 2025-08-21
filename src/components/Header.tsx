@@ -66,7 +66,7 @@ export const Header = ({ session, isAdmin, isSupporto }: HeaderProps) => {
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <Link to="/" className="flex items-center gap-2 text-2xl font-bold text-rose-600">
           <Heart className="h-8 w-8" />
-          <span>Incontri Dolci</span>
+          <span>IncontriDolci</span>
         </Link>
         <nav>
           {session ? (

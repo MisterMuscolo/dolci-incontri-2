@@ -18,7 +18,7 @@ const Privacy = () => {
 
         <div className="bg-white p-6 rounded-lg shadow-md space-y-4 text-gray-700">
           <p>
-            La presente Privacy Policy descrive come Incontri Dolci raccoglie, utilizza e protegge le tue informazioni personali quando utilizzi il nostro servizio.
+            La presente Privacy Policy descrive come IncontriDolci raccoglie, utilizza e protegge le tue informazioni personali quando utilizzi il nostro servizio.
           </p>
           <h2 className="text-xl font-semibold mt-6 mb-2">1. Informazioni che Raccogliamo</h2>
           <p>

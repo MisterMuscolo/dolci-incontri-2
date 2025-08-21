@@ -18,7 +18,7 @@ const Termini = () => {
 
         <div className="bg-white p-6 rounded-lg shadow-md space-y-4 text-gray-700">
           <p>
-            Benvenuto su Incontri Dolci. Utilizzando il nostro sito web, accetti di rispettare i seguenti termini e condizioni d'uso. Ti preghiamo di leggerli attentamente.
+            Benvenuto su IncontriDolci. Utilizzando il nostro sito web, accetti di rispettare i seguenti termini e condizioni d'uso. Ti preghiamo di leggerli attentamente.
           </p>
           <h2 className="text-xl font-semibold mt-6 mb-2">1. Accettazione dei Termini</h2>
           <p>
@@ -38,7 +38,7 @@ const Termini = () => {
           </p>
           <h2 className="text-xl font-semibold mt-6 mb-2">5. Limitazione di Responsabilità</h2>
           <p>
-            In nessun caso Incontri Dolci, i suoi direttori, dipendenti, partner, agenti, fornitori o affiliati, saranno responsabili per eventuali danni indiretti, incidentali, speciali, consequenziali o punitivi, inclusi, senza limitazione, perdita di profitti, dati, uso, avviamento o altre perdite intangibili, derivanti da (i) l'accesso o l'uso o l'impossibilità di accedere o utilizzare il servizio; (ii) qualsiasi condotta o contenuto di terzi sul servizio; (iii) qualsiasi contenuto ottenuto dal servizio; e (iv) accesso, uso o alterazione non autorizzati delle tue trasmissioni o contenuti, sia basato su garanzia, contratto, illecito civile (inclusa negligenza) o qualsiasi altra teoria legale, sia che siamo stati informati o meno della possibilità di tali danni, e anche se un rimedio qui stabilito si rivela aver fallito il suo scopo essenziale.
+            In nessun caso IncontriDolci, i suoi direttori, dipendenti, partner, agenti, fornitori o affiliati, saranno responsabili per eventuali danni indiretti, incidentali, speciali, consequenziali o punitivi, inclusi, senza limitazione, perdita di profitti, dati, uso, avviamento o altre perdite intangibili, derivanti da (i) l'accesso o l'uso o l'impossibilità di accedere o utilizzare il servizio; (ii) qualsiasi condotta o contenuto di terzi sul servizio; (iii) qualsiasi contenuto ottenuto dal servizio; e (iv) accesso, uso o alterazione non autorizzati delle tue trasmissioni o contenuti, sia basato su garanzia, contratto, illecito civile (inclusa negligenza) o qualsiasi altra teoria legale, sia che siamo stati informati o meno della possibilità di tali danni, e anche se un rimedio qui stabilito si rivela aver fallito il suo scopo essenziale.
           </p>
           <h2 className="text-xl font-semibold mt-6 mb-2">6. Legge Applicabile</h2>
           <p>

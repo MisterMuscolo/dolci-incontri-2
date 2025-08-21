@@ -45,7 +45,7 @@ serve(async (req) => {
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
 
     const { data, error: resendError } = await resend.emails.send({
-      from: 'Incontri Dolci <noreply@incontridolci.it>',
+      from: 'IncontriDolci <noreply@incontridolci.it>',
       to: [listing.email],
       reply_to: senderEmail,
       subject: `Nuova risposta al tuo annuncio: "${listing.title}"`,
@@ -54,7 +54,7 @@ serve(async (req) => {
           <div style="text-align: center; margin-bottom: 20px;">
             <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 28px; font-weight: bold; color: #E54A70;">
               <span style="font-size: 32px;">❤️</span>
-              <span>Incontri Dolci</span>
+              <span>IncontriDolci</span>
             </div>
           </div>
           <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
@@ -81,7 +81,7 @@ serve(async (req) => {
           </div>
 
           <p style="text-align: center; font-size: 0.8em; color: #888; margin-top: 20px;">
-            © ${new Date().getFullYear()} Incontri Dolci. Tutti i diritti riservati.
+            © ${new Date().getFullYear()} IncontriDolci. Tutti i diritti riservati.
           </p>
         </div>
       `,
