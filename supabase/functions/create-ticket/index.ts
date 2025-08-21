@@ -12,10 +12,10 @@ serve(async (req) => {
   }
 
   try {
-    const { listingId, subject, messageContent } = await req.json();
+    const { listingId, senderEmail, messageContent, initialSubject } = await req.json();
 
-    if (!subject || !messageContent) {
-      throw new Error('Missing required fields: subject, messageContent');
+    if (!senderEmail || !messageContent) {
+      throw new Error('Missing required fields: senderEmail, messageContent');
     }
 
     // Create a Supabase client with the user's JWT for RLS checks
@@ -27,22 +27,36 @@ serve(async (req) => {
 
     const { data: { user } } = await supabaseClient.auth.getUser();
 
-    if (!user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized: User not authenticated' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 401,
-      });
+    const ticketUserId = user ? user.id : null;
+    const ticketReporterEmail = senderEmail; // Always use the email provided in the form
+
+    let ticketSubject = initialSubject || `Nuova richiesta di supporto da ${senderEmail}`;
+
+    if (listingId) {
+      const { data: listingData, error: listingError } = await supabaseClient
+        .from('listings')
+        .select('title')
+        .eq('id', listingId)
+        .single();
+
+      if (listingError || !listingData) {
+        console.warn(`Could not fetch listing title for ID ${listingId}:`, listingError?.message);
+        ticketSubject = `Richiesta annuncio (ID: ${listingId}) da ${senderEmail}`;
+      } else {
+        ticketSubject = `Richiesta annuncio: ${listingData.title} da ${senderEmail}`;
+      }
     }
 
     // Insert new ticket
     const { data: newTicket, error: ticketError } = await supabaseClient
       .from('tickets')
       .insert({
-        user_id: user.id,
-        listing_id: listingId || null, // Will be null if it's a general contact
-        subject: subject,
+        user_id: ticketUserId, // Can be null for unauthenticated users
+        reporter_email: ticketReporterEmail, // Store the provided email
+        listing_id: listingId || null,
+        subject: ticketSubject, // Generated subject
         status: 'open',
-        last_replied_by: 'user', // User is the first to reply
+        last_replied_by: user ? (user.id === ticketUserId ? 'user' : 'admin') : 'user', // If user is null, it's a guest user
       })
       .select('id')
       .single();
@@ -56,27 +70,27 @@ serve(async (req) => {
       .from('ticket_messages')
       .insert({
         ticket_id: newTicket.id,
-        sender_id: user.id,
+        sender_id: ticketUserId, // Can be null
+        sender_email: ticketReporterEmail, // Store the provided email
         message_content: messageContent,
       });
 
     if (messageError) {
-      // If message insertion fails, consider rolling back ticket creation (more complex, but ideal)
       console.error('Failed to insert initial ticket message:', messageError.message);
       throw new Error('Ticket created, but failed to save initial message. Please contact support.');
     }
 
     // NEW: Insert notification for admin about new ticket
-    const supabaseAdmin = createClient( // Create admin client here
+    const supabaseAdmin = createClient(
         Deno.env.get('SUPABASE_URL') ?? '',
         Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
     const { error: notificationError } = await supabaseAdmin
         .from('admin_notifications')
         .insert({
-            type: 'new_ticket', // New type for new tickets
+            type: 'new_ticket',
             entity_id: newTicket.id,
-            message: `Nuovo ticket aperto: ${subject}`,
+            message: `Nuovo ticket aperto: ${ticketSubject}`,
         });
     if (notificationError) {
         console.error('Failed to insert new ticket notification:', notificationError.message);

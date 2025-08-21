@@ -24,7 +24,8 @@ import { it } from 'date-fns/locale';
 
 interface Ticket {
   id: string;
-  user_id: string;
+  user_id: string | null; // Può essere null
+  reporter_email: string | null; // Nuova colonna
   listing_id: string | null;
   subject: string;
   status: 'open' | 'in_progress' | 'resolved' | 'closed';
@@ -48,6 +49,7 @@ export const TicketManagementTable = () => {
       .select(`
         id,
         user_id,
+        reporter_email,
         listing_id,
         subject,
         status,
@@ -77,7 +79,7 @@ export const TicketManagementTable = () => {
     fetchTickets();
   }, []);
 
-  const handleUpdateTicketStatus = async (ticketId: string, newStatus: 'in_progress' | 'resolved' | 'closed', userId: string, ticketSubject: string) => {
+  const handleUpdateTicketStatus = async (ticketId: string, newStatus: 'in_progress' | 'resolved' | 'closed', userId: string | null, ticketSubject: string) => {
     setActionLoadingId(ticketId);
     const toastId = showLoading(`Aggiornamento stato ticket...`);
 
@@ -123,7 +125,7 @@ export const TicketManagementTable = () => {
           body: {
             ticketId: ticketId,
             newStatus: newStatus,
-            userId: userId,
+            userId: userId, // Pass userId (can be null)
             ticketSubject: ticketSubject,
           },
         });
@@ -222,7 +224,7 @@ export const TicketManagementTable = () => {
                   <TableRow key={ticket.id}>
                     <TableCell className="font-medium">{ticket.id.substring(0, 8)}</TableCell>
                     <TableCell>{ticket.subject}</TableCell>
-                    <TableCell>{ticket.profiles?.email || 'N/D'}</TableCell>
+                    <TableCell>{ticket.profiles?.email || ticket.reporter_email || 'N/D'}</TableCell> {/* Mostra email del profilo o reporter_email */}
                     <TableCell>
                       {ticket.listing_id ? (
                         <Link to={`/listing/${ticket.listing_id}`} className="text-blue-500 hover:underline">

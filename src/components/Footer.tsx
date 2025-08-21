@@ -27,6 +27,7 @@ export const Footer = () => {
             dialogTitle="Contatta l'Assistenza"
             dialogDescription="Compila il modulo sottostante per inviare una richiesta di supporto o una domanda generale."
             icon={Mail}
+            initialSubject="Richiesta di assistenza generale" // Passa un soggetto iniziale
             redirectPathOnAuth="/termini" // Puoi scegliere un percorso di reindirizzamento più appropriato
           />
         </div>

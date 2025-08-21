@@ -12,10 +12,10 @@ serve(async (req) => {
   }
 
   try {
-    const { ticketId, newStatus, userId, ticketSubject } = await req.json();
+    const { ticketId, newStatus, userId, ticketSubject } = await req.json(); // userId can now be null
 
-    if (!ticketId || !newStatus || !userId || !ticketSubject) {
-      throw new Error('Missing required fields: ticketId, newStatus, userId, ticketSubject');
+    if (!ticketId || !newStatus || !ticketSubject) { // userId is now optional
+      throw new Error('Missing required fields: ticketId, newStatus, ticketSubject');
     }
 
     // Create a Supabase client with the service role key for admin operations
@@ -31,7 +31,7 @@ serve(async (req) => {
         type: 'ticket_resolved', // New type for resolved tickets
         entity_id: ticketId,
         message: `Il tuo ticket "${ticketSubject}" è stato risolto.`,
-        user_id: userId, // Notify the specific user
+        user_id: userId, // Notify the specific user (can be null)
       });
 
     if (notificationError) {

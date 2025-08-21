@@ -14,7 +14,8 @@ import { Link } from 'react-router-dom';
 
 interface TicketMessage {
   id: string;
-  sender_id: string;
+  sender_id: string | null; // Può essere null
+  sender_email: string | null; // Nuova colonna
   message_content: string;
   created_at: string;
   profiles: { email: string; role: string } | null;
@@ -30,7 +31,8 @@ interface TicketDetailsData {
   listing_id: string | null;
   listings: { title: string } | null;
   ticket_messages: TicketMessage[];
-  user_id: string;
+  user_id: string | null; // Può essere null
+  reporter_email: string | null; // Nuova colonna
 }
 
 const TicketDetails = () => {
@@ -47,7 +49,7 @@ const TicketDetails = () => {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      showError("Utente non autenticato.");
+      showError("Utente non autenticato. Effettua il login per visualizzare i dettagli del ticket.");
       navigate('/auth');
       return;
     }
@@ -58,6 +60,7 @@ const TicketDetails = () => {
       .select(`
         id,
         user_id,
+        reporter_email,
         subject,
         status,
         created_at,
@@ -68,6 +71,7 @@ const TicketDetails = () => {
         ticket_messages (
           id,
           sender_id,
+          sender_email,
           message_content,
           created_at,
           profiles ( email, role )
@@ -214,7 +218,7 @@ const TicketDetails = () => {
         body: {
           ticketId: ticket.id,
           newStatus: 'resolved',
-          userId: ticket.user_id,
+          userId: ticket.user_id, // Use ticket.user_id (can be null)
           ticketSubject: ticket.subject,
         },
       });
@@ -261,16 +265,22 @@ const TicketDetails = () => {
           <User className="h-4 w-4" /> Tu
         </>
       );
-    } else {
-      const isSupportOrAdmin = message.profiles?.role === 'admin' || message.profiles?.role === 'supporto';
+    } else if (message.profiles?.role === 'admin' || message.profiles?.role === 'supporto') {
       return (
         <>
-          {isSupportOrAdmin ? (
-            <Shield className="h-4 w-4 text-purple-400" />
-          ) : (
-            <User className="h-4 w-4" />
-          )}
-          {isSupportOrAdmin ? ' Supporto' : ` ${message.profiles?.email || 'Utente Sconosciuto'}`}
+          <Shield className="h-4 w-4 text-purple-400" /> Supporto
+        </>
+      );
+    } else if (message.sender_email) { // Fallback to sender_email if sender_id is null and not admin/supporto
+      return (
+        <>
+          <User className="h-4 w-4" /> {message.sender_email}
+        </>
+      );
+    } else {
+      return (
+        <>
+          <User className="h-4 w-4" /> Utente Sconosciuto
         </>
       );
     }
@@ -303,6 +313,9 @@ const TicketDetails = () => {
             </CardDescription>
             <p className="text-sm text-gray-500 mt-2">
               Creato il: {format(new Date(ticket.created_at), 'dd/MM/yyyy HH:mm', { locale: it })}
+              {ticket.user_id === null && ticket.reporter_email && (
+                <span className="ml-2">(da: {ticket.reporter_email})</span>
+              )}
             </p>
           </CardHeader>
           <CardContent>

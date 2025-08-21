@@ -27,17 +27,10 @@ serve(async (req) => {
 
     const { data: { user } } = await supabaseClient.auth.getUser();
 
-    if (!user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized: User not authenticated' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 401,
-      });
-    }
-
     // Verify user has access to this ticket (via RLS on tickets table)
     const { data: ticket, error: ticketFetchError } = await supabaseClient
       .from('tickets')
-      .select('id, user_id, subject, status') // Added 'subject' for notification message
+      .select('id, user_id, subject, status, reporter_email') // Added 'reporter_email'
       .eq('id', ticketId)
       .single();
 
@@ -46,35 +39,46 @@ serve(async (req) => {
     }
 
     // Determine sender role (user or admin/supporto)
-    const { data: profile, error: profileError } = await supabaseClient
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
+    let senderRole: 'user' | 'admin' | 'supporto' = 'user';
+    let senderEmail: string | null = null;
+    let senderId: string | null = null;
 
-    if (profileError || !profile) {
-      throw new Error('User profile not found.');
-    }
+    if (user) {
+        senderId = user.id;
+        const { data: profile, error: profileError } = await supabaseClient
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
 
-    let senderRole: 'user' | 'admin' | 'supporto';
-    if (profile.role === 'admin') {
-        senderRole = 'admin';
-    } else if (profile.role === 'supporto') {
-        senderRole = 'supporto';
+        if (profileError || !profile) {
+            throw new Error('User profile not found.');
+        }
+        if (profile.role === 'admin') {
+            senderRole = 'admin';
+        } else if (profile.role === 'supporto') {
+            senderRole = 'supporto';
+        }
+        senderEmail = user.email; // Use authenticated user's email
     } else {
-        senderRole = 'user';
+        // If no user is authenticated, this function should ideally not be called for replies.
+        // However, if it is, we'll use the reporter_email from the ticket as the sender.
+        // This scenario is less common for replies, as replies are usually from authenticated users or admins.
+        // For now, we'll assume replies are from authenticated users or admins.
+        // If an unauthenticated user needs to reply, they would typically create a new ticket.
+        throw new Error('Unauthorized: Only authenticated users can reply to tickets.');
     }
 
-    console.log(`add-ticket-message: User ID: ${user.id}, Profile Role: ${profile.role}, Determined Sender Role: ${senderRole}`);
+    console.log(`add-ticket-message: User ID: ${senderId}, Profile Role: ${senderRole}, Determined Sender Role: ${senderRole}`);
     console.log(`add-ticket-message: Ticket current status: ${ticket.status}`);
-
 
     // Insert new message
     const { error: messageError } = await supabaseClient
       .from('ticket_messages')
       .insert({
         ticket_id: ticketId,
-        sender_id: user.id,
+        sender_id: senderId, // Can be null if we allowed unauthenticated replies, but for now it's user.id
+        sender_email: senderEmail, // Store the sender's email
         message_content: messageContent,
       });
 
@@ -100,7 +104,7 @@ serve(async (req) => {
     }
 
     // Insert notification based on sender role
-    const supabaseAdmin = createClient( // Create admin client here
+    const supabaseAdmin = createClient(
         Deno.env.get('SUPABASE_URL') ?? '',
         Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );

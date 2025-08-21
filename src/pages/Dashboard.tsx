@@ -182,6 +182,7 @@ const Dashboard = () => {
                   dialogTitle="Apri un nuovo Ticket"
                   dialogDescription="Compila il modulo sottostante per inviare una richiesta di supporto o una domanda."
                   icon={Ticket}
+                  initialSubject="Nuovo ticket di supporto" // Passa un soggetto iniziale
                   redirectPathOnAuth="/dashboard"
                 />
               </div>

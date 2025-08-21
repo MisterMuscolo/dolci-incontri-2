@@ -13,7 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 
 const newTicketSchema = z.object({
-  subject: z.string().min(10, 'L\'oggetto deve contenere almeno 10 caratteri.').max(100, 'L\'oggetto non può superare i 100 caratteri.'),
+  senderEmail: z.string().email("L'email non è valida.").min(1, "L'email è obbligatoria."),
   messageContent: z.string().min(20, 'Il messaggio deve contenere almeno 20 caratteri.'),
 });
 
@@ -24,10 +24,20 @@ const NewTicket = () => {
   const form = useForm<z.infer<typeof newTicketSchema>>({
     resolver: zodResolver(newTicketSchema),
     defaultValues: {
-      subject: '',
+      senderEmail: '',
       messageContent: '',
     },
   });
+
+  React.useEffect(() => {
+    const fetchUserEmail = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email) {
+        form.setValue('senderEmail', user.email);
+      }
+    };
+    fetchUserEmail();
+  }, [form]);
 
   const onSubmit = async (values: z.infer<typeof newTicketSchema>) => {
     setIsSubmitting(true);
@@ -36,8 +46,9 @@ const NewTicket = () => {
     try {
       const { error } = await supabase.functions.invoke('create-ticket', {
         body: {
-          subject: values.subject,
+          senderEmail: values.senderEmail,
           messageContent: values.messageContent,
+          initialSubject: "Nuovo ticket di supporto", // Default subject for general tickets
         },
       });
 
@@ -97,11 +108,11 @@ const NewTicket = () => {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <FormField
                   control={form.control}
-                  name="subject"
+                  name="senderEmail"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Oggetto *</FormLabel>
-                      <FormControl><Input placeholder="Es. Problema con il login, Segnalazione annuncio" {...field} /></FormControl>
+                      <FormLabel>La tua Email *</FormLabel>
+                      <FormControl><Input type="email" placeholder="La tua email per essere ricontattato" {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )}

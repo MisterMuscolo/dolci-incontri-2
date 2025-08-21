@@ -21,9 +21,12 @@ interface TicketItem {
   last_replied_by: 'user' | 'admin' | 'supporto'; // Aggiornato per includere 'supporto'
   listing_id: string | null;
   listings: { title: string } | null; // Corretto: singolo oggetto o null
+  user_id: string | null; // Può essere null
+  reporter_email: string | null; // Nuova colonna
 }
 
 const MyTickets = () => {
+  console.log("MyTickets component is rendering."); // Aggiunto per il debug
   const navigate = useNavigate();
   const [tickets, setTickets] = useState<TicketItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,11 +39,12 @@ const MyTickets = () => {
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
-        setError("Utente non autenticato.");
+        setError("Utente non autenticato. Accedi per visualizzare i tuoi ticket.");
         setLoading(false);
         return;
       }
 
+      // Fetch tickets where user_id matches current user OR reporter_email matches current user's email
       const { data, error } = await supabase
         .from('tickets')
         .select(`
@@ -51,9 +55,11 @@ const MyTickets = () => {
           updated_at,
           last_replied_by,
           listing_id,
-          listings ( title )
+          listings ( title ),
+          user_id,
+          reporter_email
         `)
-        .eq('user_id', user.id)
+        .or(`user_id.eq.${user.id},reporter_email.eq.${user.email}`) // RLS policy should handle this, but explicit filter helps
         .order('updated_at', { ascending: false });
 
       if (error) {
@@ -138,6 +144,7 @@ const MyTickets = () => {
               dialogTitle="Apri un nuovo Ticket"
               dialogDescription="Compila il modulo sottostante per inviare una richiesta di supporto o una domanda."
               icon={Ticket}
+              initialSubject="Nuovo ticket di supporto" // Passa un soggetto iniziale
               redirectPathOnAuth="/my-tickets"
             />
           </CardHeader>
@@ -158,6 +165,7 @@ const MyTickets = () => {
                   dialogTitle="Apri un nuovo Ticket"
                   dialogDescription="Compila il modulo sottostante per inviare una richiesta di supporto o una domanda."
                   icon={Ticket}
+                  initialSubject="Nuovo ticket di supporto" // Passa un soggetto iniziale
                   redirectPathOnAuth="/my-tickets"
                 />
               </div>
