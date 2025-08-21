@@ -70,15 +70,13 @@ serve(async (req) => {
           <div style="background-color: #f0f8ff; border: 1px solid #d0e8ff; padding: 20px; margin: 30px 0; text-align: center; border-radius: 8px;">
             <p style="font-size: 1.1em; font-weight: bold; color: #333;">Hai bisogno di assistenza?</p>
             <p style="margin-top: 10px; color: #555;">Non esitare a contattare il nostro team di supporto per qualsiasi domanda o problema.</p>
-            <a href="https://incontridolci.it/new-ticket" style="display: inline-block; background-color: #E54A70; color: #ffffff; padding: 10px 20px; margin-top: 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Contatta l'Assistenza</a>
-          </div>
+            </div>
 
           <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
 
           <div style="text-align: center; margin-top: 20px;">
             <a href="https://incontridolci.it/termini" style="display: inline-block; background-color: #f0f0f0; color: #333; padding: 8px 15px; margin: 5px; text-decoration: none; border-radius: 5px; border: 1px solid #ddd;">Termini e Condizioni</a>
             <a href="https://incontridolci.it/privacy" style="display: inline-block; background-color: #f0f0f0; color: #333; padding: 8px 15px; margin: 5px; text-decoration: none; border-radius: 5px; border: 1px solid #ddd;">Privacy Policy</a>
-            <a href="https://incontridolci.it/new-ticket" style="display: inline-block; background-color: #f0f0f0; color: #333; padding: 8px 15px; margin: 5px; text-decoration: none; border-radius: 5px; border: 1px solid #ddd;">Assistenza</a>
           </div>
 
           <p style="text-align: center; font-size: 0.8em; color: #888; margin-top: 20px;">

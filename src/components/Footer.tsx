@@ -18,18 +18,7 @@ export const Footer = () => {
         <div className="flex justify-center gap-4 md:gap-6 mb-4 text-sm">
           <Link to="/termini" className="hover:text-rose-500 hover:underline">Termini e Condizioni</Link>
           <Link to="/privacy" className="hover:text-rose-500 hover:underline">Privacy Policy</Link>
-          <CreateTicketDialog
-            triggerButton={
-              <Button variant="link" className="p-0 h-auto text-gray-600 hover:text-rose-500 hover:underline">
-                Assistenza
-              </Button>
-            }
-            dialogTitle="Contatta l'Assistenza"
-            dialogDescription="Compila il modulo sottostante per inviare una richiesta di supporto o una domanda generale."
-            icon={Mail}
-            initialSubject="Richiesta di assistenza generale" // Passa un soggetto iniziale
-            redirectPathOnAuth="/termini" // Puoi scegliere un percorso di reindirizzamento più appropriato
-          />
+          <Link to="/new-ticket" className="hover:text-rose-500 hover:underline">Assistenza</Link> {/* Ripristinato il link Assistenza */}
         </div>
 
         <p className="text-xs text-gray-500 mb-4">
