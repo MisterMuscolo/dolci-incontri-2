@@ -63,21 +63,17 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
   const isActivePremium = listing.is_premium && promoStart && promoEnd && promoStart <= now && promoEnd >= now;
   const isPendingPremium = listing.is_premium && promoStart && promoStart > now;
 
-  let photosForDisplay: { url: string; is_primary: boolean }[] = [];
+  let photosToRender: { url: string; is_primary: boolean }[] = [];
   const primaryPhoto = listing.listing_photos.find(p => p.is_primary) || listing.listing_photos[0];
 
-  // Se non ci sono controlli (es. nella ricerca), mostra solo la prima foto se premium, altrimenti nessuna.
-  // Se ci sono controlli (MyListings o AdminView), mostra la prima foto se presente.
   if (isActivePremium) {
-    photosForDisplay = listing.listing_photos.slice(0, 5);
-  } else if (canEdit || canManagePhotos || canDelete) { // Se è una vista con controlli (MyListings o Admin)
-    if (primaryPhoto) {
-      photosForDisplay = [primaryPhoto];
-    }
+    photosToRender = listing.listing_photos.slice(0, 5); // Premium gets up to 5 photos
+  } else if (primaryPhoto) {
+    photosToRender = [primaryPhoto]; // Non-premium gets 1 photo if available
   }
+  // If no photos, photosToRender remains empty, and we'll render a placeholder.
 
-  const hasPhotos = photosForDisplay.length > 0;
-  const currentActivePhotoUrl = hasPhotos ? photosForDisplay[0].url : null;
+  const hasPhotosToRender = photosToRender.length > 0;
 
   const dateToDisplay = showExpiryDate ? new Date(listing.expires_at) : new Date(listing.created_at);
   const prefix = showExpiryDate ? 'Scade il:' : '';
@@ -182,43 +178,45 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
       (canEdit || canManagePhotos || canDelete) && isPendingPremium && "border-2 border-blue-400 shadow-lg bg-blue-50" 
     )}>
       <div className="flex flex-col sm:flex-row w-full">
-        {hasPhotos ? (
-          <div className="sm:w-1/4 lg:w-1/5 flex-shrink-0 relative">
-            <AspectRatio ratio={16 / 9} className="w-full h-full">
-              {photosForDisplay.length > 1 ? (
-                <Carousel
-                  plugins={[
-                    Autoplay({
-                      delay: 3000,
-                      stopOnInteraction: false,
-                      stopOnMouseEnter: true,
-                    }),
-                  ]}
-                  opts={{
-                    loop: true,
-                  }}
-                  className="w-full h-full"
-                >
-                  <CarouselContent className="h-full">
-                    {photosForDisplay.map((photo, index) => (
-                      <CarouselItem key={index} className="h-full">
-                        <Link to={`/listing/${listing.id}`} className="block w-full h-full">
-                          <img src={photo.url} alt={`${listing.title} - ${index + 1}`} className="object-cover w-full h-full" />
-                        </Link>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10" />
-                  <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10" />
-                </Carousel>
-              ) : (
-                <Link to={`/listing/${listing.id}`} className="block w-full h-full">
-                  <img src={currentActivePhotoUrl!} alt={listing.title} className="object-cover w-full h-full" />
-                </Link>
-              )}
-            </AspectRatio>
-          </div>
-        ) : null}
+        <div className="sm:w-1/4 lg:w-1/5 flex-shrink-0 relative">
+          <AspectRatio ratio={16 / 9} className="w-full h-full">
+            {photosToRender.length > 1 ? (
+              <Carousel
+                plugins={[
+                  Autoplay({
+                    delay: 3000,
+                    stopOnInteraction: false,
+                    stopOnMouseEnter: true,
+                  }),
+                ]}
+                opts={{
+                  loop: true,
+                }}
+                className="w-full h-full"
+              >
+                <CarouselContent className="h-full">
+                  {photosToRender.map((photo, index) => (
+                    <CarouselItem key={index} className="h-full">
+                      <Link to={`/listing/${listing.id}`} className="block w-full h-full">
+                        <img src={photo.url} alt={`${listing.title} - ${index + 1}`} className="object-cover w-full h-full" />
+                      </Link>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10" />
+                <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10" />
+              </Carousel>
+            ) : photosToRender.length === 1 ? (
+              <Link to={`/listing/${listing.id}`} className="block w-full h-full">
+                <img src={photosToRender[0].url} alt={listing.title} className="object-cover w-full h-full" />
+              </Link>
+            ) : (
+              <div className="flex items-center justify-center w-full h-full bg-gray-200 text-gray-400">
+                <ImageOff className="h-16 w-16" />
+              </div>
+            )}
+          </AspectRatio>
+        </div>
         <Link to={`/listing/${listing.id}`} className="flex-grow block hover:bg-gray-50/50">
           <div className="p-4 flex flex-col flex-grow">
             <h3 className="text-xl font-semibold mb-2 text-gray-800 line-clamp-2">{listing.title}</h3>
