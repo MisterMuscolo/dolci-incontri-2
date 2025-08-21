@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Info } from 'lucide-react';
+import { Info, Share, MoreVertical } from 'lucide-react'; // Importa le nuove icone
 
 type OSType = 'iOS' | 'Android' | 'Other';
 
@@ -41,7 +41,9 @@ export const PWAInstallInstructions = () => {
       <CardContent className="space-y-6">
         {os === 'Android' && (
           <div>
-            <h3 className="font-semibold text-lg text-gray-700 mb-2">Per Android (Chrome):</h3>
+            <h3 className="font-semibold text-lg text-gray-700 mb-2 flex items-center gap-2">
+              <MoreVertical className="h-5 w-5 text-gray-600" /> Per Android (Chrome):
+            </h3>
             <ol className="list-decimal list-inside text-gray-600 space-y-1">
               <li>Apri il browser Chrome e visita questo sito.</li>
               <li>Tocca l'icona del menu (tre puntini verticali) nell'angolo in alto a destra.</li>
@@ -52,7 +54,9 @@ export const PWAInstallInstructions = () => {
         )}
         {os === 'iOS' && (
           <div>
-            <h3 className="font-semibold text-lg text-gray-700 mb-2">Per iOS (Safari):</h3>
+            <h3 className="font-semibold text-lg text-gray-700 mb-2 flex items-center gap-2">
+              <Share className="h-5 w-5 text-gray-600" /> Per iOS (Safari):
+            </h3>
             <ol className="list-decimal list-inside text-gray-600 space-y-1">
               <li>Apri il browser Safari e visita questo sito.</li>
               <li>Tocca l'icona "Condividi" (il quadrato con la freccia che punta verso l'alto) nella barra inferiore.</li>
