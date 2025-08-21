@@ -46,7 +46,7 @@ serve(async (req) => {
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
 
     const { data, error: resendError } = await resend.emails.send({
-      from: 'Incontri Dolci <noreply@incontridolci.com>', // Replace with your verified Resend domain
+      from: 'Incontri Dolci <noreply@incontridolci.it>', // Modificato qui: da .com a .it
       to: [listing.email],
       reply_to: senderEmail, // Set reply-to to the sender's email
       subject: `Nuova risposta al tuo annuncio: "${listing.title}"`,
