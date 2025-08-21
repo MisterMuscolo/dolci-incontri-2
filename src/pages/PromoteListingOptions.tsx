@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'; // Importa useSearchParams
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ChevronLeft, Rocket, Sun, Moon } from 'lucide-react';
@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { cn } from '@/lib/utils'; // Importa cn per le classi condizionali
 
 interface PromotionOption {
   id: 'day' | 'night';
@@ -83,16 +84,19 @@ const dayTimeSlots = [
 const PromoteListingOptions = () => {
   const { listingId } = useParams<{ listingId: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams(); // Ottieni i parametri di ricerca dall'URL
+  const initialModeFromUrl = searchParams.get('mode'); // Leggi il parametro 'mode'
+
   const [isLoading, setIsLoading] = useState(true);
   const [currentCredits, setCurrentCredits] = useState<number | null>(null);
   const [listingTitle, setListingTitle] = useState<string | null>(null);
   const [isPromoting, setIsPromoting] = useState(false);
-  // Modificato per gestire la durata per ogni opzione
   const [selectedDurations, setSelectedDurations] = useState<{ [key: string]: number }>({
     day: durations[0].value,
     night: durations[0].value,
   });
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>(dayTimeSlots[0].value); // Default to first time slot
+  const [initialPromotionMode, setInitialPromotionMode] = useState<string | null>(null); // Stato per il tipo di promozione iniziale (se si sta estendendo)
 
   useEffect(() => {
     const fetchUserDataAndListing = async () => {
@@ -119,11 +123,11 @@ const PromoteListingOptions = () => {
         setCurrentCredits(profileData.credits);
       }
 
-      // Fetch listing title
+      // Fetch listing title and promotion_mode
       if (listingId) {
         const { data: listingData, error: listingError } = await supabase
           .from('listings')
-          .select('title')
+          .select('title, promotion_mode') // Fetch promotion_mode
           .eq('id', listingId)
           .single();
 
@@ -134,6 +138,14 @@ const PromoteListingOptions = () => {
           return;
         }
         setListingTitle(listingData.title);
+
+        // Se il parametro 'mode' è presente nell'URL e corrisponde alla modalità di promozione dell'annuncio,
+        // imposta initialPromotionMode per disabilitare l'altra opzione.
+        if (initialModeFromUrl && initialModeFromUrl === listingData.promotion_mode) {
+            setInitialPromotionMode(initialModeFromUrl);
+        } else {
+            setInitialPromotionMode(null); // Non in modalità estensione per un tipo specifico
+        }
       } else {
         showError('ID annuncio non fornito.');
         navigate('/my-listings');
@@ -144,7 +156,7 @@ const PromoteListingOptions = () => {
     };
 
     fetchUserDataAndListing();
-  }, [listingId, navigate]);
+  }, [listingId, navigate, initialModeFromUrl]); // Aggiungi initialModeFromUrl alle dipendenze
 
   const handlePromote = async (option: PromotionOption) => {
     const currentDuration = selectedDurations[option.id];
@@ -258,10 +270,17 @@ const PromoteListingOptions = () => {
             const totalCost = option.costs[currentDuration]; // Ottieni il costo dalla mappa
             const canAfford = currentCredits !== null && currentCredits >= totalCost;
 
+            // Determina se questa opzione dovrebbe essere disabilitata per l'estensione
+            const isDisabledForExtension = initialPromotionMode !== null && option.id !== initialPromotionMode;
+
             return (
               <Card
                 key={option.id}
-                className={`flex flex-col border-2 ${canAfford ? 'border-gray-200 hover:border-rose-500' : 'border-red-300 opacity-70 cursor-not-allowed'} transition-all duration-200`}
+                className={cn(
+                  `flex flex-col border-2`,
+                  canAfford && !isDisabledForExtension ? 'border-gray-200 hover:border-rose-500' : 'border-red-300 opacity-70 cursor-not-allowed',
+                  isDisabledForExtension && 'opacity-50 cursor-not-allowed' // Stile aggiuntivo per l'opzione disabilitata
+                )}
               >
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-xl font-bold flex items-center gap-2">
@@ -276,7 +295,11 @@ const PromoteListingOptions = () => {
                   <p className="text-sm text-gray-500 mb-4">{option.coverageText}</p> {/* Testo di copertura */}
                   {option.id === 'day' && (
                     <div className="mb-4">
-                      <Select onValueChange={setSelectedTimeSlot} value={selectedTimeSlot}>
+                      <Select 
+                        onValueChange={setSelectedTimeSlot} 
+                        value={selectedTimeSlot}
+                        disabled={isDisabledForExtension} // Disabilita anche la selezione della fascia oraria
+                      >
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Seleziona fascia oraria" />
                         </SelectTrigger>
@@ -294,6 +317,7 @@ const PromoteListingOptions = () => {
                     <Select
                       onValueChange={(value) => setSelectedDurations(prev => ({ ...prev, [option.id]: parseInt(value) }))}
                       value={String(currentDuration)}
+                      disabled={isDisabledForExtension} // Disabilita la selezione della durata
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Seleziona durata" />
@@ -309,13 +333,18 @@ const PromoteListingOptions = () => {
                   </div>
                   <Button
                     onClick={() => handlePromote(option)}
-                    disabled={!canAfford || isPromoting}
+                    disabled={!canAfford || isPromoting || isDisabledForExtension} // Aggiungi isDisabledForExtension
                     className="w-full bg-rose-500 hover:bg-rose-600"
                   >
                     {isPromoting ? 'Promozione in corso...' : `Promuovi per ${totalCost} crediti`}
                   </Button>
-                  {!canAfford && (
+                  {(!canAfford && !isDisabledForExtension) && ( // Mostra crediti insufficienti solo se non disabilitato dalla modalità estensione
                     <p className="text-red-500 text-sm mt-2 text-center">Crediti insufficienti.</p>
+                  )}
+                  {isDisabledForExtension && (
+                    <p className="text-gray-500 text-sm mt-2 text-center">
+                      Puoi estendere solo la Modalità {initialPromotionMode === 'day' ? 'Giorno' : 'Notte'}.
+                    </p>
                   )}
                 </CardContent>
               </Card>

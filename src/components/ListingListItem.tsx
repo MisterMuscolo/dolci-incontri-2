@@ -235,60 +235,33 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
               />
             )}
 
-            {isActivePremium ? (
+            {isActivePremium || isPendingPremium ? ( // Combined condition for showing promotion details
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button 
                     variant="default" 
                     size="sm" 
-                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-white flex items-center gap-1"
-                  >
-                    <Rocket className="h-4 w-4" /> In Evidenza
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Annuncio In Evidenza Attivo</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {getPromotionPeriodDetails()}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Chiudi</AlertDialogCancel>
-                    {!isAdminContext && (
-                      <Link to="/buy-credits">
-                        <AlertDialogAction className="bg-rose-500 hover:bg-rose-600">
-                          Acquista Crediti
-                        </AlertDialogAction>
-                      </Link>
+                    className={cn(
+                      "w-full text-white flex items-center gap-1",
+                      isActivePremium ? "bg-yellow-500 hover:bg-yellow-600" : "bg-blue-500 hover:bg-blue-600"
                     )}
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            ) : isPendingPremium ? (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button 
-                    variant="default" 
-                    size="sm" 
-                    className="w-full bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-1"
                   >
-                    <Rocket className="h-4 w-4" /> In Attesa
+                    <Rocket className="h-4 w-4" /> {isActivePremium ? 'In Evidenza' : 'In Attesa'}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Promozione in Attesa</AlertDialogTitle>
+                    <AlertDialogTitle>Promozione {isActivePremium ? 'Attiva' : 'In Attesa'}</AlertDialogTitle>
                     <AlertDialogDescription>
                       {getPromotionPeriodDetails()}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Chiudi</AlertDialogCancel>
-                    {!isAdminContext && (
-                      <Link to="/buy-credits">
+                    {!isAdminContext && listing.promotion_mode && ( // Only show "Promuovi" if not admin context and promotion_mode exists
+                      <Link to={`/promote-listing/${listing.id}?mode=${listing.promotion_mode}`}>
                         <AlertDialogAction className="bg-rose-500 hover:bg-rose-600">
-                          Acquista Crediti
+                          Promuovi
                         </AlertDialogAction>
                       </Link>
                     )}
