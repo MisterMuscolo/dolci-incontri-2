@@ -18,7 +18,7 @@ interface TicketMessage {
   sender_email: string | null; // Nuova colonna
   message_content: string;
   created_at: string;
-  profiles: { email: string; role: string } | null;
+  profiles: { email: string; role: string }[] | null; // Corretto: ora è un array di oggetti
 }
 
 interface TicketDetailsData {
@@ -29,7 +29,7 @@ interface TicketDetailsData {
   updated_at: string;
   last_replied_by: 'user' | 'admin' | 'supporto';
   listing_id: string | null;
-  listings: { title: string } | null;
+  listings: { title: string }[] | null; // Corretto: ora è un array di oggetti
   ticket_messages: TicketMessage[];
   user_id: string | null; // Può essere null
   reporter_email: string | null; // Nuova colonna
@@ -280,8 +280,8 @@ const TicketDetails = () => {
     const isCurrentUserSender = message.sender_id === currentUserId;
 
     // Determine if the sender is an Admin or Supporto
-    const isSenderAdmin = message.profiles?.role === 'admin';
-    const isSenderSupporto = message.profiles?.role === 'supporto';
+    const isSenderAdmin = message.profiles?.[0]?.role === 'admin';
+    const isSenderSupporto = message.profiles?.[0]?.role === 'supporto';
 
     // Display for Admin
     if (isSenderAdmin) {
@@ -302,7 +302,7 @@ const TicketDetails = () => {
     // Display for the current user (who is not admin/supporto)
     else if (isCurrentUserSender) {
       // Use the email from the message's profile if available, otherwise fallback to reporter_email from the ticket
-      const displayEmail = message.profiles?.email || ticket?.reporter_email || 'Email non disponibile';
+      const displayEmail = message.profiles?.[0]?.email || ticket?.reporter_email || 'Email non disponibile';
       return (
         <>
           <User className="h-4 w-4" /> Utente ({displayEmail})
@@ -349,7 +349,7 @@ const TicketDetails = () => {
               Stato: <Badge variant={getStatusBadgeVariant(ticket.status)} className="capitalize">{getStatusLabel(ticket.status)}</Badge>
               {ticket.listing_id && (
                 <Link to={`/listing/${ticket.listing_id}`} className="text-blue-500 hover:underline flex items-center gap-1">
-                  <LinkIcon className="h-4 w-4" /> Annuncio: {ticket.listings?.title || 'N/D'}
+                  <LinkIcon className="h-4 w-4" /> Annuncio: {ticket.listings?.[0]?.title || 'N/D'}
                 </Link>
               )}
             </CardDescription>

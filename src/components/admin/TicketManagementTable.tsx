@@ -32,8 +32,8 @@ interface Ticket {
   created_at: string;
   updated_at: string;
   last_replied_by: 'user' | 'admin' | 'supporto'; // Aggiornato per includere 'supporto'
-  profiles: { email: string } | null; // Corretto: singolo oggetto o null
-  listings: { title: string } | null; // Corretto: singolo oggetto o null
+  profiles: { email: string }[] | null; // Corretto: ora è un array di oggetti
+  listings: { title: string }[] | null; // Corretto: ora è un array di oggetti
 }
 
 export const TicketManagementTable = () => {
@@ -224,11 +224,11 @@ export const TicketManagementTable = () => {
                   <TableRow key={ticket.id}>
                     <TableCell className="font-medium">{ticket.id.substring(0, 8)}</TableCell>
                     <TableCell>{ticket.subject}</TableCell>
-                    <TableCell>{ticket.profiles?.email || ticket.reporter_email || 'N/D'}</TableCell> {/* Mostra email del profilo o reporter_email */}
+                    <TableCell>{ticket.profiles?.[0]?.email || ticket.reporter_email || 'N/D'}</TableCell> {/* Mostra email del profilo o reporter_email */}
                     <TableCell>
                       {ticket.listing_id ? (
                         <Link to={`/listing/${ticket.listing_id}`} className="text-blue-500 hover:underline">
-                          {ticket.listings?.title || 'Annuncio'}
+                          {ticket.listings?.[0]?.title || 'Annuncio'}
                         </Link>
                       ) : (
                         '-'

@@ -15,7 +15,7 @@ interface CreditTransaction {
   type: string;
   package_name: string | null;
   created_at: string;
-  profiles: { email: string } | null; // Corretto: singolo oggetto o null
+  profiles: { email: string }[] | null; // Corretto: ora è un array di oggetti
 }
 
 export const AllCreditTransactionsTable = () => {
@@ -97,7 +97,7 @@ export const AllCreditTransactionsTable = () => {
                 {transactions.map((transaction) => (
                   <TableRow key={transaction.id}>
                     <TableCell>{format(new Date(transaction.created_at), 'dd/MM/yyyy HH:mm', { locale: it })}</TableCell>
-                    <TableCell className="font-medium">{transaction.profiles?.email || 'N/D'}</TableCell>
+                    <TableCell className="font-medium">{transaction.profiles?.[0]?.email || 'N/D'}</TableCell>
                     <TableCell>{getTransactionTypeLabel(transaction.type)}</TableCell>
                     <TableCell>{transaction.package_name || '-'}</TableCell>
                     <TableCell className="text-right font-medium">

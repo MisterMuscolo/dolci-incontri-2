@@ -49,13 +49,6 @@ export const WatermarkedImage = ({
       >
         {watermarkText}
       </div>
-      {/* Aggiungi keyframes per l'animazione nel CSS globale se non già presenti */}
-      <style jsx>{`
-        @keyframes watermark-flow {
-          0% { background-position: 100% 0; }
-          100% { background-position: -100% 0; }
-        }
-      `}</style>
     </div>
   );
 };

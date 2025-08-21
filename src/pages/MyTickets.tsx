@@ -20,7 +20,7 @@ interface TicketItem {
   updated_at: string;
   last_replied_by: 'user' | 'admin' | 'supporto'; // Aggiornato per includere 'supporto'
   listing_id: string | null;
-  listings: { title: string } | null; // Corretto: singolo oggetto o null
+  listings: { title: string }[] | null; // Corretto: ora è un array di oggetti
   user_id: string | null; // Può essere null
   reporter_email: string | null; // Nuova colonna
 }
@@ -192,7 +192,7 @@ const MyTickets = () => {
                         <TableCell>
                           {ticket.listing_id ? (
                             <Link to={`/listing/${ticket.listing_id}`} className="text-blue-500 hover:underline">
-                              {ticket.listings?.title || 'Annuncio'}
+                              {ticket.listings?.[0]?.title || 'Annuncio'}
                             </Link>
                           ) : (
                             '-'
