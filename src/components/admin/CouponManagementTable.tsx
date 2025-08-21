@@ -27,7 +27,7 @@ import {
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form'; // Aggiunto FormDescription
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -36,7 +36,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils'; // Aggiunto cn
+import { cn } from '@/lib/utils';
 
 interface Coupon {
   id: string;
@@ -479,10 +479,14 @@ export const CouponManagementTable = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Applica a Utente Specifico (Opzionale)</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || ''} disabled={isSubmitting}>
+                    <Select
+                      onValueChange={(val) => field.onChange(val === "all" ? null : val)} // Handle "all" to set null
+                      value={field.value || "all"} // Set default to "all" if field.value is null
+                      disabled={isSubmitting}
+                    >
                       <FormControl><SelectTrigger><SelectValue placeholder="Tutti gli utenti" /></SelectTrigger></FormControl>
                       <SelectContent className="max-h-60">
-                        <SelectItem value="">Tutti gli utenti</SelectItem>
+                        <SelectItem value="all">Tutti gli utenti</SelectItem> {/* Changed value from "" to "all" */}
                         {users.map((user) => (
                           <SelectItem key={user.id} value={user.id}>{user.email}</SelectItem>
                         ))}
