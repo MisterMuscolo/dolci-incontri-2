@@ -124,7 +124,13 @@ const SearchResults = () => {
     return (
       <div className="space-y-4">
         {listings.map((listing) => (
-          <ListingListItem key={listing.id} listing={listing} showExpiryDate={false} allowNonPremiumImage={false} />
+          <ListingListItem 
+            key={listing.id} 
+            listing={listing} 
+            showExpiryDate={false} 
+            allowNonPremiumImage={false} 
+            isCompact={listing.is_premium} // Passa isCompact se l'annuncio è Premium
+          />
         ))}
         {totalPages > 1 && (
           <Pagination className="pt-4">

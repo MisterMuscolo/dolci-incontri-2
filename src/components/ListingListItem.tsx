@@ -53,9 +53,10 @@ interface ListingListItemProps {
   onListingUpdated?: () => void;
   isAdminContext?: boolean;
   allowNonPremiumImage?: boolean;
+  isCompact?: boolean; // Nuova prop per la modalità compatta
 }
 
-export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = false, canDelete = false, showExpiryDate = false, onListingUpdated, isAdminContext = false, allowNonPremiumImage = true }: ListingListItemProps) => {
+export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = false, canDelete = false, showExpiryDate = false, onListingUpdated, isAdminContext = false, allowNonPremiumImage = true, isCompact = false }: ListingListItemProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const nowUtcTime = Date.now(); 
@@ -71,7 +72,6 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
 
   let photosToRender: { url: string; is_primary: boolean }[] = [];
   
-  // Corretto: da listing.listing.photos a listing.listing_photos
   if (listing.listing_photos && listing.listing_photos.length > 0) {
     if (isActivePremium) {
       photosToRender = listing.listing_photos.slice(0, 5);
@@ -184,8 +184,8 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
     )}>
       <div className="flex flex-col sm:flex-row w-full">
         {hasPhotosToRender && (
-          <div className="md:w-1/4 lg:w-1/5 flex-shrink-0 relative">
-            <AspectRatio ratio={3 / 4} className="w-full h-full">
+          <div className={cn("md:w-1/4 lg:w-1/5 flex-shrink-0 relative", isCompact && "md:w-1/3 lg:w-1/4")}> {/* Aumenta la larghezza relativa dell'immagine in modalità compatta */}
+            <AspectRatio ratio={isCompact ? 4 / 3 : 3 / 4} className="w-full h-full"> {/* Cambia aspect ratio */}
               <Link to={`/listing/${listing.id}`} className="block w-full h-full">
                 <WatermarkedImage src={photosToRender[0].url} alt={listing.title} imageClassName="object-cover" />
               </Link>
@@ -201,7 +201,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           "flex-grow block hover:bg-gray-50/50",
           !hasPhotosToRender && "w-full"
         )}>
-          <div className="p-4 flex flex-col flex-grow">
+          <div className={cn("p-4 flex flex-col flex-grow", isCompact && "p-3")}> {/* Riduci padding */}
             <Badge variant="outline" className="w-fit mb-2">
               <CalendarDays className="h-4 w-4 mr-1.5" />
               <span>{prefix} {formattedDate}</span>
@@ -209,8 +209,8 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
             <div className="flex items-center gap-2 mb-2">
               <Badge variant="secondary" className="capitalize"><Tag className="h-4 w-4 mr-1" />{listing.category.replace(/-/g, ' ')}</Badge>
             </div>
-            <h3 className="text-xl font-semibold mb-2 text-rose-600 line-clamp-2">{listing.title}</h3>
-            <p className="text-base text-gray-600 mb-3 line-clamp-3">{listing.description}</p>
+            <h3 className={cn("text-xl font-semibold mb-2 text-rose-600 line-clamp-2", isCompact && "text-lg")}>{listing.title}</h3> {/* Riduci dimensione titolo */}
+            <p className={cn("text-base text-gray-600 mb-3 line-clamp-3", isCompact && "text-sm line-clamp-2")}>{listing.description}</p> {/* Riduci dimensione descrizione e line-clamp */}
             <div className="flex flex-wrap gap-2 mb-2">
               <Badge variant="outline">
                 <MapPin className="h-4 w-4 mr-1" /> {listing.city}{listing.zone && ` / ${listing.zone}`}
