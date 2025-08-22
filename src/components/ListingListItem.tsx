@@ -51,9 +51,10 @@ interface ListingListItemProps {
   showExpiryDate?: boolean;
   onListingUpdated?: () => void;
   isAdminContext?: boolean;
+  allowNonPremiumImage?: boolean; // Nuova prop per controllare la visualizzazione delle immagini non premium
 }
 
-export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = false, canDelete = false, showExpiryDate = false, onListingUpdated, isAdminContext = false }: ListingListItemProps) => {
+export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = false, canDelete = false, showExpiryDate = false, onListingUpdated, isAdminContext = false, allowNonPremiumImage = true }: ListingListItemProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const now = new Date();
@@ -65,12 +66,11 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
 
   let photosToRender: { url: string; is_primary: boolean }[] = [];
   
-  // Modificato: Mostra fino a 5 foto per annunci premium (attivi o in attesa), 1 per gli altri.
   if (listing.listing_photos && listing.listing_photos.length > 0) {
     if (listing.is_premium) {
       photosToRender = listing.listing_photos.slice(0, 5); // Premium listings show up to 5 photos
-    } else {
-      photosToRender = listing.listing_photos.slice(0, 1); // Non-premium listings show only 1 photo
+    } else if (allowNonPremiumImage) { // Only show 1 photo for non-premium if explicitly allowed
+      photosToRender = listing.listing_photos.slice(0, 1);
     }
   }
 

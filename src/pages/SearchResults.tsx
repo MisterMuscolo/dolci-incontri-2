@@ -139,7 +139,7 @@ const SearchResults = () => {
     return (
       <div className="space-y-4">
         {listings.map((listing) => (
-          <ListingListItem key={listing.id} listing={listing} showExpiryDate={false} />
+          <ListingListItem key={listing.id} listing={listing} showExpiryDate={false} allowNonPremiumImage={false} />
         ))}
         {totalPages > 1 && (
           <Pagination className="pt-4">
@@ -176,8 +176,7 @@ const SearchResults = () => {
         </div>
         {renderContent()}
       </div>
-    </div>
-  );
-};
+    );
+  };
 
 export default SearchResults;
