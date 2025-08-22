@@ -176,7 +176,8 @@ const SearchResults = () => {
         </div>
         {renderContent()}
       </div>
-    );
-  };
+    </div>
+  );
+};
 
 export default SearchResults;
