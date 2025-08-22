@@ -67,11 +67,15 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
   let photosToRender: { url: string; is_primary: boolean }[] = [];
   
   if (listing.listing_photos && listing.listing_photos.length > 0) {
-    if (listing.is_premium) {
-      photosToRender = listing.listing_photos.slice(0, 5); // Premium listings show up to 5 photos
-    } else if (allowNonPremiumImage) { // Only show 1 photo for non-premium if explicitly allowed
+    // Se l'annuncio è attivamente premium, mostra fino a 5 foto
+    if (isActivePremium) {
+      photosToRender = listing.listing_photos.slice(0, 5);
+    } 
+    // Se non è attivamente premium, ma è consentita la visualizzazione di immagini non premium (es. in MyListings), mostra 1 foto
+    else if (allowNonPremiumImage) { 
       photosToRender = listing.listing_photos.slice(0, 1);
     }
+    // Se non è attivamente premium E allowNonPremiumImage è false (come in SearchResults), photosToRender rimane vuoto.
   }
 
   const hasPhotosToRender = photosToRender.length > 0;
