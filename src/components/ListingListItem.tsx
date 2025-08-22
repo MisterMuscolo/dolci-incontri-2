@@ -1,8 +1,8 @@
-import React from "react"; // Aggiunto per risolvere l'errore di compilazione JSX
-import Card from "@/components/ui/card"; // Modificato da named a default import
+import React from "react";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, CalendarDays, Rocket, User, Camera, MapPin, Tag } from "lucide-react"; // Importa MapPin e Tag
+import { Pencil, Trash2, CalendarDays, Rocket, User, Camera, MapPin, Tag } from "lucide-react";
 import { format, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Link } from "react-router-dom";
@@ -23,7 +23,7 @@ import { cn } from '@/lib/utils';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { useState } from "react";
 import { ListingPhotoManagerDialog } from "./ListingPhotoManagerDialog";
-import { WatermarkedImage } from "./WatermarkedImage"; // Importa il nuovo componente
+import { WatermarkedImage } from "./WatermarkedImage";
 
 export interface Listing {
   id: string;
@@ -41,7 +41,7 @@ export interface Listing {
   last_bumped_at: string | null;
   listing_photos: { url: string; is_primary: boolean }[];
   age?: number;
-  zone?: string | null; // Aggiunto per chiarezza
+  zone?: string | null;
 }
 
 interface ListingListItemProps {
@@ -52,38 +52,32 @@ interface ListingListItemProps {
   showExpiryDate?: boolean;
   onListingUpdated?: () => void;
   isAdminContext?: boolean;
-  allowNonPremiumImage?: boolean; // Nuova prop per controllare la visualizzazione delle immagini non premium
+  allowNonPremiumImage?: boolean;
 }
 
 export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = false, canDelete = false, showExpiryDate = false, onListingUpdated, isAdminContext = false, allowNonPremiumImage = true }: ListingListItemProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Ottieni il timestamp UTC corrente in millisecondi
   const nowUtcTime = Date.now(); 
 
   const promoStart = listing.promotion_start_at ? new Date(listing.promotion_start_at) : null;
   const promoEnd = listing.promotion_end_at ? new Date(listing.promotion_end_at) : null;
 
-  // Questi sono già timestamp UTC in millisecondi
   const promoStartTime = promoStart?.getTime(); 
   const promoEndTime = promoEnd?.getTime(); 
 
-  // Confronta i timestamp UTC
   const isActivePremium = listing.is_premium && promoStartTime && promoEndTime && promoStartTime <= nowUtcTime && promoEndTime >= nowUtcTime;
   const isPendingPremium = listing.is_premium && promoStartTime && promoStartTime > nowUtcTime;
 
   let photosToRender: { url: string; is_primary: boolean }[] = [];
   
-  if (listing.listing_photos && listing.listing_photos.length > 0) {
-    // Se l'annuncio è attivamente premium, mostra fino a 5 foto
+  if (listing.listing_photos && listing.listing.photos.length > 0) {
     if (isActivePremium) {
       photosToRender = listing.listing_photos.slice(0, 5);
     } 
-    // Se non è attivamente premium, ma è consentita la visualizzazione di immagini non premium (es. in MyListings), mostra 1 foto
     else if (allowNonPremiumImage) { 
       photosToRender = listing.listing_photos.slice(0, 1);
     }
-    // Se non è attivamente premium E allowNonPremiumImage è false (come in SearchResults), photosToRender rimane vuoto.
   }
 
   const hasPhotosToRender = photosToRender.length > 0;
@@ -143,7 +137,6 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
     const toastId = showLoading('Eliminazione annuncio in corso...');
 
     try {
-      // Delete associated photos from storage first
       const { data: photos, error: photoListError } = await supabase.storage
         .from('listing_photos')
         .list(`${listing.id}/`);
@@ -161,7 +154,6 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
         }
       }
 
-      // Then delete the listing from the database
       const { error: listingDeleteError } = await supabase
         .from('listings')
         .delete()
@@ -185,18 +177,21 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
   };
 
   return (
-    <Card className="w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row relative">
+    <Card className={cn(
+      "w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row relative",
+      (canEdit || canManagePhotos || canDelete) && isPendingPremium && "border-2 border-blue-400 shadow-lg bg-blue-50"
+    )}>
       <div className="flex flex-col sm:flex-row w-full">
         {hasPhotosToRender && (
-          <div className="md:w-1/5 lg:w-1/6 flex-shrink-0 relative"> {/* Ridotto da 1/4 e 1/5 */}
+          <div className="md:w-1/4 lg:w-1/5 flex-shrink-0 relative">
             <AspectRatio ratio={3 / 4} className="w-full h-full">
               <Link to={`/listing/${listing.id}`} className="block w-full h-full">
                 <WatermarkedImage src={photosToRender[0].url} alt={listing.title} imageClassName="object-cover" />
               </Link>
             </AspectRatio>
             {listing.is_premium && photosToRender.length > 1 && (
-              <Badge className="absolute bottom-1 right-1 bg-black/60 text-white px-1.5 py-0.5 rounded-full text-xs font-semibold flex items-center gap-0.5"> {/* Ridotto padding e gap */}
-                <Camera className="h-2.5 w-2.5" /> {photosToRender.length} {/* Ridotto icona */}
+              <Badge className="absolute bottom-1 right-1 bg-black/60 text-white px-2 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
+                <Camera className="h-3 w-3" /> {photosToRender.length}
               </Badge>
             )}
           </div>
@@ -205,31 +200,25 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           "flex-grow block hover:bg-gray-50/50",
           !hasPhotosToRender && "w-full"
         )}>
-          <div className="p-3 flex flex-col flex-grow"> {/* Ridotto da p-4 a p-3 */}
-            {/* Data di pubblicazione come Badge */}
-            <Badge variant="outline" className="w-fit mb-1 text-xs">
-              <CalendarDays className="h-2.5 w-2.5 mr-1" /> {/* Ridotto icona */}
+          <div className="p-4 flex flex-col flex-grow">
+            <Badge variant="outline" className="w-fit mb-2">
+              <CalendarDays className="h-4 w-4 mr-1.5" />
               <span>{prefix} {formattedDate}</span>
             </Badge>
-            {/* Categoria */}
-            <div className="flex items-center gap-1.5 mb-1.5"> {/* Ridotto gap e mb */}
-              <Badge variant="secondary" className="capitalize text-xs"><Tag className="h-3 w-3 mr-1" />{listing.category.replace(/-/g, ' ')}</Badge> {/* Ridotto icona e font */}
+            <div className="flex items-center gap-2 mb-2">
+              <Badge variant="secondary" className="capitalize"><Tag className="h-4 w-4 mr-1" />{listing.category.replace(/-/g, ' ')}</Badge>
             </div>
-            {/* Titolo */}
-            <h3 className="text-lg font-semibold mb-1.5 text-rose-600 line-clamp-2">{listing.title}</h3> {/* Ridotto da text-xl a text-lg e mb */}
-            {/* Descrizione */}
-            <p className="text-sm text-gray-600 mb-2 line-clamp-3">{listing.description}</p> {/* Ridotto da text-base a text-sm e mb */}
-            {/* Tag di città/zona */}
-            <div className="flex flex-wrap gap-1.5 mb-1"> {/* Ridotto gap */}
-              <Badge variant="outline" className="text-xs">
-                <MapPin className="h-2.5 w-2.5 mr-1" /> {listing.city}{listing.zone && ` / ${listing.zone}`} {/* Ridotto icona e font */}
+            <h3 className="text-xl font-semibold mb-2 text-rose-600 line-clamp-2">{listing.title}</h3>
+            <p className="text-base text-gray-600 mb-3 line-clamp-3">{listing.description}</p>
+            <div className="flex flex-wrap gap-2 mb-2">
+              <Badge variant="outline">
+                <MapPin className="h-4 w-4 mr-1" /> {listing.city}{listing.zone && ` / ${listing.zone}`}
               </Badge>
             </div>
-            {/* Tag età */}
             {listing.age && (
-              <div className="flex flex-wrap gap-1.5 mb-2"> {/* Ridotto gap e mb */}
-                <Badge variant="outline" className="text-xs">
-                  <User className="h-2.5 w-2.5 mr-1" /> {listing.age} anni {/* Ridotto icona e font */}
+              <div className="flex flex-wrap gap-2 mb-3">
+                <Badge variant="outline">
+                  <User className="h-4 w-4 mr-1" /> {listing.age} anni
                 </Badge>
               </div>
             )}
@@ -237,11 +226,11 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
         </Link>
       </div>
       {(canEdit || canManagePhotos || canDelete) && (
-        <div className="flex-shrink-0 flex md:flex-col justify-end md:justify-center items-center gap-1.5 p-3 border-t md:border-t-0 md:border-l"> {/* Ridotto gap e padding */}
+        <div className="flex-shrink-0 flex md:flex-col justify-end md:justify-center items-center gap-2 p-4 border-t md:border-t-0 md:border-l">
           {canEdit && (
             <Link to={`/edit-listing/${listing.id}`} className="w-full">
-              <Button variant="outline" size="sm" className="w-full h-8 px-2 text-xs"> {/* Ridotto altezza e padding */}
-                <Pencil className="h-3 w-3 md:mr-1.5" /> {/* Ridotto icona */}
+              <Button variant="outline" size="sm" className="w-full h-9 px-3 text-sm">
+                <Pencil className="h-4 w-4 md:mr-2" />
                 <span className="hidden md:inline">Modifica</span>
               </Button>
             </Link>
@@ -262,11 +251,11 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                   variant="default" 
                   size="sm" 
                   className={cn(
-                    "w-full h-8 px-2 text-xs flex items-center gap-0.5", {/* Ridotto altezza, padding e gap */}
+                    "w-full h-9 px-3 text-sm flex items-center gap-1",
                     isActivePremium ? "bg-yellow-500 hover:bg-yellow-600" : "bg-blue-500 hover:bg-blue-600"
                   )}
                 >
-                  <Rocket className="h-3 w-3" /> {isActivePremium ? 'In Evidenza' : 'In Attesa'} {/* Ridotto icona */}
+                  <Rocket className="h-4 w-4" /> {isActivePremium ? 'In Evidenza' : 'In Attesa'}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -291,8 +280,8 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           ) : (
             !isAdminContext && (
               <Link to={`/promote-listing/${listing.id}`} className="w-full">
-                <Button variant="default" size="sm" className="w-full h-8 px-2 text-xs bg-green-500 hover:bg-green-600 text-white"> {/* Ridotto altezza e padding */}
-                  <Rocket className="h-3 w-3 md:mr-1.5" /> {/* Ridotto icona */}
+                <Button variant="default" size="sm" className="w-full h-9 px-3 text-sm bg-green-500 hover:bg-green-600 text-white">
+                  <Rocket className="h-4 w-4 md:mr-2" />
                   <span className="hidden md:inline">Promuovi</span>
                 </Button>
               </Link>
@@ -301,8 +290,8 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           {canDelete && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm" className="w-full h-8 px-2 text-xs" disabled={isDeleting}> {/* Ridotto altezza e padding */}
-                  <Trash2 className="h-3 w-3 md:mr-1.5" /> {/* Ridotto icona */}
+                <Button variant="destructive" size="sm" className="w-full h-9 px-3 text-sm" disabled={isDeleting}>
+                  <Trash2 className="h-4 w-4 md:mr-2" />
                   <span className="hidden md:inline">Elimina</span>
                 </Button>
               </AlertDialogTrigger>
@@ -328,10 +317,9 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           )}
         </div>
       )}
-      {/* Il badge è ora un figlio diretto della Card e posizionato all'interno */}
       {!(canEdit || canManagePhotos || canDelete) && isActivePremium && (
-        <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white absolute top-1 right-1 z-20 text-xs px-1.5 py-0.5 rounded-full font-semibold flex items-center gap-0.5"> {/* Ridotto padding e gap */}
-          <Rocket className="h-2.5 w-2.5 mr-0.5" /> In Evidenza {/* Ridotto icona */}
+        <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white absolute top-1 right-1 z-20 px-2 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
+          <Rocket className="h-3 w-3 mr-0.5" /> In Evidenza
         </Badge>
       )}
     </Card>
