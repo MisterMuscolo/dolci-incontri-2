@@ -42,9 +42,7 @@ export const WatermarkedImage = ({
         )}
         style={{
           textShadow: '2px 2px 4px rgba(0,0,0,0.7)', // Ombra per maggiore leggibilità
-          background: 'linear-gradient(45deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%)', // Leggero gradiente per effetto
-          backgroundSize: '200% 100%',
-          animation: 'watermark-flow 10s linear infinite', // Animazione per un effetto dinamico
+          // Rimosso il gradiente e l'animazione
         }}
       >
         {watermarkText}
