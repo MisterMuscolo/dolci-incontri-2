@@ -60,8 +60,8 @@ const SearchResults = () => {
     // Applica l'ordinamento lato server per prioritizzare gli annunci Premium attivi
     query = query
       .order('is_premium', { ascending: false }) // Premium prima
-      .order('promotion_end_at', { ascending: false, nullsLast: true }) // Poi per scadenza promozione (più lontana prima)
-      .order('last_bumped_at', { ascending: false, nullsLast: true }) // Poi per ultimo 'bump'
+      .order('promotion_end_at', { ascending: false, nullsFirst: false }) // Poi per scadenza promozione (più lontana prima)
+      .order('last_bumped_at', { ascending: false, nullsFirst: false }) // Poi per ultimo 'bump'
       .order('created_at', { ascending: false }); // Infine per data di creazione
 
     const from = (currentPage - 1) * LISTINGS_PER_PAGE;
