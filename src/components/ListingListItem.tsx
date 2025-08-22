@@ -1,3 +1,4 @@
+import React from "react"; // Aggiunto per risolvere l'errore di compilazione JSX
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
