@@ -1,5 +1,5 @@
 import React from "react"; // Aggiunto per risolvere l'errore di compilazione JSX
-import { Card } from "@/components/ui/card";
+import Card from "@/components/ui/card"; // Modificato da named a default import
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2, CalendarDays, Rocket, User, Camera, MapPin, Tag } from "lucide-react"; // Importa MapPin e Tag
