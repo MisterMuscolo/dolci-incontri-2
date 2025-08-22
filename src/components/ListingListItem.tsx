@@ -57,18 +57,19 @@ interface ListingListItemProps {
 export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = false, canDelete = false, showExpiryDate = false, onListingUpdated, isAdminContext = false, allowNonPremiumImage = true }: ListingListItemProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const now = new Date(); // Ora locale del client
-  const nowTime = now.getTime(); // Timestamp in millisecondi dell'ora locale del client
+  // Ottieni il timestamp UTC corrente in millisecondi
+  const nowUtcTime = Date.now(); 
 
   const promoStart = listing.promotion_start_at ? new Date(listing.promotion_start_at) : null;
   const promoEnd = listing.promotion_end_at ? new Date(listing.promotion_end_at) : null;
 
-  const promoStartTime = promoStart?.getTime(); // Timestamp in millisecondi (UTC)
-  const promoEndTime = promoEnd?.getTime(); // Timestamp in millisecondi (UTC)
+  // Questi sono già timestamp UTC in millisecondi
+  const promoStartTime = promoStart?.getTime(); 
+  const promoEndTime = promoEnd?.getTime(); 
 
-  // Confronta i timestamp per determinare lo stato della promozione
-  const isActivePremium = listing.is_premium && promoStartTime && promoEndTime && promoStartTime <= nowTime && promoEndTime >= nowTime;
-  const isPendingPremium = listing.is_premium && promoStartTime && promoStartTime > nowTime;
+  // Confronta i timestamp UTC
+  const isActivePremium = listing.is_premium && promoStartTime && promoEndTime && promoStartTime <= nowUtcTime && promoEndTime >= nowUtcTime;
+  const isPendingPremium = listing.is_premium && promoStartTime && promoStartTime > nowUtcTime;
 
   let photosToRender: { url: string; is_primary: boolean }[] = [];
   

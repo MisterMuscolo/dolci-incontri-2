@@ -53,12 +53,13 @@ const ListingDetails = () => {
       if (error || !data) {
         console.error('Error fetching listing:', error);
       } else {
-        const now = new Date();
-        const promoStart = data.promotion_start_at ? new Date(data.promotion_start_at) : null;
-        const promoEnd = data.promotion_end_at ? new Date(data.promotion_end_at) : null;
+        // Ottieni il timestamp UTC corrente in millisecondi
+        const nowUtcTime = Date.now(); 
+        const promoStart = data.promotion_start_at ? new Date(data.promotion_start_at).getTime() : null;
+        const promoEnd = data.promotion_end_at ? new Date(data.promotion_end_at).getTime() : null;
 
-        // Determine if the listing is actively premium based on promotion dates
-        const isActivePremium = data.is_premium && promoStart && promoEnd && promoStart <= now && promoEnd >= now;
+        // Determina se l'annuncio è attivamente premium basandosi sui timestamp UTC
+        const isActivePremium = data.is_premium && promoStart && promoEnd && promoStart <= nowUtcTime && promoEnd >= nowUtcTime;
 
         let photosToDisplay = data.listing_photos || [];
         if (!isActivePremium) {
@@ -99,10 +100,11 @@ const ListingDetails = () => {
     return <div className="text-center py-20">Annuncio non trovato.</div>;
   }
 
-  const now = new Date();
-  const promoStart = listing.promotion_start_at ? new Date(listing.promotion_start_at) : null;
-  const promoEnd = listing.promotion_end_at ? new Date(listing.promotion_end_at) : null;
-  const isActivePremium = listing.is_premium && promoStart && promoEnd && promoStart <= now && promoEnd >= now;
+  // Ottieni il timestamp UTC corrente in millisecondi
+  const nowUtcTime = Date.now(); 
+  const promoStart = listing.promotion_start_at ? new Date(listing.promotion_start_at).getTime() : null;
+  const promoEnd = listing.promotion_end_at ? new Date(listing.promotion_end_at).getTime() : null;
+  const isActivePremium = listing.is_premium && promoStart && promoEnd && promoStart <= nowUtcTime && promoEnd >= nowUtcTime;
 
   const hasPhotos = listing.listing_photos && listing.listing_photos.length > 0;
 
