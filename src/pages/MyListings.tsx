@@ -65,10 +65,12 @@ const MyListings = () => {
         promotion_start_at,
         promotion_end_at,
         last_bumped_at,
-        listing_photos ( url, is_primary )
+        listing_photos ( url, is_primary, created_at )
       `)
       .eq('user_id', user.id)
       .gt('expires_at', new Date().toISOString()) // Filtra solo gli annunci attivi
+      .order('is_primary', { foreignTable: 'listing_photos', ascending: false }) // Primary first
+      .order('created_at', { foreignTable: 'listing_photos', ascending: true }) // Then by creation date
       .range(from, to); 
 
     if (error) {

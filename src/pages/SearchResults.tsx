@@ -43,9 +43,11 @@ const SearchResults = () => {
         promotion_start_at,
         promotion_end_at,
         last_bumped_at,
-        listing_photos ( url, is_primary )
+        listing_photos ( url, is_primary, created_at )
       `, { count: 'exact' })
-      .gt('expires_at', new Date().toISOString()); // Questo filtro è gestito dalla RLS policy "Active listings are visible to all"
+      .gt('expires_at', new Date().toISOString()) // Questo filtro è gestito dalla RLS policy "Active listings are visible to all"
+      .order('is_primary', { foreignTable: 'listing_photos', ascending: false }) // Primary first
+      .order('created_at', { foreignTable: 'listing_photos', ascending: true }); // Then by creation date
 
     if (category && category !== 'tutte') {
       query = query.eq('category', category);
