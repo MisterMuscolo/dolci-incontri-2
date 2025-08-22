@@ -91,15 +91,25 @@ serve(async (req) => {
         promoEnd = new Date(promoStart.getTime() + durationHours * 60 * 60 * 1000);
 
     } else { // night mode
-        // Target 23:00 local time
-        const targetLocalNightStart = new Date(currentLocalTime.getFullYear(), currentLocalTime.getMonth(), currentLocalTime.getDate(), 23, 0, 0, 0);
+        // Determine if current local time is within the night window (23:00 to 06:59)
+        const currentLocalHour = currentLocalTime.getHours();
+        const isCurrentlyNightActive = currentLocalHour >= 23 || currentLocalHour < 7;
 
-        if (targetLocalNightStart.getTime() <= currentLocalTime.getTime()) {
-            // If 23:00 local time today has already passed, schedule for 23:00 local time tomorrow
-            targetLocalNightStart.setDate(targetLocalNightStart.getDate() + 1);
+        if (isCurrentlyNightActive) {
+            // If currently within the night active window, start promotion immediately
+            promoStart = now;
+        } else {
+            // If it's currently daytime, schedule for the next 23:00 local time
+            const targetLocalNightStart = new Date(currentLocalTime.getFullYear(), currentLocalTime.getMonth(), currentLocalTime.getDate(), 23, 0, 0, 0);
+            
+            // If 23:00 local time today has already passed (i.e., it's after 23:00 but before 07:00 next day, which is handled by isCurrentlyNightActive)
+            // or if it's currently daytime (e.g., 07:00-22:59), schedule for 23:00 today.
+            // If 23:00 today has passed (e.g., it's 10:00 tomorrow), schedule for 23:00 tomorrow.
+            if (targetLocalNightStart.getTime() <= currentLocalTime.getTime()) {
+                targetLocalNightStart.setDate(targetLocalNightStart.getDate() + 1); // Schedule for next day's 23:00
+            }
+            promoStart = new Date(targetLocalNightStart.getTime() + timezoneOffsetMinutes * 60 * 60 * 1000);
         }
-        // Convert the local target time to UTC for promoStart
-        promoStart = new Date(targetLocalNightStart.getTime() + timezoneOffsetMinutes * 60 * 1000);
         promoEnd = new Date(promoStart.getTime() + durationHours * 60 * 60 * 1000);
     }
 
