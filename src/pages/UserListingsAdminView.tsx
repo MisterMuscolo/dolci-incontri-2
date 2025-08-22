@@ -26,7 +26,6 @@ const UserListingsAdminView = () => {
       return;
     }
 
-    // Fetch user email
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
       .select('email')
@@ -41,8 +40,7 @@ const UserListingsAdminView = () => {
     }
     setUserEmail(profileData.email);
 
-    // Fetch listings for the specific user, ordered by premium and then by date
-    const { data, error: listingsError } = await supabase
+    let query = supabase
       .from('listings')
       .select(`
         id,
@@ -62,34 +60,21 @@ const UserListingsAdminView = () => {
       `)
       .eq('user_id', userId);
 
+    // Applica l'ordinamento lato server per prioritizzare gli annunci Premium attivi
+    query = query
+      .order('is_premium', { ascending: false }) // Premium prima
+      .order('promotion_end_at', { ascending: false, nullsLast: true }) // Poi per scadenza promozione (più lontana prima)
+      .order('last_bumped_at', { ascending: false, nullsLast: true }) // Poi per ultimo 'bump'
+      .order('created_at', { ascending: false }); // Infine per data di creazione
+
+    const { data, error: listingsError } = await query;
+
     if (listingsError) {
       console.error("Error fetching user listings:", listingsError);
       setError("Impossibile caricare gli annunci dell'utente.");
     } else if (data) {
-      // Client-side sorting for active premium listings
-      const now = new Date();
-      const sortedData = (data as Listing[]).sort((a, b) => {
-        const aIsActivePremium = a.is_premium && a.promotion_start_at && a.promotion_end_at && new Date(a.promotion_start_at) <= now && new Date(a.promotion_end_at) >= now;
-        const bIsActivePremium = b.is_premium && b.promotion_start_at && b.promotion_end_at && new Date(b.promotion_start_at) <= now && new Date(b.promotion_end_at) >= now;
-
-        // Prioritize active premium listings
-        if (aIsActivePremium && !bIsActivePremium) return -1;
-        if (!aIsActivePremium && bIsActivePremium) return 1;
-
-        // If both are active premium or both are not, then sort by last_bumped_at (desc)
-        // Use created_at as fallback for last_bumped_at if it's null
-        const aBumpedAt = a.last_bumped_at ? new Date(a.last_bumped_at).getTime() : new Date(a.created_at).getTime();
-        const bBumpedAt = b.last_bumped_at ? new Date(b.last_bumped_at).getTime() : new Date(b.created_at).getTime();
-        if (aBumpedAt !== bBumpedAt) {
-            return bBumpedAt - aBumpedAt; // Descending
-        }
-
-        // Fallback to created_at (desc) if all else is equal
-        const aCreatedAt = new Date(a.created_at).getTime();
-        const bCreatedAt = new Date(b.created_at).getTime();
-        return bCreatedAt - aCreatedAt;
-      });
-      setListings(sortedData);
+      // Rimosso l'ordinamento lato client, ora gestito dal server
+      setListings(data as Listing[]);
     }
     setLoading(false);
   }, [userId]);
@@ -129,12 +114,12 @@ const UserListingsAdminView = () => {
                   <ListingListItem 
                     key={listing.id} 
                     listing={listing} 
-                    canEdit={false} // Gli amministratori non modificano direttamente gli annunci degli utenti da qui
-                    canManagePhotos={true} // Gli amministratori possono gestire le foto
-                    canDelete={true} // Gli amministratori possono eliminare
+                    canEdit={false}
+                    canManagePhotos={true}
+                    canDelete={true}
                     showExpiryDate={true} 
                     onListingUpdated={fetchUserDataAndListings}
-                    isAdminContext={true} // Passa la prop per nascondere i pulsanti di promozione/acquisto
+                    isAdminContext={true}
                   />
                 ))}
               </div>

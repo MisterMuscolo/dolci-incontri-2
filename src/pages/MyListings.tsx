@@ -16,7 +16,7 @@ const MyListings = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null); // Stato per l'ID utente corrente
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const fetchListings = useCallback(async () => {
     setLoading(true);
@@ -25,14 +25,13 @@ const MyListings = () => {
       setLoading(false);
       return;
     }
-    setCurrentUserId(user.id); // Imposta l'ID utente corrente
+    setCurrentUserId(user.id);
 
-    // Query per il conteggio totale degli annunci attivi dell'utente
     const { count, error: countError } = await supabase
       .from('listings')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
-      .gt('expires_at', new Date().toISOString()); // Filtra solo gli annunci attivi
+      .gt('expires_at', new Date().toISOString());
 
     if (countError) {
       console.error("MyListings: Errore nel conteggio degli annunci:", countError.message, countError.details);
@@ -47,8 +46,7 @@ const MyListings = () => {
     const from = (currentPage - 1) * LISTINGS_PER_PAGE;
     const to = from + LISTINGS_PER_PAGE - 1;
 
-    // Query per recuperare gli annunci attivi, ordinati per premium e poi per data
-    const { data, error } = await supabase
+    let query = supabase
       .from('listings')
       .select(`
         id,
@@ -68,43 +66,29 @@ const MyListings = () => {
         listing_photos ( url, is_primary )
       `)
       .eq('user_id', user.id)
-      .gt('expires_at', new Date().toISOString()) // Filtra solo gli annunci attivi
-      .range(from, to); 
+      .gt('expires_at', new Date().toISOString());
+
+    // Applica l'ordinamento lato server per prioritizzare gli annunci Premium attivi
+    query = query
+      .order('is_premium', { ascending: false }) // Premium prima
+      .order('promotion_end_at', { ascending: false, nullsLast: true }) // Poi per scadenza promozione (più lontana prima)
+      .order('last_bumped_at', { ascending: false, nullsLast: true }) // Poi per ultimo 'bump'
+      .order('created_at', { ascending: false }); // Infine per data di creazione
+
+    const { data, error } = await query.range(from, to);
 
     if (error) {
       console.error("MyListings: Errore nel recupero degli annunci:", error.message, error.details);
     } else if (data) {
-      // Client-side sorting for active premium listings
-      const now = new Date();
-      const sortedData = (data as Listing[]).sort((a, b) => {
-        const aIsActivePremium = a.is_premium && a.promotion_start_at && a.promotion_end_at && new Date(a.promotion_start_at) <= now && new Date(a.promotion_end_at) >= now;
-        const bIsActivePremium = b.is_premium && b.promotion_start_at && b.promotion_end_at && new Date(b.promotion_start_at) <= now && new Date(b.promotion_end_at) >= now;
-
-        // Prioritize active premium listings
-        if (aIsActivePremium && !bIsActivePremium) return -1;
-        if (!aIsActivePremium && bIsActivePremium) return 1;
-
-        // If both are active premium or both are not, then sort by last_bumped_at (desc)
-        // Use created_at as fallback for last_bumped_at if it's null
-        const aBumpedAt = a.last_bumped_at ? new Date(a.last_bumped_at).getTime() : new Date(a.created_at).getTime();
-        const bBumpedAt = b.last_bumped_at ? new Date(b.last_bumped_at).getTime() : new Date(b.created_at).getTime();
-        if (aBumpedAt !== bBumpedAt) {
-            return bBumpedAt - aBumpedAt; // Descending
-        }
-
-        // Fallback to created_at (desc) if all else is equal
-        const aCreatedAt = new Date(a.created_at).getTime();
-        const bCreatedAt = new Date(b.created_at).getTime();
-        return bCreatedAt - aCreatedAt;
-      });
-      setListings(sortedData);
+      // Rimosso l'ordinamento lato client, ora gestito dal server
+      setListings(data as Listing[]);
     }
     setLoading(false);
-  }, [currentPage]); // Dipendenza da currentPage
+  }, [currentPage]);
 
   useEffect(() => {
     fetchListings();
-  }, [fetchListings]); // Dipendenza dalla funzione fetchListings
+  }, [fetchListings]);
 
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= totalPages) {
@@ -123,7 +107,6 @@ const MyListings = () => {
             </Button>
             <h1 className="text-3xl font-bold">I tuoi annunci</h1>
           </div>
-          {/* Il pulsante "Crea nuovo annuncio" è stato rimosso da qui */}
         </div>
 
         <Card>
@@ -143,9 +126,9 @@ const MyListings = () => {
                   <ListingListItem 
                     key={listing.id} 
                     listing={listing} 
-                    canEdit={true} // L'utente può modificare i propri annunci
-                    canManagePhotos={false} // Rimosso: la gestione delle foto avviene nella pagina di modifica
-                    canDelete={true} // L'utente può eliminare i propri annunci
+                    canEdit={true}
+                    canManagePhotos={false}
+                    canDelete={true}
                     showExpiryDate={true} 
                     onListingUpdated={fetchListings} 
                   />
