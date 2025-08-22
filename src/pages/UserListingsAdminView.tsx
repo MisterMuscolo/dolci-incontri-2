@@ -58,11 +58,9 @@ const UserListingsAdminView = () => {
         promotion_start_at,
         promotion_end_at,
         last_bumped_at,
-        listing_photos ( url, is_primary, created_at )
+        listing_photos ( url, is_primary )
       `)
-      .eq('user_id', userId)
-      .order('is_primary', { foreignTable: 'listing_photos', ascending: false }) // Primary first
-      .order('created_at', { foreignTable: 'listing_photos', ascending: true }); // Then by creation date
+      .eq('user_id', userId);
 
     if (listingsError) {
       console.error("Error fetching user listings:", listingsError);
