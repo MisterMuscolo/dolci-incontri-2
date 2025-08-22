@@ -185,10 +185,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
   };
 
   return (
-    <Card className={cn(
-      "w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row relative", 
-      (canEdit || canManagePhotos || canDelete) && isPendingPremium && "border-2 border-blue-400 shadow-lg bg-blue-50" 
-    )}>
+    <Card className="w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row relative">
       <div className="flex flex-col sm:flex-row w-full">
         {hasPhotosToRender && (
           <div className="md:w-1/5 lg:w-1/6 flex-shrink-0 relative"> {/* Ridotto da 1/4 e 1/5 */}
