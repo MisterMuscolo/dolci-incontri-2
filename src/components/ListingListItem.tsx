@@ -190,15 +190,15 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
     )}>
       <div className="flex flex-col sm:flex-row w-full">
         {hasPhotosToRender && (
-          <div className="md:w-1/4 lg:w-1/5 flex-shrink-0 relative">
+          <div className="md:w-1/5 lg:w-1/6 flex-shrink-0 relative"> {/* Ridotto da 1/4 e 1/5 */}
             <AspectRatio ratio={3 / 4} className="w-full h-full">
               <Link to={`/listing/${listing.id}`} className="block w-full h-full">
                 <WatermarkedImage src={photosToRender[0].url} alt={listing.title} imageClassName="object-cover" />
               </Link>
             </AspectRatio>
             {listing.is_premium && photosToRender.length > 1 && (
-              <Badge className="absolute bottom-2 right-2 bg-black/60 text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
-                <Camera className="h-3 w-3" /> {photosToRender.length}
+              <Badge className="absolute bottom-1 right-1 bg-black/60 text-white px-1.5 py-0.5 rounded-full text-xs font-semibold flex items-center gap-0.5"> {/* Ridotto padding e gap */}
+                <Camera className="h-2.5 w-2.5" /> {photosToRender.length} {/* Ridotto icona */}
               </Badge>
             )}
           </div>
@@ -207,31 +207,31 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           "flex-grow block hover:bg-gray-50/50",
           !hasPhotosToRender && "w-full"
         )}>
-          <div className="p-4 flex flex-col flex-grow">
+          <div className="p-3 flex flex-col flex-grow"> {/* Ridotto da p-4 a p-3 */}
             {/* Data di pubblicazione come Badge */}
             <Badge variant="outline" className="w-fit mb-1 text-xs">
-              <CalendarDays className="h-3 w-3 mr-1" />
+              <CalendarDays className="h-2.5 w-2.5 mr-1" /> {/* Ridotto icona */}
               <span>{prefix} {formattedDate}</span>
             </Badge>
             {/* Categoria */}
-            <div className="flex items-center gap-2 mb-2">
-              <Badge variant="secondary" className="capitalize"><Tag className="h-4 w-4 mr-1.5" />{listing.category.replace(/-/g, ' ')}</Badge>
+            <div className="flex items-center gap-1.5 mb-1.5"> {/* Ridotto gap e mb */}
+              <Badge variant="secondary" className="capitalize text-xs"><Tag className="h-3 w-3 mr-1" />{listing.category.replace(/-/g, ' ')}</Badge> {/* Ridotto icona e font */}
             </div>
             {/* Titolo */}
-            <h3 className="text-xl font-semibold mb-2 text-rose-600 line-clamp-2">{listing.title}</h3>
+            <h3 className="text-lg font-semibold mb-1.5 text-rose-600 line-clamp-2">{listing.title}</h3> {/* Ridotto da text-xl a text-lg e mb */}
             {/* Descrizione */}
-            <p className="text-base text-gray-600 mb-3 line-clamp-3">{listing.description}</p>
+            <p className="text-sm text-gray-600 mb-2 line-clamp-3">{listing.description}</p> {/* Ridotto da text-base a text-sm e mb */}
             {/* Tag di città/zona */}
-            <div className="flex flex-wrap gap-2 mb-1">
-              <Badge variant="outline">
-                <MapPin className="h-3 w-3 mr-1" /> {listing.city}{listing.zone && ` / ${listing.zone}`}
+            <div className="flex flex-wrap gap-1.5 mb-1"> {/* Ridotto gap */}
+              <Badge variant="outline" className="text-xs">
+                <MapPin className="h-2.5 w-2.5 mr-1" /> {listing.city}{listing.zone && ` / ${listing.zone}`} {/* Ridotto icona e font */}
               </Badge>
             </div>
             {/* Tag età */}
             {listing.age && (
-              <div className="flex flex-wrap gap-2 mb-3">
-                <Badge variant="outline">
-                  <User className="h-3 w-3 mr-1" /> {listing.age} anni
+              <div className="flex flex-wrap gap-1.5 mb-2"> {/* Ridotto gap e mb */}
+                <Badge variant="outline" className="text-xs">
+                  <User className="h-2.5 w-2.5 mr-1" /> {listing.age} anni {/* Ridotto icona e font */}
                 </Badge>
               </div>
             )}
@@ -239,11 +239,11 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
         </Link>
       </div>
       {(canEdit || canManagePhotos || canDelete) && (
-        <div className="flex-shrink-0 flex md:flex-col justify-end md:justify-center items-center gap-2 p-4 border-t md:border-t-0 md:border-l">
+        <div className="flex-shrink-0 flex md:flex-col justify-end md:justify-center items-center gap-1.5 p-3 border-t md:border-t-0 md:border-l"> {/* Ridotto gap e padding */}
           {canEdit && (
             <Link to={`/edit-listing/${listing.id}`} className="w-full">
-              <Button variant="outline" size="sm" className="w-full">
-                <Pencil className="h-4 w-4 md:mr-2" />
+              <Button variant="outline" size="sm" className="w-full h-8 px-2 text-xs"> {/* Ridotto altezza e padding */}
+                <Pencil className="h-3 w-3 md:mr-1.5" /> {/* Ridotto icona */}
                 <span className="hidden md:inline">Modifica</span>
               </Button>
             </Link>
@@ -264,11 +264,11 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                   variant="default" 
                   size="sm" 
                   className={cn(
-                    "w-full text-white flex items-center gap-1",
+                    "w-full h-8 px-2 text-xs flex items-center gap-0.5", {/* Ridotto altezza, padding e gap */}
                     isActivePremium ? "bg-yellow-500 hover:bg-yellow-600" : "bg-blue-500 hover:bg-blue-600"
                   )}
                 >
-                  <Rocket className="h-4 w-4" /> {isActivePremium ? 'In Evidenza' : 'In Attesa'}
+                  <Rocket className="h-3 w-3" /> {isActivePremium ? 'In Evidenza' : 'In Attesa'} {/* Ridotto icona */}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -293,8 +293,8 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           ) : (
             !isAdminContext && (
               <Link to={`/promote-listing/${listing.id}`} className="w-full">
-                <Button variant="default" size="sm" className="w-full bg-green-500 hover:bg-green-600 text-white">
-                  <Rocket className="h-4 w-4 md:mr-2" />
+                <Button variant="default" size="sm" className="w-full h-8 px-2 text-xs bg-green-500 hover:bg-green-600 text-white"> {/* Ridotto altezza e padding */}
+                  <Rocket className="h-3 w-3 md:mr-1.5" /> {/* Ridotto icona */}
                   <span className="hidden md:inline">Promuovi</span>
                 </Button>
               </Link>
@@ -303,8 +303,8 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           {canDelete && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm" className="w-full" disabled={isDeleting}>
-                  <Trash2 className="h-4 w-4 md:mr-2" />
+                <Button variant="destructive" size="sm" className="w-full h-8 px-2 text-xs" disabled={isDeleting}> {/* Ridotto altezza e padding */}
+                  <Trash2 className="h-3 w-3 md:mr-1.5" /> {/* Ridotto icona */}
                   <span className="hidden md:inline">Elimina</span>
                 </Button>
               </AlertDialogTrigger>
@@ -332,8 +332,8 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
       )}
       {/* Il badge è ora un figlio diretto della Card e posizionato all'interno */}
       {!(canEdit || canManagePhotos || canDelete) && isActivePremium && (
-        <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white absolute top-2 right-2 z-20 text-xs px-2 py-0.5 rounded-full font-semibold">
-          <Rocket className="h-3 w-3 mr-1" /> In Evidenza
+        <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white absolute top-1 right-1 z-20 text-xs px-1.5 py-0.5 rounded-full font-semibold flex items-center gap-0.5"> {/* Ridotto padding e gap */}
+          <Rocket className="h-2.5 w-2.5 mr-0.5" /> In Evidenza {/* Ridotto icona */}
         </Badge>
       )}
     </Card>
