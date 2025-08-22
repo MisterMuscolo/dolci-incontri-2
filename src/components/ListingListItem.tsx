@@ -71,7 +71,8 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
 
   let photosToRender: { url: string; is_primary: boolean }[] = [];
   
-  if (listing.listing_photos && listing.listing.photos.length > 0) {
+  // Corretto: da listing.listing.photos a listing.listing_photos
+  if (listing.listing_photos && listing.listing_photos.length > 0) {
     if (isActivePremium) {
       photosToRender = listing.listing_photos.slice(0, 5);
     } 
