@@ -65,9 +65,13 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
 
   let photosToRender: { url: string; is_primary: boolean }[] = [];
   
-  // Solo gli annunci Premium attivi con foto mostrano le immagini
-  if (isActivePremium && listing.listing_photos && listing.listing_photos.length > 0) {
-    photosToRender = listing.listing_photos.slice(0, 5); // Premium gets up to 5 photos
+  // Modificato: Mostra fino a 5 foto per annunci premium (attivi o in attesa), 1 per gli altri.
+  if (listing.listing_photos && listing.listing_photos.length > 0) {
+    if (listing.is_premium) {
+      photosToRender = listing.listing_photos.slice(0, 5); // Premium listings show up to 5 photos
+    } else {
+      photosToRender = listing.listing_photos.slice(0, 1); // Non-premium listings show only 1 photo
+    }
   }
 
   const hasPhotosToRender = photosToRender.length > 0;
@@ -181,7 +185,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                 <WatermarkedImage src={photosToRender[0].url} alt={listing.title} imageClassName="object-cover" />
               </Link>
             </AspectRatio>
-            {isActivePremium && photosToRender.length > 1 && (
+            {listing.is_premium && photosToRender.length > 1 && (
               <Badge className="absolute bottom-2 right-2 bg-black/60 text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
                 <Camera className="h-3 w-3" /> {photosToRender.length}
               </Badge>
