@@ -33,7 +33,7 @@ type FullListing = {
   promotion_end_at: string | null;
   contact_preference: 'email' | 'phone' | 'both';
   contact_whatsapp: boolean | null; // Nuovo campo
-  listing_photos: { id: string; url: string }[];
+  listing_photos: { id: string; url: string; is_primary: boolean }[]; // Aggiunto is_primary
 };
 
 const ListingDetails = () => {
@@ -49,7 +49,10 @@ const ListingDetails = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from('listings')
-        .select('*, listing_photos(*)')
+        .select(`
+          *, 
+          listing_photos(id, url, is_primary)
+        `)
         .eq('id', id)
         .single();
 
@@ -59,6 +62,13 @@ const ListingDetails = () => {
         navigate('/search'); // Reindirizza alla pagina di ricerca se l'annuncio non è trovato
         return;
       } else {
+        // Ordina le foto: prima la principale, poi per data di creazione
+        const sortedPhotos = (data.listing_photos || []).sort((a, b) => {
+          if (a.is_primary && !b.is_primary) return -1;
+          if (!a.is_primary && b.is_primary) return 1;
+          return 0; // Mantieni l'ordine originale se nessuna è primaria o entrambe lo sono
+        });
+
         // Ottieni il timestamp UTC corrente in millisecondi
         const nowUtcTime = Date.now(); 
         const promoStart = data.promotion_start_at ? new Date(data.promotion_start_at).getTime() : null;
@@ -67,7 +77,7 @@ const ListingDetails = () => {
         // Determina se l'annuncio è attivamente premium basandosi sui timestamp UTC
         const isActivePremium = data.is_premium && promoStart && promoEnd && promoStart <= nowUtcTime && promoEnd >= nowUtcTime;
 
-        let photosToDisplay = data.listing_photos || [];
+        let photosToDisplay = sortedPhotos;
         if (!isActivePremium) {
           photosToDisplay = photosToDisplay.slice(0, 1); // Solo 1 foto per annunci non attivamente premium
         } else {

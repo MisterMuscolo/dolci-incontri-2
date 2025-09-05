@@ -79,7 +79,16 @@ const MyListings = () => {
     if (error) {
       console.error("MyListings: Errore nel recupero degli annunci:", error.message, error.details);
     } else if (data) {
-      setListings(data as Listing[]);
+      // Ordina le foto localmente per assicurare che la principale sia sempre la prima
+      const processedListings = data.map(listing => ({
+        ...listing,
+        listing_photos: (listing.listing_photos || []).sort((a, b) => {
+          if (a.is_primary && !b.is_primary) return -1;
+          if (!a.is_primary && b.is_primary) return 1;
+          return 0;
+        })
+      }));
+      setListings(processedListings as Listing[]);
     }
     setLoading(false);
   }, [currentPage]);
