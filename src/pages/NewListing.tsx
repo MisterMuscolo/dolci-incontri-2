@@ -293,8 +293,11 @@ const NewListing = () => {
                           <Input 
                             type="email" 
                             {...field} 
-                            readOnly={contactPreference === 'phone'} // Readonly if only phone is preferred
-                            className={contactPreference === 'phone' ? "bg-gray-100 cursor-not-allowed" : ""}
+                            readOnly // Email is always read-only
+                            className={cn(
+                              "bg-gray-100 cursor-not-allowed",
+                              (contactPreference === 'phone') && "opacity-50" // Visually dim if not preferred
+                            )}
                           />
                         </FormControl>
                         <FormMessage />
@@ -313,7 +316,9 @@ const NewListing = () => {
                             placeholder="Il tuo numero di telefono" 
                             {...field} 
                             readOnly={contactPreference === 'email'} // Readonly if only email is preferred
-                            className={contactPreference === 'email' ? "bg-gray-100 cursor-not-allowed" : ""}
+                            className={cn(
+                              (contactPreference === 'email') && "bg-gray-100 cursor-not-allowed opacity-50"
+                            )}
                           />
                         </FormControl>
                         <FormMessage />
