@@ -86,18 +86,25 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
   // Logica per la data da visualizzare basata su dateTypeToDisplay
   let dateToDisplay: Date;
   let prefix: string;
-  const dateFormat = 'dd MMMM yyyy'; // Formato data standard
+  let currentDateFormat: string; // Nuovo stato per il formato della data
 
   if (dateTypeToDisplay === 'created_at') {
     dateToDisplay = new Date(listing.created_at);
-    prefix = 'Pubblicato il:';
+    if (isCompact) { // Se è in modalità compatta (es. annunci premium in SearchResults)
+      prefix = ''; // Nessun prefisso
+      currentDateFormat = 'dd MMMM'; // Formato più conciso
+    } else {
+      prefix = 'Pubblicato il:';
+      currentDateFormat = 'dd MMMM yyyy'; // Formato completo
+    }
   } else { // Default a 'expires_at'
     dateToDisplay = new Date(listing.expires_at);
     prefix = 'Scade il:';
+    currentDateFormat = 'dd MMMM yyyy'; // Formato completo
   }
 
   const formattedDate = !isNaN(dateToDisplay.getTime()) 
-    ? format(dateToDisplay, dateFormat, { locale: it }) 
+    ? format(dateToDisplay, currentDateFormat, { locale: it }) 
     : 'N/D';
 
   const getPromotionDetailsText = (mode: string | null) => {
