@@ -34,20 +34,26 @@ export const ApplyCouponForm = ({ onCouponApplied, onCouponRemoved, currentAppli
       dismissToast(toastId);
 
       if (error) {
+        console.error("Errore completo da supabase.functions.invoke:", error); // Log per il debug
         let displayMessage = 'Errore durante l\'applicazione del coupon.';
-        // @ts-ignore
+
+        // Tenta di estrarre il messaggio dal corpo della risposta dell'Edge Function
         if (error.context && typeof error.context.body === 'string') {
           try {
-            // @ts-ignore
             const errorBody = JSON.parse(error.context.body);
             if (errorBody.error) {
               displayMessage = errorBody.error;
             }
           } catch (e) {
-            console.error("Could not parse error response from edge function:", e);
+            console.error("Impossibile parsare il corpo della risposta di errore dall'Edge Function:", e);
+            // Fallback al messaggio generico o a error.message se il parsing fallisce
+            displayMessage = error.message || 'Errore sconosciuto dal server.';
           }
+        } else if (error.message) {
+          // Fallback a error.message se context.body non è disponibile o non è una stringa
+          displayMessage = error.message;
         }
-        // Mostra direttamente il messaggio di errore specifico
+        
         showError(displayMessage);
         return; // Esci dalla funzione dopo aver mostrato l'errore
       }
