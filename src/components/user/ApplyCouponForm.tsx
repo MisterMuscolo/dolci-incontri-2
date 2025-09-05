@@ -34,20 +34,22 @@ export const ApplyCouponForm = ({ onCouponApplied, onCouponRemoved, currentAppli
       dismissToast(toastId);
 
       if (error) {
-        let errorMessage = 'Errore durante l\'applicazione del coupon.';
+        let displayMessage = 'Errore durante l\'applicazione del coupon.';
         // @ts-ignore
         if (error.context && typeof error.context.body === 'string') {
           try {
             // @ts-ignore
             const errorBody = JSON.parse(error.context.body);
             if (errorBody.error) {
-              errorMessage = errorBody.error;
+              displayMessage = errorBody.error;
             }
           } catch (e) {
             console.error("Could not parse error response from edge function:", e);
           }
         }
-        throw new Error(errorMessage);
+        // Mostra direttamente il messaggio di errore specifico
+        showError(displayMessage);
+        return; // Esci dalla funzione dopo aver mostrato l'errore
       }
 
       showSuccess(data.message || 'Coupon applicato con successo!');
@@ -61,6 +63,7 @@ export const ApplyCouponForm = ({ onCouponApplied, onCouponRemoved, currentAppli
       setCouponCode(''); // Clear input after successful application
     } catch (error: any) {
       dismissToast(toastId);
+      // Questo blocco catch dovrebbe essere raggiunto solo per errori imprevisti non gestiti sopra
       showError(error.message || 'Si è verificato un errore imprevisto.');
     } finally {
       setIsLoading(false);
