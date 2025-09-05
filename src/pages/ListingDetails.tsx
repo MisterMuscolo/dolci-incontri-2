@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { showError } from '@/utils/toast';
-import { MapPin, Tag, User, Mail, BookText, ChevronLeft, CalendarDays, Rocket, Phone, Flag, MessageCircle } from 'lucide-react'; // Importato MessageCircle
+import { MapPin, Tag, User, Mail, BookText, ChevronLeft, CalendarDays, Rocket, Phone, Flag, MessageCircle, Flame } from 'lucide-react'; // Importato Flame
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -145,8 +145,8 @@ const ListingDetails = () => {
         <div className="max-w-3xl mx-auto space-y-6">
           <Card className="relative">
             {isActivePremium && (
-              <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white text-base px-3 py-1 rounded-full font-semibold flex items-center gap-1 w-fit absolute top-4 right-4 z-10">
-                <Rocket className="h-4 w-4" /> In Evidenza
+              <Badge className="bg-rose-500 hover:bg-rose-600 text-white text-base px-3 py-1 rounded-full font-semibold flex items-center gap-1 w-fit absolute top-4 right-4 z-10">
+                <Flame className="h-4 w-4" /> Hot
               </Badge>
             )}
             <CardHeader>

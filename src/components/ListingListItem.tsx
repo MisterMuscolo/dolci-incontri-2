@@ -298,7 +298,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
             !isAdminContext && (
               <Link to={`/promote-listing/${listing.id}`} className="w-full">
                 <Button variant="default" size="sm" className="w-full h-9 px-3 text-sm bg-green-500 hover:bg-green-600 text-white">
-                  <Rocket className="h-4 w-4 md:mr-2" />
+                  <Flame className="h-4 w-4 md:mr-2" /> {/* Sostituito Rocket con Flame */}
                   <span className="hidden md:inline">Promuovi</span>
                 </Button>
               </Link>
