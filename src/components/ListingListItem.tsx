@@ -272,7 +272,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                     isActivePremium ? "bg-yellow-500 hover:bg-yellow-600" : "bg-blue-500 hover:bg-blue-600"
                   )}
                 >
-                  <Rocket className="h-4 w-4" /> {isActivePremium ? 'In Evidenza' : 'In Attesa'}
+                  <Rocket className="h-4 w-4" /> {isActivePremium ? 'Top' : 'In Attesa'}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -336,7 +336,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
       )}
       {!(canEdit || canManagePhotos || canDelete) && isActivePremium && (
         <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white absolute top-1 right-1 z-20 px-2 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
-          <Rocket className="h-3 w-3 mr-0.5" /> In Evidenza
+          <Rocket className="h-3 w-3 mr-0.5" /> Top
         </Badge>
       )}
     </Card>
