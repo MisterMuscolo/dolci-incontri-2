@@ -149,9 +149,10 @@ const EditListing = () => {
       const updateData = {
         title: values.title,
         description: values.description,
-        phone: values.phone,
-        email: values.email, // Include email in update
-        contact_preference: values.contact_preference, // Include contact preference
+        // Imposta email/phone a null se non sono la preferenza di contatto
+        email: (values.contact_preference === 'phone' || !values.email?.trim()) ? null : values.email,
+        phone: (values.contact_preference === 'email' || !values.phone?.trim()) ? null : values.phone,
+        contact_preference: values.contact_preference,
       };
 
       const { error: updateError } = await supabase

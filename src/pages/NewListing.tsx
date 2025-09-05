@@ -93,6 +93,9 @@ const NewListing = () => {
         age: parseInt(age, 10),
         user_id: user.id,
         last_bumped_at: new Date().toISOString(), // Aggiunto per far apparire i nuovi annunci in cima
+        // Imposta email/phone a null se non sono la preferenza di contatto
+        email: (values.contact_preference === 'phone' || !values.email?.trim()) ? null : values.email,
+        phone: (values.contact_preference === 'email' || !values.phone?.trim()) ? null : values.phone,
       };
 
       const { data: listingData, error: listingError } = await supabase
