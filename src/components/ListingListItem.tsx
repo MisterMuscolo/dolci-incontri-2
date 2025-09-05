@@ -84,18 +84,16 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
   const hasPhotosToRender = photosToRender.length > 0;
 
   // Logica aggiornata per la data da visualizzare
+  const prefix = 'Scade il:'; // Sempre 'Scade il:'
   let dateToDisplay: Date;
-  let prefix: string;
   let dateFormat: string;
 
   if (isActivePremium && promoEnd) {
     dateToDisplay = promoEnd;
-    prefix = 'Promozione termina il:';
-    dateFormat = 'dd MMMM yyyy HH:mm'; // Mostra anche l'ora per la promozione
+    dateFormat = 'dd MMMM yyyy HH:mm'; // Mostra anche l'ora per la fine della promozione
   } else {
     dateToDisplay = new Date(listing.expires_at);
-    prefix = 'Scade il:';
-    dateFormat = 'dd MMMM yyyy';
+    dateFormat = 'dd MMMM yyyy'; // Mostra solo la data per la scadenza originale
   }
 
   const formattedDate = !isNaN(dateToDisplay.getTime()) 
