@@ -69,6 +69,7 @@ serve(async (req) => {
         throw new Error(`Error checking used coupon: ${usedCouponError.message}`);
       }
       if (usedCoupon) {
+        // Specific error message for already used single-use coupon
         throw new Error('Questo coupon è già stato utilizzato.');
       }
     }
