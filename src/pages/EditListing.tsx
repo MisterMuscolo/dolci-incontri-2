@@ -5,18 +5,19 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form'; // Importato FormDescription
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { italianProvinces } from '@/data/provinces';
-import { ImageUploader } from '@/components/ImageUploader'; // Use the updated ImageUploader
+import { ImageUploader } from '@/components/ImageUploader';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { ChevronLeft, Image as ImageIcon } from 'lucide-react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { cn, slugifyFilename, formatPhoneNumber } from '@/lib/utils'; // Importa slugifyFilename e formatPhoneNumber
-import { Checkbox } from '@/components/ui/checkbox'; // Importato Checkbox
+import { cn, slugifyFilename, formatPhoneNumber } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton'; // Importato Skeleton
+import { Checkbox } from '@/components/ui/checkbox';
 
 const listingSchema = z.object({
   category: z.string({ required_error: 'La categoria è obbligatoria.' }),
@@ -26,12 +27,12 @@ const listingSchema = z.object({
     .min(1, "L'età è obbligatoria.")
     .refine((val) => !isNaN(parseInt(val, 10)), { message: "L'età deve essere un numero." })
     .refine((val) => parseInt(val, 10) >= 18, { message: "Devi avere almeno 18 anni." }),
-  title: z.string().min(5, 'Il titolo deve avere almeno 5 caratteri.'), // Rimosso il limite massimo
-  description: z.string().min(15, 'La descrizione deve avere almeno 15 caratteri.'), // Rimosso il limite massimo
-  email: z.string().email("L'email non è valida.").optional(), // Reso opzionale qui, la validazione condizionale è nel refine
+  title: z.string().min(5, 'Il titolo deve avere almeno 5 caratteri.'),
+  description: z.string().min(15, 'La descrizione deve avere almeno 15 caratteri.'),
+  email: z.string().email("L'email non è valida.").optional(),
   phone: z.string().optional(),
   contact_preference: z.enum(['email', 'phone', 'both'], { required_error: 'La preferenza di contatto è obbligatoria.' }),
-  contact_whatsapp: z.boolean().optional().default(false), // Nuovo campo per WhatsApp
+  contact_whatsapp: z.boolean().optional().default(false),
 }).superRefine((data, ctx) => {
   if (data.contact_preference === 'email' || data.contact_preference === 'both') {
     if (!data.email || data.email.trim() === '') {
@@ -65,13 +66,13 @@ type FullListing = {
   age: number;
   phone: string | null;
   email: string;
-  user_id: string; // Added to pass to ImageUploader
+  user_id: string;
   is_premium: boolean;
   promotion_mode: string | null;
   promotion_start_at: string | null;
   promotion_end_at: string | null;
-  contact_preference: 'email' | 'phone' | 'both'; // Aggiunto
-  contact_whatsapp: boolean | null; // Aggiunto
+  contact_preference: 'email' | 'phone' | 'both';
+  contact_whatsapp: boolean | null;
   listing_photos: ExistingPhoto[];
 };
 
@@ -83,7 +84,7 @@ const EditListing = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [existingPhotos, setExistingPhotos] = useState<ExistingPhoto[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [currentListing, setCurrentListing] = useState<FullListing | null>(null); // Store full listing data
+  const [currentListing, setCurrentListing] = useState<FullListing | null>(null);
 
   const form = useForm<z.infer<typeof listingSchema>>({
     resolver: zodResolver(listingSchema),
@@ -91,13 +92,13 @@ const EditListing = () => {
       zone: '',
       email: '',
       phone: '',
-      contact_preference: 'both', // Default to 'both'
-      contact_whatsapp: false, // Default for WhatsApp
+      contact_preference: 'both',
+      contact_whatsapp: false,
     }
   });
 
   const contactPreference = form.watch('contact_preference');
-  const phoneValue = form.watch('phone'); // Watch phone value to enable/disable WhatsApp checkbox
+  const phoneValue = form.watch('phone');
 
   const fetchListingData = useCallback(async () => {
     if (!id) {
@@ -119,7 +120,7 @@ const EditListing = () => {
     }
 
     const listing = data as FullListing;
-    setCurrentListing(listing); // Set the full listing data
+    setCurrentListing(listing);
 
     form.reset({
       category: listing.category,
@@ -130,8 +131,8 @@ const EditListing = () => {
       description: listing.description,
       email: listing.email,
       phone: listing.phone || '',
-      contact_preference: listing.contact_preference || 'both', // Set from fetched data
-      contact_whatsapp: listing.contact_whatsapp || false, // Set from fetched data
+      contact_preference: listing.contact_preference || 'both',
+      contact_whatsapp: listing.contact_whatsapp || false,
     });
 
     setExistingPhotos(listing.listing_photos || []);
@@ -150,16 +151,15 @@ const EditListing = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Devi essere autenticato per modificare un annuncio.');
 
-      const formattedPhone = formatPhoneNumber(values.phone); // Formatta il numero di telefono
+      const formattedPhone = formatPhoneNumber(values.phone);
 
-      // Only send mutable fields to the update operation
       const updateData = {
         title: values.title,
         description: values.description,
         email: values.email?.trim() || null,
-        phone: formattedPhone, // Usa il numero formattato
+        phone: formattedPhone,
         contact_preference: values.contact_preference,
-        contact_whatsapp: values.contact_whatsapp, // Salva la preferenza WhatsApp
+        contact_whatsapp: values.contact_whatsapp,
       };
 
       const { error: updateError } = await supabase
@@ -171,10 +171,9 @@ const EditListing = () => {
         throw new Error(updateError?.message || 'Errore nell\'aggiornamento dell\'annuncio.');
       }
 
-      // Handle new photo uploads
       if (newFiles.length > 0) {
         const uploadPromises = newFiles.map(async (file, index) => {
-          const slugifiedFileName = slugifyFilename(file.name); // Normalizza il nome del file
+          const slugifiedFileName = slugifyFilename(file.name);
           const fileName = `${Date.now()}-${slugifiedFileName}`;
           const filePath = `${user.id}/${id}/${fileName}`;
           
@@ -191,7 +190,7 @@ const EditListing = () => {
           return {
             listing_id: id,
             url: publicUrl,
-            is_primary: newPrimaryIndex === index && existingPhotos.length === 0, // Set primary only if no existing photos
+            is_primary: newPrimaryIndex === index && existingPhotos.length === 0,
           };
         });
 
@@ -200,14 +199,13 @@ const EditListing = () => {
         const { error: photosError } = await supabase.from('listing_photos').insert(photoPayloads);
 
         if (photosError) {
-          // Consider rolling back listing update if photo upload fails critically
           throw new Error(photosError.message || 'Errore nel salvataggio delle nuove foto.');
         }
       }
 
       dismissToast(toastId);
       showSuccess('Annuncio aggiornato con successo!');
-      navigate('/my-listings'); // Reindirizza a "I miei annunci"
+      navigate('/my-listings');
     } catch (error: any) {
       dismissToast(toastId);
       showError(error.message || 'Si è verificato un errore imprevisto durante l\'aggiornamento.');
@@ -241,7 +239,7 @@ const EditListing = () => {
   const now = new Date();
   const promoStart = currentListing.promotion_start_at ? new Date(currentListing.promotion_start_at) : null;
   const promoEnd = currentListing.promotion_end_at ? new Date(currentListing.promotion_end_at) : null;
-  const isPremiumOrPending = currentListing.is_premium && promoStart && promoEnd && (promoStart <= now || promoEnd >= now); // Check if premium or pending
+  const isPremiumOrPending = currentListing.is_premium && promoStart && promoEnd && (promoStart <= now || promoEnd >= now);
 
   return (
     <div className="bg-gray-50 p-4 sm:p-6 md:p-8">
@@ -385,7 +383,7 @@ const EditListing = () => {
                             readOnly // Email is always read-only
                             className={cn(
                               "bg-gray-100 cursor-not-allowed",
-                              (contactPreference === 'phone') && "opacity-50" // Visually dim if not preferred
+                              (contactPreference === 'phone') && "opacity-50"
                             )}
                           />
                         </FormControl>
@@ -404,7 +402,7 @@ const EditListing = () => {
                             type="tel" 
                             placeholder="Il tuo numero di telefono" 
                             {...field} 
-                            readOnly={contactPreference === 'email'} // Readonly if only email is preferred
+                            readOnly={contactPreference === 'email'}
                             className={cn(
                               (contactPreference === 'email') && "bg-gray-100 cursor-not-allowed opacity-50"
                             )}
@@ -426,7 +424,7 @@ const EditListing = () => {
                           <Checkbox
                             checked={field.value}
                             onCheckedChange={field.onChange}
-                            disabled={!phoneValue || isSubmitting} // Disabilita se il telefono non è inserito
+                            disabled={!phoneValue || isSubmitting}
                           />
                         </FormControl>
                         <div className="space-y-1 leading-none">
@@ -447,11 +445,11 @@ const EditListing = () => {
                     listingId={currentListing.id}
                     userId={currentListing.user_id}
                     initialPhotos={existingPhotos}
-                    isPremiumOrPending={true} // Permetti 5 foto fin da subito
+                    isPremiumOrPending={true}
                     onFilesChange={setNewFiles}
                     onPrimaryIndexChange={setNewPrimaryIndex}
-                    onExistingPhotosUpdated={setExistingPhotos} // Update existingPhotos state when changes occur
-                    hideMainPreview={false} // Mostra l'anteprima principale
+                    onExistingPhotosUpdated={setExistingPhotos}
+                    hideMainPreview={false}
                   />
                 </div>
                 <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600" disabled={isSubmitting}>
