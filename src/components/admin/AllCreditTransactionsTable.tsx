@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { History } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination"; // Importa i componenti di paginazione
 
 interface CreditTransaction {
   id: string;
@@ -24,12 +25,38 @@ interface CreditTransactionWithProfile extends CreditTransaction {
   profiles: { email: string }[] | null;
 }
 
+const TRANSACTIONS_PER_PAGE = 10; // Definisci il numero di transazioni per pagina
+
 export const AllCreditTransactionsTable = () => {
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1); // Stato per la pagina corrente
+  const [totalPages, setTotalPages] = useState(0); // Stato per il numero totale di pagine
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     setLoading(true);
+
+    // 1. Conta il numero totale di transazioni per la paginazione
+    const { count, error: countError } = await supabase
+      .from('credit_transactions')
+      .select('*', { count: 'exact', head: true });
+
+    if (countError) {
+      console.error("Error counting all credit transactions:", countError.message, countError.details);
+      showError("Impossibile contare le transazioni di credito.");
+      setLoading(false);
+      return;
+    }
+
+    if (count !== null) {
+      setTotalPages(Math.ceil(count / TRANSACTIONS_PER_PAGE));
+    }
+
+    // Calcola il range per la query
+    const from = (currentPage - 1) * TRANSACTIONS_PER_PAGE;
+    const to = from + TRANSACTIONS_PER_PAGE - 1;
+
+    // 2. Recupera le transazioni per la pagina corrente
     const { data, error } = await supabase
       .from('credit_transactions')
       .select(`
@@ -41,7 +68,8 @@ export const AllCreditTransactionsTable = () => {
         created_at,
         profiles ( email )
       `)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .range(from, to); // Applica la paginazione
 
     if (error) {
       console.error("Error fetching all credit transactions:", error);
@@ -73,11 +101,11 @@ export const AllCreditTransactionsTable = () => {
       setTransactions(processedTransactions);
     }
     setLoading(false);
-  };
+  }, [currentPage]); // Aggiungi currentPage come dipendenza
 
   useEffect(() => {
     fetchTransactions();
-  }, []);
+  }, [fetchTransactions]);
 
   const getTransactionTypeLabel = (type: string) => {
     switch (type) {
@@ -91,8 +119,16 @@ export const AllCreditTransactionsTable = () => {
         return 'Aggiunta Admin';
       case 'admin_subtract':
         return 'Sottrazione Admin';
+      case 'coupon_credit_add':
+        return 'Coupon Crediti';
       default:
         return type;
+    }
+  };
+
+  const handlePageChange = (page: number) => {
+    if (page > 0 && page <= totalPages) {
+      setCurrentPage(page);
     }
   };
 
@@ -111,32 +147,53 @@ export const AllCreditTransactionsTable = () => {
         ) : transactions.length === 0 ? (
           <p className="text-gray-600">Nessuna transazione di credito trovata.</p>
         ) : (
-          <div className="overflow-x-auto rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Utente</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Dettagli</TableHead>
-                  <TableHead className="text-right">Importo</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {transactions.map((transaction) => (
-                  <TableRow key={transaction.id}>
-                    <TableCell>{format(new Date(transaction.created_at), 'dd/MM/yyyy HH:mm', { locale: it })}</TableCell>
-                    <TableCell className="font-medium">{transaction.userEmail || 'N/D'}</TableCell>
-                    <TableCell>{getTransactionTypeLabel(transaction.type)}</TableCell>
-                    <TableCell>{transaction.package_name || '-'}</TableCell>
-                    <TableCell className="text-right font-medium">
-                      {transaction.amount > 0 ? `+${transaction.amount}` : transaction.amount}
-                    </TableCell>
+          <>
+            <div className="overflow-x-auto rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Data</TableHead>
+                    <TableHead>Utente</TableHead>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead>Dettagli</TableHead>
+                    <TableHead className="text-right">Importo</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {transactions.map((transaction) => (
+                    <TableRow key={transaction.id}>
+                      <TableCell>{format(new Date(transaction.created_at), 'dd/MM/yyyy HH:mm', { locale: it })}</TableCell>
+                      <TableCell className="font-medium">{transaction.userEmail || 'N/D'}</TableCell>
+                      <TableCell>{getTransactionTypeLabel(transaction.type)}</TableCell>
+                      <TableCell>{transaction.package_name || '-'}</TableCell>
+                      <TableCell className="text-right font-medium">
+                        {transaction.amount > 0 ? `+${transaction.amount}` : transaction.amount}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            {totalPages > 1 && (
+              <Pagination className="pt-4">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious href="#" onClick={(e) => { e.preventDefault(); handlePageChange(currentPage - 1); }} />
+                  </PaginationItem>
+                  {[...Array(totalPages)].map((_, i) => (
+                    <PaginationItem key={i}>
+                      <PaginationLink href="#" isActive={currentPage === i + 1} onClick={(e) => { e.preventDefault(); handlePageChange(i + 1); }}>
+                        {i + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  <PaginationItem>
+                    <PaginationNext href="#" onClick={(e) => { e.preventDefault(); handlePageChange(currentPage + 1); }} />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
+          </>
         )}
       </CardContent>
     </Card>
