@@ -16,8 +16,7 @@ import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast
 import { ChevronLeft, Image as ImageIcon } from 'lucide-react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { cn, slugifyFilename, formatPhoneNumber } from '@/lib/utils'; // Importa slugifyFilename e formatPhoneNumber
-import { Skeleton } from '@/components/ui/skeleton';
-import { Checkbox } // Importato Checkbox
+import { Checkbox } from '@/components/ui/checkbox'; // Importato Checkbox
 
 const listingSchema = z.object({
   category: z.string({ required_error: 'La categoria è obbligatoria.' }),
