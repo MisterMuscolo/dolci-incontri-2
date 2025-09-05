@@ -24,7 +24,7 @@ type FullListing = {
   zone: string | null;
   age: number;
   phone: string | null;
-  email: string;
+  email: string | null; // Reso esplicitamente nullable
   created_at: string;
   expires_at: string;
   is_premium: boolean;
@@ -83,7 +83,7 @@ const ListingDetails = () => {
       setLoading(false);
     };
     fetchListing();
-  }, [id, navigate]); // Aggiunto navigate alle dipendenze
+  }, [id, navigate]);
 
   if (loading) {
     return (
@@ -114,8 +114,8 @@ const ListingDetails = () => {
   const hasPhotos = listing.listing_photos && listing.listing_photos.length > 0;
 
   // Logica corretta per i pulsanti di contatto
-  const canContactByEmail = listing.contact_preference === 'email' || listing.contact_preference === 'both';
-  const canContactByPhone = listing.contact_preference === 'phone' || listing.contact_preference === 'both';
+  const canContactByEmail = (listing.contact_preference === 'email' || listing.contact_preference === 'both') && !!listing.email;
+  const canContactByPhone = (listing.contact_preference === 'phone' || listing.contact_preference === 'both') && !!listing.phone;
 
   return (
     <div className="bg-gray-50">
@@ -204,7 +204,7 @@ const ListingDetails = () => {
           </Card>
 
           <div className="flex flex-col sm:flex-row justify-center py-4 gap-4">
-            {canContactByPhone && listing.phone && (
+            {canContactByPhone && (
               <a
                 href={`tel:${listing.phone}`}
                 className="w-full sm:w-auto"
