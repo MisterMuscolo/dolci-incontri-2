@@ -149,9 +149,10 @@ const EditListing = () => {
       const updateData = {
         title: values.title,
         description: values.description,
-        // Imposta email/phone a null se non sono la preferenza di contatto
-        email: (values.contact_preference === 'phone' || !values.email?.trim()) ? null : values.email,
-        phone: (values.contact_preference === 'email' || !values.phone?.trim()) ? null : values.phone,
+        // Non impostare email/phone a null qui. La validazione gestisce se sono obbligatori.
+        // Se non sono la preferenza di contatto, il loro valore (anche se vuoto) verrà comunque salvato.
+        email: values.email?.trim() || null,
+        phone: values.phone?.trim() || null,
         contact_preference: values.contact_preference,
       };
 

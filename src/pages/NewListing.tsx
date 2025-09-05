@@ -14,6 +14,7 @@ import { ImageUploader } from '@/components/ImageUploader';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { ChevronLeft } from 'lucide-react';
+import { cn } from '@/lib/utils'; // Import cn for conditional classes
 
 const listingSchema = z.object({
   category: z.string({ required_error: 'La categoria è obbligatoria.' }),
@@ -93,9 +94,10 @@ const NewListing = () => {
         age: parseInt(age, 10),
         user_id: user.id,
         last_bumped_at: new Date().toISOString(), // Aggiunto per far apparire i nuovi annunci in cima
-        // Imposta email/phone a null se non sono la preferenza di contatto
-        email: (values.contact_preference === 'phone' || !values.email?.trim()) ? null : values.email,
-        phone: (values.contact_preference === 'email' || !values.phone?.trim()) ? null : values.phone,
+        // Non impostare email/phone a null qui. La validazione gestisce se sono obbligatori.
+        // Se non sono la preferenza di contatto, il loro valore (anche se vuoto) verrà comunque salvato.
+        email: values.email?.trim() || null,
+        phone: values.phone?.trim() || null,
       };
 
       const { data: listingData, error: listingError } = await supabase
