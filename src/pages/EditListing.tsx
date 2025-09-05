@@ -27,8 +27,8 @@ const listingSchema = z.object({
     .min(1, "L'età è obbligatoria.")
     .refine((val) => !isNaN(parseInt(val, 10)), { message: "L'età deve essere un numero." })
     .refine((val) => parseInt(val, 10) >= 18, { message: "Devi avere almeno 18 anni." }),
-  title: z.string().min(5, 'Il titolo deve avere almeno 5 caratteri.').max(100, 'Il titolo non può superare i 100 caratteri.'),
-  description: z.string().min(20, 'La descrizione deve avere almeno 20 caratteri.'),
+  title: z.string().min(5, 'Il titolo deve avere almeno 5 caratteri.'), // Rimosso il limite massimo
+  description: z.string().min(15, 'La descrizione deve avere almeno 15 caratteri.'), // Rimosso il limite massimo
   email: z.string().email("L'email non è valida.").optional(), // Reso opzionale qui, la validazione condizionale è nel refine
   phone: z.string().optional(),
   contact_preference: z.enum(['email', 'phone', 'both'], { required_error: 'La preferenza di contatto è obbligatoria.' }),
