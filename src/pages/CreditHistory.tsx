@@ -79,6 +79,8 @@ const CreditHistory = () => {
         return 'Creazione Annuncio';
       case 'premium_upgrade':
         return 'Upgrade Premium';
+      case 'coupon_credit_add': // Nuovo tipo di transazione
+        return 'Coupon Crediti';
       default:
         return type;
     }

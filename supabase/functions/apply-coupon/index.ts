@@ -78,7 +78,52 @@ serve(async (req) => {
       throw new Error('Questo coupon ha raggiunto il numero massimo di utilizzi.');
     }
 
-    // NEW LOGIC: Record that the user has applied/discovered this coupon
+    // NEW LOGIC: If discount_type is 'credits', add credits to user profile
+    if (coupon.discount_type === 'credits') {
+      const supabaseAdmin = createClient( // Use admin client to bypass RLS for credit update
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      );
+
+      // Fetch user's current credits
+      const { data: profile, error: fetchProfileError } = await supabaseAdmin
+        .from('profiles')
+        .select('credits')
+        .eq('id', user.id)
+        .single();
+
+      if (fetchProfileError || !profile) {
+        throw new Error('User profile not found for credit update.');
+      }
+
+      const newCredits = profile.credits + coupon.discount_value;
+
+      // Update user's credits
+      const { error: updateCreditsError } = await supabaseAdmin
+        .from('profiles')
+        .update({ credits: newCredits })
+        .eq('id', user.id);
+
+      if (updateCreditsError) {
+        throw new Error(`Failed to add credits: ${updateCreditsError.message}`);
+      }
+
+      // Log the transaction
+      const { error: transactionError } = await supabaseAdmin
+        .from('credit_transactions')
+        .insert({
+          user_id: user.id,
+          amount: coupon.discount_value,
+          type: 'coupon_credit_add', // New transaction type
+          package_name: `Coupon: ${coupon.code}`,
+        });
+
+      if (transactionError) {
+        console.error('Failed to log credit transaction for coupon:', transactionError.message);
+      }
+    }
+
+    // Record that the user has applied/discovered this coupon
     // Use the user's client for this insert, as RLS on `user_coupons` will allow it.
     const { error: userCouponInsertError } = await supabaseClient
       .from('user_coupons')
@@ -106,7 +151,7 @@ serve(async (req) => {
       discountType: coupon.discount_type,
       discountValue: coupon.discount_value,
       couponType: coupon.type,
-      message: 'Coupon applicato con successo!'
+      message: coupon.discount_type === 'credits' ? `Hai ricevuto ${coupon.discount_value} crediti!` : 'Coupon applicato con successo!'
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,

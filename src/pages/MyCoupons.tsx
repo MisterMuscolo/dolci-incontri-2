@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { showError, showSuccess } from '@/utils/toast';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ChevronLeft, Tag, Percent, Euro, CheckCircle, XCircle, Clock, Ban, Sparkles } from 'lucide-react';
+import { ChevronLeft, Tag, Percent, Euro, CheckCircle, XCircle, Clock, Ban, Sparkles, Coins } from 'lucide-react'; // Importa Coins
 import { Badge } from '@/components/ui/badge';
 import { ApplyCouponForm } from '@/components/user/ApplyCouponForm';
 import { PostgrestError } from '@supabase/supabase-js'; // Importa PostgrestError
@@ -17,7 +17,7 @@ interface Coupon {
   id: string;
   code: string;
   type: 'single_use' | 'reusable';
-  discount_type: 'percentage' | 'flat_amount';
+  discount_type: 'percentage' | 'flat_amount' | 'credits'; // Aggiunto 'credits'
   discount_value: number;
   expires_at: string | null;
   applies_to_user_id: string | null;
@@ -33,7 +33,7 @@ interface CouponDisplayItem extends Coupon {
 }
 
 interface AppliedCouponDetails {
-  type: 'percentage' | 'flat_amount';
+  type: 'percentage' | 'flat_amount' | 'credits'; // Aggiunto 'credits'
   value: number;
   couponId: string;
   couponType: 'single_use' | 'reusable';
@@ -190,7 +190,7 @@ const MyCoupons = () => {
   };
 
   const handleCouponApplied = (discount: AppliedCouponDetails) => {
-    showSuccess('Coupon applicato con successo!');
+    showSuccess(discount.type === 'credits' ? `Hai ricevuto ${discount.value} crediti!` : 'Coupon applicato con successo!');
     fetchCoupons(); // Re-fetch coupons to update their status (e.g., single-use becomes 'used')
   };
 
@@ -261,8 +261,16 @@ const MyCoupons = () => {
                       <TableRow key={coupon.id}>
                         <TableCell className="font-medium">{coupon.code}</TableCell>
                         <TableCell>
-                          {coupon.discount_value}
-                          {coupon.discount_type === 'percentage' ? <Percent className="inline-block h-3 w-3 ml-1" /> : <Euro className="inline-block h-3 w-3 ml-1" />}
+                          {coupon.discount_type === 'credits' ? (
+                            <div className="flex items-center gap-1">
+                              +{coupon.discount_value} <Coins className="inline-block h-3 w-3" />
+                            </div>
+                          ) : (
+                            <>
+                              {coupon.discount_value}
+                              {coupon.discount_type === 'percentage' ? <Percent className="inline-block h-3 w-3 ml-1" /> : <Euro className="inline-block h-3 w-3 ml-1" />}
+                            </>
+                          )}
                         </TableCell>
                         <TableCell className="capitalize">
                           {coupon.type === 'single_use' ? 'Monouso' : 'Riutilizzabile'}

@@ -45,7 +45,7 @@ interface CreditPackage {
 }
 
 interface AppliedCoupon {
-  type: 'percentage' | 'flat_amount';
+  type: 'percentage' | 'flat_amount' | 'credits'; // Aggiunto 'credits'
   value: number;
   couponId: string;
   couponType: 'single_use' | 'reusable';
@@ -371,9 +371,12 @@ const BuyCredits = () => {
     navigate('/credit-history');
   };
 
-  const handleCouponApplied = (discount: { type: 'percentage' | 'flat_amount'; value: number; couponId: string; couponType: 'single_use' | 'reusable' }) => {
-    setAppliedCoupon({ ...discount, code: 'APPLIED_CODE' }); // 'APPLIED_CODE' è un placeholder, il codice reale non è necessario qui
-    showSuccess('Coupon applicato con successo!');
+  const handleCouponApplied = (discount: { type: 'percentage' | 'flat_amount' | 'credits'; value: number; couponId: string; couponType: 'single_use' | 'reusable'; code: string }) => {
+    setAppliedCoupon({ ...discount, code: discount.code }); // Salva il codice del coupon
+    showSuccess(discount.type === 'credits' ? `Hai ricevuto ${discount.value} crediti!` : 'Coupon applicato con successo!');
+    if (discount.type === 'credits') {
+      fetchCurrentCredits(); // Ricarica i crediti per aggiornare il saldo visualizzato
+    }
   };
 
   const handleCouponRemoved = () => {

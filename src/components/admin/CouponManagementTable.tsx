@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Edit, Trash2, Tag, CalendarDays, User, Percent, Euro, Sparkles } from 'lucide-react'; // Importa Sparkles
+import { PlusCircle, Edit, Trash2, Tag, CalendarDays, User, Percent, Euro, Sparkles, Coins } from 'lucide-react'; // Importa Sparkles e Coins
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import {
   Dialog,
@@ -42,7 +42,7 @@ interface Coupon {
   id: string;
   code: string;
   type: 'single_use' | 'reusable';
-  discount_type: 'percentage' | 'flat_amount';
+  discount_type: 'percentage' | 'flat_amount' | 'credits'; // Aggiunto 'credits'
   discount_value: number;
   expires_at: string | null;
   applies_to_user_id: string | null;
@@ -61,7 +61,7 @@ interface UserProfile {
 const couponSchema = z.object({
   code: z.string().min(3, "Il codice deve avere almeno 3 caratteri."),
   type: z.enum(['single_use', 'reusable'], { required_error: "Il tipo è obbligatorio." }),
-  discount_type: z.enum(['percentage', 'flat_amount'], { required_error: "Il tipo di sconto è obbligatorio." }),
+  discount_type: z.enum(['percentage', 'flat_amount', 'credits'], { required_error: "Il tipo di sconto è obbligatorio." }), // Aggiunto 'credits'
   discount_value: z.coerce.number().min(0.01, "Il valore dello sconto deve essere maggiore di 0."),
   expires_at: z.date().nullable().optional(),
   applies_to_user_id: z.string().nullable().optional(),
@@ -300,8 +300,16 @@ export const CouponManagementTable = () => {
                   <TableCell className="font-medium">{coupon.code}</TableCell>
                   <TableCell className="capitalize">{coupon.type === 'single_use' ? 'Monouso' : 'Riutilizzabile'}</TableCell>
                   <TableCell>
-                    {coupon.discount_value}
-                    {coupon.discount_type === 'percentage' ? <Percent className="inline-block h-3 w-3 ml-1" /> : <Euro className="inline-block h-3 w-3 ml-1" />}
+                    {coupon.discount_type === 'credits' ? (
+                      <div className="flex items-center gap-1">
+                        +{coupon.discount_value} <Coins className="inline-block h-3 w-3" />
+                      </div>
+                    ) : (
+                      <>
+                        {coupon.discount_value}
+                        {coupon.discount_type === 'percentage' ? <Percent className="inline-block h-3 w-3 ml-1" /> : <Euro className="inline-block h-3 w-3 ml-1" />}
+                      </>
+                    )}
                   </TableCell>
                   <TableCell>
                     {coupon.expires_at ? format(new Date(coupon.expires_at), 'dd/MM/yyyy', { locale: it }) : 'Mai'}
@@ -416,6 +424,7 @@ export const CouponManagementTable = () => {
                         <SelectContent>
                           <SelectItem value="percentage">Percentuale (%)</SelectItem>
                           <SelectItem value="flat_amount">Importo Fisso (€)</SelectItem>
+                          <SelectItem value="credits">Crediti</SelectItem> {/* Nuovo tipo di sconto */}
                         </SelectContent>
                       </Select>
                       <FormMessage />

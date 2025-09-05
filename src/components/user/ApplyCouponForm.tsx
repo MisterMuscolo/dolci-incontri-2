@@ -3,14 +3,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Tag, Loader2, Percent, Euro } from 'lucide-react';
+import { Tag, Loader2, Percent, Euro, Coins } from 'lucide-react'; // Importa Coins
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ApplyCouponFormProps {
-  onCouponApplied: (discount: { type: 'percentage' | 'flat_amount'; value: number; couponId: string; couponType: 'single_use' | 'reusable' }) => void;
+  onCouponApplied: (discount: { type: 'percentage' | 'flat_amount' | 'credits'; value: number; couponId: string; couponType: 'single_use' | 'reusable'; code: string }) => void; // Aggiunto 'credits' e 'code'
   onCouponRemoved: () => void;
-  currentAppliedCoupon?: { type: 'percentage' | 'flat_amount'; value: number; code: string; couponId: string; couponType: 'single_use' | 'reusable' } | null;
+  currentAppliedCoupon?: { type: 'percentage' | 'flat_amount' | 'credits'; value: number; code: string; couponId: string; couponType: 'single_use' | 'reusable' } | null; // Aggiunto 'credits'
 }
 
 export const ApplyCouponForm = ({ onCouponApplied, onCouponRemoved, currentAppliedCoupon }: ApplyCouponFormProps) => {
@@ -56,6 +56,7 @@ export const ApplyCouponForm = ({ onCouponApplied, onCouponRemoved, currentAppli
         value: data.discountValue,
         couponId: data.couponId,
         couponType: data.couponType,
+        code: couponCode.trim(), // Passa il codice del coupon
       });
       setCouponCode(''); // Clear input after successful application
     } catch (error: any) {
@@ -87,7 +88,9 @@ export const ApplyCouponForm = ({ onCouponApplied, onCouponRemoved, currentAppli
             <div>
               <p className="font-semibold">Coupon applicato: {currentAppliedCoupon.code}</p>
               <p className="text-sm">
-                Sconto: {currentAppliedCoupon.type === 'percentage' ? `${currentAppliedCoupon.value}%` : `€${currentAppliedCoupon.value.toFixed(2)}`}
+                Sconto: {currentAppliedCoupon.type === 'percentage' ? `${currentAppliedCoupon.value}%` : 
+                         currentAppliedCoupon.type === 'flat_amount' ? `€${currentAppliedCoupon.value.toFixed(2)}` :
+                         `+${currentAppliedCoupon.value} Crediti`}
               </p>
             </div>
             <Button variant="outline" size="sm" onClick={handleRemoveCoupon} disabled={isLoading}>
