@@ -307,7 +307,12 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           {canDelete && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm" className="w-full h-9 px-3 text-sm" disabled={isDeleting}>
+                <Button 
+                  variant="default" // Cambiato a default
+                  size="sm" 
+                  className="w-full h-9 px-3 text-sm bg-blue-500 hover:bg-blue-600 text-white" // Aggiunto colore blu
+                  disabled={isDeleting}
+                >
                   <Trash2 className="h-4 w-4 md:mr-2" />
                   <span className="hidden md:inline">Elimina</span>
                 </Button>
