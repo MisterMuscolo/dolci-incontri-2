@@ -134,7 +134,7 @@ const SearchResults = () => {
             key={listing.id} 
             listing={listing} 
             allowNonPremiumImage={false} 
-            isCompact={listing.is_premium} // Passa isCompact se l'annuncio è Premium
+            isCompact={true} // Impostato a true per tutti gli annunci nei risultati di ricerca
             dateTypeToDisplay="created_at" // Mostra la data di pubblicazione
           />
         ))}
