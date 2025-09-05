@@ -78,13 +78,14 @@ serve(async (req) => {
       throw new Error('Questo coupon ha raggiunto il numero massimo di utilizzi.');
     }
 
+    // Create an admin client for operations that bypass RLS (credit update, usage tracking)
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
     // NEW LOGIC: If discount_type is 'credits', add credits to user profile
     if (coupon.discount_type === 'credits') {
-      const supabaseAdmin = createClient( // Use admin client to bypass RLS for credit update
-        Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-      );
-
       // Fetch user's current credits
       const { data: profile, error: fetchProfileError } = await supabaseAdmin
         .from('profiles')
@@ -123,8 +124,26 @@ serve(async (req) => {
       }
     }
 
-    // Record that the user has applied/discovered this coupon
-    // Use the user's client for this insert, as RLS on `user_coupons` will allow it.
+    // Track coupon usage (for both single_use and reusable)
+    if (coupon.type === 'single_use') {
+      const { error: usedCouponInsertError } = await supabaseAdmin
+        .from('used_coupons')
+        .insert({ coupon_id: coupon.id, user_id: user.id });
+      if (usedCouponInsertError) {
+        console.error('Failed to log single-use coupon usage:', usedCouponInsertError.message);
+      }
+    } else if (coupon.type === 'reusable') {
+      const { error: couponUpdateError } = await supabaseAdmin
+        .from('coupons')
+        .update({ usage_count: coupon.usage_count + 1 })
+        .eq('id', coupon.id);
+      if (couponUpdateError) {
+        console.error('Failed to increment reusable coupon usage count:', couponUpdateError.message);
+      }
+    }
+
+    // Record that the user has applied/discovered this coupon (existing logic)
+    // This is still done with supabaseClient as it's user-specific tracking.
     const { error: userCouponInsertError } = await supabaseClient
       .from('user_coupons')
       .insert({
@@ -132,17 +151,11 @@ serve(async (req) => {
         coupon_id: coupon.id,
       });
 
-    if (userCouponInsertError) {
-      // If the error is a unique constraint violation (user already applied this coupon),
-      // we can treat it as a success for the "application" part, but inform the user.
-      if (userCouponInsertError.code === '23505') { // Unique violation error code
-        console.warn(`Coupon ${coupon.code} already applied by user ${user.id}.`);
-        // We can still proceed to return success, as the coupon is valid and "known" by the user.
-      } else {
-        throw new Error(`Failed to record coupon application: ${userCouponInsertError.message}`);
-      }
+    if (userCouponInsertError && userCouponInsertError.code === '23505') {
+      console.warn(`Coupon ${coupon.code} already applied by user ${user.id}.`);
+    } else if (userCouponInsertError) {
+      throw new Error(`Failed to record coupon application: ${userCouponInsertError.message}`);
     }
-    // END NEW LOGIC
 
     // If all checks pass, return the coupon details for application
     return new Response(JSON.stringify({

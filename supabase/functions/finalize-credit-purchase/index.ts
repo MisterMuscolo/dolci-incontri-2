@@ -75,13 +75,23 @@ serve(async (req) => {
           console.error('Failed to log single-use coupon usage:', usedCouponInsertError.message);
         }
       } else if (couponType === 'reusable') {
-        // Increment usage_count for reusable coupons
-        const { error: couponUpdateError } = await supabaseAdmin
+        // Fetch current usage_count and then increment
+        const { data: currentCoupon, error: fetchCouponError } = await supabaseAdmin
           .from('coupons')
-          .update({ usage_count: (coupon.usage_count || 0) + 1 }) // Need to fetch coupon first to get current usage_count
-          .eq('id', couponId);
-        if (couponUpdateError) {
-          console.error('Failed to increment reusable coupon usage count:', couponUpdateError.message);
+          .select('usage_count')
+          .eq('id', couponId)
+          .single();
+
+        if (fetchCouponError || !currentCoupon) {
+          console.error('Failed to fetch coupon for usage increment:', fetchCouponError?.message);
+        } else {
+          const { error: couponUpdateError } = await supabaseAdmin
+            .from('coupons')
+            .update({ usage_count: currentCoupon.usage_count + 1 })
+            .eq('id', couponId);
+          if (couponUpdateError) {
+            console.error('Failed to increment reusable coupon usage count:', couponUpdateError.message);
+          }
         }
       }
     }
