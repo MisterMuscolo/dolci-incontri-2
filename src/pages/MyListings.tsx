@@ -71,7 +71,7 @@ const MyListings = () => {
     // Applica il nuovo ordinamento lato server
     query = query
       .order('last_bumped_at', { ascending: false, nullsFirst: false }) // Più recenti (creati o promossi) prima
-      .order('promotion_end_at', { ascending: false, nullsFirst: false }) // Poi per scadenza promozione (più lontana prima)
+      .order('promotion_end_at', { ascending: false, nullsFirst: true }) // Poi per scadenza promozione (più lontana prima), con NULL per primi
       .order('created_at', { ascending: false }); // Infine per data di creazione
 
     const { data, error } = await query.range(from, to);
