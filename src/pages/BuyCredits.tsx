@@ -20,6 +20,17 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { ApplyCouponForm } from '@/components/user/ApplyCouponForm'; // Importa il componente
 
 interface CreditPackage {
@@ -245,7 +256,7 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess, finalAmount, couponD
 
 const BuyCredits = () => {
   const navigate = useNavigate();
-  const [currentCredits, setCurrentCredits] = useState<number | null>(null);
+  const [currentCredits, setCurrentCredits] = useState<number | null>(0);
   const [loadingCredits, setLoadingCredits] = useState(true);
   const [selectedPackage, setSelectedPackage] = useState<CreditPackage | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -253,6 +264,16 @@ const BuyCredits = () => {
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null); // Stato per il coupon applicato
   const creditPackages = hardcodedCreditPackages; 
+
+  // Nuovo stato per disabilitare la funzione di acquisto
+  const [isPurchaseDisabled, setIsPurchaseDisabled] = useState(true);
+  const [showDisabledDialog, setShowDisabledDialog] = useState(false);
+
+  useEffect(() => {
+    if (isPurchaseDisabled) {
+      setShowDisabledDialog(true);
+    }
+  }, [isPurchaseDisabled]);
 
   const fetchCurrentCredits = useCallback(async () => {
     setLoadingCredits(true);
@@ -294,6 +315,11 @@ const BuyCredits = () => {
   };
 
   const handlePackageSelect = async (pkg: CreditPackage) => {
+    if (isPurchaseDisabled) {
+      setShowDisabledDialog(true);
+      return;
+    }
+
     setSelectedPackage(pkg);
     setClientSecret(null); // Reset client secret
     setLoadingPaymentIntent(true);
@@ -449,7 +475,7 @@ const BuyCredits = () => {
                   <Button
                     className="bg-rose-500 hover:bg-rose-600 text-sm py-2 px-4 flex-shrink-0"
                     onClick={() => handlePackageSelect(pkg)}
-                    disabled={loadingPaymentIntent || selectedPackage?.id === pkg.id}
+                    disabled={loadingPaymentIntent || selectedPackage?.id === pkg.id || isPurchaseDisabled}
                   >
                     {selectedPackage?.id === pkg.id && loadingPaymentIntent ? 'Caricamento...' : 'Seleziona'}
                   </Button>
@@ -503,6 +529,24 @@ const BuyCredits = () => {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* AlertDialog per la funzione disabilitata */}
+        <AlertDialog open={showDisabledDialog} onOpenChange={setShowDisabledDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-2xl font-bold text-gray-800">Funzione Temporaneamente Non Disponibile</AlertDialogTitle>
+              <AlertDialogDescription>
+                Ci scusiamo, ma la funzione di acquisto crediti è attualmente in manutenzione o non è ancora disponibile.
+                Stiamo lavorando per renderla operativa il prima possibile.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction onClick={() => navigate('/dashboard')} className="bg-rose-500 hover:bg-rose-600">
+                Torna alla Dashboard
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         <div className="text-center mt-8">
           <Link to="/dashboard">
