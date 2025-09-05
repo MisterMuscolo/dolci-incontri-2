@@ -14,7 +14,7 @@ import { ImageUploader } from '@/components/ImageUploader';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { ChevronLeft } from 'lucide-react';
-import { cn } from '@/lib/utils'; // Import cn for conditional classes
+import { cn, slugifyFilename } from '@/lib/utils'; // Importa slugifyFilename
 import { Checkbox } from '@/components/ui/checkbox'; // Importato Checkbox
 
 const listingSchema = z.object({
@@ -117,7 +117,8 @@ const NewListing = () => {
 
       if (files.length > 0) {
         const uploadPromises = files.map(async (file, index) => {
-          const fileName = `${Date.now()}-${file.name}`;
+          const slugifiedFileName = slugifyFilename(file.name); // Normalizza il nome del file
+          const fileName = `${Date.now()}-${slugifiedFileName}`;
           const filePath = `${user.id}/${listingId}/${fileName}`;
           
           const { error: uploadError } = await supabase.storage

@@ -15,7 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { ChevronLeft, Image as ImageIcon } from 'lucide-react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { cn } from '@/lib/utils';
+import { cn, slugifyFilename } from '@/lib/utils'; // Importa slugifyFilename
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox'; // Importato Checkbox
 
@@ -173,7 +173,8 @@ const EditListing = () => {
       // Handle new photo uploads
       if (newFiles.length > 0) {
         const uploadPromises = newFiles.map(async (file, index) => {
-          const fileName = `${Date.now()}-${file.name}`;
+          const slugifiedFileName = slugifyFilename(file.name); // Normalizza il nome del file
+          const fileName = `${Date.now()}-${slugifiedFileName}`;
           const filePath = `${user.id}/${id}/${fileName}`;
           
           const { error: uploadError } = await supabase.storage
