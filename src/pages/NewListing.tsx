@@ -357,16 +357,17 @@ const NewListing = () => {
                 )}
 
                 <div>
-                  {/* Rimosse le etichette 'Fotografie' e la sua descrizione */}
+                  <FormLabel>Fotografie</FormLabel>
+                  <p className="text-sm text-gray-500 mb-2">Carica fino a 5 foto per il tuo annuncio. Se l'annuncio non è Premium, verrà mostrata solo la prima foto.</p>
                   <ImageUploader
                     listingId={undefined} // Non disponibile per un nuovo annuncio
                     userId={currentUserId ?? undefined} // Passa l'ID utente se disponibile
                     initialPhotos={[]} // Nessuna foto iniziale per un nuovo annuncio
-                    isPremiumOrPending={false} // Un nuovo annuncio non è premium
+                    isPremiumOrPending={true} // Permetti 5 foto fin da subito
                     onFilesChange={setFiles}
                     onPrimaryIndexChange={setPrimaryIndex}
                     onExistingPhotosUpdated={() => {}} // Non fa nulla per un nuovo annuncio
-                    hideMainPreview={true} // Nasconde l'anteprima principale
+                    hideMainPreview={false} // Mostra l'anteprima principale
                   />
                 </div>
                 <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600" disabled={isLoading}>

@@ -440,16 +440,16 @@ const EditListing = () => {
 
                 <div>
                   <FormLabel>Fotografie</FormLabel>
-                  <p className="text-sm text-gray-500 mb-2">Gestisci le foto del tuo annuncio. Gli annunci gratuiti possono avere 1 foto, gli annunci Premium fino a 5.</p>
+                  <p className="text-sm text-gray-500 mb-2">Carica fino a 5 foto per il tuo annuncio. Se l'annuncio non è Premium, verrà mostrata solo la prima foto.</p>
                   <ImageUploader
                     listingId={currentListing.id}
                     userId={currentListing.user_id}
                     initialPhotos={existingPhotos}
-                    isPremiumOrPending={isPremiumOrPending}
+                    isPremiumOrPending={true} // Permetti 5 foto fin da subito
                     onFilesChange={setNewFiles}
                     onPrimaryIndexChange={setNewPrimaryIndex}
                     onExistingPhotosUpdated={setExistingPhotos} // Update existingPhotos state when changes occur
-                    hideMainPreview={true} // Aggiunto per nascondere l'anteprima principale
+                    hideMainPreview={false} // Mostra l'anteprima principale
                   />
                 </div>
                 <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600" disabled={isSubmitting}>
