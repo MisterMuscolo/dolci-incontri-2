@@ -64,19 +64,21 @@ export default function Auth() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { error } = await supabase.auth.signUp({ 
+      email, 
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback?redirect=/registration-success`, // Reindirizza al callback con destinazione finale
+      },
+    });
     setLoading(false);
     
     if (error) {
       showError(error.message);
     } else {
       showSuccess('Registrazione completata! Verifica la tua email.');
-      const redirectPath = searchParams.get('redirect');
-      if (redirectPath) {
-        navigate(redirectPath); // Naviga al percorso di reindirizzamento specificato
-      } else {
-        navigate('/registration-success'); // Reindirizzamento predefinito per la registrazione
-      }
+      // La navigazione a /registration-success avverrà tramite il callback dopo la verifica dell'email
+      // Non è necessaria una navigazione esplicita qui
     }
   };
 
@@ -88,7 +90,7 @@ export default function Auth() {
     }
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin,
+      redirectTo: `${window.location.origin}/auth/callback`, // Reindirizza al callback
     });
     setLoading(false);
     
