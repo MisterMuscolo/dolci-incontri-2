@@ -122,11 +122,10 @@ export default function Index({ session }: IndexProps) {
                   </Link>
                 </p>
               ) : (
-                <Link to="/dashboard">
-                  <Button variant="outline" className="border-rose-500 text-rose-500 hover:bg-rose-50 hover:text-rose-600">
-                    Vai alla tua Dashboard
-                  </Button>
-                </Link>
+                // Rimosso il pulsante "Vai alla tua Dashboard"
+                <p className="text-gray-600">
+                  Benvenuto! Esplora gli annunci o crea il tuo.
+                </p>
               )}
             </div>
           </div>
