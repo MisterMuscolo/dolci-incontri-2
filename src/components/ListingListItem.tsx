@@ -2,7 +2,7 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, CalendarDays, Rocket, User, Camera, MapPin, Tag } from "lucide-react";
+import { Pencil, Trash2, CalendarDays, Rocket, User, Camera, MapPin, Tag, Flame } from "lucide-react"; // Importa Flame
 import { format, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Link } from "react-router-dom";
@@ -272,7 +272,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                     isActivePremium ? "bg-yellow-500 hover:bg-yellow-600" : "bg-blue-500 hover:bg-blue-600"
                   )}
                 >
-                  <Rocket className="h-4 w-4" /> {isActivePremium ? 'Top' : 'In Attesa'}
+                  <Flame className="h-4 w-4" /> {isActivePremium ? 'Hot' : 'In Attesa'}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -336,7 +336,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
       )}
       {!(canEdit || canManagePhotos || canDelete) && isActivePremium && (
         <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white absolute top-1 right-1 z-20 px-2 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
-          <Rocket className="h-3 w-3 mr-0.5" /> Top
+          <Flame className="h-3 w-3 mr-0.5" /> Hot
         </Badge>
       )}
     </Card>
