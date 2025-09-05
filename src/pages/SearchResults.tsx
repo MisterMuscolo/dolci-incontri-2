@@ -57,11 +57,10 @@ const SearchResults = () => {
       query = query.or(`title.ilike.%${keyword}%,description.ilike.%${keyword}%`);
     }
 
-    // Applica l'ordinamento lato server per prioritizzare gli annunci Premium attivi
+    // Applica il nuovo ordinamento lato server
     query = query
-      .order('is_premium', { ascending: false }) // Premium prima
+      .order('last_bumped_at', { ascending: false, nullsFirst: false }) // Più recenti (creati o promossi) prima
       .order('promotion_end_at', { ascending: false, nullsFirst: false }) // Poi per scadenza promozione (più lontana prima)
-      .order('last_bumped_at', { ascending: false, nullsFirst: false }) // Poi per ultimo 'bump'
       .order('created_at', { ascending: false }); // Infine per data di creazione
 
     const from = (currentPage - 1) * LISTINGS_PER_PAGE;
@@ -80,7 +79,6 @@ const SearchResults = () => {
       }
       if (data) {
         console.log("SearchResults: Dati ricevuti:", data);
-        // Rimosso l'ordinamento lato client, ora gestito dal server
         setListings(data as Listing[]);
       }
     }

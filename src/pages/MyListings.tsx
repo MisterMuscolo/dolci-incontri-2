@@ -68,11 +68,10 @@ const MyListings = () => {
       .eq('user_id', user.id)
       .gt('expires_at', new Date().toISOString());
 
-    // Applica l'ordinamento lato server per prioritizzare gli annunci Premium attivi
+    // Applica il nuovo ordinamento lato server
     query = query
-      .order('is_premium', { ascending: false }) // Premium prima
+      .order('last_bumped_at', { ascending: false, nullsFirst: false }) // Più recenti (creati o promossi) prima
       .order('promotion_end_at', { ascending: false, nullsFirst: false }) // Poi per scadenza promozione (più lontana prima)
-      .order('last_bumped_at', { ascending: false, nullsFirst: false }) // Poi per ultimo 'bump'
       .order('created_at', { ascending: false }); // Infine per data di creazione
 
     const { data, error } = await query.range(from, to);
@@ -80,7 +79,6 @@ const MyListings = () => {
     if (error) {
       console.error("MyListings: Errore nel recupero degli annunci:", error.message, error.details);
     } else if (data) {
-      // Rimosso l'ordinamento lato client, ora gestito dal server
       setListings(data as Listing[]);
     }
     setLoading(false);

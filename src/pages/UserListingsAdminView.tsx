@@ -60,11 +60,10 @@ const UserListingsAdminView = () => {
       `)
       .eq('user_id', userId);
 
-    // Applica l'ordinamento lato server per prioritizzare gli annunci Premium attivi
+    // Applica il nuovo ordinamento lato server
     query = query
-      .order('is_premium', { ascending: false }) // Premium prima
+      .order('last_bumped_at', { ascending: false, nullsFirst: false }) // Più recenti (creati o promossi) prima
       .order('promotion_end_at', { ascending: false, nullsFirst: false }) // Poi per scadenza promozione (più lontana prima)
-      .order('last_bumped_at', { ascending: false, nullsFirst: false }) // Poi per ultimo 'bump'
       .order('created_at', { ascending: false }); // Infine per data di creazione
 
     const { data, error: listingsError } = await query;
@@ -73,7 +72,6 @@ const UserListingsAdminView = () => {
       console.error("Error fetching user listings:", listingsError);
       setError("Impossibile caricare gli annunci dell'utente.");
     } else if (data) {
-      // Rimosso l'ordinamento lato client, ora gestito dal server
       setListings(data as Listing[]);
     }
     setLoading(false);
