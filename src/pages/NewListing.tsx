@@ -149,8 +149,7 @@ const NewListing = () => {
 
       dismissToast(toastId);
       showSuccess('Annuncio pubblicato con successo!');
-      navigate('/dashboard');
-
+      navigate(`/listing-post-creation/${listingId}`); // Reindirizza alla nuova pagina
     } catch (error: any) {
       dismissToast(toastId);
       showError(error.message || 'Si è verificato un errore imprevisto.');

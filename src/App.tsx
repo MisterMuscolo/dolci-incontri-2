@@ -35,6 +35,7 @@ const ChangePassword = lazy(() => import("./pages/ChangePassword")); // Percorso
 const TicketDetails = lazy(() => import("./pages/TicketDetails"));
 const MyCoupons = lazy(() => import("./pages/MyCoupons")); // Importa la nuova pagina MyCoupons
 const AuthCallback = lazy(() => import("./pages/AuthCallback")); // Importa la nuova pagina AuthCallback
+const ListingPostCreation = lazy(() => import("./pages/ListingPostCreation")); // Importa la nuova pagina
 
 const queryClient = new QueryClient();
 
@@ -136,6 +137,11 @@ const App = () => {
             <Route path="/banned" element={<BannedUser />} />
             {/* Nuova rotta per la conferma registrazione */}
             <Route path="/registration-success" element={<RegistrationSuccess />} />
+            {/* Nuova rotta per la pagina di post-creazione annuncio */}
+            <Route 
+              path="/listing-post-creation/:listingId" 
+              element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><ListingPostCreation /></Suspense>) : <Navigate to="/auth" />} 
+            />
 
             <Route element={<Layout session={session} isAdmin={isAdmin} isSupporto={isSupporto} />}>
               <Route 
