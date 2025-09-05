@@ -34,28 +34,35 @@ export const ApplyCouponForm = ({ onCouponApplied, onCouponRemoved, currentAppli
       dismissToast(toastId);
 
       if (error) {
-        console.error("Errore completo da supabase.functions.invoke:", error); // Log per il debug
+        console.error("Errore completo da supabase.functions.invoke:", error);
+        // Log aggiuntivi per debug
+        console.error("Errore.name:", error.name);
+        console.error("Errore.message:", error.message);
+        // @ts-ignore
+        console.error("Errore.context:", error.context);
+        // @ts-ignore
+        console.error("Errore.context.body:", error.context?.body);
+
         let displayMessage = 'Errore durante l\'applicazione del coupon.';
 
-        // Tenta di estrarre il messaggio dal corpo della risposta dell'Edge Function
+        // @ts-ignore
         if (error.context && typeof error.context.body === 'string') {
           try {
+            // @ts-ignore
             const errorBody = JSON.parse(error.context.body);
             if (errorBody.error) {
               displayMessage = errorBody.error;
             }
           } catch (e) {
             console.error("Impossibile parsare il corpo della risposta di errore dall'Edge Function:", e);
-            // Fallback al messaggio generico o a error.message se il parsing fallisce
             displayMessage = error.message || 'Errore sconosciuto dal server.';
           }
         } else if (error.message) {
-          // Fallback a error.message se context.body non è disponibile o non è una stringa
           displayMessage = error.message;
         }
         
         showError(displayMessage);
-        return; // Esci dalla funzione dopo aver mostrato l'errore
+        return;
       }
 
       showSuccess(data.message || 'Coupon applicato con successo!');
@@ -64,12 +71,11 @@ export const ApplyCouponForm = ({ onCouponApplied, onCouponRemoved, currentAppli
         value: data.discountValue,
         couponId: data.couponId,
         couponType: data.couponType,
-        code: couponCode.trim(), // Passa il codice del coupon
+        code: couponCode.trim(),
       });
-      setCouponCode(''); // Clear input after successful application
+      setCouponCode('');
     } catch (error: any) {
       dismissToast(toastId);
-      // Questo blocco catch dovrebbe essere raggiunto solo per errori imprevisti non gestiti sopra
       showError(error.message || 'Si è verificato un errore imprevisto.');
     } finally {
       setIsLoading(false);
