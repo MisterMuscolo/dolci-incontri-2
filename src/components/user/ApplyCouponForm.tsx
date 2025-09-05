@@ -35,26 +35,20 @@ export const ApplyCouponForm = ({ onCouponApplied, onCouponRemoved, currentAppli
 
       if (error) {
         console.error("Errore completo da supabase.functions.invoke:", error);
-        // Log aggiuntivi per debug
-        console.error("Errore.name:", error.name);
-        console.error("Errore.message:", error.message);
-        // @ts-ignore
-        console.error("Errore.context:", error.context);
-        // @ts-ignore
-        console.error("Errore.context.body:", error.context?.body);
-
         let displayMessage = 'Errore durante l\'applicazione del coupon.';
 
-        // @ts-ignore
-        if (error.context && typeof error.context.body === 'string') {
+        // Se error.context è un oggetto Response e il suo body è un ReadableStream, leggilo
+        // @ts-ignore - error.context è l'oggetto Response
+        if (error.context && error.context.body instanceof ReadableStream) {
           try {
-            // @ts-ignore
-            const errorBody = JSON.parse(error.context.body);
+            // @ts-ignore - Leggi il ReadableStream per ottenere il testo
+            const errorText = await error.context.text(); 
+            const errorBody = JSON.parse(errorText);
             if (errorBody.error) {
               displayMessage = errorBody.error;
             }
           } catch (e) {
-            console.error("Impossibile parsare il corpo della risposta di errore dall'Edge Function:", e);
+            console.error("Impossibile parsare il corpo della risposta di errore dall'Edge Function (dopo aver letto il ReadableStream):", e);
             displayMessage = error.message || 'Errore sconosciuto dal server.';
           }
         } else if (error.message) {
