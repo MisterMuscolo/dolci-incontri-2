@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom'; // Importa useNavigate
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,7 +12,7 @@ import { Eye, EyeOff } from 'lucide-react'; // Importa le icone dell'occhio
 
 export default function Auth() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate(); // Inizializza useNavigate
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -49,10 +49,9 @@ export default function Auth() {
       showSuccess('Accesso effettuato!');
       const redirectPath = searchParams.get('redirect');
       if (redirectPath) {
-        navigate(redirectPath); // Naviga al percorso di reindirizzamento specificato
+        navigate(redirectPath);
       } else {
         // App.tsx gestirà il reindirizzamento predefinito in base al ruolo
-        // Non è necessaria una navigazione esplicita qui se App.tsx la gestisce
       }
     }
   };
@@ -68,7 +67,8 @@ export default function Auth() {
       email, 
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?redirect=/registration-success`, // Reindirizza al callback con destinazione finale
+        // Dopo la conferma dell'email, reindirizza alla dashboard
+        emailRedirectTo: `${window.location.origin}/auth/callback?redirect=/dashboard`,
       },
     });
     setLoading(false);
@@ -77,8 +77,8 @@ export default function Auth() {
       showError(error.message);
     } else {
       showSuccess('Registrazione completata! Verifica la tua email.');
-      // La navigazione a /registration-success avverrà tramite il callback dopo la verifica dell'email
-      // Non è necessaria una navigazione esplicita qui
+      // Dopo aver cliccato "Registrati", naviga alla pagina di successo
+      navigate('/registration-success');
     }
   };
 
@@ -90,7 +90,8 @@ export default function Auth() {
     }
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback`, // Reindirizza al callback
+      // Dopo il reset password, reindirizza alla dashboard
+      redirectTo: `${window.location.origin}/auth/callback?redirect=/dashboard`,
     });
     setLoading(false);
     
@@ -159,7 +160,7 @@ export default function Auth() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <div className="flex justify-between items-center"> {/* Modificato qui */}
+                  <div className="flex justify-between items-center">
                     <Label htmlFor="password-login">Password</Label>
                     <button
                       type="button"
