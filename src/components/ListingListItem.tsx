@@ -2,7 +2,7 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, CalendarDays, Rocket, User, Camera, MapPin, Tag, Flame } from "lucide-react"; // Importa Flame
+import { Pencil, Trash2, CalendarDays, Rocket, User, Camera, MapPin, Tag, Flame } from "lucide-react";
 import { format, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Link } from "react-router-dom";
@@ -200,8 +200,8 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
     )}>
       <div className="flex flex-col sm:flex-row w-full">
         {hasPhotosToRender && (
-          <div className={cn("md:w-1/4 lg:w-1/5 flex-shrink-0 relative", isCompact && "md:w-1/3 lg:w-1/4")}> {/* Aumenta la larghezza relativa dell'immagine in modalità compatta */}
-            <AspectRatio ratio={isCompact ? 4 / 3 : 3 / 4} className="w-full h-full"> {/* Cambia aspect ratio */}
+          <div className={cn("md:w-1/4 lg:w-1/5 flex-shrink-0 relative", isCompact && "md:w-1/3 lg:w-1/4")}>
+            <AspectRatio ratio={isCompact ? 4 / 3 : 3 / 4} className="w-full h-full">
               <Link to={`/listing/${listing.id}`} className="block w-full h-full">
                 <WatermarkedImage src={photosToRender[0].url} alt={listing.title} imageClassName="object-cover" />
               </Link>
@@ -217,7 +217,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           "flex-grow block hover:bg-gray-50/50",
           !hasPhotosToRender && "w-full"
         )}>
-          <div className={cn("p-4 flex flex-col flex-grow", isCompact && "p-3")}> {/* Riduci padding */}
+          <div className={cn("p-4 flex flex-col flex-grow", isCompact && "p-3")}>
             <Badge variant="outline" className="w-fit mb-2">
               <CalendarDays className="h-4 w-4 mr-1.5" />
               <span>{prefix} {formattedDate}</span>
@@ -225,8 +225,8 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
             <div className="flex items-center gap-2 mb-2">
               <Badge variant="secondary" className="capitalize"><Tag className="h-4 w-4 mr-1" />{listing.category.replace(/-/g, ' ')}</Badge>
             </div>
-            <h3 className={cn("text-xl font-semibold mb-2 text-rose-600 line-clamp-2", isCompact && "text-lg")}>{listing.title}</h3> {/* Riduci dimensione titolo */}
-            <p className={cn("text-base text-gray-600 mb-3 line-clamp-3", isCompact && "text-sm line-clamp-2")}>{listing.description}</p> {/* Riduci dimensione descrizione e line-clamp */}
+            <h3 className={cn("text-xl font-semibold mb-2 text-rose-600 line-clamp-2", isCompact && "text-lg")}>{listing.title}</h3>
+            <p className={cn("text-base text-gray-600 mb-3 line-clamp-3", isCompact && "text-sm line-clamp-2")}>{listing.description}</p>
             <div className="flex flex-wrap gap-2 mb-2">
               <Badge variant="outline">
                 <MapPin className="h-4 w-4 mr-1" /> {listing.city}{listing.zone && ` / ${listing.zone}`}
@@ -269,7 +269,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                   size="sm" 
                   className={cn(
                     "w-full h-9 px-3 text-sm flex items-center gap-1",
-                    isActivePremium ? "bg-yellow-500 hover:bg-yellow-600" : "bg-blue-500 hover:bg-blue-600"
+                    isActivePremium ? "bg-rose-500 hover:bg-rose-600" : "bg-blue-500 hover:bg-blue-600"
                   )}
                 >
                   <Flame className="h-4 w-4" /> {isActivePremium ? 'Hot' : 'In Attesa'}
@@ -335,7 +335,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
         </div>
       )}
       {!(canEdit || canManagePhotos || canDelete) && isActivePremium && (
-        <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white absolute top-1 right-1 z-20 px-2 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
+        <Badge className="bg-rose-500 hover:bg-rose-600 text-white absolute top-1 right-1 z-20 px-2 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
           <Flame className="h-3 w-3 mr-0.5" /> Hot
         </Badge>
       )}
