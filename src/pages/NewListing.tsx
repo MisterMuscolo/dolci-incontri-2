@@ -14,7 +14,7 @@ import { ImageUploader } from '@/components/ImageUploader';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { ChevronLeft } from 'lucide-react';
-import { cn, slugifyFilename } from '@/lib/utils'; // Importa slugifyFilename
+import { cn, slugifyFilename, formatPhoneNumber } from '@/lib/utils'; // Importa slugifyFilename e formatPhoneNumber
 import { Checkbox } from '@/components/ui/checkbox'; // Importato Checkbox
 
 const listingSchema = z.object({
@@ -92,14 +92,16 @@ const NewListing = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Devi essere autenticato per creare un annuncio.');
 
-      const { age, ...restOfValues } = values;
+      const { age, phone, ...restOfValues } = values; // Estrai 'phone'
+      const formattedPhone = formatPhoneNumber(phone); // Formatta il numero di telefono
+
       const submissionData = {
         ...restOfValues,
         age: parseInt(age, 10),
         user_id: user.id,
         last_bumped_at: new Date().toISOString(), // Aggiunto per far apparire i nuovi annunci in cima
         email: values.email?.trim() || null,
-        phone: values.phone?.trim() || null,
+        phone: formattedPhone, // Usa il numero formattato
         contact_whatsapp: values.contact_whatsapp, // Salva la preferenza WhatsApp
       };
 

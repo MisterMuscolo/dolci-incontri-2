@@ -17,3 +17,19 @@ export function slugifyFilename(filename: string): string {
     .replace(/^-+/, '') // Rimuovi trattini all'inizio
     .replace(/-+$/, ''); // Rimuovi trattini alla fine
 }
+
+export function formatPhoneNumber(phoneNumber: string | null | undefined): string | null {
+  if (!phoneNumber) {
+    return null;
+  }
+  const cleanedNumber = phoneNumber.replace(/\s/g, ''); // Rimuove tutti gli spazi
+  if (!cleanedNumber) {
+    return null;
+  }
+  // Controlla se il numero inizia già con un prefisso internazionale (es. +39, 0039)
+  if (cleanedNumber.startsWith('+') || cleanedNumber.startsWith('00')) {
+    return cleanedNumber;
+  }
+  // Altrimenti, aggiungi il prefisso +39
+  return `+39${cleanedNumber}`;
+}

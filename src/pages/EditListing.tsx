@@ -15,9 +15,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { ChevronLeft, Image as ImageIcon } from 'lucide-react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { cn, slugifyFilename } from '@/lib/utils'; // Importa slugifyFilename
+import { cn, slugifyFilename, formatPhoneNumber } from '@/lib/utils'; // Importa slugifyFilename e formatPhoneNumber
 import { Skeleton } from '@/components/ui/skeleton';
-import { Checkbox } from '@/components/ui/checkbox'; // Importato Checkbox
+import { Checkbox } // Importato Checkbox
 
 const listingSchema = z.object({
   category: z.string({ required_error: 'La categoria è obbligatoria.' }),
@@ -151,12 +151,14 @@ const EditListing = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Devi essere autenticato per modificare un annuncio.');
 
+      const formattedPhone = formatPhoneNumber(values.phone); // Formatta il numero di telefono
+
       // Only send mutable fields to the update operation
       const updateData = {
         title: values.title,
         description: values.description,
         email: values.email?.trim() || null,
-        phone: values.phone?.trim() || null,
+        phone: formattedPhone, // Usa il numero formattato
         contact_preference: values.contact_preference,
         contact_whatsapp: values.contact_whatsapp, // Salva la preferenza WhatsApp
       };
