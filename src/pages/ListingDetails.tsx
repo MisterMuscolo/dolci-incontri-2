@@ -8,12 +8,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { showError } from '@/utils/toast';
 import { MapPin, Tag, User, Mail, BookText, ChevronLeft, CalendarDays, Rocket, Phone, Flag } from 'lucide-react';
-import { cn } from '@/lib/utils'; // Corretto: da '=>' a 'from'
+import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { CreateTicketDialog } from '@/components/CreateTicketDialog';
-import { ReplyToListingDialog } from '@/components/ReplyToListingDialog'; // Importa il nuovo componente
-import { WatermarkedImage } from '@/components/WatermarkedImage'; // Importa il nuovo componente
+import { ReplyToListingDialog } from '@/components/ReplyToListingDialog';
+import { WatermarkedImage } from '@/components/WatermarkedImage';
 
 type FullListing = {
   id: string;
@@ -24,14 +24,14 @@ type FullListing = {
   zone: string | null;
   age: number;
   phone: string | null;
-  email: string; // Aggiunto
+  email: string;
   created_at: string;
   expires_at: string;
   is_premium: boolean;
   promotion_mode: string | null;
   promotion_start_at: string | null;
   promotion_end_at: string | null;
-  contact_preference: 'email' | 'phone' | 'both'; // Aggiunto
+  contact_preference: 'email' | 'phone' | 'both';
   listing_photos: { id: string; url: string }[];
 };
 
@@ -54,6 +54,9 @@ const ListingDetails = () => {
 
       if (error || !data) {
         console.error('Error fetching listing:', error);
+        showError('Impossibile caricare i dettagli dell\'annuncio.');
+        navigate('/search'); // Reindirizza alla pagina di ricerca se l'annuncio non è trovato
+        return;
       } else {
         // Ottieni il timestamp UTC corrente in millisecondi
         const nowUtcTime = Date.now(); 
@@ -80,7 +83,7 @@ const ListingDetails = () => {
       setLoading(false);
     };
     fetchListing();
-  }, [id]);
+  }, [id, navigate]); // Aggiunto navigate alle dipendenze
 
   if (loading) {
     return (
@@ -110,6 +113,7 @@ const ListingDetails = () => {
 
   const hasPhotos = listing.listing_photos && listing.listing_photos.length > 0;
 
+  // Logica corretta per i pulsanti di contatto
   const canContactByEmail = listing.contact_preference === 'email' || listing.contact_preference === 'both';
   const canContactByPhone = listing.contact_preference === 'phone' || listing.contact_preference === 'both';
 
@@ -157,12 +161,12 @@ const ListingDetails = () => {
                     <div 
                       key={photo.id} 
                       className={cn(
-                        "relative w-24 h-24 flex-shrink-0 rounded-md cursor-pointer", // Aggiunto rounded-md e cursor-pointer
+                        "relative w-24 h-24 flex-shrink-0 rounded-md cursor-pointer",
                         activePhoto === photo.url && 'ring-2 ring-rose-500 ring-offset-2 ring-offset-gray-50'
                       )}
-                      onClick={() => setActivePhoto(photo.url)} // Spostato onClick qui
+                      onClick={() => setActivePhoto(photo.url)}
                     >
-                      <WatermarkedImage src={photo.url} alt="Thumbnail" imageClassName="object-cover bg-gray-200 rounded-md" /> {/* Cambiato a object-cover */}
+                      <WatermarkedImage src={photo.url} alt="Thumbnail" imageClassName="object-cover bg-gray-200 rounded-md" />
                     </div>
                   ))}
                 </div>
