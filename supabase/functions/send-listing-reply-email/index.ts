@@ -33,13 +33,21 @@ serve(async (req) => {
 
     const { data: listing, error: listingError } = await supabaseAdmin
       .from('listings')
-      .select('title, email')
+      .select('title, email, contact_preference') // Fetch contact_preference
       .eq('id', listingId)
       .single();
 
     if (listingError || !listing || !listing.email) {
       console.error('Error fetching listing details in Edge Function:', listingError?.message);
       throw new Error('Listing not found or creator email not available.');
+    }
+
+    // Check contact preference
+    if (listing.contact_preference === 'phone') {
+      return new Response(JSON.stringify({ error: 'L\'autore dell\'annuncio ha scelto di essere contattato solo tramite telefono.' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400,
+      });
     }
 
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));

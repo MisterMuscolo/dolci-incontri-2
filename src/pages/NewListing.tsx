@@ -25,8 +25,28 @@ const listingSchema = z.object({
     .refine((val) => parseInt(val, 10) >= 18, { message: "Devi avere almeno 18 anni." }),
   title: z.string().min(5, 'Il titolo deve avere almeno 5 caratteri.').max(100, 'Il titolo non può superare i 100 caratteri.'),
   description: z.string().min(20, 'La descrizione deve avere almeno 20 caratteri.'),
-  email: z.string({ required_error: "L'email è obbligatoria." }).email("L'email non è valida."),
+  email: z.string().email("L'email non è valida.").optional(), // Reso opzionale qui, la validazione condizionale è nel refine
   phone: z.string().optional(),
+  contact_preference: z.enum(['email', 'phone', 'both'], { required_error: 'La preferenza di contatto è obbligatoria.' }),
+}).superRefine((data, ctx) => {
+  if (data.contact_preference === 'email' || data.contact_preference === 'both') {
+    if (!data.email || data.email.trim() === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "L'email è obbligatoria per la preferenza di contatto selezionata.",
+        path: ['email'],
+      });
+    }
+  }
+  if (data.contact_preference === 'phone' || data.contact_preference === 'both') {
+    if (!data.phone || data.phone.trim() === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Il numero di telefono è obbligatorio per la preferenza di contatto selezionata.",
+        path: ['phone'],
+      });
+    }
+  }
 });
 
 const NewListing = () => {
@@ -42,8 +62,11 @@ const NewListing = () => {
       zone: '',
       email: '',
       phone: '',
+      contact_preference: 'both', // Default to 'both'
     }
   });
+
+  const contactPreference = form.watch('contact_preference');
 
   useEffect(() => {
     const fetchUserEmailAndId = async () => {
@@ -234,14 +257,43 @@ const NewListing = () => {
                       </FormItem>
                     )}
                   />
+                
+                <FormField
+                  control={form.control}
+                  name="contact_preference"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Come vuoi essere contattato? *</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger><SelectValue placeholder="Seleziona preferenza di contatto" /></SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="email">Solo Email</SelectItem>
+                          <SelectItem value="phone">Solo Telefono</SelectItem>
+                          <SelectItem value="both">Email e Telefono</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <FormField
                     control={form.control}
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email *</FormLabel>
-                        <FormControl><Input type="email" {...field} readOnly className="bg-gray-100 cursor-not-allowed" /></FormControl>
+                        <FormLabel>Email {contactPreference === 'email' || contactPreference === 'both' ? '*' : '(Opzionale)'}</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="email" 
+                            {...field} 
+                            readOnly={contactPreference === 'phone'} // Readonly if only phone is preferred
+                            className={contactPreference === 'phone' ? "bg-gray-100 cursor-not-allowed" : ""}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -251,8 +303,16 @@ const NewListing = () => {
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Telefono (Opzionale)</FormLabel>
-                        <FormControl><Input type="tel" placeholder="Il tuo numero di telefono" {...field} /></FormControl>
+                        <FormLabel>Telefono {contactPreference === 'phone' || contactPreference === 'both' ? '*' : '(Opzionale)'}</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="tel" 
+                            placeholder="Il tuo numero di telefono" 
+                            {...field} 
+                            readOnly={contactPreference === 'email'} // Readonly if only email is preferred
+                            className={contactPreference === 'email' ? "bg-gray-100 cursor-not-allowed" : ""}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}

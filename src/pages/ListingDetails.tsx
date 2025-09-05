@@ -24,12 +24,14 @@ type FullListing = {
   zone: string | null;
   age: number;
   phone: string | null;
+  email: string; // Aggiunto
   created_at: string;
   expires_at: string;
   is_premium: boolean;
   promotion_mode: string | null;
   promotion_start_at: string | null;
   promotion_end_at: string | null;
+  contact_preference: 'email' | 'phone' | 'both'; // Aggiunto
   listing_photos: { id: string; url: string }[];
 };
 
@@ -107,6 +109,9 @@ const ListingDetails = () => {
   const isActivePremium = listing.is_premium && promoStart && promoEnd && promoStart <= nowUtcTime && promoEnd >= nowUtcTime;
 
   const hasPhotos = listing.listing_photos && listing.listing_photos.length > 0;
+
+  const canContactByEmail = listing.contact_preference === 'email' || listing.contact_preference === 'both';
+  const canContactByPhone = listing.contact_preference === 'phone' || listing.contact_preference === 'both';
 
   return (
     <div className="bg-gray-50">
@@ -195,7 +200,7 @@ const ListingDetails = () => {
           </Card>
 
           <div className="flex flex-col sm:flex-row justify-center py-4 gap-4">
-            {listing.phone && (
+            {canContactByPhone && listing.phone && (
               <a
                 href={`tel:${listing.phone}`}
                 className="w-full sm:w-auto"
@@ -205,17 +210,19 @@ const ListingDetails = () => {
                 </Button>
               </a>
             )}
-            <ReplyToListingDialog
-              listingId={listing.id}
-              listingTitle={listing.title}
-              triggerButton={
-                <Button
-                  className="w-full sm:w-auto bg-rose-500 hover:bg-rose-600 text-lg px-8 py-6 rounded-lg shadow-lg flex items-center justify-center gap-2"
-                >
-                  <Mail className="h-6 w-6" /> Rispondi
-                </Button>
-              }
-            />
+            {canContactByEmail && (
+              <ReplyToListingDialog
+                listingId={listing.id}
+                listingTitle={listing.title}
+                triggerButton={
+                  <Button
+                    className="w-full sm:w-auto bg-rose-500 hover:bg-rose-600 text-lg px-8 py-6 rounded-lg shadow-lg flex items-center justify-center gap-2"
+                  >
+                    <Mail className="h-6 w-6" /> Rispondi
+                  </Button>
+                }
+              />
+            )}
           </div>
         </div>
       </div>
