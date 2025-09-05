@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { showError } from '@/utils/toast';
-import { MapPin, Tag, User, Mail, BookText, ChevronLeft, CalendarDays, Rocket, Phone, Flag } from 'lucide-react';
+import { MapPin, Tag, User, Mail, BookText, ChevronLeft, CalendarDays, Rocket, Phone, Flag, MessageCircle } from 'lucide-react'; // Importato MessageCircle
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -32,6 +32,7 @@ type FullListing = {
   promotion_start_at: string | null;
   promotion_end_at: string | null;
   contact_preference: 'email' | 'phone' | 'both';
+  contact_whatsapp: boolean | null; // Nuovo campo
   listing_photos: { id: string; url: string }[];
 };
 
@@ -116,6 +117,11 @@ const ListingDetails = () => {
   // Logica corretta per i pulsanti di contatto
   const canContactByEmail = (listing.contact_preference === 'email' || listing.contact_preference === 'both') && !!listing.email;
   const canContactByPhone = (listing.contact_preference === 'phone' || listing.contact_preference === 'both') && !!listing.phone;
+
+  const phoneHref = listing.contact_whatsapp ? `https://wa.me/${listing.phone}` : `tel:${listing.phone}`;
+  const phoneButtonClass = listing.contact_whatsapp ? "bg-green-500 hover:bg-green-600" : "bg-rose-500 hover:bg-rose-600";
+  const phoneButtonIcon = listing.contact_whatsapp ? <MessageCircle className="h-6 w-6" /> : <Phone className="h-6 w-6" />;
+  const phoneButtonText = listing.contact_whatsapp ? 'WhatsApp' : 'Chiama';
 
   return (
     <div className="bg-gray-50">
@@ -206,11 +212,16 @@ const ListingDetails = () => {
           <div className="flex flex-col sm:flex-row justify-center py-4 gap-4">
             {canContactByPhone && (
               <a
-                href={`tel:${listing.phone}`}
+                href={phoneHref}
+                target={listing.contact_whatsapp ? "_blank" : "_self"} // Apri in nuova scheda per WhatsApp
+                rel={listing.contact_whatsapp ? "noopener noreferrer" : ""}
                 className="w-full sm:w-auto"
               >
-                <Button className="w-full bg-green-500 hover:bg-green-600 text-lg px-8 py-6 rounded-lg shadow-lg flex items-center justify-center gap-2">
-                  <Phone className="h-6 w-6" /> {listing.phone}
+                <Button className={cn(
+                  "w-full text-lg px-8 py-6 rounded-lg shadow-lg flex items-center justify-center gap-2",
+                  phoneButtonClass
+                )}>
+                  {phoneButtonIcon} {phoneButtonText}
                 </Button>
               </a>
             )}

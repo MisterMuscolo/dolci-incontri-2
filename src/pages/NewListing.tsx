@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form'; // Importato FormDescription
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils'; // Import cn for conditional classes
+import { Checkbox } from '@/components/ui/checkbox'; // Importato Checkbox
 
 const listingSchema = z.object({
   category: z.string({ required_error: 'La categoria è obbligatoria.' }),
@@ -29,6 +30,7 @@ const listingSchema = z.object({
   email: z.string().email("L'email non è valida.").optional(), // Reso opzionale qui, la validazione condizionale è nel refine
   phone: z.string().optional(),
   contact_preference: z.enum(['email', 'phone', 'both'], { required_error: 'La preferenza di contatto è obbligatoria.' }),
+  contact_whatsapp: z.boolean().optional().default(false), // Nuovo campo per WhatsApp
 }).superRefine((data, ctx) => {
   if (data.contact_preference === 'email' || data.contact_preference === 'both') {
     if (!data.email || data.email.trim() === '') {
@@ -64,10 +66,12 @@ const NewListing = () => {
       email: '',
       phone: '',
       contact_preference: 'both', // Default to 'both'
+      contact_whatsapp: false, // Default for WhatsApp
     }
   });
 
   const contactPreference = form.watch('contact_preference');
+  const phoneValue = form.watch('phone'); // Watch phone value to enable/disable WhatsApp checkbox
 
   useEffect(() => {
     const fetchUserEmailAndId = async () => {
@@ -94,9 +98,9 @@ const NewListing = () => {
         age: parseInt(age, 10),
         user_id: user.id,
         last_bumped_at: new Date().toISOString(), // Aggiunto per far apparire i nuovi annunci in cima
-        // L'email e il telefono vengono salvati come sono, la preferenza di contatto gestisce la visualizzazione
         email: values.email?.trim() || null,
         phone: values.phone?.trim() || null,
+        contact_whatsapp: values.contact_whatsapp, // Salva la preferenza WhatsApp
       };
 
       const { data: listingData, error: listingError } = await supabase
@@ -327,6 +331,31 @@ const NewListing = () => {
                     )}
                   />
                 </div>
+
+                {(contactPreference === 'phone' || contactPreference === 'both') && phoneValue && (
+                  <FormField
+                    control={form.control}
+                    name="contact_whatsapp"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            disabled={!phoneValue || isLoading} // Disabilita se il telefono non è inserito
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>Contatto WhatsApp</FormLabel>
+                          <FormDescription>
+                            Se selezionato, il pulsante del telefono avvierà una chat WhatsApp.
+                          </FormDescription>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                )}
+
                 <div>
                   {/* Rimosse le etichette 'Fotografie' e la sua descrizione */}
                   <ImageUploader
