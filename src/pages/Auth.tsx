@@ -67,9 +67,9 @@ export default function Auth() {
     const { error } = await supabase.auth.signUp({ 
       email, 
       password,
-      // Rimosso: options: {
-      // Rimosso:   emailRedirectTo: `${window.location.origin}/auth/callback?redirect=/registration-success`, // Reindirizza al callback con destinazione finale
-      // Rimosso: },
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback?redirect=/registration-success`, // Reindirizza al callback con destinazione finale
+      },
     });
     setLoading(false);
     
@@ -90,7 +90,7 @@ export default function Auth() {
     }
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      // Rimosso: redirectTo: `${window.location.origin}/auth/callback`, // Reindirizza al callback
+      redirectTo: `${window.location.origin}/auth/callback`, // Reindirizza al callback
     });
     setLoading(false);
     

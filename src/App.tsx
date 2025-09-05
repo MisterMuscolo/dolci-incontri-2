@@ -34,7 +34,7 @@ const RegistrationSuccess = lazy(() => import("./pages/RegistrationSuccess"));
 const ChangePassword = lazy(() => import("./pages/ChangePassword")); // Percorso corretto
 const TicketDetails = lazy(() => import("./pages/TicketDetails"));
 const MyCoupons = lazy(() => import("./pages/MyCoupons")); // Importa la nuova pagina MyCoupons
-// Rimosso: const AuthCallback = lazy(() => import("./pages/AuthCallback")); // Importa la nuova pagina AuthCallback
+const AuthCallback = lazy(() => import("./pages/AuthCallback")); // Importa la nuova pagina AuthCallback
 
 const queryClient = new QueryClient();
 
@@ -122,15 +122,15 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Rimosso: Nuova rotta per il callback di autenticazione di Supabase */}
-            {/* Rimosso: <Route 
+            {/* Nuova rotta per il callback di autenticazione di Supabase */}
+            <Route 
               path="/auth/callback" 
               element={
                 <Suspense fallback={<LoadingScreen />}>
                   <AuthCallback />
                 </Suspense>
               } 
-            /> */}
+            />
 
             {/* Route per utenti bannati */}
             <Route path="/banned" element={<BannedUser />} />
