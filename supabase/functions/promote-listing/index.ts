@@ -111,9 +111,10 @@ serve(async (req) => {
         promoEnd = new Date(promoStart.getTime() + durationHours * 60 * 60 * 1000);
     }
 
-    // *** Rimosso: La data di scadenza (expires_at) non viene più modificata dalla promozione. ***
-    // La data di scadenza originale dell'annuncio (30 giorni dalla creazione) rimane invariata.
-    // La visibilità premium sarà gestita solo tramite promotion_start_at e promotion_end_at.
+    // Calculate new expires_at: max of current expiry or promoEnd, then add promotion duration
+    const currentExpiresAt = new Date(listing.expires_at);
+    const newExpiresAt = new Date(Math.max(currentExpiresAt.getTime(), promoEnd.getTime()));
+    newExpiresAt.setUTCHours(newExpiresAt.getUTCHours() + durationHours); // Extend by promotion duration
 
     // Use the service role key for the actual update to bypass RLS for atomic transaction
     const supabaseAdmin = createClient(
@@ -130,7 +131,7 @@ serve(async (req) => {
         promotion_start_at: promoStart.toISOString(),
         promotion_end_at: promoEnd.toISOString(),
         last_bumped_at: now.toISOString(), // Always bump to now when promotion is purchased
-        // expires_at non viene più aggiornato qui
+        expires_at: newExpiresAt.toISOString(), // Extend expiry date
       })
       .eq('id', listingId);
 
