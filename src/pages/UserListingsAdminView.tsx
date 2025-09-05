@@ -115,9 +115,9 @@ const UserListingsAdminView = () => {
                     canEdit={false}
                     canManagePhotos={true}
                     canDelete={true}
-                    showExpiryDate={true} 
                     onListingUpdated={fetchUserDataAndListings}
                     isAdminContext={true}
+                    dateTypeToDisplay="expires_at" // Mostra la data di scadenza
                   />
                 ))}
               </div>

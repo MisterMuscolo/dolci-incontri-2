@@ -49,14 +49,14 @@ interface ListingListItemProps {
   canEdit?: boolean;
   canManagePhotos?: boolean;
   canDelete?: boolean;
-  showExpiryDate?: boolean;
   onListingUpdated?: () => void;
   isAdminContext?: boolean;
   allowNonPremiumImage?: boolean;
   isCompact?: boolean; // Nuova prop per la modalità compatta
+  dateTypeToDisplay?: 'created_at' | 'expires_at'; // Nuova prop per scegliere la data da visualizzare
 }
 
-export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = false, canDelete = false, showExpiryDate = false, onListingUpdated, isAdminContext = false, allowNonPremiumImage = true, isCompact = false }: ListingListItemProps) => {
+export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = false, canDelete = false, onListingUpdated, isAdminContext = false, allowNonPremiumImage = true, isCompact = false, dateTypeToDisplay = 'expires_at' }: ListingListItemProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const nowUtcTime = Date.now(); 
@@ -83,10 +83,18 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
 
   const hasPhotosToRender = photosToRender.length > 0;
 
-  // La data da visualizzare è sempre listing.expires_at, che ora viene estesa dalla promozione
-  const dateToDisplay: Date = new Date(listing.expires_at);
-  const prefix = 'Scade il:'; 
-  const dateFormat = 'dd MMMM yyyy'; // Mostra solo la data per la scadenza
+  // Logica per la data da visualizzare basata su dateTypeToDisplay
+  let dateToDisplay: Date;
+  let prefix: string;
+  const dateFormat = 'dd MMMM yyyy'; // Formato data standard
+
+  if (dateTypeToDisplay === 'created_at') {
+    dateToDisplay = new Date(listing.created_at);
+    prefix = 'Pubblicato il:';
+  } else { // Default a 'expires_at'
+    dateToDisplay = new Date(listing.expires_at);
+    prefix = 'Scade il:';
+  }
 
   const formattedDate = !isNaN(dateToDisplay.getTime()) 
     ? format(dateToDisplay, dateFormat, { locale: it }) 

@@ -136,8 +136,8 @@ const MyListings = () => {
                     canEdit={true}
                     canManagePhotos={false}
                     canDelete={true}
-                    showExpiryDate={true} 
                     onListingUpdated={fetchListings} 
+                    dateTypeToDisplay="expires_at" // Mostra la data di scadenza
                   />
                 ))}
                 {totalPages > 1 && (
