@@ -140,6 +140,31 @@ const ListingDetails = () => {
         <meta property="og:description" content={`${listing.description.substring(0, 150)}... Annuncio di ${listing.category.replace(/-/g, ' ')} a ${listing.city}. Trova il tuo appuntamento ideale.`} />
         <meta property="og:url" content={`${window.location.origin}/listing/${listing.id}`} />
         <meta property="og:type" content="website" />
+        {/* Schema Markup per il servizio */}
+        <script type="application/ld+json">
+          {`
+            {
+              "@context": "https://schema.org",
+              "@type": "Service",
+              "name": "${listing.title}",
+              "description": "${listing.description.replace(/"/g, '\\"')}",
+              "serviceType": "${listing.category.replace(/-/g, ' ')}",
+              "areaServed": {
+                "@type": "Place",
+                "name": "${listing.city}"
+              },
+              "provider": {
+                "@type": "Person",
+                "name": "Utente di IncontriDolci",
+                ${listing.age ? `"ageRange": "${listing.age}",` : ''}
+                ${listing.email ? `"email": "${listing.email}",` : ''}
+                ${listing.phone ? `"telephone": "${listing.phone}"` : ''}
+              },
+              ${hasPhotos ? `"image": "${listing.listing_photos[0].url}",` : ''}
+              "url": "${window.location.origin}/listing/${listing.id}"
+            }
+          `}
+        </script>
       </Helmet>
       <div className="container mx-auto p-4 sm:p-6 md:p-8">
         <div className="flex items-center gap-4 mb-6">
