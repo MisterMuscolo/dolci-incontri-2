@@ -22,6 +22,7 @@ const ListingDetails = lazy(() => import("./pages/ListingDetails"));
 import MyListings from "./pages/MyListings"; // MyListings rimane importato direttamente
 import CreditHistory from "./pages/CreditHistory"; // CreditHistory rimane importato direttamente
 import MyTickets from "./pages/MyTickets"; // Importa MyTickets direttamente
+import MyCoupons from "./pages/MyCoupons"; // Importa MyCoupons direttamente
 const UserListingsAdminView = lazy(() => import("./pages/UserListingsAdminView"));
 const BannedUser = lazy(() => import("./pages/BannedUser"));
 const EditListing = lazy(() => import("./pages/EditListing"));
@@ -186,6 +187,10 @@ const App = () => {
               <Route 
                 path="/my-tickets/:ticketId" 
                 element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><TicketDetails /></Suspense>) : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/my-coupons" 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <MyCoupons />) : <Navigate to="/auth" />} 
               />
               
               {/* Reindirizza gli utenti in base allo stato di autenticazione e al ruolo */}
