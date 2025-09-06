@@ -199,7 +199,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
       (canEdit || canManagePhotos || canDelete) && isPendingPremium && "border-2 border-blue-400 shadow-lg bg-blue-50"
     )}>
       {hasPhotosToRender && (
-        <div className="flex-shrink-0 relative w-36 sm:w-48 h-auto"> {/* Decreased width for image container */}
+        <div className="flex-shrink-0 relative w-32 sm:w-44 h-auto"> {/* Decreased width for image container */}
           <AspectRatio ratio={4 / 5} className="w-full h-full"> {/* 4:5 aspect ratio */}
             <Link to={`/listing/${listing.id}`} className="block w-full h-full">
               <WatermarkedImage src={photosToRender[0].url} alt={listing.title} imageClassName="object-cover" />
