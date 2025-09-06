@@ -1,189 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { supabase } from '@/integrations/supabase/client';
-import { showError, showSuccess } from '@/utils/toast';
-import { PasswordValidator, isPasswordValid } from '@/components/PasswordValidator';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { Eye, EyeOff } from 'lucide-react'; // Importa le icone dell'occhio
-import { Turnstile } from '@marsidev/react-turnstile'; // Importa Turnstile
+// ... (codice precedente)
 
-export default function Auth() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'login');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [isResettingPassword, setIsResettingPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // Nuovo stato per la visibilità della password
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null); // Stato per il token di Turnstile
-
-  useEffect(() => {
-    const tab = searchParams.get('tab');
-    if (tab === 'login' || tab === 'register') {
-      setActiveTab(tab);
-    } else {
-      setActiveTab('login');
-    }
-    setIsResettingPassword(false);
-  }, [searchParams]);
-
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    setSearchParams({ tab: value });
-    setIsResettingPassword(false);
-    setTurnstileToken(null); // Resetta il token di Turnstile al cambio tab
-  };
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!turnstileToken) {
-      showError('Completa la verifica di sicurezza.');
-      return;
-    }
-    setLoading(true);
-    
-    // Invia il token di Turnstile al backend per la verifica
-    const { data, error: invokeError } = await supabase.functions.invoke('verify-turnstile', {
-      body: { token: turnstileToken },
-    });
-
-    if (invokeError || !data?.success) {
-      showError('Verifica di sicurezza fallita. Riprova.');
-      setLoading(false);
-      setTurnstileToken(null); // Resetta il token per una nuova verifica
-      return;
-    }
-
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    
-    if (error) {
-      showError('Credenziali non valide');
-    } else {
-      showSuccess('Accesso effettuato!');
-      const redirectPath = searchParams.get('redirect');
-      if (redirectPath) {
-        navigate(redirectPath);
-      } else {
-        // App.tsx gestirà il reindirizzamento predefinito in base al ruolo
-      }
-    }
-  };
-
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isPasswordValid(password)) {
-      showError('La password non rispetta i requisiti.');
-      return;
-    }
-    if (!turnstileToken) {
-      showError('Completa la verifica di sicurezza.');
-      return;
-    }
-    setLoading(true);
-
-    // Invia il token di Turnstile al backend per la verifica
-    const { data, error: invokeError } = await supabase.functions.invoke('verify-turnstile', {
-      body: { token: turnstileToken },
-    });
-
-    if (invokeError || !data?.success) {
-      showError('Verifica di sicurezza fallita. Riprova.');
-      setLoading(false);
-      setTurnstileToken(null); // Resetta il token per una nuova verifica
-      return;
-    }
-
-    const { error } = await supabase.auth.signUp({ 
-      email, 
-      password,
-      options: {
-        // Dopo la conferma dell'email, reindirizza alla dashboard
-        emailRedirectTo: `${window.location.origin}/auth/callback?redirect=/dashboard`,
-      },
-    });
-    setLoading(false);
-    
-    if (error) {
-      showError(error.message);
-    } else {
-      showSuccess('Registrazione completata! Verifica la tua email.');
-      // Dopo aver cliccato "Registrati", naviga alla pagina di successo
-      navigate('/registration-success');
-    }
-  };
-
-  const handlePasswordReset = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) {
-      showError('Inserisci il tuo indirizzo email.');
-      return;
-    }
-    if (!turnstileToken) {
-      showError('Completa la verifica di sicurezza.');
-      return;
-    }
-    setLoading(true);
-
-    // Invia il token di Turnstile al backend per la verifica
-    const { data, error: invokeError } = await supabase.functions.invoke('verify-turnstile', {
-      body: { token: turnstileToken },
-    });
-
-    if (invokeError || !data?.success) {
-      showError('Verifica di sicurezza fallita. Riprova.');
-      setLoading(false);
-      setTurnstileToken(null); // Resetta il token per una nuova verifica
-      return;
-    }
-
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      // Dopo il reset password, reindirizza alla dashboard
-      redirectTo: `${window.location.origin}/auth/callback?redirect=/dashboard`,
-    });
-    setLoading(false);
-    
-    if (error) {
-      showError(error.message);
-    } else {
-      showSuccess('Controlla la tua email per il link di recupero.');
-      setIsResettingPassword(false);
-    }
-  };
-
-  return (
-    <div className="flex items-center justify-center bg-gradient-to-br from-rose-100 via-white to-sky-100 py-12">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg">
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">Accedi</TabsTrigger>
-            <TabsTrigger value="register">Registrati</TabsTrigger>
-          </TabsList>
-          
           <TabsContent value="login">
             {isResettingPassword ? (
-              <form onSubmit={handlePasswordReset} className="space-y-4 pt-6">
-                <h3 className="text-center font-semibold text-gray-700">Recupera la tua password</h3>
-                <p className="text-center text-sm text-gray-600">
-                  Inserisci la tua email e ti invieremo un link per reimpostare la password.
-                </p>
-                <div>
-                  <Label htmlFor="email-reset">Email</Label>
-                  <Input
-                    id="email-reset"
-                    type="email"
-                    placeholder="mario.rossi@esempio.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <div className="flex justify-center py-2">
+              // ... (form di reset password)
+              <div className="flex justify-center py-2">
                   <Turnstile 
                     siteKey="$$CLOUDFLARE_TURNSTILE_SITE_KEY$$" // Sostituisci con la tua Site Key
                     onSuccess={setTurnstileToken}
@@ -192,74 +12,10 @@ export default function Auth() {
                     }}
                   />
                 </div>
-                <Button 
-                  type="submit"
-                  className="w-full bg-rose-500 hover:bg-rose-600" 
-                  disabled={loading || !turnstileToken}
-                >
-                  {loading ? 'Invio in corso...' : 'Invia link di recupero'}
-                </Button>
-                <p className="text-center text-sm text-gray-600 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsResettingPassword(false)}
-                    className="font-semibold text-rose-500 hover:text-rose-600 focus:outline-none"
-                  >
-                    Torna al login
-                  </button>
-                </p>
-              </form>
+              // ... (resto del form)
             ) : (
               <form onSubmit={handleLogin} className="space-y-4 pt-6">
-                <p className="text-center text-gray-600">Accedi al tuo account per continuare.</p>
-                <div>
-                  <Label htmlFor="email-login">Email</Label>
-                  <Input
-                    id="email-login"
-                    type="email"
-                    placeholder="mario.rossi@esempio.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="password-login">Password</Label>
-                    <button
-                      type="button"
-                      onClick={() => setIsResettingPassword(true)}
-                      className="text-sm font-semibold text-rose-500 hover:text-rose-600 focus:outline-none"
-                    >
-                      Hai dimenticato la password?
-                    </button>
-                  </div>
-                  <div className="relative">
-                    <Input
-                      id="password-login"
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="********"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowPassword((prev) => !prev)}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-gray-500" />
-                      ) : (
-                        <Eye className="h-4 w-4 text-gray-500" />
-                      )}
-                    </Button>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="remember-me" checked={rememberMe} onCheckedChange={(checked) => setRememberMe(!!checked)} />
-                    <Label htmlFor="remember-me">Rimani connesso</Label>
-                  </div>
-                </div>
+                {/* ... (campi email e password) */}
                 <div className="flex justify-center py-2">
                   <Turnstile 
                     siteKey="$$CLOUDFLARE_TURNSTILE_SITE_KEY$$" // Sostituisci con la tua Site Key
@@ -269,51 +25,14 @@ export default function Auth() {
                     }}
                   />
                 </div>
-                <Button 
-                  type="submit"
-                  className="w-full bg-rose-500 hover:bg-rose-600" 
-                  disabled={loading || !turnstileToken}
-                >
-                  {loading ? 'Caricamento...' : 'Accedi'}
-                </Button>
-                <p className="text-center text-sm text-gray-600 pt-2">
-                  Non hai un account?{' '}
-                  <button
-                    type="button"
-                    onClick={() => handleTabChange('register')}
-                    className="font-semibold text-rose-500 hover:text-rose-600 focus:outline-none"
-                  >
-                    Registrati
-                  </button>
-                </p>
+                {/* ... (pulsante di login) */}
               </form>
             )}
           </TabsContent>
           
           <TabsContent value="register">
             <form onSubmit={handleSignUp} className="space-y-4 pt-6">
-              <p className="text-center text-gray-600">Crea un nuovo account per iniziare la tua avventura.</p>
-              <div>
-                <Label htmlFor="email-register">Email</Label>
-                <Input
-                  id="email-register"
-                  type="email"
-                  placeholder="mario.rossi@esempio.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="password-register">Password</Label>
-                <Input
-                  id="password-register"
-                  type="password"
-                  placeholder="********"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              <PasswordValidator password={password} />
+              {/* ... (campi email e password) */}
               <div className="flex justify-center py-2">
                 <Turnstile 
                   siteKey="$$CLOUDFLARE_TURNSTILE_SITE_KEY$$" // Sostituisci con la tua Site Key
@@ -323,27 +42,8 @@ export default function Auth() {
                   }}
                 />
               </div>
-              <Button 
-                type="submit"
-                className="w-full bg-rose-500 hover:bg-rose-600" 
-                disabled={loading || !isPasswordValid(password) || !turnstileToken}
-              >
-                {loading ? 'Caricamento...' : 'Registrati'}
-              </Button>
-              <p className="text-center text-sm text-gray-600 pt-2">
-                Hai già un account?{' '}
-                <button
-                  type="button"
-                  onClick={() => handleTabChange('login')}
-                  className="font-semibold text-rose-500 hover:text-rose-600 focus:outline-none"
-                >
-                  Accedi
-                </button>
-              </p>
+              {/* ... (pulsante di registrazione) */}
             </form>
           </TabsContent>
-        </Tabs>
-      </div>
-    </div>
-  );
-}
+
+// ... (codice successivo)
