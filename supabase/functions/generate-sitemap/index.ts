@@ -12,60 +12,40 @@ serve(async (req) => {
   }
 
   try {
-    // Create a Supabase client with the service role key for admin operations
-    // This bypasses RLS, allowing the function to fetch all listings.
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Fetch all active listing IDs and their last_bumped_at/created_at for lastmod
     const { data: listings, error: fetchError } = await supabaseAdmin
       .from('listings')
       .select('id, last_bumped_at, created_at')
-      .gt('expires_at', new Date().toISOString()); // Only include active listings
+      .gt('expires_at', new Date().toISOString());
 
     if (fetchError) {
       throw new Error(`Failed to fetch listings for sitemap: ${fetchError.message}`);
     }
 
-    const baseUrl = 'https://incontridolci.it'; // Replace with your actual domain
+    const baseUrl = 'https://incontridolci.it';
+    const sitemapEntries: string[] = [];
+    const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
-    let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>${baseUrl}/</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/search</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/termini</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/privacy</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-    <priority>0.6</priority>
-  </url>`;
+    // Static URLs
+    sitemapEntries.push(`  <url><loc>${baseUrl}/</loc><lastmod>${currentDate}</lastmod><priority>1.0</priority></url>`);
+    sitemapEntries.push(`  <url><loc>${baseUrl}/search</loc><lastmod>${currentDate}</lastmod><priority>0.8</priority></url>`);
+    sitemapEntries.push(`  <url><loc>${baseUrl}/termini</loc><lastmod>${currentDate}</lastmod><priority>0.6</priority></url>`);
+    sitemapEntries.push(`  <url><loc>${baseUrl}/privacy</loc><lastmod>${currentDate}</lastmod><priority>0.6</priority></url>`);
 
-    // Add dynamic listing URLs
+    // Dynamic listing URLs
     listings.forEach((listing) => {
       const lastModDate = listing.last_bumped_at || listing.created_at;
-      sitemap += `
-  <url>
-    <loc>${baseUrl}/listing/${listing.id}</loc>
-    <lastmod>${new Date(lastModDate).toISOString().split('T')[0]}</lastmod>
-    <priority>0.7</priority>
-  </url>`;
+      const formattedLastMod = new Date(lastModDate).toISOString().split('T')[0];
+      sitemapEntries.push(`  <url><loc>${baseUrl}/listing/${listing.id}</loc><lastmod>${formattedLastMod}</lastmod><priority>0.7</priority></url>`);
     });
 
-    sitemap += `
+    const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${sitemapEntries.join('\n')}
 </urlset>`;
 
     return new Response(sitemap, {
