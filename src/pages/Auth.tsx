@@ -9,6 +9,7 @@ import { PasswordValidator, isPasswordValid } from '@/components/PasswordValidat
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff } from 'lucide-react'; // Importa le icone dell'occhio
+import { Turnstile } from '@marsidev/react-turnstile'; // Importa Turnstile
 
 export default function Auth() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -20,6 +21,7 @@ export default function Auth() {
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false); // Nuovo stato per la visibilità della password
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null); // Stato per il token di Turnstile
 
   useEffect(() => {
     const tab = searchParams.get('tab');
@@ -35,11 +37,29 @@ export default function Auth() {
     setActiveTab(value);
     setSearchParams({ tab: value });
     setIsResettingPassword(false);
+    setTurnstileToken(null); // Resetta il token di Turnstile al cambio tab
   };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!turnstileToken) {
+      showError('Completa la verifica di sicurezza.');
+      return;
+    }
     setLoading(true);
+    
+    // Invia il token di Turnstile al backend per la verifica
+    const { data, error: invokeError } = await supabase.functions.invoke('verify-turnstile', {
+      body: { token: turnstileToken },
+    });
+
+    if (invokeError || !data?.success) {
+      showError('Verifica di sicurezza fallita. Riprova.');
+      setLoading(false);
+      setTurnstileToken(null); // Resetta il token per una nuova verifica
+      return;
+    }
+
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     
@@ -62,7 +82,24 @@ export default function Auth() {
       showError('La password non rispetta i requisiti.');
       return;
     }
+    if (!turnstileToken) {
+      showError('Completa la verifica di sicurezza.');
+      return;
+    }
     setLoading(true);
+
+    // Invia il token di Turnstile al backend per la verifica
+    const { data, error: invokeError } = await supabase.functions.invoke('verify-turnstile', {
+      body: { token: turnstileToken },
+    });
+
+    if (invokeError || !data?.success) {
+      showError('Verifica di sicurezza fallita. Riprova.');
+      setLoading(false);
+      setTurnstileToken(null); // Resetta il token per una nuova verifica
+      return;
+    }
+
     const { error } = await supabase.auth.signUp({ 
       email, 
       password,
@@ -88,7 +125,24 @@ export default function Auth() {
       showError('Inserisci il tuo indirizzo email.');
       return;
     }
+    if (!turnstileToken) {
+      showError('Completa la verifica di sicurezza.');
+      return;
+    }
     setLoading(true);
+
+    // Invia il token di Turnstile al backend per la verifica
+    const { data, error: invokeError } = await supabase.functions.invoke('verify-turnstile', {
+      body: { token: turnstileToken },
+    });
+
+    if (invokeError || !data?.success) {
+      showError('Verifica di sicurezza fallita. Riprova.');
+      setLoading(false);
+      setTurnstileToken(null); // Resetta il token per una nuova verifica
+      return;
+    }
+
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       // Dopo il reset password, reindirizza alla dashboard
       redirectTo: `${window.location.origin}/auth/callback?redirect=/dashboard`,
@@ -129,10 +183,19 @@ export default function Auth() {
                     onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
+                <div className="flex justify-center py-2">
+                  <Turnstile 
+                    siteKey="$$CLOUDFLARE_TURNSTILE_SITE_KEY$$" // Sostituisci con la tua Site Key
+                    onSuccess={setTurnstileToken}
+                    options={{
+                      theme: 'light',
+                    }}
+                  />
+                </div>
                 <Button 
                   type="submit"
                   className="w-full bg-rose-500 hover:bg-rose-600" 
-                  disabled={loading}
+                  disabled={loading || !turnstileToken}
                 >
                   {loading ? 'Invio in corso...' : 'Invia link di recupero'}
                 </Button>
@@ -197,10 +260,19 @@ export default function Auth() {
                     <Label htmlFor="remember-me">Rimani connesso</Label>
                   </div>
                 </div>
+                <div className="flex justify-center py-2">
+                  <Turnstile 
+                    siteKey="$$CLOUDFLARE_TURNSTILE_SITE_KEY$$" // Sostituisci con la tua Site Key
+                    onSuccess={setTurnstileToken}
+                    options={{
+                      theme: 'light',
+                    }}
+                  />
+                </div>
                 <Button 
                   type="submit"
                   className="w-full bg-rose-500 hover:bg-rose-600" 
-                  disabled={loading}
+                  disabled={loading || !turnstileToken}
                 >
                   {loading ? 'Caricamento...' : 'Accedi'}
                 </Button>
@@ -242,10 +314,19 @@ export default function Auth() {
                 />
               </div>
               <PasswordValidator password={password} />
+              <div className="flex justify-center py-2">
+                <Turnstile 
+                  siteKey="$$CLOUDFLARE_TURNSTILE_SITE_KEY$$" // Sostituisci con la tua Site Key
+                  onSuccess={setTurnstileToken}
+                  options={{
+                    theme: 'light',
+                  }}
+                />
+              </div>
               <Button 
                 type="submit"
                 className="w-full bg-rose-500 hover:bg-rose-600" 
-                disabled={loading || !isPasswordValid(password)}
+                disabled={loading || !isPasswordValid(password) || !turnstileToken}
               >
                 {loading ? 'Caricamento...' : 'Registrati'}
               </Button>
