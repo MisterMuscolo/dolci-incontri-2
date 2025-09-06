@@ -163,7 +163,7 @@ const SearchResults = () => {
 
   return (
     <div className="bg-gray-50 p-6 flex-grow">
-      <div className="max-w-7xl mx-auto px-4"> {/* Aggiunto px-4 qui */}
+      <div className="max-w-7xl mx-auto px-8"> {/* Aggiunto px-8 qui */}
         <div className="flex items-center gap-4 mb-6">
           <Button variant="ghost" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">
             <ChevronLeft className="h-5 w-5 mr-2" />
