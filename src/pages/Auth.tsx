@@ -77,6 +77,12 @@ const Auth = () => {
   }, [initialTab]);
 
   const verifyTurnstile = async () => {
+    // Bypass Turnstile verification in development environment
+    if (import.meta.env.DEV) {
+      console.log("Turnstile verification bypassed in development mode.");
+      return true;
+    }
+
     if (!turnstileToken) {
       setTurnstileError("Per favore, completa la verifica di sicurezza.");
       return false;
@@ -240,15 +246,17 @@ const Auth = () => {
                       <p className="text-sm text-red-500">{resetPasswordForm.formState.errors.email.message}</p>
                     )}
                   </div>
-                  <div className="flex justify-center py-2">
-                    <Turnstile 
-                      siteKey="0x4AAAAAABzon3GSbPvU02qY" // Sostituisci con la tua Site Key
-                      onSuccess={setTurnstileToken}
-                      options={{
-                        theme: 'light',
-                      }}
-                    />
-                  </div>
+                  {!import.meta.env.DEV && ( // Conditionally render Turnstile
+                    <div className="flex justify-center py-2">
+                      <Turnstile 
+                        siteKey="0x4AAAAAABzon3GSbPvU02qY"
+                        onSuccess={setTurnstileToken}
+                        options={{
+                          theme: 'light',
+                        }}
+                      />
+                    </div>
+                  )}
                   {turnstileError && (
                     <div className="flex items-center text-red-500 text-sm mt-2">
                       <AlertCircle className="h-4 w-4 mr-1" /> {turnstileError}
@@ -293,15 +301,17 @@ const Auth = () => {
                   <Button variant="link" onClick={() => setIsResettingPassword(true)} className="p-0 h-auto text-sm text-rose-500 hover:text-rose-600">
                     Hai dimenticato la password?
                   </Button>
-                  <div className="flex justify-center py-2">
-                    <Turnstile 
-                      siteKey="0x4AAAAAABzon3GSbPvU02qY" // Sostituisci con la tua Site Key
-                      onSuccess={setTurnstileToken}
-                      options={{
-                        theme: 'light',
-                      }}
-                    />
-                  </div>
+                  {!import.meta.env.DEV && ( // Conditionally render Turnstile
+                    <div className="flex justify-center py-2">
+                      <Turnstile 
+                        siteKey="0x4AAAAAABzon3GSbPvU02qY"
+                        onSuccess={setTurnstileToken}
+                        options={{
+                          theme: 'light',
+                        }}
+                      />
+                    </div>
+                  )}
                   {turnstileError && (
                     <div className="flex items-center text-red-500 text-sm mt-2">
                       <AlertCircle className="h-4 w-4 mr-1" /> {turnstileError}
@@ -357,15 +367,17 @@ const Auth = () => {
                     <p className="text-sm text-red-500">{registerForm.formState.errors.confirmPassword.message}</p>
                   )}
                 </div>
-                <div className="flex justify-center py-2">
-                  <Turnstile 
-                    siteKey="0x4AAAAAABzon3GSbPvU02qY" // Sostituisci con la tua Site Key
-                    onSuccess={setTurnstileToken}
-                    options={{
-                      theme: 'light',
-                    }}
-                  />
-                </div>
+                {!import.meta.env.DEV && ( // Conditionally render Turnstile
+                    <div className="flex justify-center py-2">
+                      <Turnstile 
+                        siteKey="0x4AAAAAABzon3GSbPvU02qY"
+                        onSuccess={setTurnstileToken}
+                        options={{
+                          theme: 'light',
+                        }}
+                      />
+                    </div>
+                  )}
                 {turnstileError && (
                   <div className="flex items-center text-red-500 text-sm mt-2">
                     <AlertCircle className="h-4 w-4 mr-1" /> {turnstileError}
