@@ -22,13 +22,13 @@ import { Checkbox } from '@/components/ui/checkbox';
 const listingSchema = z.object({
   category: z.string({ required_error: 'La categoria è obbligatoria.' }),
   city: z.string({ required_error: 'La città è obbligatoria.' }),
-  zone: z.string().optional(),
+  zone: z.string().min(3, "La zona è obbligatoria e deve avere almeno 3 caratteri."), // Reso obbligatorio
   age: z.string()
     .min(1, "L'età è obbligatoria.")
     .refine((val) => !isNaN(parseInt(val, 10)), { message: "L'età deve essere un numero." })
     .refine((val) => parseInt(val, 10) >= 18, { message: "Devi avere almeno 18 anni." }),
-  title: z.string().min(5, 'Il titolo deve avere almeno 5 caratteri.'),
-  description: z.string().min(15, 'La descrizione deve avere almeno 15 caratteri.'),
+  title: z.string().min(15, 'Il titolo deve avere almeno 15 caratteri e includere dettagli importanti.'), // Lunghezza minima aumentata e suggerimento
+  description: z.string().min(50, 'La descrizione deve avere almeno 50 caratteri e includere dettagli rilevanti.'), // Lunghezza minima aumentata e suggerimento
   email: z.string().email("L'email non è valida.").optional(),
   phone: z.string().optional(),
   contact_preference: z.enum(['email', 'phone', 'both'], { required_error: 'La preferenza di contatto è obbligatoria.' }),
@@ -160,6 +160,7 @@ const EditListing = () => {
         phone: formattedPhone,
         contact_preference: values.contact_preference,
         contact_whatsapp: values.contact_whatsapp,
+        zone: values.zone, // Includi la zona nell'aggiornamento
       };
 
       const { error: updateError } = await supabase
@@ -322,8 +323,9 @@ const EditListing = () => {
                     name="zone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Zona (Opzionale)</FormLabel>
-                        <FormControl><Input placeholder="Es. Centro Storico" {...field} readOnly className="bg-gray-100 cursor-not-allowed" /></FormControl>
+                        <FormLabel>Zona *</FormLabel> {/* Reso obbligatorio */}
+                        <FormControl><Input placeholder="Es. Centro Storico, Parioli, Fuorigrotta" {...field} /></FormControl> {/* Placeholder migliorato */}
+                        <FormDescription>Specifica una zona per aiutare gli altri a trovarti più facilmente.</FormDescription> {/* Nuova descrizione */}
                         <FormMessage />
                       </FormItem>
                     )}
@@ -346,7 +348,8 @@ const EditListing = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Titolo *</FormLabel>
-                      <FormControl><Input placeholder="Es. Incontro speciale a Roma" {...field} /></FormControl>
+                      <FormControl><Input placeholder="Es. Donna affascinante cerca uomo a Milano per serate speciali" {...field} /></FormControl> {/* Placeholder migliorato */}
+                      <FormDescription>Crea un titolo accattivante e includi la tua città e la categoria per cui vuoi essere trovato.</FormDescription> {/* Nuova descrizione */}
                       <FormMessage />
                     </FormItem>
                   )}
@@ -357,7 +360,8 @@ const EditListing = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Descrizione *</FormLabel>
-                      <FormControl><Textarea placeholder="Descrivi cosa cerchi..." className="min-h-[120px]" {...field} /></FormControl>
+                      <FormControl><Textarea placeholder="Descrivi dettagliatamente cosa cerchi, i tuoi interessi e la tua personalità. Includi parole chiave come 'incontri', 'appuntamenti', 'relazioni', 'amicizia' e la tua città." className="min-h-[120px]" {...field} /></FormControl> {/* Placeholder migliorato */}
+                      <FormDescription>Una descrizione ricca di dettagli e parole chiave pertinenti migliora la visibilità del tuo annuncio.</FormDescription> {/* Nuova descrizione */}
                       <FormMessage />
                     </FormItem>
                   )}
