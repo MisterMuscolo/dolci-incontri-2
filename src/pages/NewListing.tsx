@@ -20,13 +20,13 @@ import { Checkbox } from '@/components/ui/checkbox';
 const listingSchema = z.object({
   category: z.string({ required_error: 'La categoria è obbligatoria.' }),
   city: z.string({ required_error: 'La città è obbligatoria.' }),
-  zone: z.string().min(3, "La zona è obbligatoria e deve avere almeno 3 caratteri."), // Reso obbligatorio
+  zone: z.string().optional(), // Reso nuovamente opzionale
   age: z.string()
     .min(1, "L'età è obbligatoria.")
     .refine((val) => !isNaN(parseInt(val, 10)), { message: "L'età deve essere un numero." })
     .refine((val) => parseInt(val, 10) >= 18, { message: "Devi avere almeno 18 anni." }),
-  title: z.string().min(15, 'Il titolo deve avere almeno 15 caratteri e includere dettagli importanti.'), // Lunghezza minima aumentata e suggerimento
-  description: z.string().min(50, 'La descrizione deve avere almeno 50 caratteri e includere dettagli rilevanti.'), // Lunghezza minima aumentata e suggerimento
+  title: z.string().min(15, 'Il titolo deve avere almeno 15 caratteri e includere dettagli importanti.'),
+  description: z.string().min(50, 'La descrizione deve avere almeno 50 caratteri e includere dettagli rilevanti.'),
   email: z.string().email("L'email non è valida.").optional(),
   phone: z.string().optional(),
   contact_preference: z.enum(['email', 'phone', 'both'], { required_error: 'La preferenza di contatto è obbligatoria.' }),
@@ -54,7 +54,7 @@ const listingSchema = z.object({
 
 const NewListing = () => {
   const navigate = useNavigate();
-  const [filesToUpload, setFilesToUpload] = useState<Array<{ original: File; cropped: File }>>([]); // Store objects with original and cropped files
+  const [filesToUpload, setFilesToUpload] = useState<Array<{ original: File; cropped: File }>>([]);
   const [primaryIndex, setPrimaryIndex] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -242,9 +242,9 @@ const NewListing = () => {
                     name="zone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Zona *</FormLabel> {/* Reso obbligatorio */}
-                        <FormControl><Input placeholder="Es. Centro Storico, Parioli, Fuorigrotta" {...field} /></FormControl>
-                        <FormDescription>Specifica una zona per aiutare gli altri a trovarti più facilmente.</FormDescription> {/* Nuova descrizione */}
+                        <FormLabel>Zona (Opzionale)</FormLabel> {/* Reso opzionale */}
+                        <FormControl><Input placeholder="Es. Centro, Parioli, Fuorigrotta" {...field} /></FormControl> {/* Placeholder modificato */}
+                        <FormDescription>Aggiungi una zona specifica per aiutare gli altri utenti a trovarti più facilmente.</FormDescription> {/* Descrizione modificata */}
                         <FormMessage />
                       </FormItem>
                     )}
@@ -267,8 +267,8 @@ const NewListing = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Titolo *</FormLabel>
-                      <FormControl><Input placeholder="Es. Donna affascinante cerca uomo a Milano per serate speciali" {...field} /></FormControl> {/* Placeholder migliorato */}
-                      <FormDescription>Crea un titolo accattivante e includi la tua città e la categoria per cui vuoi essere trovato.</FormDescription> {/* Nuova descrizione */}
+                      <FormControl><Input placeholder="Es. Donna affascinante cerca uomo a Milano per serate speciali" {...field} /></FormControl>
+                      <FormDescription>Un titolo chiaro e dettagliato attira più attenzione. Includi la tua città e cosa cerchi.</FormDescription> {/* Descrizione modificata */}
                       <FormMessage />
                     </FormItem>
                   )}
@@ -279,8 +279,8 @@ const NewListing = () => {
                   render={({ field }) => (
                       <FormItem>
                         <FormLabel>Descrizione *</FormLabel>
-                        <FormControl><Textarea placeholder="Descrivi dettagliatamente cosa cerchi, i tuoi interessi e la tua personalità. Includi parole chiave come 'incontri', 'appuntamenti', 'relazioni', 'amicizia' e la tua città." className="min-h-[120px]" {...field} /></FormControl> {/* Placeholder migliorato */}
-                        <FormDescription>Una descrizione ricca di dettagli e parole chiave pertinenti migliora la visibilità del tuo annuncio.</FormDescription> {/* Nuova descrizione */}
+                        <FormControl><Textarea placeholder="Descrivi dettagliatamente cosa cerchi, i tuoi interessi e la tua personalità. Più dettagli fornisci, più facile sarà trovare la persona giusta." className="min-h-[120px]" {...field} /></FormControl> {/* Placeholder modificato */}
+                        <FormDescription>Una descrizione completa e sincera aiuta a trovare la persona giusta e rende il tuo annuncio più interessante.</FormDescription> {/* Descrizione modificata */}
                         <FormMessage />
                       </FormItem>
                     )}
@@ -384,7 +384,7 @@ const NewListing = () => {
                     userId={currentUserId ?? undefined}
                     initialPhotos={[]}
                     isPremiumOrPending={true}
-                    onFilesChange={setFilesToUpload as any} // Cast to any for now, as ImageUploader now returns {original, cropped}
+                    onFilesChange={setFilesToUpload as any}
                     onPrimaryIndexChange={setPrimaryIndex}
                     onExistingPhotosUpdated={() => {}}
                     hideMainPreview={false}
