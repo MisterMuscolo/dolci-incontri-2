@@ -90,6 +90,7 @@ const PromoteListingOptions = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [currentCredits, setCurrentCredits] = useState<number | null>(null);
   const [listingTitle, setListingTitle] = useState<string | null>(null);
+  const [listingSlug, setListingSlug] = useState<string | null>(null); // Nuovo stato per lo slug
   const [isPromoting, setIsPromoting] = useState(false);
   const [selectedDurations, setSelectedDurations] = useState<{ [key: string]: number }>({
     day: durations[0].value,
@@ -127,7 +128,7 @@ const PromoteListingOptions = () => {
       if (listingId) {
         const { data: listingData, error: listingError } = await supabase
           .from('listings')
-          .select('title, promotion_mode') // Fetch promotion_mode
+          .select('title, promotion_mode, slug') // Fetch promotion_mode and slug
           .eq('id', listingId)
           .single();
 
@@ -138,6 +139,7 @@ const PromoteListingOptions = () => {
           return;
         }
         setListingTitle(listingData.title);
+        setListingSlug(listingData.slug); // Salva lo slug
 
         // Se il parametro 'mode' è presente nell'URL e corrisponde alla modalità di promozione dell'annuncio,
         // imposta initialPromotionMode per disabilitare l'altra opzione.

@@ -160,7 +160,7 @@ const App = () => {
                 } 
               />
               <Route 
-                path="/listing/:id" 
+                path="/listing/:slug" {/* Modificato da :id a :slug */}
                 element={
                   <Suspense fallback={<LoadingScreen />}>
                     <ListingDetails />

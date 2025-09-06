@@ -35,10 +35,11 @@ type FullListing = {
   contact_preference: 'email' | 'phone' | 'both';
   contact_whatsapp: boolean | null;
   listing_photos: { id: string; url: string; original_url: string | null; is_primary: boolean }[];
+  slug: string; // Aggiunto slug
 };
 
 const ListingDetails = () => {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>(); // Modificato da id a slug
   const navigate = useNavigate();
   const [listing, setListing] = useState<FullListing | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,7 +47,7 @@ const ListingDetails = () => {
 
   useEffect(() => {
     const fetchListing = async () => {
-      if (!id) return;
+      if (!slug) return; // Controlla lo slug invece dell'id
       setLoading(true);
       const { data, error } = await supabase
         .from('listings')
@@ -54,7 +55,7 @@ const ListingDetails = () => {
           *, 
           listing_photos(id, url, original_url, is_primary)
         `)
-        .eq('id', id)
+        .eq('slug', slug) // Cerca per slug
         .single();
 
       if (error || !data) {
@@ -92,7 +93,7 @@ const ListingDetails = () => {
       setLoading(false);
     };
     fetchListing();
-  }, [id, navigate]);
+  }, [slug, navigate]); // Dipendenza da slug
 
   if (loading) {
     return (
@@ -138,7 +139,7 @@ const ListingDetails = () => {
         {hasPhotos && <meta property="og:image" content={listing.listing_photos[0].url} />}
         <meta property="og:title" content={`${listing.title} - Incontri a ${listing.city} | IncontriDolci`} />
         <meta property="og:description" content={`${listing.description.substring(0, 150)}... Annuncio di ${listing.category.replace(/-/g, ' ')} a ${listing.city}. Trova il tuo appuntamento ideale.`} />
-        <meta property="og:url" content={`${window.location.origin}/listing/${listing.id}`} />
+        <meta property="og:url" content={`${window.location.origin}/listing/${listing.slug}`} /> {/* Usa slug qui */}
         <meta property="og:type" content="website" />
         {/* Schema Markup per il servizio */}
         <script type="application/ld+json">
@@ -161,7 +162,7 @@ const ListingDetails = () => {
                 ${listing.phone ? `"telephone": "${listing.phone}"` : ''}
               },
               ${hasPhotos ? `"image": "${listing.listing_photos[0].url}",` : ''}
-              "url": "${window.location.origin}/listing/${listing.id}"
+              "url": "${window.location.origin}/listing/${listing.slug}"
             }
           `}
         </script>
@@ -235,7 +236,7 @@ const ListingDetails = () => {
               initialSubject={`Segnalazione annuncio: ${listing.title}`}
               listingId={listing.id}
               icon={Flag}
-              redirectPathOnAuth={`/listing/${listing.id}`}
+              redirectPathOnAuth={`/listing/${listing.slug}`} {/* Usa slug qui */}
             />
           </div>
 

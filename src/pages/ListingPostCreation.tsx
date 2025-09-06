@@ -11,6 +11,7 @@ const ListingPostCreation = () => {
   const { listingId } = useParams<{ listingId: string }>();
   const navigate = useNavigate();
   const [listingTitle, setListingTitle] = useState<string | null>(null);
+  const [listingSlug, setListingSlug] = useState<string | null>(null); // Nuovo stato per lo slug
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,7 +24,7 @@ const ListingPostCreation = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from('listings')
-        .select('title')
+        .select('title, slug') // Seleziona anche lo slug
         .eq('id', listingId)
         .single();
 
@@ -33,6 +34,7 @@ const ListingPostCreation = () => {
         navigate('/my-listings');
       } else {
         setListingTitle(data.title);
+        setListingSlug(data.slug); // Salva lo slug
       }
       setLoading(false);
     };
@@ -52,7 +54,7 @@ const ListingPostCreation = () => {
     );
   }
 
-  if (!listingTitle) {
+  if (!listingTitle || !listingSlug) { // Controlla anche lo slug
     return (
       <div className="bg-gray-50 p-6 min-h-screen flex items-center justify-center">
         <Card className="max-w-md w-full text-center">

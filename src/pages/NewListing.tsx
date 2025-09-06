@@ -14,7 +14,7 @@ import { ImageUploader, NewFilePair } from '@/components/ImageUploader'; // Impo
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { ChevronLeft } from 'lucide-react';
-import { cn, slugifyFilename, formatPhoneNumber } from '@/lib/utils';
+import { cn, slugifyFilename, formatPhoneNumber, generateListingSlug } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 
 const listingSchema = z.object({
@@ -95,27 +95,44 @@ const NewListing = () => {
       const { age, phone, ...restOfValues } = values;
       const formattedPhone = formatPhoneNumber(phone);
 
-      const submissionData = {
-        ...restOfValues,
-        age: parseInt(age, 10),
-        user_id: user.id,
-        last_bumped_at: new Date().toISOString(),
-        email: values.email?.trim() || null,
-        phone: formattedPhone,
-        contact_whatsapp: values.contact_whatsapp,
-      };
-
-      const { data: listingData, error: listingError } = await supabase
+      // Prima inseriamo l'annuncio per ottenere l'ID, che ci servirà per generare lo slug
+      const { data: tempListingData, error: tempListingError } = await supabase
         .from('listings')
-        .insert(submissionData)
+        .insert({
+          user_id: user.id,
+          category: restOfValues.category,
+          city: restOfValues.city,
+          zone: restOfValues.zone,
+          age: parseInt(age, 10),
+          title: restOfValues.title,
+          description: restOfValues.description,
+          email: restOfValues.email?.trim() || null,
+          phone: formattedPhone,
+          contact_preference: restOfValues.contact_preference,
+          contact_whatsapp: restOfValues.contact_whatsapp,
+          last_bumped_at: new Date().toISOString(),
+        })
         .select('id')
         .single();
 
-      if (listingError || !listingData) {
-        throw new Error(listingError?.message || 'Errore nella creazione dell\'annuncio.');
+      if (tempListingError || !tempListingData) {
+        throw new Error(tempListingError?.message || 'Errore nella creazione dell\'annuncio temporaneo.');
       }
 
-      const listingId = listingData.id;
+      const listingId = tempListingData.id;
+      const generatedSlug = generateListingSlug(values.title, values.category, values.city, listingId);
+
+      // Ora aggiorniamo l'annuncio con lo slug generato
+      const { error: updateSlugError } = await supabase
+        .from('listings')
+        .update({ slug: generatedSlug })
+        .eq('id', listingId);
+
+      if (updateSlugError) {
+        // Se l'aggiornamento dello slug fallisce, eliminiamo l'annuncio appena creato
+        await supabase.from('listings').delete().eq('id', listingId);
+        throw new Error(updateSlugError?.message || 'Errore nella generazione dello slug per l\'annuncio.');
+      }
 
       if (filesToUpload.length > 0) {
         const photoUploadPromises = filesToUpload.map(async (filePair, index) => {
@@ -160,6 +177,7 @@ const NewListing = () => {
         const { error: photosError } = await supabase.from('listing_photos').insert(photoPayloads);
 
         if (photosError) {
+          // Se il salvataggio delle foto fallisce, eliminiamo l'annuncio e lo slug
           await supabase.from('listings').delete().eq('id', listingId);
           throw new Error(photosError.message || 'Errore nel salvataggio delle foto.');
         }

@@ -42,6 +42,7 @@ export interface Listing {
   listing_photos: { url: string; original_url: string | null; is_primary: boolean }[]; // Added original_url
   age?: number;
   zone?: string | null;
+  slug: string; // Aggiunto slug
 }
 
 interface ListingListItemProps {
@@ -214,7 +215,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
       {hasPhotosToRender && (
         <div className="flex-shrink-0 relative w-32 sm:w-44 h-auto">
           <AspectRatio ratio={4 / 5} className="w-full h-full">
-            <Link to={`/listing/${listing.id}`} className="block w-full h-full">
+            <Link to={`/listing/${listing.slug}`} className="block w-full h-full"> {/* Usa listing.slug */}
               <WatermarkedImage src={photosToRender[0].url} alt={listing.title} imageClassName="object-cover" />
             </Link>
           </AspectRatio>
@@ -225,7 +226,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           )}
         </div>
       )}
-      <Link to={`/listing/${listing.id}`} className={cn(
+      <Link to={`/listing/${listing.slug}`} className={cn( {/* Usa listing.slug */}
         "flex-grow block hover:bg-gray-50/50",
         !hasPhotosToRender && "w-full"
       )}>

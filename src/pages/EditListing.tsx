@@ -15,7 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { ChevronLeft, Image as ImageIcon } from 'lucide-react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { cn, slugifyFilename, formatPhoneNumber } from '@/lib/utils';
+import { cn, slugifyFilename, formatPhoneNumber, generateListingSlug } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
 
@@ -74,6 +74,7 @@ type FullListing = {
   contact_preference: 'email' | 'phone' | 'both';
   contact_whatsapp: boolean | null;
   listing_photos: ExistingPhoto[];
+  slug: string | null; // Aggiunto slug
 };
 
 const EditListing = () => {
@@ -153,6 +154,9 @@ const EditListing = () => {
 
       const formattedPhone = formatPhoneNumber(values.phone);
 
+      // Genera un nuovo slug in caso di modifiche a titolo, categoria o città
+      const newSlug = generateListingSlug(values.title, values.category, values.city, id!);
+
       const updateData = {
         title: values.title,
         description: values.description,
@@ -161,6 +165,7 @@ const EditListing = () => {
         contact_preference: values.contact_preference,
         contact_whatsapp: values.contact_whatsapp,
         zone: values.zone,
+        slug: newSlug, // Aggiorna lo slug
       };
 
       const { error: updateError } = await supabase
