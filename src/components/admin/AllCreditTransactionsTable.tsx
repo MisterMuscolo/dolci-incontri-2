@@ -121,6 +121,8 @@ export const AllCreditTransactionsTable = () => {
         return 'Sottrazione Admin';
       case 'coupon_credit_add':
         return 'Coupon Crediti';
+      case 'referral_bonus': // Nuovo tipo di transazione
+        return 'Bonus Referral';
       default:
         return type;
     }

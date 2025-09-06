@@ -106,6 +106,8 @@ const CreditHistory = () => {
         return 'Upgrade Premium';
       case 'coupon_credit_add': // Nuovo tipo di transazione
         return 'Coupon Crediti';
+      case 'referral_bonus': // Nuovo tipo di transazione
+        return 'Bonus Referral';
       default:
         return type;
     }

@@ -41,6 +41,7 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const initialTab = searchParams.get('tab') || 'login';
   const redirectTo = searchParams.get('redirect') || '/dashboard';
+  const referrerCode = searchParams.get('ref'); // Leggi il codice referral dall'URL
 
   const [activeTab, setActiveTab] = useState(initialTab);
   const [isLoading, setIsLoading] = useState(false);
@@ -159,6 +160,11 @@ const Auth = () => {
       const { error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
+        options: {
+          data: {
+            referrer_code: referrerCode, // Passa il codice referral ai metadati di Supabase
+          },
+        },
       });
 
       dismissToast(toastId);

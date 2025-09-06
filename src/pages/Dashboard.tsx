@@ -4,14 +4,16 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Wallet, Settings, LayoutGrid, Ticket, PlusCircle, MessageSquare, Tag } from "lucide-react"; // Importa Tag
+import { Wallet, Settings, LayoutGrid, Ticket, PlusCircle, MessageSquare, Tag, Share2 } from "lucide-react"; // Importa Tag e Share2
 import { CreateTicketDialog } from "@/components/CreateTicketDialog";
+import { Input } from "@/components/ui/input"; // Importa Input
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [totalListingsCount, setTotalListingsCount] = useState(0);
   const [currentCredits, setCurrentCredits] = useState<number | null>(0);
   const [totalCreditsSpent, setTotalCreditsSpent] = useState<number>(0);
+  const [referralLink, setReferralLink] = useState<string | null>(null); // Stato per il link referral
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,18 +37,22 @@ const Dashboard = () => {
         setTotalListingsCount(listingsCount);
       }
 
-      // Fetch current credits from profiles table
+      // Fetch current credits and referral code from profiles table
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('credits')
+        .select('credits, referral_code') // Seleziona anche referral_code
         .eq('id', user.id)
         .single();
 
       if (profileError) {
-        console.error("Errore nel recupero dei crediti:", profileError);
+        console.error("Errore nel recupero dei crediti e codice referral:", profileError);
         setCurrentCredits(0);
+        setReferralLink(null);
       } else if (profileData) {
         setCurrentCredits(profileData.credits);
+        if (profileData.referral_code) {
+          setReferralLink(`${window.location.origin}/auth?tab=register&ref=${profileData.referral_code}`);
+        }
       }
 
       // Fetch credit transactions to calculate total spent
@@ -82,6 +88,42 @@ const Dashboard = () => {
         </div>
 
         <div className="space-y-4">
+          {/* Nuova Card per Invita Amici */}
+          <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
+            <CardHeader>
+              <CardTitle className="text-2xl font-semibold flex items-center gap-4">
+                <div className="bg-rose-100 p-4 rounded-md flex items-center justify-center">
+                  <Share2 className="h-10 w-10 text-rose-500" />
+                </div>
+                <span className="text-gray-800">Invita Amici</span>
+              </CardTitle>
+              <CardDescription className="ml-[88px]">Condividi il tuo link e guadagna 50 crediti per ogni amico che si registra!</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <Skeleton className="h-8 w-3/4" />
+              ) : referralLink ? (
+                <div className="flex flex-col gap-2">
+                  <p className="text-gray-600 text-lg">Il tuo link referral:</p>
+                  <Input 
+                    value={referralLink} 
+                    readOnly 
+                    className="bg-gray-100 cursor-copy" 
+                    onClick={(e) => navigator.clipboard.writeText(e.currentTarget.value).then(() => showSuccess('Link copiato!')).catch(() => showError('Impossibile copiare il link.'))} 
+                  />
+                  <Button 
+                    onClick={() => navigator.clipboard.writeText(referralLink).then(() => showSuccess('Link copiato!')).catch(() => showError('Impossibile copiare il link.'))} 
+                    className="bg-rose-500 hover:bg-rose-600"
+                  >
+                    Copia Link
+                  </Button>
+                </div>
+              ) : (
+                <p className="text-gray-600">Caricamento link referral...</p>
+              )}
+            </CardContent>
+          </Card>
+
           <Card className="w-full transition-shadow hover:shadow-lg bg-white hover:bg-gray-50">
             <CardHeader>
               <CardTitle className="text-2xl font-semibold flex items-center gap-4">
