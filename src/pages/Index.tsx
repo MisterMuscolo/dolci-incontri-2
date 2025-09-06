@@ -120,7 +120,7 @@ export default function Index({ session }: IndexProps) {
                     placeholder="Parola chiave o zona..." 
                     className="w-full pl-10"
                     value={keyword}
-                    onChange={(e) => setKeyword(e.target.value)} {/* Correzione qui */}
+                    onChange={(e) => setKeyword(e.target.value)}
                   />
                 </div>
               </div>
