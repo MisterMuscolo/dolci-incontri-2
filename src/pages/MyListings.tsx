@@ -56,6 +56,7 @@ const MyListings = () => {
         city,
         zone,
         age,
+        description,
         created_at,
         expires_at,
         is_premium,

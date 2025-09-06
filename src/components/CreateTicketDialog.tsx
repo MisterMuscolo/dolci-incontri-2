@@ -14,7 +14,7 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Flag, Mail, LogIn, UserPlus, Loader2, MessageSquare, Lock } from 'lucide-react'; // Importato Lock
+import { Flag, Mail, LogIn, UserPlus, Loader2, Lock } from 'lucide-react'; // Importato Lock
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { useNavigate, Link } from 'react-router-dom';

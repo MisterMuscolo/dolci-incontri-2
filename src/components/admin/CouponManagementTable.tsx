@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -11,7 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -450,7 +449,7 @@ export const CouponManagementTable = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Numero Massimo di Utilizzi (Opzionale)</FormLabel>
-                      <FormControl><Input type="number" placeholder="Es. 100" {...field} disabled={isSubmitting} /></FormControl>
+                      <FormControl><Input type="number" placeholder="Es. 100" {...field} value={field.value === null ? '' : field.value} disabled={isSubmitting} /></FormControl>
                       <FormDescription>Lascia vuoto per utilizzi illimitati.</FormDescription>
                       <FormMessage />
                     </FormItem>

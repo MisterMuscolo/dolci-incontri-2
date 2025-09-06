@@ -1,4 +1,3 @@
-import React from 'react';
 import { Loader2, Heart } from 'lucide-react'; // Using Loader2 for a spinner
 
 export const LoadingScreen = () => {

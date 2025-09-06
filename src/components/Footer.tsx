@@ -1,6 +1,5 @@
 import { Heart, Mail } from 'lucide-react'; // Importa Mail icona
 import { Link } from 'react-router-dom';
-import { Button } from './ui/button'; // Importa Button per il trigger
 import { CreateTicketDialog } from './CreateTicketDialog'; // Importa il nuovo componente
 
 export const Footer = () => {

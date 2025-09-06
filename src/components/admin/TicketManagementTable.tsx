@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Eye, CheckCircle, XCircle, MessageSquare } from 'lucide-react';
+import { Eye, XCircle, MessageSquare } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,

@@ -48,6 +48,7 @@ const UserListingsAdminView = () => {
         title,
         category,
         city,
+        description,
         created_at,
         expires_at,
         is_premium,

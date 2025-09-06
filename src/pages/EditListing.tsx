@@ -13,8 +13,7 @@ import { italianProvinces } from '@/data/provinces';
 import { ImageUploader, NewFilePair } from '@/components/ImageUploader'; // Importa NewFilePair
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
-import { ChevronLeft, Image as ImageIcon } from 'lucide-react';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { ChevronLeft } from 'lucide-react';
 import { cn, formatPhoneNumber } from '@/lib/utils'; // Rimosso slugifyFilename, generateListingSlug
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -464,7 +463,7 @@ const EditListing = () => {
                     listingId={currentListing.id}
                     userId={currentListing.user_id}
                     initialPhotos={existingPhotos}
-                    isPremiumOrPending={true}
+                    isPremiumOrPending={isPremiumOrPending}
                     onFilesChange={setNewFilesToUpload} // Correttamente tipizzato
                     onPrimaryIndexChange={setNewPrimaryIndex}
                     onExistingPhotosUpdated={setExistingPhotos}

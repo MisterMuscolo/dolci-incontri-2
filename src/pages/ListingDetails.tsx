@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { showError } from '@/utils/toast';
-import { MapPin, Tag, User, Mail, BookText, ChevronLeft, CalendarDays, Rocket, Phone, Flag, MessageCircle, Flame } from 'lucide-react';
+import { MapPin, User, Mail, BookText, ChevronLeft, CalendarDays, Phone, Flag, MessageCircle, Flame } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -63,7 +63,7 @@ const ListingDetails = () => {
         navigate('/search');
         return;
       } else {
-        const sortedPhotos = (data.listing_photos || []).sort((a, b) => {
+        const sortedPhotos = (data.listing_photos || []).sort((a: { is_primary: boolean }, b: { is_primary: boolean }) => {
           if (a.is_primary && !b.is_primary) return -1;
           if (!a.is_primary && b.is_primary) return 1;
           return 0;
@@ -235,7 +235,7 @@ const ListingDetails = () => {
               initialSubject={`Segnalazione annuncio: ${listing.title}`}
               listingId={listing.id}
               icon={Flag}
-              redirectPathOnAuth={`/listing/${listing.id}`} {/* Usa id qui */}
+              redirectPathOnAuth={`/listing/${listing.id}`}
             />
           </div>
 

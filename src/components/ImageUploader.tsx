@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { UploadCloud, X, Star, Plus, Crop } from 'lucide-react';
+import { X, Star, Plus, Crop } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -303,8 +303,6 @@ export const ImageUploader = ({
     } catch (error: any) {
       dismissToast(toastId);
       showError(error.message || 'Errore durante l\'eliminazione della foto.');
-    } finally {
-      setIsDeletingSingle(null);
     }
   };
 

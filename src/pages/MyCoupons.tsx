@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { showError, showSuccess } from '@/utils/toast';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ChevronLeft, Tag, Percent, Euro, CheckCircle, XCircle, Clock, Ban, Sparkles, Coins } from 'lucide-react'; // Importa Coins
+import { ChevronLeft, Tag, Percent, Euro, CheckCircle, XCircle, Clock, Sparkles, Coins } from 'lucide-react'; // Importa Coins
 import { Badge } from '@/components/ui/badge';
 import { ApplyCouponForm } from '@/components/user/ApplyCouponForm';
 import { PostgrestError } from '@supabase/supabase-js'; // Importa PostgrestError

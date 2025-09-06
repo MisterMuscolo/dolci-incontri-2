@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Ban } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
