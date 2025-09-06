@@ -104,7 +104,7 @@ const MyListings = () => {
   };
 
   return (
-    <div className="bg-gray-50 py-6 px-3 sm:px-6 flex-grow"> {/* Adjusted p-6 to py-6 px-3 sm:px-6 */}
+    <div className="bg-gray-50 py-6 px-2 sm:px-6 flex-grow"> {/* Adjusted px-3 to px-2 on mobile */}
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-4">
