@@ -51,7 +51,8 @@ const Dashboard = () => {
       } else if (profileData) {
         setCurrentCredits(profileData.credits);
         if (profileData.referral_code) {
-          setReferralLink(`${window.location.origin}/auth?tab=register&ref=${profileData.referral_code}`);
+          // Modificato per puntare alla homepage con il parametro 'ref'
+          setReferralLink(`${window.location.origin}/?ref=${profileData.referral_code}`);
         }
       }
 

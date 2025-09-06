@@ -41,7 +41,11 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const initialTab = searchParams.get('tab') || 'login';
   const redirectTo = searchParams.get('redirect') || '/dashboard';
-  const referrerCode = searchParams.get('ref'); // Leggi il codice referral dall'URL
+  
+  // Priorità: 1. parametro 'ref' nell'URL, 2. 'referrer_code' in localStorage
+  const urlReferrerCode = searchParams.get('ref');
+  const storedReferrerCode = localStorage.getItem('referrer_code');
+  const finalReferrerCode = urlReferrerCode || storedReferrerCode;
 
   const [activeTab, setActiveTab] = useState(initialTab);
   const [isLoading, setIsLoading] = useState(false);
@@ -162,7 +166,7 @@ const Auth = () => {
         password: values.password,
         options: {
           data: {
-            referrer_code: referrerCode, // Passa il codice referral ai metadati di Supabase
+            referrer_code: finalReferrerCode, // Usa il codice referral finale
           },
         },
       });
@@ -172,6 +176,12 @@ const Auth = () => {
       if (error) {
         showError(error.message);
         return;
+      }
+
+      // Pulisci il codice referral da localStorage dopo una registrazione riuscita
+      if (finalReferrerCode) {
+        localStorage.removeItem('referrer_code');
+        console.log('Referrer code removed from localStorage after successful signup.');
       }
 
       showSuccess('Registrazione avvenuta con successo! Controlla la tua email per la conferma.');

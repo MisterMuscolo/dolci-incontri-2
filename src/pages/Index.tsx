@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -18,6 +18,20 @@ export default function Index({ session }: IndexProps) {
   const [city, setCity] = useState('tutte');
   const [keyword, setKeyword] = useState('');
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams(); // Ottieni i parametri di ricerca
+
+  useEffect(() => {
+    const referrerCode = searchParams.get('ref');
+    if (referrerCode) {
+      // Memorizza il codice referral in localStorage
+      localStorage.setItem('referrer_code', referrerCode);
+      console.log('Referrer code stored in localStorage:', referrerCode);
+      // Rimuovi il parametro 'ref' dall'URL per pulizia, senza ricaricare la pagina
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete('ref');
+      navigate({ search: newSearchParams.toString() }, { replace: true });
+    }
+  }, [searchParams, navigate]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,7 +120,7 @@ export default function Index({ session }: IndexProps) {
                     placeholder="Parola chiave o zona..." 
                     className="w-full pl-10"
                     value={keyword}
-                    onChange={(e) => setKeyword(e.target.value)}
+                    onChange={(e) => e.target.value)}
                   />
                 </div>
               </div>
