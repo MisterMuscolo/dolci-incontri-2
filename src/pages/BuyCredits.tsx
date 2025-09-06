@@ -255,7 +255,7 @@ const BuyCredits = () => {
   const creditPackages = hardcodedCreditPackages; 
 
   // Imposta isPurchaseDisabled a true per disabilitare la funzione di acquisto
-  const [isPurchaseDisabled, setIsPurchaseDisabled] = useState(true);
+  const isPurchaseDisabled = true;
   const [showDisabledDialog, setShowDisabledDialog] = useState(false);
 
   useEffect(() => {
