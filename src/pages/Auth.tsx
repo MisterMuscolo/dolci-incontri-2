@@ -321,10 +321,7 @@ const Auth = () => {
                   <Button 
                     type="button" 
                     variant="link" 
-                    onClick={(e) => {
-                      e.preventDefault(); // Aggiunto preventDefault qui
-                      setIsResettingPassword(true);
-                    }} 
+                    onClick={() => setIsResettingPassword(true)} 
                     className="p-0 h-auto w-full text-sm text-rose-500 hover:text-rose-600"
                   >
                     Hai dimenticato la password?
