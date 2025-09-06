@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Mail, Lock, LogIn, UserPlus, Loader2, AlertCircle } from 'lucide-react';
+import { Mail, LogIn, UserPlus, Loader2, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, dismissToast, showLoading } from '@/utils/toast';
 import { PasswordValidator, isPasswordValid } from '@/components/PasswordValidator';

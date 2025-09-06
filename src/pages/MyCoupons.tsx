@@ -37,7 +37,7 @@ interface AppliedCouponDetails {
   value: number;
   couponId: string;
   couponType: 'single_use' | 'reusable';
-  code: string;
+  code: string; // Aggiunto per visualizzazione
 }
 
 // Nuova interfaccia per tipizzare il risultato della join

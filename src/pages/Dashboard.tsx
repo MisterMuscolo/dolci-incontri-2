@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Wallet, Settings, LayoutGrid, Ticket, PlusCircle, MessageSquare, Tag, Share2 } from "lucide-react"; // Importa Tag e Share2
 import { CreateTicketDialog } from "@/components/CreateTicketDialog";
 import { Input } from "@/components/ui/input"; // Importa Input
+import { showError, showSuccess } from '@/utils/toast'; // Aggiunto import
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);

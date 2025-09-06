@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'; // Importa useSearchParams
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -84,7 +84,7 @@ const dayTimeSlots = [
 const PromoteListingOptions = () => {
   const { listingId } = useParams<{ listingId: string }>();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams(); // Ottieni i parametri di ricerca dall'URL
+  const [searchParams] = useSearchParams(); // Ottieni i parametri di ricerca
   const initialModeFromUrl = searchParams.get('mode'); // Leggi il parametro 'mode'
 
   const [isLoading, setIsLoading] = useState(true);

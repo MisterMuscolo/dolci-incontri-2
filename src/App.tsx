@@ -254,6 +254,14 @@ const App = () => {
                 path="/credit-history" 
                 element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><CreditHistory /></Suspense>) : <Navigate to="/auth" />} 
               />
+              <Route 
+                path="*" 
+                element={
+                  <Suspense fallback={<LoadingScreen />}>
+                    <NotFound />
+                  </Suspense>
+                } 
+              /> {/* Catch-all route for 404 */}
             </Route> {/* Chiusura della rotta del Layout */}
           </Routes>
         </BrowserRouter>

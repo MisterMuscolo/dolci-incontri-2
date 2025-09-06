@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Edit, Trash2, Tag, CalendarDays, User, Percent, Euro, Sparkles, Coins } from 'lucide-react'; // Importa Sparkles e Coins
+import { PlusCircle, Edit, Trash2, CalendarDays, User, Percent, Euro, Sparkles, Coins } from 'lucide-react'; // Rimossa Tag
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import {
   Dialog,

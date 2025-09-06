@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; // Rimosso CardDescription
 import { ChevronLeft, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
@@ -16,9 +16,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogTrigger,
 } from '@/components/ui/dialog';
-import {
+import { // Rimosso DialogTrigger
   AlertDialog,
   AlertDialogAction,
   AlertDialogContent,
@@ -26,8 +25,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+} from '@/components/ui/alert-dialog'; // Rimosso AlertDialogTrigger
 import { ApplyCouponForm } from '@/components/user/ApplyCouponForm'; // Importa il componente
 
 interface CreditPackage {
@@ -289,7 +287,7 @@ const BuyCredits = () => {
 
     if (profileError) {
       console.error("Errore nel recupero dei crediti:", profileError);
-      setCurrentCredits(0);
+      setCurrentCredits(0); 
     } else if (profileData) {
       setCurrentCredits(profileData.credits);
     }
@@ -444,7 +442,10 @@ const BuyCredits = () => {
               return (
                 <Card 
                   key={pkg.id} 
-                  className={`w-full flex items-center justify-between p-4 shadow-lg hover:shadow-xl transition-shadow duration-300 relative ${pkg.recommended ? 'border-2 border-rose-500' : ''}`}
+                  className={cn(
+                    `w-full flex items-center justify-between p-4 shadow-lg hover:shadow-xl transition-shadow duration-300 relative`, 
+                    pkg.recommended && 'border-2 border-rose-500'
+                  )}
                 >
                   {pkg.recommended && (
                     <Badge className="absolute -top-3 left-4 bg-rose-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">

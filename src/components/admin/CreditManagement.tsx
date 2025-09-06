@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
-import { Coins, Search, Plus, Minus, User } from 'lucide-react';
+import { Coins, Plus, Minus, User } from 'lucide-react'; // Rimossa Search
 import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';

@@ -36,7 +36,7 @@ interface UserProfile {
 
 interface UserManagementTableProps {
   isAdmin: boolean;
-  // isSupporto: boolean; // Rimosso: non utilizzata
+  isSupporto: boolean; // Aggiunto: la prop è utilizzata in AdminDashboard
 }
 
 export const UserManagementTable = ({ isAdmin }: UserManagementTableProps) => {
