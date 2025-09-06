@@ -322,7 +322,8 @@ const BuyCredits = () => {
     setLoadingPaymentIntent(true);
     const toastId = showLoading(`Preparazione pagamento per ${pkg.name}...`);
 
-    const /* finalPrice */ _finalPrice = calculateFinalPrice(pkg.price, appliedCoupon); // Rimosso finalPrice
+    // const /* finalPrice */ _finalPrice = calculateFinalPrice(pkg.price, appliedCoupon); // Rimosso finalPrice
+    // La riga sopra è stata rimossa, non è più necessaria.
 
     try {
       const { data, error } = await supabase.functions.invoke('create-payment-intent', {
