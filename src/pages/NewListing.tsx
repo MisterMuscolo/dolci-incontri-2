@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from '@hookform/react-hook-form'; // Corretto l'import
+import { useForm } from 'react-hook-form'; // Corretto l'import
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
