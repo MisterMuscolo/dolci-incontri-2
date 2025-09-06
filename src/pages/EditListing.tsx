@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { italianProvinces } from '@/data/provinces';
-import { ImageUploader } from '@/components/ImageUploader';
+import { ImageUploader, NewFilePair } from '@/components/ImageUploader'; // Importa NewFilePair
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { ChevronLeft, Image as ImageIcon } from 'lucide-react';
@@ -79,7 +79,7 @@ type FullListing = {
 const EditListing = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [newFilesToUpload, setNewFilesToUpload] = useState<Array<{ original: File; cropped: File }>>([]);
+  const [newFilesToUpload, setNewFilesToUpload] = useState<NewFilePair[]>([]); // Aggiornato a NewFilePair[]
   const [newPrimaryIndex, setNewPrimaryIndex] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [existingPhotos, setExistingPhotos] = useState<ExistingPhoto[]>([]);
@@ -323,9 +323,9 @@ const EditListing = () => {
                     name="zone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Zona (Opzionale)</FormLabel> {/* Reso opzionale */}
-                        <FormControl><Input placeholder="Es. Centro, Parioli, Fuorigrotta" {...field} /></FormControl> {/* Placeholder modificato */}
-                        <FormDescription>Aggiungi una zona specifica per aiutare gli altri utenti a trovarti più facilmente.</FormDescription> {/* Descrizione modificata */}
+                        <FormLabel>Zona (Opzionale)</FormLabel>
+                        <FormControl><Input placeholder="Es. Centro, Parioli, Fuorigrotta" {...field} /></FormControl>
+                        <FormDescription>Aggiungi una zona specifica per aiutare gli altri utenti a trovarti più facilmente.</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -349,7 +349,7 @@ const EditListing = () => {
                     <FormItem>
                       <FormLabel>Titolo *</FormLabel>
                       <FormControl><Input placeholder="Es. Donna affascinante cerca uomo a Milano per serate speciali" {...field} /></FormControl>
-                      <FormDescription>Un titolo chiaro e dettagliato attira più attenzione. Includi la tua città e cosa cerchi.</FormDescription> {/* Descrizione modificata */}
+                      <FormDescription>Un titolo chiaro e dettagliato attira più attenzione. Includi la tua città e cosa cerchi.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -360,8 +360,8 @@ const EditListing = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Descrizione *</FormLabel>
-                      <FormControl><Textarea placeholder="Descrivi dettagliatamente cosa cerchi, i tuoi interessi e la tua personalità. Più dettagli fornisci, più facile sarà trovare la persona giusta." className="min-h-[120px]" {...field} /></FormControl> {/* Placeholder modificato */}
-                      <FormDescription>Una descrizione completa e sincera aiuta a trovare la persona giusta e rende il tuo annuncio più interessante.</FormDescription> {/* Descrizione modificata */}
+                      <FormControl><Textarea placeholder="Descrivi dettagliatamente cosa cerchi, i tuoi interessi e la tua personalità. Più dettagli fornisci, più facile sarà trovare la persona giusta." className="min-h-[120px]" {...field} /></FormControl>
+                      <FormDescription>Una descrizione completa e sincera aiuta a trovare la persona giusta e rende il tuo annuncio più interessante.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -465,7 +465,7 @@ const EditListing = () => {
                     userId={currentListing.user_id}
                     initialPhotos={existingPhotos}
                     isPremiumOrPending={true}
-                    onFilesChange={setNewFilesToUpload as any}
+                    onFilesChange={setNewFilesToUpload} // Correttamente tipizzato
                     onPrimaryIndexChange={setNewPrimaryIndex}
                     onExistingPhotosUpdated={setExistingPhotos}
                     hideMainPreview={false}

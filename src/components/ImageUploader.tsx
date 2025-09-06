@@ -15,12 +15,18 @@ interface ExistingPhoto {
   is_primary: boolean;
 }
 
+// Nuova interfaccia per i file appena selezionati (originale + ritagliato)
+export interface NewFilePair {
+  original: File;
+  cropped: File;
+}
+
 interface ImageUploaderProps {
   listingId?: string;
   userId?: string;
   initialPhotos?: ExistingPhoto[];
   isPremiumOrPending?: boolean;
-  onFilesChange: (files: File[]) => void;
+  onFilesChange: (files: NewFilePair[]) => void; // Aggiornato per accettare NewFilePair[]
   onPrimaryIndexChange: (index: number | null) => void;
   onExistingPhotosUpdated: (updatedPhotos: ExistingPhoto[]) => void;
   hideMainPreview?: boolean;
@@ -36,7 +42,7 @@ export const ImageUploader = ({
   onExistingPhotosUpdated,
   hideMainPreview = false,
 }: ImageUploaderProps) => {
-  const [newlySelectedFiles, setNewlySelectedFiles] = useState<File[]>([]);
+  const [newlySelectedFiles, setNewlySelectedFiles] = useState<NewFilePair[]>([]); // Aggiornato a NewFilePair[]
   const [newlySelectedPreviews, setNewlySelectedPreviews] = useState<string[]>([]);
   const [newlySelectedPrimaryIndex, setNewlySelectedPrimaryIndex] = useState<number | null>(null);
   const [existingPhotosState, setExistingPhotosState] = useState<ExistingPhoto[]>(initialPhotos);
@@ -177,9 +183,7 @@ export const ImageUploader = ({
       // For new files, we need to store both original and cropped
       setNewlySelectedFiles(prev => {
         const updated = [...prev];
-        // Store an object that contains both original and cropped files
-        // This is a temporary structure for the uploader, actual upload logic will be in NewListing/EditListing
-        updated[currentCroppingIndex] = { original: originalFileToUpload, cropped: croppedFile } as any; // Cast to any for now
+        updated[currentCroppingIndex] = { original: originalFileToUpload, cropped: croppedFile }; // Correctly typed
         return updated;
       });
       setNewlySelectedPreviews(prev => {
@@ -299,6 +303,8 @@ export const ImageUploader = ({
     } catch (error: any) {
       dismissToast(toastId);
       showError(error.message || 'Errore durante l\'eliminazione della foto.');
+    } finally {
+      setIsDeletingSingle(null);
     }
   };
 
@@ -469,7 +475,7 @@ export const ImageUploader = ({
                 className="h-8 w-8 opacity-0 group-hover:opacity-100"
                 onClick={() => {
                   // For new files, imageToCrop should be the original file
-                  const fileData = newlySelectedFiles[index] as any;
+                  const fileData = newlySelectedFiles[index]; // Access directly from newlySelectedFiles
                   setImageToCrop(fileData.original); 
                   setCurrentCroppingIndex(index);
                   setCurrentCroppingExistingPhoto(null);

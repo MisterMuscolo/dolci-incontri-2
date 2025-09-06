@@ -42,7 +42,6 @@ export const WatermarkedImage = ({
         )}
         style={{
           textShadow: '2px 2px 4px rgba(0,0,0,0.7)', // Ombra per maggiore leggibilità
-          // Rimosso il gradiente e l'animazione
         }}
       >
         {watermarkText}

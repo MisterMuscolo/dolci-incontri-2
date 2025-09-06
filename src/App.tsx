@@ -1,5 +1,4 @@
 import React, { useEffect, useState, lazy, Suspense, startTransition } from "react"; // Import React
-import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -119,7 +118,7 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
+        {/* Rimosso il componente Toaster non più necessario */}
         <Sonner />
         <BrowserRouter>
           <Routes>
