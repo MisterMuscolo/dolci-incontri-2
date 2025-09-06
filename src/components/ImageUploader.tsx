@@ -346,7 +346,7 @@ export const ImageUploader = ({
   };
 
   const handleEditExistingPhoto = (photo: ExistingPhoto) => {
-    setImageToCrop(photo.url); // Use the cropped URL for editing the crop
+    setImageToCrop(photo.original_url ?? photo.url); // Use original_url for re-cropping
     setCurrentCroppingExistingPhoto(photo);
     setCurrentCroppingIndex(null);
     setIsCropperOpen(true);

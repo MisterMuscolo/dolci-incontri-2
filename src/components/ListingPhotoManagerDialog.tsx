@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { X, Star, ImageOff, GalleryHorizontal } from 'lucide-react';
+import { X, Star, ImageOff, GalleryHorizontal, Crop } from 'lucide-react'; // Import Crop icon
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { cn } from '@/lib/utils';
@@ -24,6 +24,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { ImageCropperDialog } from './ImageCropperDialog'; // Import ImageCropperDialog
 
 interface Photo {
   id: string;
@@ -45,6 +46,12 @@ export const ListingPhotoManagerDialog = ({ listingId, listingTitle, userId, onP
   const [activePreviewUrl, setActivePreviewUrl] = useState<string | null>(null);
   const [isDeletingSingle, setIsDeletingSingle] = useState<string | null>(null);
   const [isDeletingAll, setIsDeletingAll] = useState(false);
+
+  const [isCropperOpen, setIsCropperOpen] = useState(false); // State for cropper dialog
+  const [imageToCrop, setImageToCrop] = useState<string | File | null>(null); // Image source for cropper
+  const [currentCroppingPhoto, setCurrentCroppingPhoto] = useState<Photo | null>(null); // Photo being cropped
+
+  const THUMBNAIL_ASPECT_RATIO = 4 / 5; // Define aspect ratio
 
   const fetchPhotos = useCallback(async () => {
     setLoading(true);
@@ -73,6 +80,61 @@ export const ListingPhotoManagerDialog = ({ listingId, listingTitle, userId, onP
   useEffect(() => {
     fetchPhotos();
   }, [fetchPhotos]);
+
+  const handleUpdatePhotoCrop = useCallback(async (originalPhoto: Photo, newCroppedFile: File) => {
+    const toastId = showLoading('Aggiornamento ritaglio foto in corso...');
+    try {
+      // 1. Delete old cropped image from Supabase Storage
+      const oldCroppedUrlParts = originalPhoto.url.split('/');
+      const oldCroppedFilename = oldCroppedUrlParts[oldCroppedUrlParts.length - 1];
+      const oldCroppedStoragePath = `${userId}/${listingId}/${oldCroppedFilename}`;
+
+      const { error: removeError } = await supabase.storage
+        .from('listing_photos')
+        .remove([oldCroppedStoragePath]);
+
+      if (removeError) {
+        console.warn(`Errore durante l'eliminazione della vecchia foto ritagliata dallo storage: ${removeError.message}`);
+      }
+
+      // 2. Upload new cropped image to Supabase Storage
+      const newCroppedFileName = `${crypto.randomUUID()}.jpeg`; // Generate new UUID for cropped file
+      const newCroppedFilePath = `${userId}/${listingId}/${newCroppedFileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('listing_photos')
+        .upload(newCroppedFilePath, newCroppedFile, {
+          cacheControl: '3600',
+          upsert: true,
+        });
+
+      if (uploadError) {
+        throw new Error(`Errore nel caricamento della nuova foto ritagliata: ${uploadError.message}`);
+      }
+
+      const { data: { publicUrl: newCroppedPublicUrl } } = supabase.storage.from('listing_photos').getPublicUrl(newCroppedFilePath);
+
+      // 3. Update 'url' in database (original_url remains unchanged)
+      const { error: dbUpdateError } = await supabase
+        .from('listing_photos')
+        .update({ url: newCroppedPublicUrl })
+        .eq('id', originalPhoto.id);
+
+      if (dbUpdateError) {
+        throw new Error(`Errore durante l'aggiornamento del URL della foto ritagliata nel database: ${dbUpdateError.message}`);
+      }
+
+      dismissToast(toastId);
+      showSuccess('Ritaglio foto aggiornato con successo!');
+      await fetchPhotos(); // Re-fetch to update state and UI
+      onPhotosUpdated();
+
+    } catch (error: any) {
+      dismissToast(toastId);
+      showError(error.message || 'Errore durante l\'aggiornamento del ritaglio della foto.');
+    }
+  }, [listingId, userId, fetchPhotos, onPhotosUpdated]);
+
 
   const handleDeleteSinglePhoto = async (photoToDelete: Photo) => {
     setIsDeletingSingle(photoToDelete.id);
@@ -238,6 +300,21 @@ export const ListingPhotoManagerDialog = ({ listingId, listingTitle, userId, onP
     }
   };
 
+  const handleEditPhotoCrop = (photo: Photo) => {
+    setImageToCrop(photo.original_url ?? photo.url); // Use original_url for re-cropping
+    setCurrentCroppingPhoto(photo);
+    setIsCropperOpen(true);
+  };
+
+  const handleCropperSave = (croppedFile: File) => {
+    if (currentCroppingPhoto) {
+      handleUpdatePhotoCrop(currentCroppingPhoto, croppedFile);
+    }
+    setIsCropperOpen(false);
+    setImageToCrop(null);
+    setCurrentCroppingPhoto(null);
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -315,6 +392,15 @@ export const ListingPhotoManagerDialog = ({ listingId, listingTitle, userId, onP
                     >
                       <Star className={cn("h-4 w-4", photo.is_primary && "text-yellow-400 fill-current")} />
                     </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="h-7 w-7 opacity-0 group-hover:opacity-100"
+                      onClick={() => handleEditPhotoCrop(photo)} // New button for editing crop
+                    >
+                      <Crop className="h-4 w-4" />
+                    </Button>
                   </div>
                   {photo.is_primary && (
                     <div className="absolute top-1 right-1 bg-yellow-500 text-white text-xs px-1.5 py-0.5 rounded-full">
@@ -354,6 +440,19 @@ export const ListingPhotoManagerDialog = ({ listingId, listingTitle, userId, onP
           </div>
         )}
       </DialogContent>
+      {imageToCrop && (
+        <ImageCropperDialog
+          imageSrc={imageToCrop}
+          aspectRatio={THUMBNAIL_ASPECT_RATIO}
+          isOpen={isCropperOpen}
+          onClose={() => {
+            setIsCropperOpen(false);
+            setImageToCrop(null);
+            setCurrentCroppingPhoto(null);
+          }}
+          onCropComplete={handleCropperSave}
+        />
+      )}
     </Dialog>
   );
 };
