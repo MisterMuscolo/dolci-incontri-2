@@ -1,6 +1,8 @@
 // Funzione helper per il ritaglio dell'immagine su canvas
 // Basato su https://github.com/ricardo-ch/react-easy-crop/blob/main/src/utils.ts
 
+import { Area } from 'react-easy-crop'; // Import corretto per Area
+
 const createImage = (url: string): Promise<HTMLImageElement> =>
   new Promise((resolve, reject) => {
     const image = new Image();

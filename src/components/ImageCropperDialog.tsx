@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import Cropper from 'react-easy-crop';
-import { Area } from 'react-easy-crop/types';
+import { Area } from 'react-easy-crop'; // Percorso di importazione corretto
 import {
   Dialog,
   DialogContent,
