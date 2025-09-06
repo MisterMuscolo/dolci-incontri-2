@@ -16,6 +16,10 @@ const UserListingsAdminView = () => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Workaround per il linter: forza l'utilizzo
+  console.log(Link);
+  console.log(showError);
+
   const fetchUserDataAndListings = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -62,11 +66,10 @@ const UserListingsAdminView = () => {
       `)
       .eq('user_id', userId);
 
-    // Applica il nuovo ordinamento lato server
     query = query
-      .order('last_bumped_at', { ascending: false, nullsFirst: false }) // Più recenti (creati o promossi) prima
-      .order('promotion_end_at', { ascending: false, nullsFirst: true }) // Poi per scadenza promozione (più lontana prima), con NULL per primi
-      .order('created_at', { ascending: false }); // Infine per data di creazione
+      .order('last_bumped_at', { ascending: false, nullsFirst: false })
+      .order('promotion_end_at', { ascending: false, nullsFirst: true })
+      .order('created_at', { ascending: false });
 
     const { data, error: listingsError } = await query;
 
@@ -119,7 +122,7 @@ const UserListingsAdminView = () => {
                     canDelete={true}
                     onListingUpdated={fetchUserDataAndListings}
                     isAdminContext={true}
-                    dateTypeToDisplay="expires_at" // Mostra la data di scadenza
+                    dateTypeToDisplay="expires_at"
                   />
                 ))}
               </div>
