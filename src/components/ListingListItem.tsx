@@ -1,4 +1,3 @@
-import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -180,7 +179,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           .remove(filePathsToDelete);
 
         if (deletePhotoError) {
-          console.warn(`Could not delete photos for listing ${listing.id} from storage:`, deletePhotoError.message);
+          console.warn(`Could not delete photos for listing ${listing.id} (title: ${listing.title}) from storage: ${deletePhotoError.message}`);
         }
       }
 

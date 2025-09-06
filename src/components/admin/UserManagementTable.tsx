@@ -39,7 +39,7 @@ interface UserManagementTableProps {
   isSupporto: boolean; // Rinomina da isCollaborator a isSupporto
 }
 
-export const UserManagementTable = ({ isAdmin, isSupporto }: UserManagementTableProps) => {
+export const UserManagementTable = ({ isAdmin }: UserManagementTableProps) => { // Rimosso isSupporto dalla destrutturazione
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);

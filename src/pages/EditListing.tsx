@@ -254,7 +254,7 @@ const EditListing = () => {
   const now = new Date();
   const promoStart = currentListing.promotion_start_at ? new Date(currentListing.promotion_start_at) : null;
   const promoEnd = currentListing.promotion_end_at ? new Date(currentListing.promotion_end_at) : null;
-  const isPremiumOrPending = currentListing.is_premium && promoStart && promoEnd && (promoStart <= now || promoEnd >= now);
+  const isPremiumOrPending = !!(currentListing.is_premium && promoStart && promoEnd && (promoStart <= now || promoEnd >= now)); // Convert to boolean
 
   return (
     <div className="bg-gray-50 p-4 sm:p-6 md:p-8">

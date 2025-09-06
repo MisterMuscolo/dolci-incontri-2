@@ -263,7 +263,7 @@ const BuyCredits = () => {
   const creditPackages = hardcodedCreditPackages; 
 
   // Nuovo stato per disabilitare la funzione di acquisto
-  const [isPurchaseDisabled, setIsPurchaseDisabled] = useState(true);
+  const [isPurchaseDisabled, /* setIsPurchaseDisabled */] = useState(true); // Rimosso setIsPurchaseDisabled
   const [showDisabledDialog, setShowDisabledDialog] = useState(false);
 
   useEffect(() => {
@@ -322,7 +322,7 @@ const BuyCredits = () => {
     setLoadingPaymentIntent(true);
     const toastId = showLoading(`Preparazione pagamento per ${pkg.name}...`);
 
-    const finalPrice = calculateFinalPrice(pkg.price, appliedCoupon);
+    const /* finalPrice */ _finalPrice = calculateFinalPrice(pkg.price, appliedCoupon); // Rimosso finalPrice
 
     try {
       const { data, error } = await supabase.functions.invoke('create-payment-intent', {

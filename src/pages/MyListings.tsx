@@ -16,7 +16,7 @@ const MyListings = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  // const [currentUserId, setCurrentUserId] = useState<string | null>(null); // Rimosso: non utilizzato
 
   const fetchListings = useCallback(async () => {
     setLoading(true);
@@ -25,7 +25,7 @@ const MyListings = () => {
       setLoading(false);
       return;
     }
-    setCurrentUserId(user.id);
+    // setCurrentUserId(user.id); // Rimosso: non utilizzato
 
     const { count, error: countError } = await supabase
       .from('listings')
