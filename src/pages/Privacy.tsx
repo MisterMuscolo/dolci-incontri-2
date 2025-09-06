@@ -57,7 +57,7 @@ const Privacy = () => {
           </p>
           <h2 className="text-xl font-semibold mt-6 mb-2">7. Contatti</h2>
           <p>
-            Per qualsiasi domanda sulla presente Privacy Policy, ti preghiamo di contattarci all'indirizzo <a href="mailto:support@incontridolci.com" className="text-rose-500 hover:underline">support@incontridolci.com</a>.
+            Per qualsiasi domanda sulla presente Privacy Policy, ti preghiamo di contattarci tramite il nostro sistema di ticket di assistenza, accessibile dalla sezione "Assistenza" nel footer del sito o dalla tua dashboard.
           </p>
         </div>
       </div>
