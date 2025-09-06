@@ -19,7 +19,7 @@ export default function Index({ session }: IndexProps) {
   const [keyword, setKeyword] = useState('');
   const navigate = useNavigate();
 
-  const handleSearch = (e: React.FormFormEvent) => {
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const searchParams = new URLSearchParams();
     if (category && category !== 'tutte') searchParams.append('category', category);
