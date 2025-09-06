@@ -133,6 +133,14 @@ serve(async (req) => {
       if (usedCouponInsertError) {
         console.error('Failed to log single-use coupon usage:', usedCouponInsertError.message);
       }
+      // NEW: Mark single_use coupon as inactive globally
+      const { error: updateCouponStatusError } = await supabaseAdmin
+        .from('coupons')
+        .update({ is_active: false })
+        .eq('id', coupon.id);
+      if (updateCouponStatusError) {
+        console.error('Failed to mark single-use coupon as inactive:', updateCouponStatusError.message);
+      }
     } else if (coupon.type === 'reusable') {
       const { error: couponUpdateError } = await supabaseAdmin
         .from('coupons')
