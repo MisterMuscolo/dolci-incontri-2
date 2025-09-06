@@ -195,12 +195,12 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
 
   return (
     <Card className={cn(
-      "w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col md:flex-row relative",
+      "w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col relative", // Rimosso md:flex-row per mantenere il layout verticale anche su schermi più grandi
       (canEdit || canManagePhotos || canDelete) && isPendingPremium && "border-2 border-blue-400 shadow-lg bg-blue-50"
     )}>
-      <div className="flex flex-col sm:flex-row w-full">
+      <div className="flex flex-col w-full"> {/* Modificato da sm:flex-row a flex-col */}
         {hasPhotosToRender && (
-          <div className={cn("md:w-1/4 lg:w-1/5 flex-shrink-0 relative", isCompact && "md:w-1/3 lg:w-1/4")}>
+          <div className={cn("flex-shrink-0 relative", isCompact && "w-full")}> {/* L'immagine occupa tutta la larghezza della card compatta */}
             <AspectRatio ratio={isCompact ? 4 / 5 : 3 / 4} className="w-full h-full">
               <Link to={`/listing/${listing.id}`} className="block w-full h-full">
                 <WatermarkedImage src={photosToRender[0].url} alt={listing.title} imageClassName="object-cover" />
