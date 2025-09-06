@@ -6,7 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { ChevronLeft } from 'lucide-react';
-import { Helmet } from 'react-helmet-async'; // Import Helmet
+import { Helmet } from 'react-helmet-async';
 
 const LISTINGS_PER_PAGE = 10;
 
@@ -103,19 +103,19 @@ const SearchResults = () => {
   };
 
   const generateTitle = () => {
-    let title = "Risultati di ricerca";
-    if (keyword) title += ` per "${keyword}"`;
-    if (category && category !== 'tutte') title += ` in ${category.replace(/-/g, ' ')}`;
-    if (city && city !== 'tutte') title += ` a ${city}`;
-    return `${title} | IncontriDolci`;
+    let titleParts = ["Annunci Incontri"];
+    if (category && category !== 'tutte') titleParts.push(category.replace(/-/g, ' '));
+    if (city && city !== 'tutte') titleParts.push(`a ${city}`);
+    if (keyword) titleParts.push(`"${keyword}"`);
+    return `${titleParts.join(' ')} | IncontriDolci`;
   };
 
   const generateDescription = () => {
-    let description = "Trova annunci di incontri";
-    if (keyword) description += ` per "${keyword}"`;
+    let description = "Cerca annunci di incontri e appuntamenti";
     if (category && category !== 'tutte') description += ` nella categoria "${category.replace(/-/g, ' ')}"`;
     if (city && city !== 'tutte') description += ` nella città di ${city}`;
-    description += ". Esplora le opportunità di incontro su IncontriDolci.";
+    if (keyword) description += ` per la parola chiave "${keyword}"`;
+    description += ". Trova la tua prossima relazione su IncontriDolci.";
     return description;
   };
 
@@ -182,7 +182,7 @@ const SearchResults = () => {
       <Helmet>
         <title>{generateTitle()}</title>
         <meta name="description" content={generateDescription()} />
-        <meta name="keywords" content={`incontri, ${keyword || ''}, ${category || ''}, ${city || ''}, annunci, ricerca`} />
+        <meta name="keywords" content={`incontri, annunci, ${keyword || ''}, ${category || ''}, ${city || ''}, appuntamenti, relazioni, single, bakeca incontri`} />
       </Helmet>
       <div className="max-w-7xl mx-auto px-2 sm:px-8">
         <div className="flex items-center gap-4 mb-6">

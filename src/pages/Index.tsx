@@ -6,8 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { italianProvinces } from '@/data/provinces';
 import { Heart, MapPin, Search } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { PWAInstallInstructions } from '@/components/PWAInstallInstructions'; // Importa il nuovo componente
-import { Helmet } from 'react-helmet-async'; // Import Helmet
+import { PWAInstallInstructions } from '@/components/PWAInstallInstructions';
+import { Helmet } from 'react-helmet-async';
 
 interface IndexProps {
   session: any;
@@ -19,7 +19,7 @@ export default function Index({ session }: IndexProps) {
   const [keyword, setKeyword] = useState('');
   const navigate = useNavigate();
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormFormEvent) => {
     e.preventDefault();
     const searchParams = new URLSearchParams();
     if (category && category !== 'tutte') searchParams.append('category', category);
@@ -46,9 +46,9 @@ export default function Index({ session }: IndexProps) {
   return (
     <>
       <Helmet>
-        <title>IncontriDolci - Trova la tua complice avventura</title>
-        <meta name="description" content="IncontriDolci è il portale per incontri autentici in Italia. Cerca annunci per categoria, città o parole chiave. Donna cerca uomo, uomo cerca donna, coppie e altro." />
-        <meta name="keywords" content="incontri, incontri milano, incontri roma, annunci incontri, donna cerca uomo, uomo cerca donna, coppie, incontri online, appuntamenti" />
+        <title>IncontriDolci: Annunci Incontri, Appuntamenti e Relazioni in Italia</title>
+        <meta name="description" content="Trova il tuo incontro ideale su IncontriDolci. Annunci per donna cerca uomo, uomo cerca donna, coppie e altro. Incontri autentici e appuntamenti seri in tutte le città italiane." />
+        <meta name="keywords" content="incontri, annunci incontri, sito incontri, appuntamenti, relazioni, amore, single, donna cerca uomo, uomo cerca donna, coppie, incontri Milano, incontri Roma, incontri Torino, incontri Napoli, bakeca incontri" />
       </Helmet>
       <div className="bg-gradient-to-br from-rose-100 via-white to-sky-100">
         <div className="container mx-auto px-4 py-16 text-center">

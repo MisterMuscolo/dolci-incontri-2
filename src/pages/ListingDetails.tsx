@@ -14,7 +14,7 @@ import { it } from 'date-fns/locale';
 import { CreateTicketDialog } from '@/components/CreateTicketDialog';
 import { ReplyToListingDialog } from '@/components/ReplyToListingDialog';
 import { WatermarkedImage } from '@/components/WatermarkedImage';
-import { Helmet } from 'react-helmet-async'; // Import Helmet
+import { Helmet } from 'react-helmet-async';
 
 type FullListing = {
   id: string;
@@ -34,7 +34,7 @@ type FullListing = {
   promotion_end_at: string | null;
   contact_preference: 'email' | 'phone' | 'both';
   contact_whatsapp: boolean | null;
-  listing_photos: { id: string; url: string; original_url: string | null; is_primary: boolean }[]; // Added original_url
+  listing_photos: { id: string; url: string; original_url: string | null; is_primary: boolean }[];
 };
 
 const ListingDetails = () => {
@@ -42,7 +42,7 @@ const ListingDetails = () => {
   const navigate = useNavigate();
   const [listing, setListing] = useState<FullListing | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activePhoto, setActivePhoto] = useState<string | null>(null); // This will now store the original_url for the main view
+  const [activePhoto, setActivePhoto] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -83,7 +83,6 @@ const ListingDetails = () => {
         }
 
         if (photosToDisplay.length > 0) {
-          // For main display, use original_url if available, otherwise fallback to cropped url
           setActivePhoto(photosToDisplay[0].original_url ?? photosToDisplay[0].url);
         } else {
           setActivePhoto(null);
@@ -133,10 +132,14 @@ const ListingDetails = () => {
   return (
     <div className="bg-gray-50">
       <Helmet>
-        <title>{listing.title} a {listing.city} | IncontriDolci</title>
-        <meta name="description" content={listing.description.substring(0, 160)} />
-        <meta name="keywords" content={`incontri, ${listing.category.replace(/-/g, ' ')}, ${listing.city}, ${listing.zone || ''}, ${listing.age} anni, ${listing.title}`} />
+        <title>{listing.title} - Incontri a {listing.city} | IncontriDolci</title>
+        <meta name="description" content={`${listing.description.substring(0, 150)}... Annuncio di ${listing.category.replace(/-/g, ' ')} a ${listing.city}. Trova il tuo appuntamento ideale.`} />
+        <meta name="keywords" content={`incontri, ${listing.category.replace(/-/g, ' ')}, ${listing.city}, ${listing.zone || ''}, ${listing.age} anni, ${listing.title}, annunci, appuntamenti, relazioni, bakeca incontri`} />
         {hasPhotos && <meta property="og:image" content={listing.listing_photos[0].url} />}
+        <meta property="og:title" content={`${listing.title} - Incontri a ${listing.city} | IncontriDolci`} />
+        <meta property="og:description" content={`${listing.description.substring(0, 150)}... Annuncio di ${listing.category.replace(/-/g, ' ')} a ${listing.city}. Trova il tuo appuntamento ideale.`} />
+        <meta property="og:url" content={`${window.location.origin}/listing/${listing.id}`} />
+        <meta property="og:type" content="website" />
       </Helmet>
       <div className="container mx-auto p-4 sm:p-6 md:p-8">
         <div className="flex items-center gap-4 mb-6">
