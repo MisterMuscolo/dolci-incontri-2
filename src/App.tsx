@@ -116,7 +116,7 @@ const App = () => {
   console.log("App.tsx: Rendering Layout with isAdmin:", isAdmin, "isSupporto:", isSupporto, "isBanned:", isBanned, "Session exists:", !!session);
 
   return (
-    <React.Fragment> {/* Aggiunto React.Fragment qui */}
+    <> {/* Utilizzo della sintassi breve per i frammenti */}
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           {/* Rimosso il componente Toaster non più necessario */}
@@ -267,7 +267,7 @@ const App = () => {
           </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>
-    </React.Fragment>
+    </>
   );
 };
 
