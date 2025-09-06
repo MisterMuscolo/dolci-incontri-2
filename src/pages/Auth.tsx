@@ -298,7 +298,12 @@ const Auth = () => {
                       <p className="text-sm text-red-500">{loginForm.formState.errors.password.message}</p>
                     )}
                   </div>
-                  <Button variant="link" onClick={() => setIsResettingPassword(true)} className="p-0 h-auto text-sm text-rose-500 hover:text-rose-600">
+                  <Button 
+                    type="button" // Aggiunto type="button" per evitare l'invio del modulo
+                    variant="link" 
+                    onClick={() => setIsResettingPassword(true)} 
+                    className="p-0 h-auto text-sm text-rose-500 hover:text-rose-600"
+                  >
                     Hai dimenticato la password?
                   </Button>
                   {!import.meta.env.DEV && ( // Conditionally render Turnstile
