@@ -201,7 +201,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
       <div className="flex flex-col sm:flex-row w-full">
         {hasPhotosToRender && (
           <div className={cn("md:w-1/4 lg:w-1/5 flex-shrink-0 relative", isCompact && "md:w-1/3 lg:w-1/4")}>
-            <AspectRatio ratio={isCompact ? 9 / 16 : 3 / 4} className="w-full h-full">
+            <AspectRatio ratio={isCompact ? 4 / 5 : 3 / 4} className="w-full h-full">
               <Link to={`/listing/${listing.id}`} className="block w-full h-full">
                 <WatermarkedImage src={photosToRender[0].url} alt={listing.title} imageClassName="object-cover" />
               </Link>
