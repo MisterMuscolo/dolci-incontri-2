@@ -298,14 +298,6 @@ const Auth = () => {
                       <p className="text-sm text-red-500">{loginForm.formState.errors.password.message}</p>
                     )}
                   </div>
-                  <Button 
-                    type="button" // Aggiunto type="button" per evitare l'invio del modulo
-                    variant="link" 
-                    onClick={() => setIsResettingPassword(true)} 
-                    className="p-0 h-auto text-sm text-rose-500 hover:text-rose-600"
-                  >
-                    Hai dimenticato la password?
-                  </Button>
                   {!import.meta.env.DEV && ( // Conditionally render Turnstile
                     <div className="flex justify-center py-2">
                       <Turnstile 
@@ -325,6 +317,14 @@ const Auth = () => {
                   <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600" disabled={isLoading}>
                     {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <LogIn className="h-4 w-4 mr-2" />}
                     {isLoading ? 'Accesso in corso...' : 'Accedi'}
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="link" 
+                    onClick={() => setIsResettingPassword(true)} 
+                    className="p-0 h-auto w-full text-sm text-rose-500 hover:text-rose-600"
+                  >
+                    Hai dimenticato la password?
                   </Button>
                 </form>
               )}
