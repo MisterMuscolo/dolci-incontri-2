@@ -527,10 +527,10 @@ const BuyCredits = () => {
         <AlertDialog open={showDisabledDialog} onOpenChange={setShowDisabledDialog}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-2xl font-bold text-gray-800">Funzione Temporaneamente Non Disponibile</AlertDialogTitle>
+              <AlertDialogTitle className="text-2xl font-bold text-gray-800">Funzione Presto Disponibile!</AlertDialogTitle>
               <AlertDialogDescription>
-                Ci scusiamo, ma la funzione di acquisto crediti è attualmente in manutenzione o non è ancora disponibile.
-                Stiamo lavorando per renderla operativa il prima possibile.
+                Ci scusiamo, ma la funzione di acquisto crediti è attualmente in fase di sviluppo e sarà disponibile in futuro.
+                Stiamo lavorando per offrirti la migliore esperienza possibile.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
