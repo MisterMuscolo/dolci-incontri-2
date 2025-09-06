@@ -7,6 +7,7 @@ import { italianProvinces } from '@/data/provinces';
 import { Heart, MapPin, Search } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { PWAInstallInstructions } from '@/components/PWAInstallInstructions'; // Importa il nuovo componente
+import { Helmet } from 'react-helmet-async'; // Import Helmet
 
 interface IndexProps {
   session: any;
@@ -44,6 +45,11 @@ export default function Index({ session }: IndexProps) {
 
   return (
     <>
+      <Helmet>
+        <title>IncontriDolci - Trova la tua complice avventura</title>
+        <meta name="description" content="IncontriDolci è il portale per incontri autentici in Italia. Cerca annunci per categoria, città o parole chiave. Donna cerca uomo, uomo cerca donna, coppie e altro." />
+        <meta name="keywords" content="incontri, incontri milano, incontri roma, annunci incontri, donna cerca uomo, uomo cerca donna, coppie, incontri online, appuntamenti" />
+      </Helmet>
       <div className="bg-gradient-to-br from-rose-100 via-white to-sky-100">
         <div className="container mx-auto px-4 py-16 text-center">
           {/* Rimosso i pulsanti di download */}

@@ -14,6 +14,7 @@ import { it } from 'date-fns/locale';
 import { CreateTicketDialog } from '@/components/CreateTicketDialog';
 import { ReplyToListingDialog } from '@/components/ReplyToListingDialog';
 import { WatermarkedImage } from '@/components/WatermarkedImage';
+import { Helmet } from 'react-helmet-async'; // Import Helmet
 
 type FullListing = {
   id: string;
@@ -131,6 +132,12 @@ const ListingDetails = () => {
 
   return (
     <div className="bg-gray-50">
+      <Helmet>
+        <title>{listing.title} a {listing.city} | IncontriDolci</title>
+        <meta name="description" content={listing.description.substring(0, 160)} />
+        <meta name="keywords" content={`incontri, ${listing.category.replace(/-/g, ' ')}, ${listing.city}, ${listing.zone || ''}, ${listing.age} anni, ${listing.title}`} />
+        {hasPhotos && <meta property="og:image" content={listing.listing_photos[0].url} />}
+      </Helmet>
       <div className="container mx-auto p-4 sm:p-6 md:p-8">
         <div className="flex items-center gap-4 mb-6">
           <Button variant="ghost" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">

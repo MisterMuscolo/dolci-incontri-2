@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { ChevronLeft } from 'lucide-react';
+import { Helmet } from 'react-helmet-async'; // Import Helmet
 
 const LISTINGS_PER_PAGE = 10;
 
@@ -101,6 +102,23 @@ const SearchResults = () => {
     }
   };
 
+  const generateTitle = () => {
+    let title = "Risultati di ricerca";
+    if (keyword) title += ` per "${keyword}"`;
+    if (category && category !== 'tutte') title += ` in ${category.replace(/-/g, ' ')}`;
+    if (city && city !== 'tutte') title += ` a ${city}`;
+    return `${title} | IncontriDolci`;
+  };
+
+  const generateDescription = () => {
+    let description = "Trova annunci di incontri";
+    if (keyword) description += ` per "${keyword}"`;
+    if (category && category !== 'tutte') description += ` nella categoria "${category.replace(/-/g, ' ')}"`;
+    if (city && city !== 'tutte') description += ` nella città di ${city}`;
+    description += ". Esplora le opportunità di incontro su IncontriDolci.";
+    return description;
+  };
+
   const renderContent = () => {
     if (loading) {
       return (
@@ -161,6 +179,11 @@ const SearchResults = () => {
 
   return (
     <div className="bg-gray-50 p-6 flex-grow">
+      <Helmet>
+        <title>{generateTitle()}</title>
+        <meta name="description" content={generateDescription()} />
+        <meta name="keywords" content={`incontri, ${keyword || ''}, ${category || ''}, ${city || ''}, annunci, ricerca`} />
+      </Helmet>
       <div className="max-w-7xl mx-auto px-2 sm:px-8">
         <div className="flex items-center gap-4 mb-6">
           <Button variant="ghost" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">
