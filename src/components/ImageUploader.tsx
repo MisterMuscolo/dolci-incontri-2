@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { UploadCloud, X, Star, Plus, Crop } from 'lucide-react'; // Importato Crop
+import { UploadCloud, X, Star, Plus, Crop } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
-import { supabase } from '@/integrations/supabase/client'; // Import supabase
+import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Link } from 'react-router-dom'; // Import Link
-import { ImageCropperDialog } from './ImageCropperDialog'; // Importa il nuovo componente
+import { Link } from 'react-router-dom';
+import { ImageCropperDialog } from './ImageCropperDialog';
 
 interface ExistingPhoto {
   id: string;
@@ -15,46 +15,44 @@ interface ExistingPhoto {
 }
 
 interface ImageUploaderProps {
-  listingId?: string; // Reso opzionale
-  userId?: string; // Reso opzionale
-  initialPhotos?: ExistingPhoto[]; // Reso opzionale
-  isPremiumOrPending?: boolean; // Reso opzionale
-  onFilesChange: (files: File[]) => void; // For new files to be uploaded
-  onPrimaryIndexChange: (index: number | null) => void; // For new files primary index
-  onExistingPhotosUpdated: (updatedPhotos: ExistingPhoto[]) => void; // Callback for parent to update existing photos state
-  hideMainPreview?: boolean; // Nuova proprietà
+  listingId?: string;
+  userId?: string;
+  initialPhotos?: ExistingPhoto[];
+  isPremiumOrPending?: boolean;
+  onFilesChange: (files: File[]) => void;
+  onPrimaryIndexChange: (index: number | null) => void;
+  onExistingPhotosUpdated: (updatedPhotos: ExistingPhoto[]) => void;
+  hideMainPreview?: boolean;
 }
 
 export const ImageUploader = ({
   listingId,
   userId,
-  initialPhotos = [], // Valore predefinito
-  isPremiumOrPending = false, // Valore predefinito
+  initialPhotos = [],
+  isPremiumOrPending = false,
   onFilesChange,
   onPrimaryIndexChange,
   onExistingPhotosUpdated,
-  hideMainPreview = false, // Valore predefinito
+  hideMainPreview = false,
 }: ImageUploaderProps) => {
   const [newlySelectedFiles, setNewlySelectedFiles] = useState<File[]>([]);
   const [newlySelectedPreviews, setNewlySelectedPreviews] = useState<string[]>([]);
   const [newlySelectedPrimaryIndex, setNewlySelectedPrimaryIndex] = useState<number | null>(null);
   const [existingPhotosState, setExistingPhotosState] = useState<ExistingPhoto[]>(initialPhotos);
-  const [activePreviewUrl, setActivePreviewUrl] = useState<string | null>(null); // For the main preview
+  const [activePreviewUrl, setActivePreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Stato per il cropper
   const [isCropperOpen, setIsCropperOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | File | null>(null);
-  const [currentCroppingIndex, setCurrentCroppingIndex] = useState<number | null>(null); // Index in newlySelectedFiles
-  const [currentCroppingExistingPhoto, setCurrentCroppingExistingPhoto] = useState<ExistingPhoto | null>(null); // Existing photo object
+  const [currentCroppingIndex, setCurrentCroppingIndex] = useState<number | null>(null);
+  const [currentCroppingExistingPhoto, setCurrentCroppingExistingPhoto] = useState<ExistingPhoto | null>(null);
 
   const MAX_PHOTOS = 5;
   const FREE_PHOTOS_LIMIT = 1;
-  const THUMBNAIL_ASPECT_RATIO = 4 / 5; // Aspect ratio for thumbnails
+  const THUMBNAIL_ASPECT_RATIO = 4 / 5;
 
   useEffect(() => {
     setExistingPhotosState(initialPhotos);
-    // Set initial active preview to primary existing photo or first existing photo
     const primary = initialPhotos.find(p => p.is_primary);
     setActivePreviewUrl(primary?.url ?? initialPhotos[0]?.url ?? null);
   }, [initialPhotos]);
@@ -66,6 +64,78 @@ export const ImageUploader = ({
   useEffect(() => {
     onPrimaryIndexChange(newlySelectedPrimaryIndex);
   }, [newlySelectedPrimaryIndex, onPrimaryIndexChange]);
+
+  // Define handleUpdateExistingPhoto
+  const handleUpdateExistingPhoto = useCallback(async (originalPhoto: ExistingPhoto, newCroppedFile: File) => {
+    if (!listingId || !userId) {
+      showError('Impossibile aggiornare la foto: ID annuncio o ID utente non disponibili.');
+      return;
+    }
+
+    const toastId = showLoading('Aggiornamento foto in corso...');
+    try {
+      const oldUrlParts = originalPhoto.url.split('/');
+      const oldFilename = oldUrlParts[oldUrlParts.length - 1];
+      const oldStoragePath = `${userId}/${listingId}/${oldFilename}`;
+
+      const { error: removeError } = await supabase.storage
+        .from('listing_photos')
+        .remove([oldStoragePath]);
+
+      if (removeError) {
+        console.warn(`Errore durante l'eliminazione della vecchia foto dallo storage: ${removeError.message}`);
+      }
+
+      const slugifiedFileName = originalPhoto.id;
+      const newFileName = `${slugifiedFileName}.jpeg`;
+      const newFilePath = `${userId}/${listingId}/${newFileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('listing_photos')
+        .upload(newFilePath, newCroppedFile, {
+          cacheControl: '3600',
+          upsert: true,
+        });
+
+      if (uploadError) {
+        throw new Error(`Errore nel caricamento della nuova foto: ${uploadError.message}`);
+      }
+
+      const { data: { publicUrl: newPublicUrl } } = supabase.storage.from('listing_photos').getPublicUrl(newFilePath);
+
+      const { error: dbUpdateError } = await supabase
+        .from('listing_photos')
+        .update({ url: newPublicUrl })
+        .eq('id', originalPhoto.id);
+
+      if (dbUpdateError) {
+        throw new Error(`Errore durante l'aggiornamento del URL della foto nel database: ${dbUpdateError.message}`);
+      }
+
+      dismissToast(toastId);
+      showSuccess('Foto aggiornata con successo!');
+
+      // Use functional update for setExistingPhotosState to ensure latest state
+      setExistingPhotosState(prev => prev.map(p =>
+        p.id === originalPhoto.id ? { ...p, url: newPublicUrl } : p
+      ));
+      // Call onExistingPhotosUpdated with the updated state
+      onExistingPhotosUpdated(existingPhotosState.map(p => // This will be stale if not using functional update
+        p.id === originalPhoto.id ? { ...p, url: newPublicUrl } : p
+      ));
+      setActivePreviewUrl(newPublicUrl);
+
+    } catch (error: any) {
+      dismissToast(toastId);
+      showError(error.message || 'Errore durante l\'aggiornamento della foto.');
+    }
+  }, [listingId, userId, onExistingPhotosUpdated, existingPhotosState]); // existingPhotosState is a dependency here
+
+  // Create a ref for handleUpdateExistingPhoto
+  const handleUpdateExistingPhotoRef = useRef(handleUpdateExistingPhoto);
+  useEffect(() => {
+    handleUpdateExistingPhotoRef.current = handleUpdateExistingPhoto;
+  }, [handleUpdateExistingPhoto]); // This useEffect ensures the ref is always up-to-date
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -81,28 +151,32 @@ export const ImageUploader = ({
 
       const newFiles = filesToAdd.slice(0, availableSlots);
       
-      // For each new file, open the cropper
       if (newFiles.length > 0) {
         const fileToProcess = newFiles[0];
         setImageToCrop(fileToProcess);
-        setCurrentCroppingIndex(newlySelectedFiles.length); // Index where this file will be added
+        setCurrentCroppingIndex(newlySelectedFiles.length);
         setCurrentCroppingExistingPhoto(null);
         setIsCropperOpen(true);
       }
 
-      // Clear the input so the same file can be selected again
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     }
   };
 
-  const handleCropperSave = useCallback((croppedFile: File) => {
+  // Define handleCropperSave as a regular function (NOT useCallback)
+  const handleCropperSave = (croppedFile: File) => {
     if (currentCroppingExistingPhoto) {
-      // Update existing photo
-      handleUpdateExistingPhoto(currentCroppingExistingPhoto, croppedFile);
+      // Use the ref to call handleUpdateExistingPhoto
+      // The ref ensures we always call the latest version of handleUpdateExistingPhoto
+      if (handleUpdateExistingPhotoRef.current) {
+        handleUpdateExistingPhotoRef.current(currentCroppingExistingPhoto, croppedFile);
+      } else {
+        console.error("handleUpdateExistingPhotoRef.current is not defined when trying to update existing photo.");
+        showError("Errore interno: impossibile aggiornare la foto esistente.");
+      }
     } else if (currentCroppingIndex !== null) {
-      // Add new cropped file
       setNewlySelectedFiles(prev => {
         const updated = [...prev];
         updated[currentCroppingIndex] = croppedFile;
@@ -114,6 +188,8 @@ export const ImageUploader = ({
         return updated;
       });
 
+      // This condition relies on `newlySelectedFiles.length` and `existingPhotosState.length`
+      // These are in the dependencies of this useCallback, so they are fresh.
       if (newlySelectedPrimaryIndex === null && existingPhotosState.length === 0 && (newlySelectedFiles.length + 1) > 0) {
         setNewlySelectedPrimaryIndex(currentCroppingIndex);
         setActivePreviewUrl(URL.createObjectURL(croppedFile));
@@ -123,75 +199,7 @@ export const ImageUploader = ({
     setImageToCrop(null);
     setCurrentCroppingIndex(null);
     setCurrentCroppingExistingPhoto(null);
-  }, [currentCroppingExistingPhoto, currentCroppingIndex, newlySelectedFiles, newlySelectedPrimaryIndex, existingPhotosState.length, handleUpdateExistingPhoto]);
-
-
-  const handleUpdateExistingPhoto = useCallback(async (originalPhoto: ExistingPhoto, newCroppedFile: File) => {
-    if (!listingId || !userId) {
-      showError('Impossibile aggiornare la foto: ID annuncio o ID utente non disponibili.');
-      return;
-    }
-
-    const toastId = showLoading('Aggiornamento foto in corso...');
-    try {
-      // 1. Delete old image from Supabase Storage
-      const oldUrlParts = originalPhoto.url.split('/');
-      const oldFilename = oldUrlParts[oldUrlParts.length - 1];
-      const oldStoragePath = `${listingId}/${oldFilename}`;
-
-      const { error: removeError } = await supabase.storage
-        .from('listing_photos')
-        .remove([oldStoragePath]);
-
-      if (removeError) {
-        console.warn(`Errore durante l'eliminazione della vecchia foto dallo storage: ${removeError.message}`);
-        // Non bloccare l'operazione se la vecchia foto non può essere rimossa
-      }
-
-      // 2. Upload new cropped image to Supabase Storage
-      const slugifiedFileName = originalPhoto.id; // Use photo ID as filename for consistency
-      const newFileName = `${slugifiedFileName}.jpeg`; // Ensure .jpeg extension
-      const newFilePath = `${userId}/${listingId}/${newFileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('listing_photos')
-        .upload(newFilePath, newCroppedFile, {
-          cacheControl: '3600',
-          upsert: true, // Sovrascrivi se esiste già
-        });
-
-      if (uploadError) {
-        throw new Error(`Errore nel caricamento della nuova foto: ${uploadError.message}`);
-      }
-
-      const { data: { publicUrl: newPublicUrl } } = supabase.storage.from('listing_photos').getPublicUrl(newFilePath);
-
-      // 3. Update URL in database
-      const { error: dbUpdateError } = await supabase
-        .from('listing_photos')
-        .update({ url: newPublicUrl })
-        .eq('id', originalPhoto.id);
-
-      if (dbUpdateError) {
-        throw new Error(`Errore durante l'aggiornamento del URL della foto nel database: ${dbUpdateError.message}`);
-      }
-
-      dismissToast(toastId);
-      showSuccess('Foto aggiornata con successo!');
-
-      const updatedExistingPhotos = existingPhotosState.map(p =>
-        p.id === originalPhoto.id ? { ...p, url: newPublicUrl } : p
-      );
-      setExistingPhotosState(updatedExistingPhotos);
-      onExistingPhotosUpdated(updatedExistingPhotos);
-      setActivePreviewUrl(newPublicUrl); // Update main preview if this was the active one
-
-    } catch (error: any) {
-      dismissToast(toastId);
-      showError(error.message || 'Errore durante l\'aggiornamento della foto.');
-    }
-  }, [listingId, userId, existingPhotosState, onExistingPhotosUpdated]);
-
+  }; // No useCallback here
 
   const removeNewlySelectedFile = (index: number) => {
     const updatedFiles = newlySelectedFiles.filter((_, i) => i !== index);
@@ -226,11 +234,9 @@ export const ImageUploader = ({
 
     const toastId = showLoading('Eliminazione foto in corso...');
     try {
-      // 1. Delete from Supabase Storage
-      // The path in storage is userId/listingId/filename. Need to extract filename from URL.
       const urlParts = photoToDelete.url.split('/');
       const filename = urlParts[urlParts.length - 1];
-      const storagePath = `${userId}/${listingId}/${filename}`; // Corrected storage path
+      const storagePath = `${userId}/${listingId}/${filename}`;
 
       const { error: storageError } = await supabase.storage
         .from('listing_photos')
@@ -240,7 +246,6 @@ export const ImageUploader = ({
         throw new Error(`Errore durante l'eliminazione della foto dallo storage: ${storageError.message}`);
       }
 
-      // 2. Delete from database
       const { error: dbError } = await supabase
         .from('listing_photos')
         .delete()
@@ -254,24 +259,20 @@ export const ImageUploader = ({
       showSuccess('Foto eliminata con successo!');
       const updatedExistingPhotos = existingPhotosState.filter(p => p.id !== photoToDelete.id);
       setExistingPhotosState(updatedExistingPhotos);
-      onExistingPhotosUpdated(updatedExistingPhotos); // Notify parent
+      onExistingPhotosUpdated(updatedExistingPhotos);
 
-      // Adjust primary if deleted photo was primary
       if (photoToDelete.is_primary) {
         if (updatedExistingPhotos.length > 0) {
-          // Set first remaining existing photo as primary
           await handleSetExistingAsPrimary(updatedExistingPhotos[0]);
         } else if (newlySelectedFiles.length > 0) {
-          // Set first newly selected photo as primary
           setNewlySelectedPrimaryIndex(0);
-          const previews = newlySelectedPreviews ?? []; // Defensive check
+          const previews = newlySelectedPreviews ?? [];
           setActivePreviewUrl(previews.length > 0 ? (previews[0] ?? null) : null);
         } else {
           setActivePreviewUrl(null);
         }
       } else if (activePreviewUrl === photoToDelete.url) {
-        // If deleted photo was just the active preview, reset preview
-        const previews = newlySelectedPreviews ?? []; // Defensive check
+        const previews = newlySelectedPreviews ?? [];
         setActivePreviewUrl(
           updatedExistingPhotos[0]?.url ?? 
           (previews.length > 0 ? (previews[0] ?? null) : null) ?? 
@@ -286,7 +287,7 @@ export const ImageUploader = ({
   };
 
   const handleSetExistingAsPrimary = async (photoToSetPrimary: ExistingPhoto) => {
-    if (photoToSetPrimary.is_primary) return; // Already primary
+    if (photoToSetPrimary.is_primary) return;
     if (!listingId) {
       showError('Impossibile impostare la foto principale: ID annuncio non disponibile.');
       return;
@@ -294,17 +295,15 @@ export const ImageUploader = ({
 
     const toastId = showLoading('Impostazione foto principale...');
     try {
-      // Reset all existing photos to not primary
       const { error: resetExistingError } = await supabase
         .from('listing_photos')
         .update({ is_primary: false })
-        .eq('listing_id', listingId); // Reset all for this listing
+        .eq('listing_id', listingId);
 
       if (resetExistingError) {
         console.warn("Failed to reset old primary existing photo:", resetExistingError.message);
       }
 
-      // Set the selected existing photo as primary
       const { error: updateError } = await supabase
         .from('listing_photos')
         .update({ is_primary: true })
@@ -321,9 +320,9 @@ export const ImageUploader = ({
         is_primary: p.id === photoToSetPrimary.id,
       }));
       setExistingPhotosState(updatedExistingPhotos);
-      onExistingPhotosUpdated(updatedExistingPhotos); // Notify parent
-      setNewlySelectedPrimaryIndex(null); // Clear primary for new files
-      setActivePreviewUrl(photoToSetPrimary.url ?? null); // Update main preview
+      onExistingPhotosUpdated(updatedExistingPhotos);
+      setNewlySelectedPrimaryIndex(null);
+      setActivePreviewUrl(photoToSetPrimary.url ?? null);
     } catch (error: any) {
       dismissToast(toastId);
       showError(error.message || 'Errore durante l\'impostazione della foto principale.');
@@ -342,12 +341,10 @@ export const ImageUploader = ({
   const canAddMorePhotos = currentPhotoCount < maxAllowedPhotos;
   const emptySlotsCount = Math.max(0, maxAllowedPhotos - currentPhotoCount);
 
-  // Determine the main preview URL
   const mainPreview = activePreviewUrl ?? existingPhotosState.find(p => p.is_primary)?.url ?? existingPhotosState[0]?.url ?? (newlySelectedPreviews.length > 0 ? newlySelectedPreviews[0] : null) ?? null;
 
   return (
     <div className="space-y-4">
-      {/* Conditionally render main preview based on hideMainPreview prop */}
       {!hideMainPreview && mainPreview && (
         <div className="mb-4">
           <p className="text-sm text-gray-500 mb-2">Anteprima foto principale:</p>
@@ -363,14 +360,14 @@ export const ImageUploader = ({
           <div 
             key={photo.id} 
             className={cn(
-              "relative group aspect-square", // Rimosso rounded-md
+              "relative group aspect-square",
               photo.is_primary && "ring-4 ring-offset-2 ring-rose-500"
             )}
           >
             <img
               src={photo.url}
               alt={`Foto esistente ${index + 1}`}
-              className="w-full h-full object-cover transition-all" // Rimosso rounded-md
+              className="w-full h-full object-cover transition-all"
               onClick={() => setActivePreviewUrl(photo.url ?? null)}
             />
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center gap-2">
@@ -380,7 +377,7 @@ export const ImageUploader = ({
                 size="icon"
                 className="h-8 w-8 opacity-0 group-hover:opacity-100"
                 onClick={() => handleDeleteExistingPhoto(photo)}
-                disabled={!listingId} // Disabilita se non c'è listingId
+                disabled={!listingId}
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -390,7 +387,7 @@ export const ImageUploader = ({
                 size="icon"
                 className="h-8 w-8 opacity-0 group-hover:opacity-100"
                 onClick={() => handleSetExistingAsPrimary(photo)}
-                disabled={photo.is_primary || !listingId} // Disabilita se già primaria o non c'è listingId
+                disabled={photo.is_primary || !listingId}
               >
                 <Star className={cn("h-4 w-4", photo.is_primary && "text-yellow-400 fill-current")} />
               </Button>
@@ -417,14 +414,14 @@ export const ImageUploader = ({
           <div 
             key={`new-${index}`} 
             className={cn(
-              "relative group aspect-square", // Rimosso rounded-md
+              "relative group aspect-square",
               (newlySelectedPrimaryIndex === index && existingPhotosState.length === 0) && "ring-4 ring-offset-2 ring-rose-500"
             )}
           >
             <img
               src={preview}
               alt={`Nuova foto ${index + 1}`}
-              className="w-full h-full object-cover transition-all" // Rimosso rounded-md
+              className="w-full h-full object-cover transition-all"
               onClick={() => setActivePreviewUrl(preview ?? null)}
             />
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center gap-2">
@@ -437,13 +434,13 @@ export const ImageUploader = ({
               >
                 <X className="h-4 w-4" />
               </Button>
-              {existingPhotosState.length === 0 && ( // Only allow setting primary for new if no existing photos
+              {existingPhotosState.length === 0 && (
                 <Button
                   type="button"
                   variant="secondary"
                   size="icon"
                   className="h-8 w-8 opacity-0 group-hover:opacity-100"
-                  onClick={() => setNewlySelectedAsPrimary(preview)} // Pass the preview URL
+                  onClick={() => setNewlySelectedAsPrimary(preview)}
                   disabled={newlySelectedPrimaryIndex === index}
                 >
                   <Star className={cn("h-4 w-4", newlySelectedPrimaryIndex === index && "text-yellow-400 fill-current")} />
