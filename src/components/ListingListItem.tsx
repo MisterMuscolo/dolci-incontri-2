@@ -195,59 +195,57 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
 
   return (
     <Card className={cn(
-      "w-full overflow-hidden transition-shadow hover:shadow-md flex flex-col relative", // Rimosso md:flex-row per mantenere il layout verticale anche su schermi più grandi
+      "w-full overflow-hidden transition-shadow hover:shadow-md flex relative", // Always flex-row
       (canEdit || canManagePhotos || canDelete) && isPendingPremium && "border-2 border-blue-400 shadow-lg bg-blue-50"
     )}>
-      <div className="flex flex-col w-full"> {/* Modificato da sm:flex-row a flex-col */}
-        {hasPhotosToRender && (
-          <div className={cn("flex-shrink-0 relative", isCompact && "w-full")}> {/* L'immagine occupa tutta la larghezza della card compatta */}
-            <AspectRatio ratio={isCompact ? 4 / 5 : 3 / 4} className="w-full h-full">
-              <Link to={`/listing/${listing.id}`} className="block w-full h-full">
-                <WatermarkedImage src={photosToRender[0].url} alt={listing.title} imageClassName="object-cover" />
-              </Link>
-            </AspectRatio>
-            {listing.is_premium && photosToRender.length > 1 && (
-              <Badge className="absolute bottom-1 right-1 bg-black/60 text-white px-2 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
-                <Camera className="h-3 w-3" /> {photosToRender.length}
-              </Badge>
-            )}
-          </div>
-        )}
-        <Link to={`/listing/${listing.id}`} className={cn(
-          "flex-grow block hover:bg-gray-50/50",
-          !hasPhotosToRender && "w-full"
-        )}>
-          <div className={cn("p-4 flex flex-col flex-grow", isCompact && "p-3")}>
-            <Badge variant="outline" className="w-fit mb-2">
-              <CalendarDays className="h-4 w-4 mr-1.5" />
-              <span>{prefix} {formattedDate}</span>
+      {hasPhotosToRender && (
+        <div className="flex-shrink-0 relative w-32 sm:w-40 h-auto"> {/* Small fixed width for image container */}
+          <AspectRatio ratio={9 / 16} className="w-full h-full"> {/* 9:16 aspect ratio */}
+            <Link to={`/listing/${listing.id}`} className="block w-full h-full">
+              <WatermarkedImage src={photosToRender[0].url} alt={listing.title} imageClassName="object-cover" />
+            </Link>
+          </AspectRatio>
+          {listing.is_premium && photosToRender.length > 1 && (
+            <Badge className="absolute bottom-1 right-1 bg-black/60 text-white px-2 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
+              <Camera className="h-3 w-3" /> {photosToRender.length}
             </Badge>
-            <div className="flex items-center gap-2 mb-2">
-              <Badge variant="secondary" className="capitalize"><Tag className="h-4 w-4 mr-1" />{listing.category.replace(/-/g, ' ')}</Badge>
-            </div>
-            <h3 className={cn("text-xl font-semibold mb-2 text-rose-600 line-clamp-2", isCompact && "text-lg")}>{listing.title}</h3>
-            <p className={cn("text-base text-gray-600 mb-3 line-clamp-3", isCompact && "text-sm line-clamp-2")}>{listing.description}</p>
-            <div className="flex flex-wrap gap-2 mb-2">
-              <Badge variant="outline">
-                <MapPin className="h-4 w-4 mr-1" /> {listing.city}{listing.zone && ` / ${listing.zone}`}
+          )}
+        </div>
+      )}
+      <Link to={`/listing/${listing.id}`} className={cn(
+        "flex-grow block hover:bg-gray-50/50",
+        !hasPhotosToRender && "w-full"
+      )}>
+        <div className={cn("p-3 flex flex-col flex-grow", isCompact && "p-2")}> {/* Adjusted padding for compact */}
+          <Badge variant="outline" className="w-fit mb-1 text-xs"> {/* Smaller text for badge */}
+            <CalendarDays className="h-3 w-3 mr-1" /> {/* Smaller icon */}
+            <span>{prefix} {formattedDate}</span>
+          </Badge>
+          <div className="flex items-center gap-1 mb-1"> {/* Smaller gap */}
+            <Badge variant="secondary" className="capitalize text-xs"><Tag className="h-3 w-3 mr-1" />{listing.category.replace(/-/g, ' ')}</Badge> {/* Smaller text for badge */}
+          </div>
+          <h3 className={cn("text-lg font-semibold mb-1 text-rose-600 line-clamp-2", isCompact && "text-base")}>{listing.title}</h3> {/* Smaller text for title */}
+          <p className={cn("text-sm text-gray-600 mb-2 line-clamp-3", isCompact && "text-xs line-clamp-2")}>{listing.description}</p> {/* Smaller text for description */}
+          <div className="flex flex-wrap gap-1 mb-1"> {/* Smaller gap */}
+            <Badge variant="outline" className="text-xs"> {/* Smaller text for badge */}
+              <MapPin className="h-3 w-3 mr-1" /> {listing.city}{listing.zone && ` / ${listing.zone}`}
+            </Badge>
+          </div>
+          {listing.age && (
+            <div className="flex flex-wrap gap-1 mb-2"> {/* Smaller gap */}
+              <Badge variant="outline" className="text-xs"> {/* Smaller text for badge */}
+                <User className="h-3 w-3 mr-1" /> {listing.age} anni
               </Badge>
             </div>
-            {listing.age && (
-              <div className="flex flex-wrap gap-2 mb-3">
-                <Badge variant="outline">
-                  <User className="h-4 w-4 mr-1" /> {listing.age} anni
-                </Badge>
-              </div>
-            )}
-          </div>
-        </Link>
-      </div>
+          )}
+        </div>
+      </Link>
       {(canEdit || canManagePhotos || canDelete) && (
-        <div className="flex-shrink-0 flex md:flex-col justify-end md:justify-center items-center gap-2 p-4 border-t md:border-t-0 md:border-l">
+        <div className="flex-shrink-0 flex flex-col justify-center items-center gap-2 p-3 border-l"> {/* Adjusted padding */}
           {canEdit && (
             <Link to={`/edit-listing/${listing.id}`} className="w-full">
-              <Button variant="outline" size="sm" className="w-full h-9 px-3 text-sm">
-                <Pencil className="h-4 w-4 md:mr-2" />
+              <Button variant="outline" size="sm" className="w-full h-8 px-2 text-xs"> {/* Smaller button */}
+                <Pencil className="h-3 w-3 md:mr-1" />
                 <span className="hidden md:inline">Modifica</span>
               </Button>
             </Link>
@@ -268,11 +266,11 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                   variant="default" 
                   size="sm" 
                   className={cn(
-                    "w-full h-9 px-3 text-sm flex items-center gap-1",
+                    "w-full h-8 px-2 text-xs flex items-center gap-1", // Smaller button
                     isActivePremium ? "bg-rose-500 hover:bg-rose-600" : "bg-blue-500 hover:bg-blue-600"
                   )}
                 >
-                  <Flame className="h-4 w-4" /> {isActivePremium ? 'Hot' : 'In Attesa'}
+                  <Flame className="h-3 w-3" /> {isActivePremium ? 'Hot' : 'In Attesa'}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -297,8 +295,8 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           ) : (
             !isAdminContext && (
               <Link to={`/promote-listing/${listing.id}`} className="w-full">
-                <Button variant="default" size="sm" className="w-full h-9 px-3 text-sm bg-green-500 hover:bg-green-600 text-white">
-                  <Flame className="h-4 w-4 md:mr-2" /> {/* Sostituito Rocket con Flame */}
+                <Button variant="default" size="sm" className="w-full h-8 px-2 text-xs bg-green-500 hover:bg-green-600 text-white"> {/* Smaller button */}
+                  <Flame className="h-3 w-3 md:mr-1" />
                   <span className="hidden md:inline">Promuovi</span>
                 </Button>
               </Link>
@@ -308,12 +306,12 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button 
-                  variant="default" // Cambiato a default
+                  variant="default" 
                   size="sm" 
-                  className="w-full h-9 px-3 text-sm bg-blue-500 hover:bg-blue-600 text-white" // Aggiunto colore blu
+                  className="w-full h-8 px-2 text-xs bg-blue-500 hover:bg-blue-600 text-white" // Smaller button
                   disabled={isDeleting}
                 >
-                  <Trash2 className="h-4 w-4 md:mr-2" />
+                  <Trash2 className="h-3 w-3 md:mr-1" />
                   <span className="hidden md:inline">Elimina</span>
                 </Button>
               </AlertDialogTrigger>
@@ -340,7 +338,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
         </div>
       )}
       {!(canEdit || canManagePhotos || canDelete) && isActivePremium && (
-        <Badge className="bg-rose-500 hover:bg-rose-600 text-white absolute top-1 right-1 z-20 px-2 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
+        <Badge className="bg-rose-500 hover:bg-rose-600 text-white absolute top-1 right-1 z-20 px-1.5 py-0.5 rounded-full text-xs font-semibold flex items-center gap-0.5"> {/* Smaller badge */}
           <Flame className="h-3 w-3 mr-0.5" /> Hot
         </Badge>
       )}

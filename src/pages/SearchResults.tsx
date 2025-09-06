@@ -106,8 +106,8 @@ const SearchResults = () => {
   const renderContent = () => {
     if (loading) {
       return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
+        <div className="space-y-4"> {/* Changed to space-y-4 for vertical stacking */}
+          {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-32 w-full" />)} {/* Adjusted height for skeleton */}
         </div>
       );
     }
@@ -128,7 +128,7 @@ const SearchResults = () => {
     }
 
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="space-y-4"> {/* Changed to space-y-4 for vertical stacking */}
         {listings.map((listing) => (
           <ListingListItem 
             key={listing.id} 
