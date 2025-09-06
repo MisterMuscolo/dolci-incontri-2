@@ -42,7 +42,6 @@ export interface Listing {
   listing_photos: { url: string; original_url: string | null; is_primary: boolean }[]; // Added original_url
   age?: number;
   zone?: string | null;
-  slug: string; // Aggiunto slug
 }
 
 interface ListingListItemProps {
@@ -215,7 +214,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
       {hasPhotosToRender && (
         <div className="flex-shrink-0 relative w-32 sm:w-44 h-auto">
           <AspectRatio ratio={4 / 5} className="w-full h-full">
-            <Link to={`/listing/${listing.slug}`} className="block w-full h-full"> {/* Usa listing.slug */}
+            <Link to={`/listing/${listing.id}`} className="block w-full h-full"> {/* Usa listing.id */}
               <WatermarkedImage src={photosToRender[0].url} alt={listing.title} imageClassName="object-cover" />
             </Link>
           </AspectRatio>
@@ -226,7 +225,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           )}
         </div>
       )}
-      <Link to={`/listing/${listing.slug}`} className={cn( {/* Usa listing.slug */}
+      <Link to={`/listing/${listing.id}`} className={cn( {/* Usa listing.id */}
         "flex-grow block hover:bg-gray-50/50",
         !hasPhotosToRender && "w-full"
       )}>
@@ -238,7 +237,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           <div className="flex items-center gap-1 mb-1">
             <Badge variant="secondary" className="capitalize text-xs"><Tag className="h-3 w-3 mr-1" />{listing.category.replace(/-/g, ' ')}</Badge>
           </div>
-          <h3 className={cn("text-lg font-semibold mb-1 text-rose-600 line-clamp-2", isCompact && "text-base")}>{listing.title}</h3>
+          <h3 className="text-lg font-semibold mb-1 text-rose-600 line-clamp-2">{listing.title}</h3>
           <p className={cn("text-sm text-gray-600 mb-2 line-clamp-3", isCompact && "text-xs line-clamp-2")}>{listing.description}</p>
           <div className="flex flex-wrap gap-1 mb-1">
             <Badge variant="outline" className="text-xs">

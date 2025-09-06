@@ -2,14 +2,6 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
-      "source": "/sitemap.xml",
-      "destination": "https://bpfhentkvaelbphqlfot.supabase.co/functions/v1/generate-sitemap"
-    },
-    {
-      "source": "/listing/:id([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})",
-      "destination": "https://bpfhentkvaelbphqlfot.supabase.co/functions/v1/redirect-listing-by-id"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

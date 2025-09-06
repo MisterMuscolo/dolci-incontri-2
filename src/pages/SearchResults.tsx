@@ -44,8 +44,7 @@ const SearchResults = () => {
         promotion_start_at,
         promotion_end_at,
         last_bumped_at,
-        listing_photos ( url, original_url, is_primary ),
-        slug
+        listing_photos ( url, original_url, is_primary )
       `, { count: 'exact' })
       .gt('expires_at', new Date().toISOString());
 

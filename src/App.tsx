@@ -32,9 +32,7 @@ const PromoteListingOptions = lazy(() => import("./pages/PromoteListingOptions")
 const RegistrationSuccess = lazy(() => import("./pages/RegistrationSuccess"));
 const ChangePassword = lazy(() => import("./pages/ChangePassword")); // Percorso corretto
 const TicketDetails = lazy(() => import("./pages/TicketDetails"));
-const MyCoupons = lazy(() => import("./pages/MyCoupons")); // Importa la nuova pagina MyCoupons
 const AuthCallback = lazy(() => import("./pages/AuthCallback")); // Importa la nuova pagina AuthCallback
-const ListingPostCreation = lazy(() => import("./pages/ListingPostCreation")); // Importa la nuova pagina
 
 const queryClient = new QueryClient();
 
@@ -116,158 +114,146 @@ const App = () => {
   console.log("App.tsx: Rendering Layout with isAdmin:", isAdmin, "isSupporto:", isSupporto, "isBanned:", isBanned, "Session exists:", !!session);
 
   return (
-    <> {/* Utilizzo della sintassi breve per i frammenti */}
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          {/* Rimosso il componente Toaster non più necessario */}
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              {/* Nuova rotta per il callback di autenticazione di Supabase */}
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            {/* Nuova rotta per il callback di autenticazione di Supabase */}
+            <Route 
+              path="/auth/callback" 
+              element={
+                <Suspense fallback={<LoadingScreen />}>
+                  <AuthCallback />
+                </Suspense>
+              } 
+            />
+
+            {/* Route per utenti bannati */}
+            <Route path="/banned" element={<BannedUser />} />
+            {/* Nuova rotta per la conferma registrazione */}
+            <Route path="/registration-success" element={<RegistrationSuccess />} />
+
+            <Route element={<Layout session={session} isAdmin={isAdmin} isSupporto={isSupporto} />}>
               <Route 
-                path="/auth/callback" 
+                path="/" 
                 element={
                   <Suspense fallback={<LoadingScreen />}>
-                    <AuthCallback />
+                    <Index session={session} />
                   </Suspense>
                 } 
               />
-
-              {/* Route per utenti bannati */}
-              <Route path="/banned" element={<BannedUser />} />
-              {/* Nuova rotta per la conferma registrazione */}
-              <Route path="/registration-success" element={<RegistrationSuccess />} />
-              {/* Nuova rotta per la pagina di post-creazione annuncio */}
               <Route 
-                path="/listing-post-creation/:listingId" 
-                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><ListingPostCreation /></Suspense>) : <Navigate to="/auth" />} 
+                path="/search" 
+                element={
+                  <Suspense fallback={<LoadingScreen />}>
+                    <SearchResults />
+                  </Suspense>
+                } 
               />
-
-              <Route element={<Layout session={session} isAdmin={isAdmin} isSupporto={isSupporto} />}>
-                <Route 
-                  path="/" 
-                  element={
+              <Route 
+                path="/listing/:id" 
+                element={
+                  <Suspense fallback={<LoadingScreen />}>
+                    <ListingDetails />
+                  </Suspense>
+                } 
+              />
+              <Route 
+                path="/termini" 
+                element={
+                  <Suspense fallback={<LoadingScreen />}>
+                    <Termini />
+                  </Suspense>
+                } 
+              />
+              <Route 
+                path="/privacy" 
+                element={
+                  <Suspense fallback={<LoadingScreen />}>
+                    <Privacy />
+                  </Suspense>
+                } 
+              />
+              <Route 
+                path="/new-ticket" 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><NewTicket /></Suspense>) : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/my-tickets" 
+                element={session ? <MyTickets /> : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/my-tickets/:ticketId" 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><TicketDetails /></Suspense>) : <Navigate to="/auth" />} 
+              />
+              
+              {/* Reindirizza gli utenti in base allo stato di autenticazione e al ruolo */}
+              <Route 
+                path="/auth" 
+                element={
+                  !session ? (
                     <Suspense fallback={<LoadingScreen />}>
-                      <Index session={session} />
+                      <Auth />
                     </Suspense>
-                  } 
-                />
-                <Route 
-                  path="/search" 
-                  element={
-                    <Suspense fallback={<LoadingScreen />}>
-                      <SearchResults />
-                    </Suspense>
-                  } 
-                />
-                <Route 
-                  path="/listing/:slug" {/* Modificato da :id a :slug */}
-                  element={
-                    <Suspense fallback={<LoadingScreen />}>
-                      <ListingDetails />
-                    </Suspense>
-                  } 
-                />
-                <Route 
-                  path="/termini" 
-                  element={
-                    <Suspense fallback={<LoadingScreen />}>
-                      <Termini />
-                    </Suspense>
-                  } 
-                />
-                <Route 
-                  path="/privacy" 
-                  element={
-                    <Suspense fallback={<LoadingScreen />}>
-                      <Privacy />
-                    </Suspense>
-                  } 
-                />
-                <Route 
-                  path="/new-ticket" 
-                  element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><NewTicket /></Suspense>) : <Navigate to="/auth" />} 
-                />
-                <Route 
-                  path="/my-tickets" 
-                  element={session ? <MyTickets /> : <Navigate to="/auth" />} 
-                />
-                <Route 
-                  path="/my-tickets/:ticketId" 
-                  element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><TicketDetails /></Suspense>) : <Navigate to="/auth" />} 
-                />
-                
-                {/* Reindirizza gli utenti in base allo stato di autenticazione e al ruolo */}
-                <Route 
-                  path="/auth" 
-                  element={
-                    !session ? (
-                      <Suspense fallback={<LoadingScreen />}>
-                        <Auth />
-                      </Suspense>
-                    ) : isBanned ? (
-                      <Navigate to="/banned" />
-                    ) : (isAdmin || isSupporto) ? ( // Aggiorna il controllo del ruolo
-                      <Navigate to="/admin" />
-                    ) : (
-                      <Navigate to="/dashboard" />
-                    )
-                  } 
-                />
-                <Route 
-                  path="/dashboard" 
-                  element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><Dashboard /></Suspense>) : <Navigate to="/auth" />} 
-                />
-                <Route 
-                  path="/admin" 
-                  element={(isAdmin || isSupporto) ? <Suspense fallback={<LoadingScreen />}><AdminDashboard isAdmin={isAdmin} isSupporto={isSupporto} /></Suspense> : <Navigate to="/" />} 
-                />
-                <Route 
-                  path="/admin/users/:userId/listings" 
-                  element={(isAdmin || isSupporto) ? <Suspense fallback={<LoadingScreen />}><UserListingsAdminView /></Suspense> : <Navigate to="/" />} 
-                />
-                <Route 
-                  path="/new-listing" 
-                  element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><NewListing /></Suspense>) : <Navigate to="/auth" />} 
-                />
-                <Route 
-                  path="/edit-listing/:id" 
-                  element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><EditListing /></Suspense>) : <Navigate to="/auth" />} 
-                />
-                <Route 
-                  path="/promote-listing/:listingId" 
-                  element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><PromoteListingOptions /></Suspense>) : <Navigate to="/auth" />} 
-                />
-                <Route 
-                  path="/buy-credits" 
-                  element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><BuyCredits /></Suspense>) : <Navigate to="/auth" />} 
-                />
-                <Route 
-                  path="/profile-settings" 
-                  element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><ProfileSettings /></Suspense>) : <Navigate to="/auth" />} 
-                />
-                <Route 
-                  path="/change-password" 
-                  element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><ChangePassword /></Suspense>) : <Navigate to="/auth" />} 
-                />
-                <Route 
-                  path="/my-listings" 
-                  element={session ? (isBanned ? <Navigate to="/banned" /> : <MyListings />) : <Navigate to="/auth" />} 
-                />
-                <Route 
-                  path="/credit-history" 
-                  element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><CreditHistory /></Suspense>) : <Navigate to="/auth" />} 
-                />
-                <Route 
-                  path="/my-coupons" 
-                  element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><MyCoupons /></Suspense>) : <Navigate to="/auth" />} 
-                />
-              </Route> {/* Chiusura della rotta del Layout */}
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </QueryClientProvider>
-    </>
+                  ) : isBanned ? (
+                    <Navigate to="/banned" />
+                  ) : (isAdmin || isSupporto) ? ( // Aggiorna il controllo del ruolo
+                    <Navigate to="/admin" />
+                  ) : (
+                    <Navigate to="/dashboard" />
+                  )
+                } 
+              />
+              <Route 
+                path="/dashboard" 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><Dashboard /></Suspense>) : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/admin" 
+                element={(isAdmin || isSupporto) ? <Suspense fallback={<LoadingScreen />}><AdminDashboard isAdmin={isAdmin} isSupporto={isSupporto} /></Suspense> : <Navigate to="/" />} 
+              />
+              <Route 
+                path="/admin/users/:userId/listings" 
+                element={(isAdmin || isSupporto) ? <Suspense fallback={<LoadingScreen />}><UserListingsAdminView /></Suspense> : <Navigate to="/" />} 
+              />
+              <Route 
+                path="/new-listing" 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><NewListing /></Suspense>) : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/edit-listing/:id" 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><EditListing /></Suspense>) : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/promote-listing/:listingId" 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><PromoteListingOptions /></Suspense>) : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/buy-credits" 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><BuyCredits /></Suspense>) : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/profile-settings" 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><ProfileSettings /></Suspense>) : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/change-password" 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><ChangePassword /></Suspense>) : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/my-listings" 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <MyListings />) : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/credit-history" 
+                element={session ? (isBanned ? <Navigate to="/banned" /> : <Suspense fallback={<LoadingScreen />}><CreditHistory /></Suspense>) : <Navigate to="/auth" />} 
+              />
+            </Route> {/* Chiusura della rotta del Layout */}
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 };
 

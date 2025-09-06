@@ -18,14 +18,6 @@ export function slugifyFilename(filename: string): string {
     .replace(/-+$/, ''); // Rimuovi trattini alla fine
 }
 
-// Nuova funzione per generare uno slug per gli annunci
-export function generateListingSlug(title: string, category: string, city: string, id: string): string {
-  const baseSlug = slugifyFilename(`${title}-${category}-${city}`);
-  // Aggiungi un hash corto dell'ID per garantire l'unicità e mantenere lo slug leggibile
-  const shortId = id.substring(0, 8); 
-  return `${baseSlug}-${shortId}`;
-}
-
 export function formatPhoneNumber(phoneNumber: string | null | undefined): string | null {
   if (!phoneNumber) {
     return null;
