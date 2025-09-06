@@ -1,4 +1,4 @@
-import React from "react";
+import React from "react"; // Aggiunto questo import
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
