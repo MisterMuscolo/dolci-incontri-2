@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { UploadCloud, X, Star, Plus, Crop } from 'lucide-react'; // Importato Crop
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
