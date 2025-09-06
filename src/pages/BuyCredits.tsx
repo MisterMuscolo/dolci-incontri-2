@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; // Rimosso CardDescription
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronLeft, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
@@ -17,7 +17,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { // Rimosso DialogTrigger
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogContent,
@@ -25,8 +25,8 @@ import { // Rimosso DialogTrigger
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'; // Rimosso AlertDialogTrigger
-import { ApplyCouponForm } from '@/components/user/ApplyCouponForm'; // Importa il componente
+} from '@/components/ui/alert-dialog';
+import { ApplyCouponForm } from '@/components/user/ApplyCouponForm';
 
 interface CreditPackage {
   id: string;
@@ -40,11 +40,11 @@ interface CreditPackage {
 }
 
 interface AppliedCoupon {
-  type: 'percentage' | 'flat_amount' | 'credits'; // Aggiunto 'credits'
+  type: 'percentage' | 'flat_amount' | 'credits';
   value: number;
   couponId: string;
   couponType: 'single_use' | 'reusable';
-  code: string; // Aggiunto per visualizzazione
+  code: string;
 }
 
 const hardcodedCreditPackages: CreditPackage[] = [
@@ -159,7 +159,7 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess, finalAmount, couponD
         confirmParams: {
           return_url: `${window.location.origin}/credit-history`,
         },
-        redirect: 'if_required', // Aggiunto redirect: 'if_required' per gestire i 3D Secure
+        redirect: 'if_required',
       });
 
       if (confirmError) {
@@ -175,17 +175,14 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess, finalAmount, couponD
         return;
       }
 
-      // If payment requires action (e.g., 3D Secure), Stripe handles the redirect.
-      // The finalize-credit-purchase function will be called by a webhook or on return_url.
-      // For simplicity, we'll call it directly here if no redirect is needed.
       if (paymentIntent && paymentIntent.status === 'succeeded') {
         const { error: finalizeError } = await supabase.functions.invoke('finalize-credit-purchase', {
           body: {
             userId: user.id,
             amount: selectedPackage.credits,
             packageName: selectedPackage.name,
-            couponId: couponDetails?.couponId || null, // Pass coupon details
-            couponType: couponDetails?.couponType || null, // Pass coupon details
+            couponId: couponDetails?.couponId || null,
+            couponType: couponDetails?.couponType || null,
           },
         });
 
@@ -209,12 +206,9 @@ const CheckoutForm = ({ selectedPackage, onPurchaseSuccess, finalAmount, couponD
         showSuccess(`Hai acquistato ${selectedPackage.credits} crediti con successo!`);
         onPurchaseSuccess();
       } else {
-        // Handle other paymentIntent statuses if necessary (e.g., 'processing', 'requires_action')
-        // For 'requires_action', Stripe's redirect handles it.
-        // For 'processing', the user might need to wait.
         dismissToast(toastId);
         showSuccess("Pagamento in elaborazione o richiede ulteriori azioni. Controlla la cronologia crediti tra poco.");
-        onPurchaseSuccess(); // Still navigate away, as payment is initiated
+        onPurchaseSuccess();
       }
 
     } catch (error: any) {
@@ -257,11 +251,11 @@ const BuyCredits = () => {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loadingPaymentIntent, setLoadingPaymentIntent] = useState(false);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
-  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null); // Stato per il coupon applicato
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const creditPackages = hardcodedCreditPackages; 
 
-  // Nuovo stato per disabilitare la funzione di acquisto
-  const [isPurchaseDisabled, /* setIsPurchaseDisabled */] = useState(false); // Impostato a false per abilitare l'acquisto
+  // Imposta isPurchaseDisabled a true per disabilitare la funzione di acquisto
+  const [isPurchaseDisabled, setIsPurchaseDisabled] = useState(true);
   const [showDisabledDialog, setShowDisabledDialog] = useState(false);
 
   useEffect(() => {
@@ -306,7 +300,7 @@ const BuyCredits = () => {
     } else if (coupon.type === 'flat_amount') {
       price = originalPrice - coupon.value;
     }
-    return Math.max(0, price); // Ensure price doesn't go below zero
+    return Math.max(0, price);
   };
 
   const handlePackageSelect = async (pkg: CreditPackage) => {
@@ -316,7 +310,7 @@ const BuyCredits = () => {
     }
 
     setSelectedPackage(pkg);
-    setClientSecret(null); // Reset client secret
+    setClientSecret(null);
     setLoadingPaymentIntent(true);
     const toastId = showLoading(`Preparazione pagamento per ${pkg.name}...`);
 
@@ -324,7 +318,7 @@ const BuyCredits = () => {
       const { data, error } = await supabase.functions.invoke('create-payment-intent', {
         body: { 
           packageId: pkg.id,
-          couponCode: appliedCoupon?.code || null, // Pass coupon code to Edge Function
+          couponCode: appliedCoupon?.code || null,
         },
       });
 
@@ -348,7 +342,7 @@ const BuyCredits = () => {
       setClientSecret(data.clientSecret);
       console.log("Client Secret ricevuto:", data.clientSecret);
       showSuccess('Pagamento pronto!');
-      setIsPaymentDialogOpen(true); // Apri il dialog dopo aver ricevuto il client secret
+      setIsPaymentDialogOpen(true);
     } catch (error: any) {
       dismissToast(toastId);
       showError(error.message || 'Si è verificato un errore imprevisto.');
@@ -359,16 +353,16 @@ const BuyCredits = () => {
   };
 
   const handlePurchaseSuccess = () => {
-    setIsPaymentDialogOpen(false); // Chiudi il dialog
-    setAppliedCoupon(null); // Resetta il coupon dopo l'acquisto
+    setIsPaymentDialogOpen(false);
+    setAppliedCoupon(null);
     navigate('/credit-history');
   };
 
   const handleCouponApplied = (discount: { type: 'percentage' | 'flat_amount' | 'credits'; value: number; couponId: string; couponType: 'single_use' | 'reusable'; code: string }) => {
-    setAppliedCoupon({ ...discount, code: discount.code }); // Salva il codice del coupon
+    setAppliedCoupon({ ...discount, code: discount.code });
     showSuccess(discount.type === 'credits' ? `Hai ricevuto ${discount.value} crediti!` : 'Coupon applicato con successo!');
     if (discount.type === 'credits') {
-      fetchCurrentCredits(); // Ricarica i crediti per aggiornare il saldo visualizzato
+      fetchCurrentCredits();
     }
   };
 
@@ -437,7 +431,7 @@ const BuyCredits = () => {
               const originalPrice = pkg.price;
               const finalPrice = calculateFinalPrice(originalPrice, appliedCoupon);
               const discountAmount = originalPrice - finalPrice;
-              const hasDiscount = discountAmount > 0.01; // Check if there's a significant discount
+              const hasDiscount = discountAmount > 0.01;
 
               return (
                 <Card 
@@ -489,9 +483,9 @@ const BuyCredits = () => {
           open={isPaymentDialogOpen} 
           onOpenChange={(open) => {
             setIsPaymentDialogOpen(open);
-            if (!open) { // Se il dialog si sta chiudendo
-              setSelectedPackage(null); // Resetta il pacchetto selezionato
-              setClientSecret(null); // Resetta il client secret
+            if (!open) {
+              setSelectedPackage(null);
+              setClientSecret(null);
             }
           }}
         >
