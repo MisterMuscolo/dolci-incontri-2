@@ -43,7 +43,7 @@ const SearchResults = () => {
         promotion_start_at,
         promotion_end_at,
         last_bumped_at,
-        listing_photos ( url, is_primary )
+        listing_photos ( url, original_url, is_primary )
       `, { count: 'exact' })
       .gt('expires_at', new Date().toISOString());
 
@@ -57,11 +57,10 @@ const SearchResults = () => {
       query = query.or(`title.ilike.%${keyword}%,description.ilike.%${keyword}%`);
     }
 
-    // Applica il nuovo ordinamento lato server
     query = query
-      .order('last_bumped_at', { ascending: false, nullsFirst: false }) // Più recenti (creati o promossi) prima
-      .order('promotion_end_at', { ascending: false, nullsFirst: true }) // Poi per scadenza promozione (più lontana prima), con NULL per primi
-      .order('created_at', { ascending: false }); // Infine per data di creazione
+      .order('last_bumped_at', { ascending: false, nullsFirst: false })
+      .order('promotion_end_at', { ascending: false, nullsFirst: true })
+      .order('created_at', { ascending: false });
 
     const from = (currentPage - 1) * LISTINGS_PER_PAGE;
     const to = from + LISTINGS_PER_PAGE - 1;
@@ -78,7 +77,6 @@ const SearchResults = () => {
         console.log("SearchResults: Conteggio annunci trovati:", count, "Pagine totali:", totalPages);
       }
       if (data) {
-        // Ordina le foto localmente per assicurare che la principale sia sempre la prima
         const processedListings = data.map(listing => ({
           ...listing,
           listing_photos: (listing.listing_photos || []).sort((a, b) => {
@@ -106,8 +104,8 @@ const SearchResults = () => {
   const renderContent = () => {
     if (loading) {
       return (
-        <div className="space-y-4"> {/* Changed to space-y-4 for vertical stacking */}
-          {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-32 w-full" />)} {/* Adjusted height for skeleton */}
+        <div className="space-y-4">
+          {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
         </div>
       );
     }
@@ -128,14 +126,14 @@ const SearchResults = () => {
     }
 
     return (
-      <div className="space-y-4"> {/* Changed to space-y-4 for vertical stacking */}
+      <div className="space-y-4">
         {listings.map((listing) => (
           <ListingListItem 
             key={listing.id} 
             listing={listing} 
             allowNonPremiumImage={false} 
-            isCompact={true} // Impostato a true per tutti gli annunci nei risultati di ricerca
-            dateTypeToDisplay="created_at" // Mostra la data di pubblicazione
+            isCompact={true}
+            dateTypeToDisplay="created_at"
           />
         ))}
         {totalPages > 1 && (
@@ -163,7 +161,7 @@ const SearchResults = () => {
 
   return (
     <div className="bg-gray-50 p-6 flex-grow">
-      <div className="max-w-7xl mx-auto px-2 sm:px-8"> {/* Adjusted px-4 to px-2 on mobile */}
+      <div className="max-w-7xl mx-auto px-2 sm:px-8">
         <div className="flex items-center gap-4 mb-6">
           <Button variant="ghost" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">
             <ChevronLeft className="h-5 w-5 mr-2" />

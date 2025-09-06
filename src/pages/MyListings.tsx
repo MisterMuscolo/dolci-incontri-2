@@ -63,23 +63,21 @@ const MyListings = () => {
         promotion_start_at,
         promotion_end_at,
         last_bumped_at,
-        listing_photos ( url, is_primary )
+        listing_photos ( url, original_url, is_primary )
       `)
       .eq('user_id', user.id)
       .gt('expires_at', new Date().toISOString());
 
-    // Applica il nuovo ordinamento lato server
     query = query
-      .order('last_bumped_at', { ascending: false, nullsFirst: false }) // Più recenti (creati o promossi) prima
-      .order('promotion_end_at', { ascending: false, nullsFirst: true }) // Poi per scadenza promozione (più lontana prima), con NULL per primi
-      .order('created_at', { ascending: false }); // Infine per data di creazione
+      .order('last_bumped_at', { ascending: false, nullsFirst: false })
+      .order('promotion_end_at', { ascending: false, nullsFirst: true })
+      .order('created_at', { ascending: false });
 
     const { data, error } = await query.range(from, to);
 
     if (error) {
       console.error("MyListings: Errore nel recupero degli annunci:", error.message, error.details);
     } else if (data) {
-      // Ordina le foto localmente per assicurare che la principale sia sempre la prima
       const processedListings = data.map(listing => ({
         ...listing,
         listing_photos: (listing.listing_photos || []).sort((a, b) => {
@@ -104,7 +102,7 @@ const MyListings = () => {
   };
 
   return (
-    <div className="bg-gray-50 py-6 px-2 sm:px-6 flex-grow"> {/* Adjusted px-3 to px-2 on mobile */}
+    <div className="bg-gray-50 py-6 px-2 sm:px-6 flex-grow">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-4">
@@ -137,7 +135,7 @@ const MyListings = () => {
                     canManagePhotos={false}
                     canDelete={true}
                     onListingUpdated={fetchListings} 
-                    dateTypeToDisplay="expires_at" // Mostra la data di scadenza
+                    dateTypeToDisplay="expires_at"
                   />
                 ))}
                 {totalPages > 1 && (

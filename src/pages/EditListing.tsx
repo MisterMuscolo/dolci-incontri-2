@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useForm } from 'react-hook-form'; // Corretto l'import
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,7 @@ import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast
 import { ChevronLeft, Image as ImageIcon } from 'lucide-react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { cn, slugifyFilename, formatPhoneNumber } from '@/lib/utils';
-import { Skeleton } from '@/components/ui/skeleton'; // Importato Skeleton
+import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
 
 const listingSchema = z.object({
@@ -54,7 +54,7 @@ const listingSchema = z.object({
   }
 });
 
-type ExistingPhoto = { id: string; url: string; is_primary: boolean };
+type ExistingPhoto = { id: string; url: string; original_url: string | null; is_primary: boolean };
 
 type FullListing = {
   id: string;
@@ -79,7 +79,7 @@ type FullListing = {
 const EditListing = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [newFilesToUpload, setNewFilesToUpload] = useState<Array<{ original: File; cropped: File }>>([]); // Store objects with original and cropped files
   const [newPrimaryIndex, setNewPrimaryIndex] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [existingPhotos, setExistingPhotos] = useState<ExistingPhoto[]>([]);
@@ -171,31 +171,45 @@ const EditListing = () => {
         throw new Error(updateError?.message || 'Errore nell\'aggiornamento dell\'annuncio.');
       }
 
-      if (newFiles.length > 0) {
-        const uploadPromises = newFiles.map(async (file, index) => {
-          // Usa un UUID per il nome del file per evitare collisioni e mantenere l'unicità
-          const fileExtension = file.name.split('.').pop();
-          const fileName = `${crypto.randomUUID()}.${fileExtension}`; // Genera un UUID per il nome del file
-          const filePath = `${user.id}/${id}/${fileName}`;
+      if (newFilesToUpload.length > 0) {
+        const photoUploadPromises = newFilesToUpload.map(async (filePair, index) => {
+          // Upload original file
+          const originalFileExtension = filePair.original.name.split('.').pop();
+          const originalFileName = `${crypto.randomUUID()}.${originalFileExtension}`;
+          const originalFilePath = `${user.id}/${id}/original_${originalFileName}`;
           
-          const { error: uploadError } = await supabase.storage
+          const { error: originalUploadError } = await supabase.storage
             .from('listing_photos')
-            .upload(filePath, file);
+            .upload(originalFilePath, filePair.original);
 
-          if (uploadError) {
-            throw new Error(`Errore nel caricamento della nuova foto ${index + 1}: ${uploadError.message}`);
+          if (originalUploadError) {
+            throw new Error(`Errore nel caricamento della foto originale ${index + 1}: ${originalUploadError.message}`);
           }
+          const { data: { publicUrl: originalPublicUrl } } = supabase.storage.from('listing_photos').getPublicUrl(originalFilePath);
 
-          const { data: { publicUrl } } = supabase.storage.from('listing_photos').getPublicUrl(filePath);
+          // Upload cropped file
+          const croppedFileExtension = filePair.cropped.name.split('.').pop();
+          const croppedFileName = `${crypto.randomUUID()}.${croppedFileExtension}`;
+          const croppedFilePath = `${user.id}/${id}/cropped_${croppedFileName}`;
+          
+          const { error: croppedUploadError } = await supabase.storage
+            .from('listing_photos')
+            .upload(croppedFilePath, filePair.cropped);
+
+          if (croppedUploadError) {
+            throw new Error(`Errore nel caricamento della foto ritagliata ${index + 1}: ${croppedUploadError.message}`);
+          }
+          const { data: { publicUrl: croppedPublicUrl } } = supabase.storage.from('listing_photos').getPublicUrl(croppedFilePath);
           
           return {
             listing_id: id,
-            url: publicUrl,
+            url: croppedPublicUrl, // Cropped URL for display
+            original_url: originalPublicUrl, // Original URL for full view
             is_primary: newPrimaryIndex === index && existingPhotos.length === 0,
           };
         });
 
-        const photoPayloads = await Promise.all(uploadPromises);
+        const photoPayloads = await Promise.all(photoUploadPromises);
 
         const { error: photosError } = await supabase.from('listing_photos').insert(photoPayloads);
 
@@ -381,7 +395,7 @@ const EditListing = () => {
                           <Input 
                             type="email" 
                             {...field} 
-                            readOnly // Email is always read-only
+                            readOnly
                             className={cn(
                               "bg-gray-100 cursor-not-allowed",
                               (contactPreference === 'phone') && "opacity-50"
@@ -447,7 +461,7 @@ const EditListing = () => {
                     userId={currentListing.user_id}
                     initialPhotos={existingPhotos}
                     isPremiumOrPending={true}
-                    onFilesChange={setNewFiles}
+                    onFilesChange={setNewFilesToUpload as any} // Cast to any for now
                     onPrimaryIndexChange={setNewPrimaryIndex}
                     onExistingPhotosUpdated={setExistingPhotos}
                     hideMainPreview={false}

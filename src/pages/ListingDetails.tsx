@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { showError } from '@/utils/toast';
-import { MapPin, Tag, User, Mail, BookText, ChevronLeft, CalendarDays, Rocket, Phone, Flag, MessageCircle, Flame } from 'lucide-react'; // Importato Flame
+import { MapPin, Tag, User, Mail, BookText, ChevronLeft, CalendarDays, Rocket, Phone, Flag, MessageCircle, Flame } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -24,7 +24,7 @@ type FullListing = {
   zone: string | null;
   age: number;
   phone: string | null;
-  email: string | null; // Reso esplicitamente nullable
+  email: string | null;
   created_at: string;
   expires_at: string;
   is_premium: boolean;
@@ -32,8 +32,8 @@ type FullListing = {
   promotion_start_at: string | null;
   promotion_end_at: string | null;
   contact_preference: 'email' | 'phone' | 'both';
-  contact_whatsapp: boolean | null; // Nuovo campo
-  listing_photos: { id: string; url: string; is_primary: boolean }[]; // Aggiunto is_primary
+  contact_whatsapp: boolean | null;
+  listing_photos: { id: string; url: string; original_url: string | null; is_primary: boolean }[]; // Added original_url
 };
 
 const ListingDetails = () => {
@@ -41,7 +41,7 @@ const ListingDetails = () => {
   const navigate = useNavigate();
   const [listing, setListing] = useState<FullListing | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activePhoto, setActivePhoto] = useState<string | null>(null);
+  const [activePhoto, setActivePhoto] = useState<string | null>(null); // This will now store the original_url for the main view
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -51,7 +51,7 @@ const ListingDetails = () => {
         .from('listings')
         .select(`
           *, 
-          listing_photos(id, url, is_primary)
+          listing_photos(id, url, original_url, is_primary)
         `)
         .eq('id', id)
         .single();
@@ -59,37 +59,35 @@ const ListingDetails = () => {
       if (error || !data) {
         console.error('Error fetching listing:', error);
         showError('Impossibile caricare i dettagli dell\'annuncio.');
-        navigate('/search'); // Reindirizza alla pagina di ricerca se l'annuncio non è trovato
+        navigate('/search');
         return;
       } else {
-        // Ordina le foto: prima la principale, poi per data di creazione
         const sortedPhotos = (data.listing_photos || []).sort((a, b) => {
           if (a.is_primary && !b.is_primary) return -1;
           if (!a.is_primary && b.is_primary) return 1;
-          return 0; // Mantieni l'ordine originale se nessuna è primaria o entrambe lo sono
+          return 0;
         });
 
-        // Ottieni il timestamp UTC corrente in millisecondi
         const nowUtcTime = Date.now(); 
         const promoStart = data.promotion_start_at ? new Date(data.promotion_start_at).getTime() : null;
         const promoEnd = data.promotion_end_at ? new Date(data.promotion_end_at).getTime() : null;
 
-        // Determina se l'annuncio è attivamente premium basandosi sui timestamp UTC
         const isActivePremium = data.is_premium && promoStart && promoEnd && promoStart <= nowUtcTime && promoEnd >= nowUtcTime;
 
         let photosToDisplay = sortedPhotos;
         if (!isActivePremium) {
-          photosToDisplay = photosToDisplay.slice(0, 1); // Solo 1 foto per annunci non attivamente premium
+          photosToDisplay = photosToDisplay.slice(0, 1);
         } else {
-          photosToDisplay = photosToDisplay.slice(0, 5); // Fino a 5 foto per annunci attivamente premium
+          photosToDisplay = photosToDisplay.slice(0, 5);
         }
 
         if (photosToDisplay.length > 0) {
-          setActivePhoto(photosToDisplay[0].url);
+          // For main display, use original_url if available, otherwise fallback to cropped url
+          setActivePhoto(photosToDisplay[0].original_url ?? photosToDisplay[0].url);
         } else {
-          setActivePhoto(null); // Nessuna foto da mostrare
+          setActivePhoto(null);
         }
-        setListing({ ...data, listing_photos: photosToDisplay } as FullListing); // Aggiorna lo stato con le foto filtrate
+        setListing({ ...data, listing_photos: photosToDisplay } as FullListing);
       }
       setLoading(false);
     };
@@ -116,7 +114,6 @@ const ListingDetails = () => {
     return <div className="text-center py-20">Annuncio non trovato.</div>;
   }
 
-  // Ottieni il timestamp UTC corrente in millisecondi
   const nowUtcTime = Date.now(); 
   const promoStart = listing.promotion_start_at ? new Date(listing.promotion_start_at).getTime() : null;
   const promoEnd = listing.promotion_end_at ? new Date(listing.promotion_end_at).getTime() : null;
@@ -124,7 +121,6 @@ const ListingDetails = () => {
 
   const hasPhotos = listing.listing_photos && listing.listing_photos.length > 0;
 
-  // Logica corretta per i pulsanti di contatto
   const canContactByEmail = (listing.contact_preference === 'email' || listing.contact_preference === 'both') && !!listing.email;
   const canContactByPhone = (listing.contact_preference === 'phone' || listing.contact_preference === 'both') && !!listing.phone;
 
@@ -150,14 +146,12 @@ const ListingDetails = () => {
               </Badge>
             )}
             <CardHeader>
-              {/* Data di pubblicazione per prima */}
               <div className="mb-2">
                 <Badge variant="outline" className="text-xs">
                   <CalendarDays className="h-4 w-4 mr-1.5" />
                   {format(new Date(listing.created_at), 'dd MMMM', { locale: it })}
                 </Badge>
               </div>
-              {/* Tag di città/zona e età */}
               <div className="flex flex-wrap gap-2 mb-2">
                 <Badge variant="outline"><MapPin className="h-4 w-4 mr-1.5" />{listing.city}{listing.zone && ` / ${listing.zone}`}</Badge>
                 <Badge variant="outline"><User className="h-4 w-4 mr-1.5" />{listing.age} anni</Badge>
@@ -178,11 +172,11 @@ const ListingDetails = () => {
                       key={photo.id} 
                       className={cn(
                         "relative w-24 h-24 flex-shrink-0 rounded-md cursor-pointer",
-                        activePhoto === photo.url && 'ring-2 ring-rose-500 ring-offset-2 ring-offset-gray-50'
+                        activePhoto === (photo.original_url ?? photo.url) && 'ring-2 ring-rose-500 ring-offset-2 ring-offset-gray-50'
                       )}
-                      onClick={() => setActivePhoto(photo.url)}
+                      onClick={() => setActivePhoto(photo.original_url ?? photo.url)}
                     >
-                      <WatermarkedImage src={photo.url} alt="Thumbnail" imageClassName="object-cover bg-gray-200 rounded-md" />
+                      <WatermarkedImage src={photo.url} alt="Miniatura foto" imageClassName="object-cover bg-gray-200 rounded-md" />
                     </div>
                   ))}
                 </div>
@@ -223,7 +217,7 @@ const ListingDetails = () => {
             {canContactByPhone && (
               <a
                 href={phoneHref}
-                target={listing.contact_whatsapp ? "_blank" : "_self"} // Apri in nuova scheda per WhatsApp
+                target={listing.contact_whatsapp ? "_blank" : "_self"}
                 rel={listing.contact_whatsapp ? "noopener noreferrer" : ""}
                 className="w-full sm:w-auto"
               >

@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form'; // Corretto l'import
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form'; // Importato FormDescription
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
@@ -14,8 +14,8 @@ import { ImageUploader } from '@/components/ImageUploader';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { ChevronLeft } from 'lucide-react';
-import { cn, slugifyFilename, formatPhoneNumber } from '@/lib/utils'; // Importa slugifyFilename e formatPhoneNumber
-import { Checkbox } from '@/components/ui/checkbox'; // Importato Checkbox
+import { cn, slugifyFilename, formatPhoneNumber } from '@/lib/utils';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const listingSchema = z.object({
   category: z.string({ required_error: 'La categoria è obbligatoria.' }),
@@ -25,12 +25,12 @@ const listingSchema = z.object({
     .min(1, "L'età è obbligatoria.")
     .refine((val) => !isNaN(parseInt(val, 10)), { message: "L'età deve essere un numero." })
     .refine((val) => parseInt(val, 10) >= 18, { message: "Devi avere almeno 18 anni." }),
-  title: z.string().min(5, 'Il titolo deve avere almeno 5 caratteri.'), // Rimosso il limite massimo
-  description: z.string().min(15, 'La descrizione deve avere almeno 15 caratteri.'), // Rimosso il limite massimo
-  email: z.string().email("L'email non è valida.").optional(), // Reso opzionale qui, la validazione condizionale è nel refine
+  title: z.string().min(5, 'Il titolo deve avere almeno 5 caratteri.'),
+  description: z.string().min(15, 'La descrizione deve avere almeno 15 caratteri.'),
+  email: z.string().email("L'email non è valida.").optional(),
   phone: z.string().optional(),
   contact_preference: z.enum(['email', 'phone', 'both'], { required_error: 'La preferenza di contatto è obbligatoria.' }),
-  contact_whatsapp: z.boolean().optional().default(false), // Nuovo campo per WhatsApp
+  contact_whatsapp: z.boolean().optional().default(false),
 }).superRefine((data, ctx) => {
   if (data.contact_preference === 'email' || data.contact_preference === 'both') {
     if (!data.email || data.email.trim() === '') {
@@ -54,10 +54,10 @@ const listingSchema = z.object({
 
 const NewListing = () => {
   const navigate = useNavigate();
-  const [files, setFiles] = useState<File[]>([]);
+  const [filesToUpload, setFilesToUpload] = useState<Array<{ original: File; cropped: File }>>([]); // Store objects with original and cropped files
   const [primaryIndex, setPrimaryIndex] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null); // Stato per l'ID utente
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof listingSchema>>({
     resolver: zodResolver(listingSchema),
@@ -65,20 +65,20 @@ const NewListing = () => {
       zone: '',
       email: '',
       phone: '',
-      contact_preference: 'both', // Default to 'both'
-      contact_whatsapp: false, // Default for WhatsApp
+      contact_preference: 'both',
+      contact_whatsapp: false,
     }
   });
 
   const contactPreference = form.watch('contact_preference');
-  const phoneValue = form.watch('phone'); // Watch phone value to enable/disable WhatsApp checkbox
+  const phoneValue = form.watch('phone');
 
   useEffect(() => {
     const fetchUserEmailAndId = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user?.email) {
         form.setValue('email', user.email);
-        setCurrentUserId(user.id); // Imposta l'ID utente
+        setCurrentUserId(user.id);
       }
     };
     fetchUserEmailAndId();
@@ -92,17 +92,17 @@ const NewListing = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Devi essere autenticato per creare un annuncio.');
 
-      const { age, phone, ...restOfValues } = values; // Estrai 'phone'
-      const formattedPhone = formatPhoneNumber(phone); // Formatta il numero di telefono
+      const { age, phone, ...restOfValues } = values;
+      const formattedPhone = formatPhoneNumber(phone);
 
       const submissionData = {
         ...restOfValues,
         age: parseInt(age, 10),
         user_id: user.id,
-        last_bumped_at: new Date().toISOString(), // Aggiunto per far apparire i nuovi annunci in cima
+        last_bumped_at: new Date().toISOString(),
         email: values.email?.trim() || null,
-        phone: formattedPhone, // Usa il numero formattato
-        contact_whatsapp: values.contact_whatsapp, // Salva la preferenza WhatsApp
+        phone: formattedPhone,
+        contact_whatsapp: values.contact_whatsapp,
       };
 
       const { data: listingData, error: listingError } = await supabase
@@ -117,31 +117,45 @@ const NewListing = () => {
 
       const listingId = listingData.id;
 
-      if (files.length > 0) {
-        const uploadPromises = files.map(async (file, index) => {
-          // Usa un UUID per il nome del file per evitare collisioni e mantenere l'unicità
-          const fileExtension = file.name.split('.').pop();
-          const fileName = `${crypto.randomUUID()}.${fileExtension}`; // Genera un UUID per il nome del file
-          const filePath = `${user.id}/${listingId}/${fileName}`;
+      if (filesToUpload.length > 0) {
+        const photoUploadPromises = filesToUpload.map(async (filePair, index) => {
+          // Upload original file
+          const originalFileExtension = filePair.original.name.split('.').pop();
+          const originalFileName = `${crypto.randomUUID()}.${originalFileExtension}`;
+          const originalFilePath = `${user.id}/${listingId}/original_${originalFileName}`;
           
-          const { error: uploadError } = await supabase.storage
+          const { error: originalUploadError } = await supabase.storage
             .from('listing_photos')
-            .upload(filePath, file);
+            .upload(originalFilePath, filePair.original);
 
-          if (uploadError) {
-            throw new Error(`Errore nel caricamento della foto ${index + 1}: ${uploadError.message}`);
+          if (originalUploadError) {
+            throw new Error(`Errore nel caricamento della foto originale ${index + 1}: ${originalUploadError.message}`);
           }
+          const { data: { publicUrl: originalPublicUrl } } = supabase.storage.from('listing_photos').getPublicUrl(originalFilePath);
 
-          const { data: { publicUrl } } = supabase.storage.from('listing_photos').getPublicUrl(filePath);
+          // Upload cropped file
+          const croppedFileExtension = filePair.cropped.name.split('.').pop();
+          const croppedFileName = `${crypto.randomUUID()}.${croppedFileExtension}`;
+          const croppedFilePath = `${user.id}/${listingId}/cropped_${croppedFileName}`;
+          
+          const { error: croppedUploadError } = await supabase.storage
+            .from('listing_photos')
+            .upload(croppedFilePath, filePair.cropped);
+
+          if (croppedUploadError) {
+            throw new Error(`Errore nel caricamento della foto ritagliata ${index + 1}: ${croppedUploadError.message}`);
+          }
+          const { data: { publicUrl: croppedPublicUrl } } = supabase.storage.from('listing_photos').getPublicUrl(croppedFilePath);
           
           return {
             listing_id: listingId,
-            url: publicUrl,
+            url: croppedPublicUrl, // Cropped URL for display
+            original_url: originalPublicUrl, // Original URL for full view
             is_primary: index === primaryIndex,
           };
         });
 
-        const photoPayloads = await Promise.all(uploadPromises);
+        const photoPayloads = await Promise.all(photoUploadPromises);
 
         const { error: photosError } = await supabase.from('listing_photos').insert(photoPayloads);
 
@@ -153,7 +167,7 @@ const NewListing = () => {
 
       dismissToast(toastId);
       showSuccess('Annuncio pubblicato con successo!');
-      navigate(`/listing-post-creation/${listingId}`); // Reindirizza alla nuova pagina
+      navigate(`/listing-post-creation/${listingId}`);
     } catch (error: any) {
       dismissToast(toastId);
       showError(error.message || 'Si è verificato un errore imprevisto.');
@@ -301,10 +315,10 @@ const NewListing = () => {
                           <Input 
                             type="email" 
                             {...field} 
-                            readOnly // Email is always read-only
+                            readOnly
                             className={cn(
                               "bg-gray-100 cursor-not-allowed",
-                              (contactPreference === 'phone') && "opacity-50" // Visually dim if not preferred
+                              (contactPreference === 'phone') && "opacity-50"
                             )}
                           />
                         </FormControl>
@@ -323,7 +337,7 @@ const NewListing = () => {
                             type="tel" 
                             placeholder="Il tuo numero di telefono" 
                             {...field} 
-                            readOnly={contactPreference === 'email'} // Readonly if only email is preferred
+                            readOnly={contactPreference === 'email'}
                             className={cn(
                               (contactPreference === 'email') && "bg-gray-100 cursor-not-allowed opacity-50"
                             )}
@@ -345,7 +359,7 @@ const NewListing = () => {
                           <Checkbox
                             checked={field.value}
                             onCheckedChange={field.onChange}
-                            disabled={!phoneValue || isLoading} // Disabilita se il telefono non è inserito
+                            disabled={!phoneValue || isLoading}
                           />
                         </FormControl>
                         <div className="space-y-1 leading-none">
@@ -363,14 +377,14 @@ const NewListing = () => {
                   <FormLabel>Fotografie</FormLabel>
                   <p className="text-sm text-gray-500 mb-2">Carica fino a 5 foto per il tuo annuncio. Se l'annuncio non è Premium, verrà mostrata solo la prima foto.</p>
                   <ImageUploader
-                    listingId={undefined} // Non disponibile per un nuovo annuncio
-                    userId={currentUserId ?? undefined} // Passa l'ID utente se disponibile
-                    initialPhotos={[]} // Nessuna foto iniziale per un nuovo annuncio
-                    isPremiumOrPending={true} // Permetti 5 foto fin da subito
-                    onFilesChange={setFiles}
+                    listingId={undefined}
+                    userId={currentUserId ?? undefined}
+                    initialPhotos={[]}
+                    isPremiumOrPending={true}
+                    onFilesChange={setFilesToUpload as any} // Cast to any for now, as ImageUploader now returns {original, cropped}
                     onPrimaryIndexChange={setPrimaryIndex}
-                    onExistingPhotosUpdated={() => {}} // Non fa nulla per un nuovo annuncio
-                    hideMainPreview={false} // Mostra l'anteprima principale
+                    onExistingPhotosUpdated={() => {}}
+                    hideMainPreview={false}
                   />
                 </div>
                 <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600" disabled={isLoading}>

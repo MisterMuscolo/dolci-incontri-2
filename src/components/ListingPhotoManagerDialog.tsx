@@ -27,32 +27,33 @@ import {
 
 interface Photo {
   id: string;
-  url: string;
+  url: string; // Cropped URL
+  original_url: string | null; // Original URL
   is_primary: boolean;
 }
 
 interface ListingPhotoManagerDialogProps {
   listingId: string;
   listingTitle: string;
-  userId: string; // Necessario per la gestione dello storage
-  onPhotosUpdated: () => void; // Callback per aggiornare la lista nel componente padre
+  userId: string;
+  onPhotosUpdated: () => void;
 }
 
 export const ListingPhotoManagerDialog = ({ listingId, listingTitle, userId, onPhotosUpdated }: ListingPhotoManagerDialogProps) => {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const [activePreviewUrl, setActivePreviewUrl] = useState<string | null>(null);
-  const [isDeletingSingle, setIsDeletingSingle] = useState<string | null>(null); // ID della foto in eliminazione
+  const [isDeletingSingle, setIsDeletingSingle] = useState<string | null>(null);
   const [isDeletingAll, setIsDeletingAll] = useState(false);
 
   const fetchPhotos = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from('listing_photos')
-      .select('id, url, is_primary')
+      .select('id, url, original_url, is_primary') // Select original_url
       .eq('listing_id', listingId)
-      .order('is_primary', { ascending: false }) // Primary first
-      .order('created_at', { ascending: true }); // Then by creation date
+      .order('is_primary', { ascending: false })
+      .order('created_at', { ascending: true });
 
     if (error) {
       console.error("Error fetching listing photos:", error);
@@ -61,7 +62,7 @@ export const ListingPhotoManagerDialog = ({ listingId, listingTitle, userId, onP
       setPhotos(data || []);
       if (data && data.length > 0) {
         const primary = data.find(p => p.is_primary);
-        setActivePreviewUrl(primary?.url || data[0].url);
+        setActivePreviewUrl(primary?.url || data[0].url); // Preview uses cropped URL
       } else {
         setActivePreviewUrl(null);
       }
@@ -78,20 +79,29 @@ export const ListingPhotoManagerDialog = ({ listingId, listingTitle, userId, onP
     const toastId = showLoading('Eliminazione foto in corso...');
 
     try {
-      // 1. Delete from Supabase Storage
-      const urlParts = photoToDelete.url.split('/');
-      const filename = urlParts[urlParts.length - 1];
-      const storagePath = `${listingId}/${filename}`;
+      const filesToDelete: string[] = [];
+
+      // 1. Delete cropped image from Supabase Storage
+      const croppedUrlParts = photoToDelete.url.split('/');
+      const croppedFilename = croppedUrlParts[croppedUrlParts.length - 1];
+      filesToDelete.push(`${userId}/${listingId}/${croppedFilename}`);
+
+      // 2. Delete original image from Supabase Storage (if exists)
+      if (photoToDelete.original_url) {
+        const originalUrlParts = photoToDelete.original_url.split('/');
+        const originalFilename = originalUrlParts[originalUrlParts.length - 1];
+        filesToDelete.push(`${userId}/${listingId}/${originalFilename}`);
+      }
 
       const { error: storageError } = await supabase.storage
         .from('listing_photos')
-        .remove([storagePath]);
+        .remove(filesToDelete);
 
       if (storageError) {
-        throw new Error(`Errore durante l'eliminazione della foto dallo storage: ${storageError.message}`);
+        throw new Error(`Errore durante l'eliminazione delle foto dallo storage: ${storageError.message}`);
       }
 
-      // 2. Delete from database
+      // 3. Delete from database
       const { error: dbError } = await supabase
         .from('listing_photos')
         .delete()
@@ -103,17 +113,15 @@ export const ListingPhotoManagerDialog = ({ listingId, listingTitle, userId, onP
 
       dismissToast(toastId);
       showSuccess('Foto eliminata con successo!');
-      await fetchPhotos(); // Re-fetch photos to update the list
-      onPhotosUpdated(); // Notify parent to refresh
+      await fetchPhotos();
+      onPhotosUpdated();
 
-      // If the deleted photo was primary, set a new primary if other photos exist
       if (photoToDelete.is_primary && photos.length > 1) {
         const remainingPhotos = photos.filter(p => p.id !== photoToDelete.id);
         if (remainingPhotos.length > 0) {
           await handleSetAsPrimary(remainingPhotos[0]);
         }
       } else if (activePreviewUrl === photoToDelete.url) {
-        // If the deleted photo was just the active preview, reset preview
         const remainingPhotos = photos.filter(p => p.id !== photoToDelete.id);
         setActivePreviewUrl(remainingPhotos[0]?.url || null);
       }
@@ -132,14 +140,14 @@ export const ListingPhotoManagerDialog = ({ listingId, listingTitle, userId, onP
 
     try {
       // 1. List all photos for the listing in storage
-      const { data: storagePhotos, error: storageListError } = await supabase.storage
+      const { data: storageFiles, error: storageListError } = await supabase.storage
         .from('listing_photos')
-        .list(`${listingId}/`);
+        .list(`${userId}/${listingId}/`); // List files in the user's listing folder
 
       if (storageListError) {
         console.warn(`Could not list photos for listing ${listingId} in storage:`, storageListError.message);
-      } else if (storagePhotos && storagePhotos.length > 0) {
-        const filePaths = storagePhotos.map(file => `${listingId}/${file.name}`);
+      } else if (storageFiles && storageFiles.length > 0) {
+        const filePaths = storageFiles.map(file => `${userId}/${listingId}/${file.name}`);
         const { error: storageDeleteError } = await supabase.storage
           .from('listing_photos')
           .remove(filePaths);
@@ -172,7 +180,7 @@ export const ListingPhotoManagerDialog = ({ listingId, listingTitle, userId, onP
         const { error: updateListingError } = await supabase
           .from('listings')
           .update({ 
-            is_premium: false, // Set to false if all photos are removed
+            is_premium: false,
             promotion_mode: null,
             promotion_start_at: null,
             promotion_end_at: null,
@@ -186,9 +194,9 @@ export const ListingPhotoManagerDialog = ({ listingId, listingTitle, userId, onP
 
       dismissToast(toastId);
       showSuccess('Tutte le foto dell\'annuncio sono state eliminate con successo!');
-      setPhotos([]); // Clear photos in state
+      setPhotos([]);
       setActivePreviewUrl(null);
-      onPhotosUpdated(); // Notify parent to refresh
+      onPhotosUpdated();
     } catch (error: any) {
       dismissToast(toastId);
       showError(error.message || 'Errore durante l\'eliminazione delle foto.');
@@ -198,21 +206,19 @@ export const ListingPhotoManagerDialog = ({ listingId, listingTitle, userId, onP
   };
 
   const handleSetAsPrimary = async (photoToSetPrimary: Photo) => {
-    if (photoToSetPrimary.is_primary) return; // Already primary
+    if (photoToSetPrimary.is_primary) return;
     const toastId = showLoading('Impostazione foto principale...');
 
     try {
-      // Reset all existing photos to not primary
       const { error: resetExistingError } = await supabase
         .from('listing_photos')
         .update({ is_primary: false })
-        .eq('listing_id', listingId); // Reset all for this listing
+        .eq('listing_id', listingId);
 
       if (resetExistingError) {
         console.warn("Failed to reset old primary existing photo:", resetExistingError.message);
       }
 
-      // Set the selected existing photo as primary
       const { error: updateError } = await supabase
         .from('listing_photos')
         .update({ is_primary: true })
@@ -224,8 +230,8 @@ export const ListingPhotoManagerDialog = ({ listingId, listingTitle, userId, onP
 
       dismissToast(toastId);
       showSuccess('Foto principale aggiornata!');
-      await fetchPhotos(); // Re-fetch to update primary status
-      onPhotosUpdated(); // Notify parent
+      await fetchPhotos();
+      onPhotosUpdated();
     } catch (error: any) {
       dismissToast(toastId);
       showError(error.message || 'Errore durante l\'impostazione della foto principale.');
@@ -275,16 +281,16 @@ export const ListingPhotoManagerDialog = ({ listingId, listingTitle, userId, onP
                 <div 
                   key={photo.id} 
                   className={cn(
-                    "relative group aspect-square", // Rimosso rounded-md
+                    "relative group aspect-square",
                     activePreviewUrl === photo.url && "ring-2 ring-rose-500 ring-offset-2 ring-offset-gray-50"
                   )}
                 >
                   <img
-                    src={photo.url}
+                    src={photo.url} // Display cropped URL for thumbnails
                     alt="Miniatura foto"
                     className={cn(
-                      "w-full h-full object-cover transition-all cursor-pointer", // Rimosso rounded-md
-                      photo.is_primary && "border-2 border-yellow-400" // Highlight primary with a border
+                      "w-full h-full object-cover transition-all cursor-pointer",
+                      photo.is_primary && "border-2 border-yellow-400"
                     )}
                     onClick={() => setActivePreviewUrl(photo.url)}
                   />

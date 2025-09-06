@@ -10,7 +10,8 @@ import { ImageCropperDialog } from './ImageCropperDialog';
 
 interface ExistingPhoto {
   id: string;
-  url: string;
+  url: string; // This will be the cropped URL
+  original_url: string | null; // New: This will be the original URL
   is_primary: boolean;
 }
 
@@ -44,6 +45,7 @@ export const ImageUploader = ({
 
   const [isCropperOpen, setIsCropperOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | File | null>(null);
+  const [originalFileToUpload, setOriginalFileToUpload] = useState<File | null>(null); // Store original file for new uploads
   const [currentCroppingIndex, setCurrentCroppingIndex] = useState<number | null>(null);
   const [currentCroppingExistingPhoto, setCurrentCroppingExistingPhoto] = useState<ExistingPhoto | null>(null);
 
@@ -65,7 +67,6 @@ export const ImageUploader = ({
     onPrimaryIndexChange(newlySelectedPrimaryIndex);
   }, [newlySelectedPrimaryIndex, onPrimaryIndexChange]);
 
-  // Define handleUpdateExistingPhoto
   const handleUpdateExistingPhoto = useCallback(async (originalPhoto: ExistingPhoto, newCroppedFile: File) => {
     if (!listingId || !userId) {
       showError('Impossibile aggiornare la foto: ID annuncio o ID utente non disponibili.');
@@ -74,68 +75,67 @@ export const ImageUploader = ({
 
     const toastId = showLoading('Aggiornamento foto in corso...');
     try {
-      const oldUrlParts = originalPhoto.url.split('/');
-      const oldFilename = oldUrlParts[oldUrlParts.length - 1];
-      const oldStoragePath = `${userId}/${listingId}/${oldFilename}`;
+      // For existing photos, we only update the cropped version. The original_url remains the same.
+      // 1. Delete old cropped image from Supabase Storage
+      const oldCroppedUrlParts = originalPhoto.url.split('/');
+      const oldCroppedFilename = oldCroppedUrlParts[oldCroppedUrlParts.length - 1];
+      const oldCroppedStoragePath = `${userId}/${listingId}/${oldCroppedFilename}`;
 
       const { error: removeError } = await supabase.storage
         .from('listing_photos')
-        .remove([oldStoragePath]);
+        .remove([oldCroppedStoragePath]);
 
       if (removeError) {
-        console.warn(`Errore durante l'eliminazione della vecchia foto dallo storage: ${removeError.message}`);
+        console.warn(`Errore durante l'eliminazione della vecchia foto ritagliata dallo storage: ${removeError.message}`);
       }
 
-      const slugifiedFileName = originalPhoto.id;
-      const newFileName = `${slugifiedFileName}.jpeg`;
-      const newFilePath = `${userId}/${listingId}/${newFileName}`;
+      // 2. Upload new cropped image to Supabase Storage
+      const newCroppedFileName = `${crypto.randomUUID()}.jpeg`; // Generate new UUID for cropped file
+      const newCroppedFilePath = `${userId}/${listingId}/${newCroppedFileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('listing_photos')
-        .upload(newFilePath, newCroppedFile, {
+        .upload(newCroppedFilePath, newCroppedFile, {
           cacheControl: '3600',
           upsert: true,
         });
 
       if (uploadError) {
-        throw new Error(`Errore nel caricamento della nuova foto: ${uploadError.message}`);
+        throw new Error(`Errore nel caricamento della nuova foto ritagliata: ${uploadError.message}`);
       }
 
-      const { data: { publicUrl: newPublicUrl } } = supabase.storage.from('listing_photos').getPublicUrl(newFilePath);
+      const { data: { publicUrl: newCroppedPublicUrl } } = supabase.storage.from('listing_photos').getPublicUrl(newCroppedFilePath);
 
+      // 3. Update 'url' in database (original_url remains unchanged)
       const { error: dbUpdateError } = await supabase
         .from('listing_photos')
-        .update({ url: newPublicUrl })
+        .update({ url: newCroppedPublicUrl })
         .eq('id', originalPhoto.id);
 
       if (dbUpdateError) {
-        throw new Error(`Errore durante l'aggiornamento del URL della foto nel database: ${dbUpdateError.message}`);
+        throw new Error(`Errore durante l'aggiornamento del URL della foto ritagliata nel database: ${dbUpdateError.message}`);
       }
 
       dismissToast(toastId);
       showSuccess('Foto aggiornata con successo!');
 
-      // Use functional update for setExistingPhotosState to ensure latest state
-      setExistingPhotosState(prev => prev.map(p =>
-        p.id === originalPhoto.id ? { ...p, url: newPublicUrl } : p
-      ));
-      // Call onExistingPhotosUpdated with the updated state
-      onExistingPhotosUpdated(existingPhotosState.map(p => // This will be stale if not using functional update
-        p.id === originalPhoto.id ? { ...p, url: newPublicUrl } : p
-      ));
-      setActivePreviewUrl(newPublicUrl);
+      const updatedExistingPhotos = existingPhotosState.map(p =>
+        p.id === originalPhoto.id ? { ...p, url: newCroppedPublicUrl } : p
+      );
+      setExistingPhotosState(updatedExistingPhotos);
+      onExistingPhotosUpdated(updatedExistingPhotos);
+      setActivePreviewUrl(newCroppedPublicUrl);
 
     } catch (error: any) {
       dismissToast(toastId);
       showError(error.message || 'Errore durante l\'aggiornamento della foto.');
     }
-  }, [listingId, userId, onExistingPhotosUpdated, existingPhotosState]); // existingPhotosState is a dependency here
+  }, [listingId, userId, onExistingPhotosUpdated, existingPhotosState]);
 
-  // Create a ref for handleUpdateExistingPhoto
   const handleUpdateExistingPhotoRef = useRef(handleUpdateExistingPhoto);
   useEffect(() => {
     handleUpdateExistingPhotoRef.current = handleUpdateExistingPhoto;
-  }, [handleUpdateExistingPhoto]); // This useEffect ensures the ref is always up-to-date
+  }, [handleUpdateExistingPhoto]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -149,11 +149,11 @@ export const ImageUploader = ({
         return;
       }
 
-      const newFiles = filesToAdd.slice(0, availableSlots);
+      const newFile = filesToAdd[0]; // Only process one file at a time for cropping
       
-      if (newFiles.length > 0) {
-        const fileToProcess = newFiles[0];
-        setImageToCrop(fileToProcess);
+      if (newFile) {
+        setImageToCrop(newFile);
+        setOriginalFileToUpload(newFile); // Store the original file
         setCurrentCroppingIndex(newlySelectedFiles.length);
         setCurrentCroppingExistingPhoto(null);
         setIsCropperOpen(true);
@@ -165,31 +165,29 @@ export const ImageUploader = ({
     }
   };
 
-  // Define handleCropperSave as a regular function (NOT useCallback)
   const handleCropperSave = (croppedFile: File) => {
     if (currentCroppingExistingPhoto) {
-      // Use the ref to call handleUpdateExistingPhoto
-      // The ref ensures we always call the latest version of handleUpdateExistingPhoto
       if (handleUpdateExistingPhotoRef.current) {
         handleUpdateExistingPhotoRef.current(currentCroppingExistingPhoto, croppedFile);
       } else {
         console.error("handleUpdateExistingPhotoRef.current is not defined when trying to update existing photo.");
         showError("Errore interno: impossibile aggiornare la foto esistente.");
       }
-    } else if (currentCroppingIndex !== null) {
+    } else if (currentCroppingIndex !== null && originalFileToUpload) {
+      // For new files, we need to store both original and cropped
       setNewlySelectedFiles(prev => {
         const updated = [...prev];
-        updated[currentCroppingIndex] = croppedFile;
+        // Store an object that contains both original and cropped files
+        // This is a temporary structure for the uploader, actual upload logic will be in NewListing/EditListing
+        updated[currentCroppingIndex] = { original: originalFileToUpload, cropped: croppedFile } as any; // Cast to any for now
         return updated;
       });
       setNewlySelectedPreviews(prev => {
         const updated = [...prev];
-        updated[currentCroppingIndex] = URL.createObjectURL(croppedFile);
+        updated[currentCroppingIndex] = URL.createObjectURL(croppedFile); // Preview uses cropped
         return updated;
       });
 
-      // This condition relies on `newlySelectedFiles.length` and `existingPhotosState.length`
-      // These are in the dependencies of this useCallback, so they are fresh.
       if (newlySelectedPrimaryIndex === null && existingPhotosState.length === 0 && (newlySelectedFiles.length + 1) > 0) {
         setNewlySelectedPrimaryIndex(currentCroppingIndex);
         setActivePreviewUrl(URL.createObjectURL(croppedFile));
@@ -197,9 +195,10 @@ export const ImageUploader = ({
     }
     setIsCropperOpen(false);
     setImageToCrop(null);
+    setOriginalFileToUpload(null);
     setCurrentCroppingIndex(null);
     setCurrentCroppingExistingPhoto(null);
-  }; // No useCallback here
+  };
 
   const removeNewlySelectedFile = (index: number) => {
     const updatedFiles = newlySelectedFiles.filter((_, i) => i !== index);
@@ -234,18 +233,35 @@ export const ImageUploader = ({
 
     const toastId = showLoading('Eliminazione foto in corso...');
     try {
-      const urlParts = photoToDelete.url.split('/');
-      const filename = urlParts[urlParts.length - 1];
-      const storagePath = `${userId}/${listingId}/${filename}`;
+      // 1. Delete cropped image from Supabase Storage
+      const croppedUrlParts = photoToDelete.url.split('/');
+      const croppedFilename = croppedUrlParts[croppedUrlParts.length - 1];
+      const croppedStoragePath = `${userId}/${listingId}/${croppedFilename}`;
 
-      const { error: storageError } = await supabase.storage
+      const { error: croppedStorageError } = await supabase.storage
         .from('listing_photos')
-        .remove([storagePath]);
+        .remove([croppedStoragePath]);
 
-      if (storageError) {
-        throw new Error(`Errore durante l'eliminazione della foto dallo storage: ${storageError.message}`);
+      if (croppedStorageError) {
+        console.warn(`Errore durante l'eliminazione della foto ritagliata dallo storage: ${croppedStorageError.message}`);
       }
 
+      // 2. Delete original image from Supabase Storage (if exists)
+      if (photoToDelete.original_url) {
+        const originalUrlParts = photoToDelete.original_url.split('/');
+        const originalFilename = originalUrlParts[originalUrlParts.length - 1];
+        const originalStoragePath = `${userId}/${listingId}/${originalFilename}`;
+
+        const { error: originalStorageError } = await supabase.storage
+          .from('listing_photos')
+          .remove([originalStoragePath]);
+
+        if (originalStorageError) {
+          console.warn(`Errore durante l'eliminazione della foto originale dallo storage: ${originalStorageError.message}`);
+        }
+      }
+
+      // 3. Delete from database
       const { error: dbError } = await supabase
         .from('listing_photos')
         .delete()
@@ -330,7 +346,7 @@ export const ImageUploader = ({
   };
 
   const handleEditExistingPhoto = (photo: ExistingPhoto) => {
-    setImageToCrop(photo.url);
+    setImageToCrop(photo.url); // Use the cropped URL for editing the crop
     setCurrentCroppingExistingPhoto(photo);
     setCurrentCroppingIndex(null);
     setIsCropperOpen(true);
@@ -365,7 +381,7 @@ export const ImageUploader = ({
             )}
           >
             <img
-              src={photo.url}
+              src={photo.url} // Display cropped URL for existing photos
               alt={`Foto esistente ${index + 1}`}
               className="w-full h-full object-cover transition-all"
               onClick={() => setActivePreviewUrl(photo.url ?? null)}
@@ -419,7 +435,7 @@ export const ImageUploader = ({
             )}
           >
             <img
-              src={preview}
+              src={preview} // Display cropped preview for new photos
               alt={`Nuova foto ${index + 1}`}
               className="w-full h-full object-cover transition-all"
               onClick={() => setActivePreviewUrl(preview ?? null)}
@@ -452,7 +468,9 @@ export const ImageUploader = ({
                 size="icon"
                 className="h-8 w-8 opacity-0 group-hover:opacity-100"
                 onClick={() => {
-                  setImageToCrop(newlySelectedFiles[index]);
+                  // For new files, imageToCrop should be the original file
+                  const fileData = newlySelectedFiles[index] as any;
+                  setImageToCrop(fileData.original); 
                   setCurrentCroppingIndex(index);
                   setCurrentCroppingExistingPhoto(null);
                   setIsCropperOpen(true);
@@ -510,6 +528,7 @@ export const ImageUploader = ({
           onClose={() => {
             setIsCropperOpen(false);
             setImageToCrop(null);
+            setOriginalFileToUpload(null);
             setCurrentCroppingIndex(null);
             setCurrentCroppingExistingPhoto(null);
           }}

@@ -39,7 +39,7 @@ export interface Listing {
   promotion_start_at: string | null;
   promotion_end_at: string | null;
   last_bumped_at: string | null;
-  listing_photos: { url: string; is_primary: boolean }[];
+  listing_photos: { url: string; original_url: string | null; is_primary: boolean }[]; // Added original_url
   age?: number;
   zone?: string | null;
 }
@@ -52,8 +52,8 @@ interface ListingListItemProps {
   onListingUpdated?: () => void;
   isAdminContext?: boolean;
   allowNonPremiumImage?: boolean;
-  isCompact?: boolean; // Nuova prop per la modalità compatta
-  dateTypeToDisplay?: 'created_at' | 'expires_at'; // Nuova prop per scegliere la data da visualizzare
+  isCompact?: boolean;
+  dateTypeToDisplay?: 'created_at' | 'expires_at';
 }
 
 export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = false, canDelete = false, onListingUpdated, isAdminContext = false, allowNonPremiumImage = true, isCompact = false, dateTypeToDisplay = 'expires_at' }: ListingListItemProps) => {
@@ -70,7 +70,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
   const isActivePremium = listing.is_premium && promoStartTime && promoEndTime && promoStartTime <= nowUtcTime && promoEndTime >= nowUtcTime;
   const isPendingPremium = listing.is_premium && promoStartTime && promoStartTime > nowUtcTime;
 
-  let photosToRender: { url: string; is_primary: boolean }[] = [];
+  let photosToRender: { url: string; original_url: string | null; is_primary: boolean }[] = [];
   
   if (listing.listing_photos && listing.listing_photos.length > 0) {
     if (isActivePremium) {
@@ -83,24 +83,23 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
 
   const hasPhotosToRender = photosToRender.length > 0;
 
-  // Logica per la data da visualizzare basata su dateTypeToDisplay
   let dateToDisplay: Date;
   let prefix: string;
-  let currentDateFormat: string; // Nuovo stato per il formato della data
+  let currentDateFormat: string;
 
   if (dateTypeToDisplay === 'created_at') {
     dateToDisplay = new Date(listing.created_at);
-    if (isCompact) { // Se è in modalità compatta (es. annunci premium in SearchResults)
-      prefix = ''; // Nessun prefisso
-      currentDateFormat = 'dd MMMM'; // Formato più conciso
+    if (isCompact) {
+      prefix = '';
+      currentDateFormat = 'dd MMMM';
     } else {
       prefix = 'Pubblicato il:';
-      currentDateFormat = 'dd MMMM yyyy'; // Formato completo
+      currentDateFormat = 'dd MMMM yyyy';
     }
-  } else { // Default a 'expires_at'
+  } else {
     dateToDisplay = new Date(listing.expires_at);
     prefix = 'Scade il:';
-    currentDateFormat = 'dd MMMM yyyy'; // Formato completo
+    currentDateFormat = 'dd MMMM yyyy';
   }
 
   const formattedDate = !isNaN(dateToDisplay.getTime()) 
@@ -154,20 +153,34 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
     const toastId = showLoading('Eliminazione annuncio in corso...');
 
     try {
-      const { data: photos, error: photoListError } = await supabase.storage
+      // Fetch all photos associated with the listing to delete both cropped and original
+      const { data: listingPhotos, error: fetchPhotosError } = await supabase
         .from('listing_photos')
-        .list(`${listing.id}/`);
+        .select('url, original_url')
+        .eq('listing_id', listing.id);
 
-      if (photoListError) {
-        console.warn(`Could not list photos for listing ${listing.id}:`, photoListError.message);
-      } else if (photos && photos.length > 0) {
-        const filePaths = photos.map(file => `${listing.id}/${file.name}`);
+      if (fetchPhotosError) {
+        console.warn(`Could not fetch photos for listing ${listing.id}:`, fetchPhotosError.message);
+      } else if (listingPhotos && listingPhotos.length > 0) {
+        const filePathsToDelete: string[] = [];
+        listingPhotos.forEach(photo => {
+          const croppedUrlParts = photo.url.split('/');
+          const croppedFilename = croppedUrlParts[croppedUrlParts.length - 1];
+          filePathsToDelete.push(`${listing.user_id}/${listing.id}/${croppedFilename}`);
+
+          if (photo.original_url) {
+            const originalUrlParts = photo.original_url.split('/');
+            const originalFilename = originalUrlParts[originalUrlParts.length - 1];
+            filePathsToDelete.push(`${listing.user_id}/${listing.id}/${originalFilename}`);
+          }
+        });
+
         const { error: deletePhotoError } = await supabase.storage
           .from('listing_photos')
-          .remove(filePaths);
+          .remove(filePathsToDelete);
 
         if (deletePhotoError) {
-          console.warn(`Could not delete photos for listing ${listing.id}:`, deletePhotoError.message);
+          console.warn(`Could not delete photos for listing ${listing.id} from storage:`, deletePhotoError.message);
         }
       }
 
@@ -195,12 +208,12 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
 
   return (
     <Card className={cn(
-      "w-full overflow-hidden transition-shadow hover:shadow-md flex relative", // Always flex-row
+      "w-full overflow-hidden transition-shadow hover:shadow-md flex relative",
       (canEdit || canManagePhotos || canDelete) && isPendingPremium && "border-2 border-blue-400 shadow-lg bg-blue-50"
     )}>
       {hasPhotosToRender && (
-        <div className="flex-shrink-0 relative w-32 sm:w-44 h-auto"> {/* Decreased width for image container */}
-          <AspectRatio ratio={4 / 5} className="w-full h-full"> {/* 4:5 aspect ratio */}
+        <div className="flex-shrink-0 relative w-32 sm:w-44 h-auto">
+          <AspectRatio ratio={4 / 5} className="w-full h-full">
             <Link to={`/listing/${listing.id}`} className="block w-full h-full">
               <WatermarkedImage src={photosToRender[0].url} alt={listing.title} imageClassName="object-cover" />
             </Link>
@@ -216,24 +229,24 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
         "flex-grow block hover:bg-gray-50/50",
         !hasPhotosToRender && "w-full"
       )}>
-        <div className={cn("p-3 flex flex-col flex-grow", isCompact && "p-2")}> {/* Adjusted padding for compact */}
-          <Badge variant="outline" className="w-fit mb-1 text-xs"> {/* Smaller text for badge */}
-            <CalendarDays className="h-3 w-3 mr-1" /> {/* Smaller icon */}
+        <div className={cn("p-3 flex flex-col flex-grow", isCompact && "p-2")}>
+          <Badge variant="outline" className="w-fit mb-1 text-xs">
+            <CalendarDays className="h-3 w-3 mr-1" />
             <span>{prefix} {formattedDate}</span>
           </Badge>
-          <div className="flex items-center gap-1 mb-1"> {/* Smaller gap */}
-            <Badge variant="secondary" className="capitalize text-xs"><Tag className="h-3 w-3 mr-1" />{listing.category.replace(/-/g, ' ')}</Badge> {/* Smaller text for badge */}
+          <div className="flex items-center gap-1 mb-1">
+            <Badge variant="secondary" className="capitalize text-xs"><Tag className="h-3 w-3 mr-1" />{listing.category.replace(/-/g, ' ')}</Badge>
           </div>
-          <h3 className={cn("text-lg font-semibold mb-1 text-rose-600 line-clamp-2", isCompact && "text-base")}>{listing.title}</h3> {/* Smaller text for title */}
-          <p className={cn("text-sm text-gray-600 mb-2 line-clamp-3", isCompact && "text-xs line-clamp-2")}>{listing.description}</p> {/* Smaller text for description */}
-          <div className="flex flex-wrap gap-1 mb-1"> {/* Smaller gap */}
-            <Badge variant="outline" className="text-xs"> {/* Smaller text for badge */}
+          <h3 className={cn("text-lg font-semibold mb-1 text-rose-600 line-clamp-2", isCompact && "text-base")}>{listing.title}</h3>
+          <p className={cn("text-sm text-gray-600 mb-2 line-clamp-3", isCompact && "text-xs line-clamp-2")}>{listing.description}</p>
+          <div className="flex flex-wrap gap-1 mb-1">
+            <Badge variant="outline" className="text-xs">
               <MapPin className="h-3 w-3 mr-1" /> {listing.city}{listing.zone && ` / ${listing.zone}`}
             </Badge>
           </div>
           {listing.age && (
-            <div className="flex flex-wrap gap-1 mb-2"> {/* Smaller gap */}
-              <Badge variant="outline" className="text-xs"> {/* Smaller text for badge */}
+            <div className="flex flex-wrap gap-1 mb-2">
+              <Badge variant="outline" className="text-xs">
                 <User className="h-3 w-3 mr-1" /> {listing.age} anni
               </Badge>
             </div>
@@ -241,10 +254,10 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
         </div>
       </Link>
       {(canEdit || canManagePhotos || canDelete) && (
-        <div className="flex-shrink-0 flex flex-col justify-center items-center gap-2 p-3 border-l"> {/* Adjusted padding */}
+        <div className="flex-shrink-0 flex flex-col justify-center items-center gap-2 p-3 border-l">
           {canEdit && (
             <Link to={`/edit-listing/${listing.id}`} className="w-full">
-              <Button variant="outline" size="sm" className="w-full h-8 px-2 text-xs"> {/* Smaller button */}
+              <Button variant="outline" size="sm" className="w-full h-8 px-2 text-xs">
                 <Pencil className="h-3 w-3 md:mr-1" />
                 <span className="hidden md:inline">Modifica</span>
               </Button>
@@ -266,7 +279,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                   variant="default" 
                   size="sm" 
                   className={cn(
-                    "w-full h-8 px-2 text-xs flex items-center gap-1", // Smaller button
+                    "w-full h-8 px-2 text-xs flex items-center gap-1",
                     isActivePremium ? "bg-rose-500 hover:bg-rose-600" : "bg-blue-500 hover:bg-blue-600"
                   )}
                 >
@@ -295,7 +308,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           ) : (
             !isAdminContext && (
               <Link to={`/promote-listing/${listing.id}`} className="w-full">
-                <Button variant="default" size="sm" className="w-full h-8 px-2 text-xs bg-green-500 hover:bg-green-600 text-white"> {/* Smaller button */}
+                <Button variant="default" size="sm" className="w-full h-8 px-2 text-xs bg-green-500 hover:bg-green-600 text-white">
                   <Flame className="h-3 w-3 md:mr-1" />
                   <span className="hidden md:inline">Promuovi</span>
                 </Button>
@@ -308,7 +321,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                 <Button 
                   variant="default" 
                   size="sm" 
-                  className="w-full h-8 px-2 text-xs bg-blue-500 hover:bg-blue-600 text-white" // Smaller button
+                  className="w-full h-8 px-2 text-xs bg-blue-500 hover:bg-blue-600 text-white"
                   disabled={isDeleting}
                 >
                   <Trash2 className="h-3 w-3 md:mr-1" />
@@ -338,7 +351,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
         </div>
       )}
       {!(canEdit || canManagePhotos || canDelete) && isActivePremium && (
-        <Badge className="bg-rose-500 hover:bg-rose-600 text-white absolute top-1 right-1 z-20 px-1.5 py-0.5 rounded-full text-xs font-semibold flex items-center gap-0.5"> {/* Smaller badge */}
+        <Badge className="bg-rose-500 hover:bg-rose-600 text-white absolute top-1 right-1 z-20 px-1.5 py-0.5 rounded-full text-xs font-semibold flex items-center gap-0.5">
           <Flame className="h-3 w-3 mr-0.5" /> Hot
         </Badge>
       )}
