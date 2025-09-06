@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Eye, UserCog } from 'lucide-react'; // Aggiunto UserCog
+import { Eye, UserCog } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,10 +36,10 @@ interface UserProfile {
 
 interface UserManagementTableProps {
   isAdmin: boolean;
-  isSupporto: boolean; // Rinomina da isCollaborator a isSupporto
+  // isSupporto: boolean; // Rimosso: non utilizzata
 }
 
-export const UserManagementTable = ({ isAdmin }: UserManagementTableProps) => { // Rimosso isSupporto dalla destrutturazione
+export const UserManagementTable = ({ isAdmin }: UserManagementTableProps) => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
