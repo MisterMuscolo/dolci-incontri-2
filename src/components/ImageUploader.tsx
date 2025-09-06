@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { UploadCloud, X, Star, Plus } from 'lucide-react';
+import { UploadCloud, X, Star, Plus, Crop } from 'lucide-react'; // Importato Crop
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client'; // Import supabase
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Link } from 'react-router-dom'; // Import Link
+import { ImageCropperDialog } from './ImageCropperDialog'; // Importa il nuovo componente
 
 interface ExistingPhoto {
   id: string;
@@ -41,8 +42,15 @@ export const ImageUploader = ({
   const [activePreviewUrl, setActivePreviewUrl] = useState<string | null>(null); // For the main preview
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Stato per il cropper
+  const [isCropperOpen, setIsCropperOpen] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState<string | File | null>(null);
+  const [currentCroppingIndex, setCurrentCroppingIndex] = useState<number | null>(null); // Index in newlySelectedFiles
+  const [currentCroppingExistingPhoto, setCurrentCroppingExistingPhoto] = useState<ExistingPhoto | null>(null); // Existing photo object
+
   const MAX_PHOTOS = 5;
   const FREE_PHOTOS_LIMIT = 1;
+  const THUMBNAIL_ASPECT_RATIO = 4 / 5; // Aspect ratio for thumbnails
 
   useEffect(() => {
     setExistingPhotosState(initialPhotos);
@@ -72,33 +80,118 @@ export const ImageUploader = ({
       }
 
       const newFiles = filesToAdd.slice(0, availableSlots);
-      const newPreviews = newFiles
-        .map(file => {
-          try {
-            return URL.createObjectURL(file);
-          } catch (e) {
-            console.error("Error creating object URL for file:", file.name, e);
-            return undefined; // Return undefined if there's an issue
-          }
-        })
-        .filter((p): p is string => typeof p === 'string'); // Filter out any undefined results
-
-      setNewlySelectedFiles(prev => [...prev, ...newFiles]);
-      setNewlySelectedPreviews(prev => [...prev, ...newPreviews]);
-
-      if (newlySelectedPrimaryIndex === null && existingPhotosState.length === 0 && (newlySelectedFiles.length + newFiles.length) > 0) {
-        // Set first new photo as primary if no existing and no other new, and there's at least one valid new preview
-        if (newPreviews.length > 0) {
-          setNewlySelectedPrimaryIndex(newlySelectedFiles.length); // Index of the first new file added in this batch
-          setActivePreviewUrl(newPreviews[0] ?? null); // Set the active preview immediately
-        }
+      
+      // For each new file, open the cropper
+      if (newFiles.length > 0) {
+        const fileToProcess = newFiles[0];
+        setImageToCrop(fileToProcess);
+        setCurrentCroppingIndex(newlySelectedFiles.length); // Index where this file will be added
+        setCurrentCroppingExistingPhoto(null);
+        setIsCropperOpen(true);
       }
+
       // Clear the input so the same file can be selected again
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     }
   };
+
+  const handleCropperSave = useCallback((croppedFile: File) => {
+    if (currentCroppingExistingPhoto) {
+      // Update existing photo
+      handleUpdateExistingPhoto(currentCroppingExistingPhoto, croppedFile);
+    } else if (currentCroppingIndex !== null) {
+      // Add new cropped file
+      setNewlySelectedFiles(prev => {
+        const updated = [...prev];
+        updated[currentCroppingIndex] = croppedFile;
+        return updated;
+      });
+      setNewlySelectedPreviews(prev => {
+        const updated = [...prev];
+        updated[currentCroppingIndex] = URL.createObjectURL(croppedFile);
+        return updated;
+      });
+
+      if (newlySelectedPrimaryIndex === null && existingPhotosState.length === 0 && (newlySelectedFiles.length + 1) > 0) {
+        setNewlySelectedPrimaryIndex(currentCroppingIndex);
+        setActivePreviewUrl(URL.createObjectURL(croppedFile));
+      }
+    }
+    setIsCropperOpen(false);
+    setImageToCrop(null);
+    setCurrentCroppingIndex(null);
+    setCurrentCroppingExistingPhoto(null);
+  }, [currentCroppingExistingPhoto, currentCroppingIndex, newlySelectedFiles, newlySelectedPrimaryIndex, existingPhotosState.length, handleUpdateExistingPhoto]);
+
+
+  const handleUpdateExistingPhoto = useCallback(async (originalPhoto: ExistingPhoto, newCroppedFile: File) => {
+    if (!listingId || !userId) {
+      showError('Impossibile aggiornare la foto: ID annuncio o ID utente non disponibili.');
+      return;
+    }
+
+    const toastId = showLoading('Aggiornamento foto in corso...');
+    try {
+      // 1. Delete old image from Supabase Storage
+      const oldUrlParts = originalPhoto.url.split('/');
+      const oldFilename = oldUrlParts[oldUrlParts.length - 1];
+      const oldStoragePath = `${listingId}/${oldFilename}`;
+
+      const { error: removeError } = await supabase.storage
+        .from('listing_photos')
+        .remove([oldStoragePath]);
+
+      if (removeError) {
+        console.warn(`Errore durante l'eliminazione della vecchia foto dallo storage: ${removeError.message}`);
+        // Non bloccare l'operazione se la vecchia foto non può essere rimossa
+      }
+
+      // 2. Upload new cropped image to Supabase Storage
+      const slugifiedFileName = originalPhoto.id; // Use photo ID as filename for consistency
+      const newFileName = `${slugifiedFileName}.jpeg`; // Ensure .jpeg extension
+      const newFilePath = `${userId}/${listingId}/${newFileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('listing_photos')
+        .upload(newFilePath, newCroppedFile, {
+          cacheControl: '3600',
+          upsert: true, // Sovrascrivi se esiste già
+        });
+
+      if (uploadError) {
+        throw new Error(`Errore nel caricamento della nuova foto: ${uploadError.message}`);
+      }
+
+      const { data: { publicUrl: newPublicUrl } } = supabase.storage.from('listing_photos').getPublicUrl(newFilePath);
+
+      // 3. Update URL in database
+      const { error: dbUpdateError } = await supabase
+        .from('listing_photos')
+        .update({ url: newPublicUrl })
+        .eq('id', originalPhoto.id);
+
+      if (dbUpdateError) {
+        throw new Error(`Errore durante l'aggiornamento del URL della foto nel database: ${dbUpdateError.message}`);
+      }
+
+      dismissToast(toastId);
+      showSuccess('Foto aggiornata con successo!');
+
+      const updatedExistingPhotos = existingPhotosState.map(p =>
+        p.id === originalPhoto.id ? { ...p, url: newPublicUrl } : p
+      );
+      setExistingPhotosState(updatedExistingPhotos);
+      onExistingPhotosUpdated(updatedExistingPhotos);
+      setActivePreviewUrl(newPublicUrl); // Update main preview if this was the active one
+
+    } catch (error: any) {
+      dismissToast(toastId);
+      showError(error.message || 'Errore durante l\'aggiornamento della foto.');
+    }
+  }, [listingId, userId, existingPhotosState, onExistingPhotosUpdated]);
+
 
   const removeNewlySelectedFile = (index: number) => {
     const updatedFiles = newlySelectedFiles.filter((_, i) => i !== index);
@@ -134,10 +227,10 @@ export const ImageUploader = ({
     const toastId = showLoading('Eliminazione foto in corso...');
     try {
       // 1. Delete from Supabase Storage
-      // The path in storage is listingId/filename. Need to extract filename from URL.
+      // The path in storage is userId/listingId/filename. Need to extract filename from URL.
       const urlParts = photoToDelete.url.split('/');
       const filename = urlParts[urlParts.length - 1];
-      const storagePath = `${listingId}/${filename}`;
+      const storagePath = `${userId}/${listingId}/${filename}`; // Corrected storage path
 
       const { error: storageError } = await supabase.storage
         .from('listing_photos')
@@ -237,6 +330,13 @@ export const ImageUploader = ({
     }
   };
 
+  const handleEditExistingPhoto = (photo: ExistingPhoto) => {
+    setImageToCrop(photo.url);
+    setCurrentCroppingExistingPhoto(photo);
+    setCurrentCroppingIndex(null);
+    setIsCropperOpen(true);
+  };
+
   const currentPhotoCount = existingPhotosState.length + newlySelectedFiles.length;
   const maxAllowedPhotos = isPremiumOrPending ? MAX_PHOTOS : FREE_PHOTOS_LIMIT;
   const canAddMorePhotos = currentPhotoCount < maxAllowedPhotos;
@@ -294,6 +394,16 @@ export const ImageUploader = ({
               >
                 <Star className={cn("h-4 w-4", photo.is_primary && "text-yellow-400 fill-current")} />
               </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 opacity-0 group-hover:opacity-100"
+                onClick={() => handleEditExistingPhoto(photo)}
+                disabled={!listingId}
+              >
+                <Crop className="h-4 w-4" />
+              </Button>
             </div>
             {photo.is_primary && (
               <div className="absolute top-1 right-1 bg-rose-500 text-white text-xs px-2 py-1 rounded-full">
@@ -339,6 +449,20 @@ export const ImageUploader = ({
                   <Star className={cn("h-4 w-4", newlySelectedPrimaryIndex === index && "text-yellow-400 fill-current")} />
                 </Button>
               )}
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 opacity-0 group-hover:opacity-100"
+                onClick={() => {
+                  setImageToCrop(newlySelectedFiles[index]);
+                  setCurrentCroppingIndex(index);
+                  setCurrentCroppingExistingPhoto(null);
+                  setIsCropperOpen(true);
+                }}
+              >
+                <Crop className="h-4 w-4" />
+              </Button>
             </div>
             {(newlySelectedPrimaryIndex === index && existingPhotosState.length === 0) && (
               <div className="absolute top-1 right-1 bg-rose-500 text-white text-xs px-2 py-1 rounded-full">
@@ -379,6 +503,21 @@ export const ImageUploader = ({
         <p className="text-sm text-gray-500 mt-2">
           Passa a <Link to={`/promote-listing/${listingId}`} className="text-rose-500 hover:underline font-semibold">Premium</Link> per caricare fino a {MAX_PHOTOS} foto.
         </p>
+      )}
+
+      {imageToCrop && (
+        <ImageCropperDialog
+          imageSrc={imageToCrop}
+          aspectRatio={THUMBNAIL_ASPECT_RATIO}
+          isOpen={isCropperOpen}
+          onClose={() => {
+            setIsCropperOpen(false);
+            setImageToCrop(null);
+            setCurrentCroppingIndex(null);
+            setCurrentCroppingExistingPhoto(null);
+          }}
+          onCropComplete={handleCropperSave}
+        />
       )}
     </div>
   );

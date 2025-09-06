@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import { useForm } from '@hookform/react-hook-form'; // Corretto l'import
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -119,8 +119,9 @@ const NewListing = () => {
 
       if (files.length > 0) {
         const uploadPromises = files.map(async (file, index) => {
-          const slugifiedFileName = slugifyFilename(file.name); // Normalizza il nome del file
-          const fileName = `${Date.now()}-${slugifiedFileName}`;
+          // Usa un UUID per il nome del file per evitare collisioni e mantenere l'unicità
+          const fileExtension = file.name.split('.').pop();
+          const fileName = `${crypto.randomUUID()}.${fileExtension}`; // Genera un UUID per il nome del file
           const filePath = `${user.id}/${listingId}/${fileName}`;
           
           const { error: uploadError } = await supabase.storage
