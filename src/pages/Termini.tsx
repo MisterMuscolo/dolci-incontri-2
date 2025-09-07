@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
+import { Link } from 'react-router-dom'; // Importa Link
 
 const Termini = () => {
   const navigate = useNavigate();
@@ -125,7 +126,7 @@ const Termini = () => {
             Gli Utenti non possono utilizzare il Sito per promuovere il commercio illegale, schemi Ponzi o marketing piramidale, né assumere condotte ingannevoli, o che possano indurre in errore altri Utenti o che suggeriscano che, contrariamente al vero, una persona o un'organizzazione promuovano quell’Utente o i suoi contenuti o che quell’Utente agisce in qualità di testimonial o rappresentante di una persona o di un'organizzazione.
           </p>
           <p>
-            L’inserimento in qualsiasi annuncio o profilo di materiale pedopornografico, compresi tutti gli accessi e i metadati, sarà immediatamente segnalato alle Autorità competenti. Ci riserviamo inoltre il diritto di segnalare il materiale che contravviene alle nostre regole sulla pornografia estrema o sul revenge porn.
+            L’inserimento in qualsiasi annuncio o profilo di materiale pedopornografico, compresi tutti gli accessi e i metadati, sarà immediatamente segnalato alle Autorità competenti. Ci riserviamo inoltre il diritto di segnalare il materiale che contravvenga alle nostre regole sulla pornografia estrema o sul revenge porn.
           </p>
 
           <h2 className="text-xl font-semibold mt-6 mb-2">4. Servizi a Pagamento e Crediti</h2>
@@ -177,6 +178,11 @@ const Termini = () => {
           <p>
             Per qualsiasi domanda o segnalazione sui presenti Termini, ti preghiamo di contattarci tramite il nostro sistema di ticket di assistenza, accessibile dalla sezione "Assistenza" nel footer del sito o dalla tua dashboard.
           </p>
+          <div className="text-center mt-8">
+            <Link to="/">
+              <Button variant="outline">Torna alla Home</Button>
+            </Link>
+          </div>
         </div>
       </div>
     </div>

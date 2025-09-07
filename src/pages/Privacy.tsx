@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
+import { Link } from 'react-router-dom'; // Importa Link
 
 const Privacy = () => {
   const navigate = useNavigate();
@@ -61,6 +62,11 @@ const Privacy = () => {
           <p>
             Per qualsiasi domanda sulla presente Privacy Policy, ti preghiamo di contattarci tramite il nostro sistema di ticket di assistenza, accessibile dalla sezione "Assistenza" nel footer del sito o dalla tua dashboard.
           </p>
+          <div className="text-center mt-8">
+            <Link to="/">
+              <Button variant="outline">Torna alla Home</Button>
+            </Link>
+          </div>
         </div>
       </div>
     </div>

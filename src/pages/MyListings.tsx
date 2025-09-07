@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft } from "lucide-react";
+import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
 
 const LISTINGS_PER_PAGE = 10;
 
@@ -17,6 +18,7 @@ const MyListings = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   // const [currentUserId, setCurrentUserId] = useState<string | null>(null); // Rimosso: non utilizzato
+  const { getBackLinkText, handleGoBack } = useDynamicBackLink();
 
   const fetchListings = useCallback(async () => {
     setLoading(true);
@@ -108,9 +110,9 @@ const MyListings = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">
+            <Button variant="ghost" onClick={handleGoBack} className="text-gray-600 hover:text-gray-800">
               <ChevronLeft className="h-5 w-5 mr-2" />
-              Indietro
+              {getBackLinkText()}
             </Button>
             <h1 className="text-3xl font-bold">I tuoi annunci</h1>
           </div>
@@ -163,8 +165,11 @@ const MyListings = () => {
             ) : (
               <div className="text-center py-8">
                 <p className="text-gray-600">Non hai ancora creato nessun annuncio.</p>
-                <Link to="/new-listing" className="mt-4 inline-block">
+                <Link to="/new-listing" className="mt-4 inline-block mr-4">
                   <Button className="bg-rose-500 hover:bg-rose-600">Pubblica il tuo primo annuncio</Button>
+                </Link>
+                <Link to="/dashboard" className="mt-4 inline-block">
+                  <Button variant="outline">Torna alla Dashboard</Button>
                 </Link>
               </div>
             )}

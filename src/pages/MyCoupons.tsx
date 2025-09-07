@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { ApplyCouponForm } from '@/components/user/ApplyCouponForm';
 import { PostgrestError } from '@supabase/supabase-js';
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
+import { Link } from 'react-router-dom'; // Importa Link
 
 interface Coupon {
   id: string;
@@ -236,7 +237,12 @@ const MyCoupons = () => {
             ) : error ? (
               <p className="text-red-500 text-center py-8">{error}</p>
             ) : coupons.length === 0 ? (
-              <p className="text-gray-600 text-center py-8">Nessun coupon trovato per il tuo account.</p>
+              <div className="text-center py-8">
+                <p className="text-gray-600 text-center py-8">Nessun coupon trovato per il tuo account.</p>
+                <Link to="/dashboard" className="mt-4 inline-block">
+                  <Button variant="outline">Torna alla Dashboard</Button>
+                </Link>
+              </div>
             ) : (
               <div className="overflow-x-auto rounded-md border">
                 <Table>
