@@ -74,8 +74,8 @@ export const useDynamicBackLink = () => {
   }, [backPath]);
 
   const handleNavigateBack = useCallback(() => {
-    navigate(backPath); // Naviga al percorso logico calcolato
-  }, [navigate, backPath]);
+    navigate(-1); // Naviga semplicemente indietro nella cronologia del browser
+  }, [navigate]);
 
   return { getBackLinkText, handleNavigateBack, backPath };
 };
