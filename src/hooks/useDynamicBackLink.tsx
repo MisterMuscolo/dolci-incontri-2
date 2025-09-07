@@ -33,32 +33,35 @@ export const useDynamicBackLink = () => {
 
   const getPreviousPath = useCallback(() => {
     const pathSegments = location.pathname.split('/').filter(Boolean);
+    const currentPath = '/' + pathSegments.join('/'); // Reconstruct current path without trailing slash
 
-    if (pathSegments.length === 0) {
-      return '/'; // Già alla root
+    if (currentPath === '/') {
+      return '/'; // Already at root, back to root
     }
 
-    // Gestisce pagine "figlie" specifiche e i loro genitori logici
-    if (pathSegments[0] === 'change-password') return '/profile-settings';
-    if (pathSegments[0] === 'new-ticket') return '/my-tickets';
-    if (pathSegments[0] === 'listing' && pathSegments[1]) return '/search'; // Da dettagli annuncio a risultati ricerca
-    if (pathSegments[0] === 'edit-listing' && pathSegments[1]) return '/my-listings';
-    if (pathSegments[0] === 'promote-listing' && pathSegments[1]) return '/my-listings';
-    if (pathSegments[0] === 'my-tickets' && pathSegments[1]) return '/my-tickets'; // Da dettagli ticket a lista ticket
-    if (pathSegments[0] === 'admin' && pathSegments[1] === 'users' && pathSegments[2] && pathSegments[3] === 'listings') return '/admin'; // Da annunci utente a dashboard admin
+    // Specific child-parent mappings
+    if (currentPath.startsWith('/listing/')) return '/search';
+    if (currentPath.startsWith('/edit-listing/')) return '/my-listings';
+    if (currentPath.startsWith('/promote-listing/')) return '/my-listings';
+    if (currentPath.startsWith('/my-tickets/') && pathSegments.length > 1) return '/my-tickets';
+    if (currentPath.startsWith('/admin/users/') && pathSegments.length > 3 && pathSegments[3] === 'listings') return '/admin';
+    if (currentPath === '/change-password') return '/profile-settings';
+    if (currentPath === '/new-ticket') return '/my-tickets';
+    if (currentPath === '/registration-success') return '/auth'; // Logical parent for registration success
 
-    // Per le rotte di primo livello che non hanno un genitore logico specifico diverso dalla root,
-    // restituisci null per indicare un 'Indietro' generico.
-    const topLevelRoutesWithoutSpecificParent = ['search', 'termini', 'privacy', 'auth', 'dashboard', 'new-listing', 'buy-credits', 'profile-settings', 'my-listings', 'my-coupons', 'admin'];
-    if (pathSegments.length === 1 && topLevelRoutesWithoutSpecificParent.includes(pathSegments[0])) {
-      return null; // Nessun genitore logico specifico, usa 'Indietro' generico
+    // For top-level routes that don't have a specific logical parent other than the homepage,
+    // we return null so getBackLinkText can show "Indietro".
+    const topLevelRoutes = ['/search', '/dashboard', '/admin', '/buy-credits', '/profile-settings', '/my-listings', '/my-coupons', '/termini', '/privacy', '/auth', '/banned'];
+    if (topLevelRoutes.includes(currentPath)) {
+      return null;
     }
 
-    // Default: risali di un livello nel percorso
-    if (pathSegments.length > 1) {
+    // Default: go up one level in the path
+    if (pathSegments.length > 0) {
       return '/' + pathSegments.slice(0, pathSegments.length - 1).join('/');
     }
-    return '/'; // Fallback alla homepage se nulla corrisponde
+    
+    return '/'; // Fallback to homepage
   }, [location.pathname]);
 
   const backPath = getPreviousPath(); // Calcola il percorso di destinazione
