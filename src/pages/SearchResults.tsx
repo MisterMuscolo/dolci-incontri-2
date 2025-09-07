@@ -126,6 +126,7 @@ const SearchResults = () => {
     if (currentKeyword) newSearchParams.append('keyword', currentKeyword);
     newSearchParams.append('page', String(page));
     navigate(`/search?${newSearchParams.toString()}`);
+    setIsFilterFormOpen(false); // Close the collapsible after applying filters
   };
 
   const handlePageChange = (page: number) => {
