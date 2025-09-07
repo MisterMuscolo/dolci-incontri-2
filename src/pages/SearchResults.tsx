@@ -5,14 +5,17 @@ import { ListingListItem, Listing } from '@/components/ListingListItem';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, MapPin, Search, Heart } from 'lucide-react'; // Add Heart icon
 import { Helmet } from 'react-helmet-async';
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // Import Select components
+import { Input } from '@/components/ui/input'; // Import Input component
+import { italianProvinces } from '@/data/provinces'; // Import provinces
 
 const LISTINGS_PER_PAGE = 10;
 
 const SearchResults = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams(); // Use setSearchParams
   const navigate = useNavigate();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,13 +24,27 @@ const SearchResults = () => {
   const [totalPages, setTotalPages] = useState(0);
   const { getBackLinkText, handleGoBack } = useDynamicBackLink();
 
-  const category = searchParams.get('category');
-  const city = searchParams.get('city');
-  const keyword = searchParams.get('keyword');
+  // Local states for filters
+  const [currentCategory, setCurrentCategory] = useState(searchParams.get('category') || 'tutte');
+  const [currentCity, setCurrentCity] = useState(searchParams.get('city') || 'tutte');
+  const [currentKeyword, setCurrentKeyword] = useState(searchParams.get('keyword') || '');
+
+  // Update local states when URL search params change (e.g., direct URL access or browser back/forward)
+  useEffect(() => {
+    setCurrentCategory(searchParams.get('category') || 'tutte');
+    setCurrentCity(searchParams.get('city') || 'tutte');
+    setCurrentKeyword(searchParams.get('keyword') || '');
+    setCurrentPage(parseInt(searchParams.get('page') || '1', 10)); // Also update page
+  }, [searchParams]);
 
   const fetchListings = useCallback(async () => {
     setLoading(true);
     setError(null);
+
+    const categoryParam = searchParams.get('category');
+    const cityParam = searchParams.get('city');
+    const keywordParam = searchParams.get('keyword');
+    const pageParam = parseInt(searchParams.get('page') || '1', 10);
 
     let query = supabase
       .from('listings')
@@ -50,14 +67,14 @@ const SearchResults = () => {
       `, { count: 'exact' })
       .gt('expires_at', new Date().toISOString());
 
-    if (category && category !== 'tutte') {
-      query = query.eq('category', category);
+    if (categoryParam && categoryParam !== 'tutte') {
+      query = query.eq('category', categoryParam);
     }
-    if (city && city !== 'tutte') {
-      query = query.eq('city', city);
+    if (cityParam && cityParam !== 'tutte') {
+      query = query.eq('city', cityParam);
     }
-    if (keyword) {
-      query = query.or(`title.ilike.%${keyword}%,description.ilike.%${keyword}%`);
+    if (keywordParam) {
+      query = query.or(`title.ilike.%${keywordParam}%,description.ilike.%${keywordParam}%`);
     }
 
     query = query
@@ -65,7 +82,7 @@ const SearchResults = () => {
       .order('promotion_end_at', { ascending: false, nullsFirst: true })
       .order('created_at', { ascending: false });
 
-    const from = (currentPage - 1) * LISTINGS_PER_PAGE;
+    const from = (pageParam - 1) * LISTINGS_PER_PAGE;
     const to = from + LISTINGS_PER_PAGE - 1;
     query = query.range(from, to);
 
@@ -75,9 +92,8 @@ const SearchResults = () => {
       console.error("SearchResults: Errore nella ricerca degli annunci:", error.message, error.details);
       setError("Si è verificato un errore durante la ricerca. Riprova più tardi.");
     } else {
-      if (count) {
+      if (count !== null) {
         setTotalPages(Math.ceil(count / LISTINGS_PER_PAGE));
-        console.log("SearchResults: Conteggio annunci trovati:", count, "Pagine totali:", totalPages);
       }
       if (data) {
         const processedListings = data.map(listing => ({
@@ -92,31 +108,49 @@ const SearchResults = () => {
       }
     }
     setLoading(false);
-  }, [category, city, keyword, currentPage]);
+  }, [searchParams]); // Depend on searchParams directly
 
   useEffect(() => {
     fetchListings();
   }, [fetchListings]);
 
+  const handleApplyFilters = (page: number = 1) => {
+    const newSearchParams = new URLSearchParams();
+    if (currentCategory && currentCategory !== 'tutte') newSearchParams.append('category', currentCategory);
+    if (currentCity && currentCity !== 'tutte') newSearchParams.append('city', currentCity);
+    if (currentKeyword) newSearchParams.append('keyword', currentKeyword);
+    newSearchParams.append('page', String(page));
+    navigate(`/search?${newSearchParams.toString()}`);
+  };
+
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= totalPages) {
       setCurrentPage(page);
+      handleApplyFilters(page); // Apply filters with new page
     }
   };
 
+  const categories = [
+    { value: 'donna-cerca-uomo', label: '👩‍❤️‍👨 Donna cerca Uomo' },
+    { value: 'uomo-cerca-donna', label: '👨‍❤️‍👩 Uomo cerca Donna' },
+    { value: 'coppie', label: '👩‍❤️‍💋‍👨 Coppie' },
+    { value: 'uomo-cerca-uomo', label: '👨‍❤️‍👨 Uomo cerca Uomo' },
+    { value: 'donna-cerca-donna', label: '👩‍❤️‍👩 Donna cerca Donna' },
+  ];
+
   const generateTitle = () => {
     let titleParts = ["Annunci Incontri"];
-    if (category && category !== 'tutte') titleParts.push(category.replace(/-/g, ' '));
-    if (city && city !== 'tutte') titleParts.push(`a ${city}`);
-    if (keyword) titleParts.push(`"${keyword}"`);
+    if (currentCategory && currentCategory !== 'tutte') titleParts.push(currentCategory.replace(/-/g, ' '));
+    if (currentCity && currentCity !== 'tutte') titleParts.push(`a ${currentCity}`);
+    if (currentKeyword) titleParts.push(`"${currentKeyword}"`);
     return `${titleParts.join(' ')} | IncontriDolci`;
   };
 
   const generateDescription = () => {
     let description = "Cerca annunci di incontri e appuntamenti";
-    if (category && category !== 'tutte') description += ` nella categoria "${category.replace(/-/g, ' ')}"`;
-    if (city && city !== 'tutte') description += ` nella città di ${city}`;
-    if (keyword) description += ` per la parola chiave "${keyword}"`;
+    if (currentCategory && currentCategory !== 'tutte') description += ` nella categoria "${currentCategory.replace(/-/g, ' ')}"`;
+    if (currentCity && currentCity !== 'tutte') description += ` nella città di ${currentCity}`;
+    if (currentKeyword) description += ` per la parola chiave "${currentKeyword}"`;
     description += ". Trova la tua prossima relazione su IncontriDolci.";
     return description;
   };
@@ -184,7 +218,7 @@ const SearchResults = () => {
       <Helmet>
         <title>{generateTitle()}</title>
         <meta name="description" content={generateDescription()} />
-        <meta name="keywords" content={`incontri, annunci, ${keyword || ''}, ${category || ''}, ${city || ''}, appuntamenti, relazioni, single, bakeca incontri`} />
+        <meta name="keywords" content={`incontri, annunci, ${currentKeyword || ''}, ${currentCategory || ''}, ${currentCity || ''}, appuntamenti, relazioni, single, bakeca incontri`} />
       </Helmet>
       <div className="max-w-7xl mx-auto px-2 sm:px-8">
         <div className="flex items-center gap-4 mb-6">
@@ -194,6 +228,63 @@ const SearchResults = () => {
           </Button>
           <h1 className="text-3xl font-bold">Risultati della ricerca</h1>
         </div>
+
+        {/* Dynamic Filter Section */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">Modifica la tua ricerca</h2>
+          <form onSubmit={(e) => { e.preventDefault(); handleApplyFilters(); }} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="relative">
+                <Heart className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Select value={currentCategory} onValueChange={setCurrentCategory}>
+                  <SelectTrigger className="w-full pl-10">
+                    <SelectValue placeholder="Categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="tutte">Tutte le categorie</SelectItem>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.value} value={cat.value}>
+                        {cat.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Select value={currentCity} onValueChange={setCurrentCity}>
+                  <SelectTrigger className="w-full pl-10">
+                    <SelectValue placeholder="Città" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-72">
+                    <SelectItem value="tutte">Tutte le città</SelectItem>
+                    {italianProvinces.map((province) => (
+                      <SelectItem key={province.value} value={province.label}>
+                        {province.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="relative md:col-span-2">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Input 
+                  type="text" 
+                  placeholder="Parola chiave o zona..." 
+                  className="w-full pl-10"
+                  value={currentKeyword}
+                  onChange={(e) => setCurrentKeyword(e.target.value)}
+                />
+              </div>
+            </div>
+            <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600 text-lg py-6">
+              Applica Filtri
+            </Button>
+          </form>
+        </div>
+
         {renderContent()}
       </div>
     </div>
