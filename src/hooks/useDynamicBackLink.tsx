@@ -47,16 +47,26 @@ export const useDynamicBackLink = () => {
     if (pathSegments[0] === 'my-tickets' && pathSegments[1]) return '/my-tickets'; // Da dettagli ticket a lista ticket
     if (pathSegments[0] === 'admin' && pathSegments[1] === 'users' && pathSegments[2] && pathSegments[3] === 'listings') return '/admin'; // Da annunci utente a dashboard admin
 
+    // Per le rotte di primo livello che non hanno un genitore logico specifico diverso dalla root,
+    // restituisci null per indicare un 'Indietro' generico.
+    const topLevelRoutesWithoutSpecificParent = ['search', 'termini', 'privacy', 'auth', 'dashboard', 'new-listing', 'buy-credits', 'profile-settings', 'my-listings', 'my-coupons', 'admin'];
+    if (pathSegments.length === 1 && topLevelRoutesWithoutSpecificParent.includes(pathSegments[0])) {
+      return null; // Nessun genitore logico specifico, usa 'Indietro' generico
+    }
+
     // Default: risali di un livello nel percorso
     if (pathSegments.length > 1) {
       return '/' + pathSegments.slice(0, pathSegments.length - 1).join('/');
     }
-    return '/'; // Fallback alla homepage
+    return '/'; // Fallback alla homepage se nulla corrisponde
   }, [location.pathname]);
 
   const backPath = getPreviousPath(); // Calcola il percorso di destinazione
 
   const getBackLinkText = useCallback(() => {
+    if (backPath === null) {
+      return 'Indietro'; // Usa 'Indietro' generico se non c'è un genitore logico specifico
+    }
     // Gestisce rotte dinamiche con prefissi
     for (const prefix in routeNames) {
       if (backPath.startsWith(prefix) && prefix.endsWith('/')) {
