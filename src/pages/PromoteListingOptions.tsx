@@ -35,7 +35,6 @@ const promotionOptions: PromotionOption[] = [
       1: 15,
       3: 30,
       7: 62,
-      30: 200, // Aggiunta opzione 30 giorni
     },
   },
   {
@@ -53,7 +52,6 @@ const promotionOptions: PromotionOption[] = [
       1: 20,
       3: 45,
       7: 90,
-      30: 250, // Aggiunta opzione 30 giorni
     },
   },
 ];
@@ -62,7 +60,6 @@ const durations = [
   { value: 1, label: '1 Giorno' },
   { value: 3, label: '3 Giorni' },
   { value: 7, label: '7 Giorni' },
-  { value: 30, label: '30 Giorni' }, // Aggiunta opzione 30 giorni
 ];
 
 const dayTimeSlots = [
