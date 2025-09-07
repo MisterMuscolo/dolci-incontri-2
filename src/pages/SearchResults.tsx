@@ -26,7 +26,7 @@ const SearchResults = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const { getBackLinkText, handleGoBack } = useDynamicBackLink();
+  const { getBackLinkText, handleNavigateBack } = useDynamicBackLink(); // Usa handleNavigateBack
 
   // Local states for filters
   const [currentCategory, setCurrentCategory] = useState(searchParams.get('category') || 'tutte');
@@ -241,7 +241,7 @@ const SearchResults = () => {
       </Helmet>
       <div className="max-w-7xl mx-auto px-2 sm:px-8">
         <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" onClick={handleGoBack} className="text-gray-600 hover:text-gray-800">
+          <Button variant="ghost" onClick={handleNavigateBack} className="text-gray-600 hover:text-gray-800">
             <ChevronLeft className="h-5 w-5 mr-2" />
             {getBackLinkText()}
           </Button>

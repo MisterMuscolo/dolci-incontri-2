@@ -98,7 +98,7 @@ const PromoteListingOptions = () => {
   });
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>(dayTimeSlots[0].value); // Default to first time slot
   const [initialPromotionMode, setInitialPromotionMode] = useState<string | null>(null); // Stato per il tipo di promozione iniziale (se si sta estendendo)
-  const { getBackLinkText, handleGoBack } = useDynamicBackLink();
+  const { getBackLinkText, handleNavigateBack } = useDynamicBackLink(); // Usa handleNavigateBack
 
   useEffect(() => {
     const fetchUserDataAndListing = async () => {
@@ -234,7 +234,7 @@ const PromoteListingOptions = () => {
     <div className="bg-gray-50 p-6 min-h-screen">
       <div className="max-w-3xl mx-auto space-y-8">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={handleGoBack} className="text-gray-600 hover:text-gray-800">
+          <Button variant="ghost" onClick={handleNavigateBack} className="text-gray-600 hover:text-gray-800">
             <ChevronLeft className="h-5 w-5 mr-2" />
             {getBackLinkText()}
           </Button>

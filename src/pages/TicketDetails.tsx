@@ -46,7 +46,7 @@ const TicketDetails = () => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null); // Nuovo stato per il ruolo dell'utente
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { getBackLinkText, handleGoBack } = useDynamicBackLink();
+  const { getBackLinkText, handleNavigateBack } = useDynamicBackLink(); // Usa handleNavigateBack
 
   const fetchTicketDetails = async () => {
     setLoading(true);
@@ -334,7 +334,7 @@ const TicketDetails = () => {
     <div className="bg-gray-50 p-4 sm:p-6 md:p-8 min-h-screen">
       <div className="max-w-3xl mx-auto space-y-6">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={handleGoBack} className="text-gray-600 hover:text-gray-800">
+          <Button variant="ghost" onClick={handleNavigateBack} className="text-gray-600 hover:text-gray-800">
             <ChevronLeft className="h-5 w-5 mr-2" />
             {getBackLinkText()}
           </Button>

@@ -254,7 +254,7 @@ const BuyCredits = () => {
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const creditPackages = hardcodedCreditPackages; 
-  const { getBackLinkText, handleGoBack } = useDynamicBackLink();
+  const { getBackLinkText, handleNavigateBack } = useDynamicBackLink(); // Usa handleNavigateBack
 
   // Imposta isPurchaseDisabled a true per disabilitare la funzione di acquisto
   const isPurchaseDisabled = true;
@@ -388,7 +388,7 @@ const BuyCredits = () => {
     <div className="min-h-screen bg-gray-50 p-6 flex flex-col items-center">
       <div className="w-full max-w-3xl">
         <div className="flex items-center gap-4 mb-8">
-          <Button variant="ghost" onClick={handleGoBack} className="text-gray-600 hover:text-gray-800">
+          <Button variant="ghost" onClick={handleNavigateBack} className="text-gray-600 hover:text-gray-800">
             <ChevronLeft className="h-5 w-5 mr-2" />
             {getBackLinkText()}
           </Button>

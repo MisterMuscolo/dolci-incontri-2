@@ -54,28 +54,28 @@ export const useDynamicBackLink = () => {
     return '/'; // Fallback alla homepage
   }, [location.pathname]);
 
+  const backPath = getPreviousPath(); // Calcola il percorso di destinazione
+
   const getBackLinkText = useCallback(() => {
-    const previousPath = getPreviousPath();
-    
     // Gestisce rotte dinamiche con prefissi
     for (const prefix in routeNames) {
-      if (previousPath.startsWith(prefix) && prefix.endsWith('/')) {
+      if (backPath.startsWith(prefix) && prefix.endsWith('/')) {
         return `Torna a ${routeNames[prefix]}`;
       }
     }
 
     // Gestisce corrispondenze esatte
-    if (routeNames[previousPath]) {
-      return `Torna a ${routeNames[previousPath]}`;
+    if (routeNames[backPath]) {
+      return `Torna a ${routeNames[backPath]}`;
     }
 
     // Fallback per percorsi sconosciuti o complessi
     return 'Indietro';
-  }, [getPreviousPath]);
+  }, [backPath]);
 
-  const handleGoBack = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
+  const handleNavigateBack = useCallback(() => {
+    navigate(backPath); // Naviga al percorso logico calcolato
+  }, [navigate, backPath]);
 
-  return { getBackLinkText, handleGoBack };
+  return { getBackLinkText, handleNavigateBack, backPath };
 };

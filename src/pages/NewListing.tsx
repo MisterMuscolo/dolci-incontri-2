@@ -59,7 +59,7 @@ const NewListing = () => {
   const [primaryIndex, setPrimaryIndex] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const { getBackLinkText, handleGoBack } = useDynamicBackLink();
+  const { getBackLinkText, handleNavigateBack } = useDynamicBackLink(); // Usa handleNavigateBack
 
   const form = useForm<z.infer<typeof listingSchema>>({
     resolver: zodResolver(listingSchema),
@@ -186,7 +186,7 @@ const NewListing = () => {
     <div className="bg-gray-50 p-4 sm:p-6 md:p-8">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" onClick={handleGoBack} className="text-gray-600 hover:text-gray-800">
+          <Button variant="ghost" onClick={handleNavigateBack} className="text-gray-600 hover:text-gray-800">
             <ChevronLeft className="h-5 w-5 mr-2" />
             {getBackLinkText()}
           </Button>

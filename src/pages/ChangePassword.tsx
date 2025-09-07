@@ -32,7 +32,7 @@ const passwordChangeSchema = z.object({
 const ChangePassword = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const { getBackLinkText, handleGoBack } = useDynamicBackLink();
+  const { getBackLinkText, handleNavigateBack } = useDynamicBackLink(); // Usa handleNavigateBack
 
   const form = useForm<z.infer<typeof passwordChangeSchema>>({
     resolver: zodResolver(passwordChangeSchema),
@@ -92,7 +92,7 @@ const ChangePassword = () => {
     <div className="bg-gray-50 p-4 sm:p-6 md:p-8 min-h-screen">
       <div className="max-w-2xl mx-auto space-y-8">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={handleGoBack} className="text-gray-600 hover:text-gray-800">
+          <Button variant="ghost" onClick={handleNavigateBack} className="text-gray-600 hover:text-gray-800">
             <ChevronLeft className="h-5 w-5 mr-2" />
             {getBackLinkText()}
           </Button>
