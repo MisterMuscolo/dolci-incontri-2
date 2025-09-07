@@ -14,6 +14,7 @@ import { italianProvinces } from '@/data/provinces';
 import { Card } from '@/components/ui/card'; // Ensure Card is imported
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'; // Import Collapsible components
 import { Separator } from '@/components/ui/separator'; // Import Separator
+import { Badge } from '@/components/ui/badge'; // Import Badge
 
 const LISTINGS_PER_PAGE = 10;
 
@@ -145,7 +146,8 @@ const SearchResults = () => {
   // Helper to get category label
   const getCategoryLabel = (value: string) => {
     const cat = categories.find(c => c.value === value);
-    return cat ? cat.label : 'Tutte le categorie';
+    // Return only the text part of the label, removing emoji and first word
+    return cat ? cat.label.substring(cat.label.indexOf(' ') + 1) : 'Tutte le categorie';
   };
 
   // Helper to get city label
@@ -258,10 +260,26 @@ const SearchResults = () => {
                   <h2 className="text-xl font-semibold text-gray-700">
                     Filtri di ricerca
                   </h2>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Categoria: <span className="font-medium">{getCategoryLabel(currentCategory)}</span>, Città: <span className="font-medium">{getCityLabel(currentCity)}</span>
-                    {currentKeyword && `, Parola chiave: "${currentKeyword}"`}
-                  </p>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {currentCategory && currentCategory !== 'tutte' && (
+                      <Badge variant="secondary" className="capitalize">
+                        <Heart className="h-3 w-3 mr-1" /> {getCategoryLabel(currentCategory)}
+                      </Badge>
+                    )}
+                    {currentCity && currentCity !== 'tutte' && (
+                      <Badge variant="secondary" className="capitalize">
+                        <MapPin className="h-3 w-3 mr-1" /> {getCityLabel(currentCity)}
+                      </Badge>
+                    )}
+                    {currentKeyword && (
+                      <Badge variant="secondary" className="capitalize">
+                        <Search className="h-3 w-3 mr-1" /> "{currentKeyword}"
+                      </Badge>
+                    )}
+                    {(!currentCategory || currentCategory === 'tutte') && (!currentCity || currentCity === 'tutte') && !currentKeyword && (
+                      <Badge variant="secondary">Tutti gli annunci</Badge>
+                    )}
+                  </div>
                 </div>
                 <Button variant="ghost" size="sm" className="w-9 p-0">
                   {isFilterFormOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
