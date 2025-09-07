@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronLeft, User } from 'lucide-react';
 import { showError } from '@/utils/toast';
+import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
 
 const UserListingsAdminView = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -15,6 +16,7 @@ const UserListingsAdminView = () => {
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { getBackLinkText, handleGoBack } = useDynamicBackLink();
 
   // Workaround per il linter: forza l'utilizzo
   console.log(Link);
@@ -90,9 +92,9 @@ const UserListingsAdminView = () => {
     <div className="bg-gray-50 p-6 flex-grow">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">
+          <Button variant="ghost" onClick={handleGoBack} className="text-gray-600 hover:text-gray-800">
             <ChevronLeft className="h-5 w-5 mr-2" />
-            Indietro
+            {getBackLinkText()}
           </Button>
           <h1 className="text-3xl font-bold">Annunci di {userEmail || 'Utente'}</h1>
         </div>

@@ -27,6 +27,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { ApplyCouponForm } from '@/components/user/ApplyCouponForm';
+import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
 
 interface CreditPackage {
   id: string;
@@ -253,6 +254,7 @@ const BuyCredits = () => {
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const creditPackages = hardcodedCreditPackages; 
+  const { getBackLinkText, handleGoBack } = useDynamicBackLink();
 
   // Imposta isPurchaseDisabled a true per disabilitare la funzione di acquisto
   const isPurchaseDisabled = true;
@@ -386,9 +388,9 @@ const BuyCredits = () => {
     <div className="min-h-screen bg-gray-50 p-6 flex flex-col items-center">
       <div className="w-full max-w-3xl">
         <div className="flex items-center gap-4 mb-8">
-          <Button variant="ghost" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">
+          <Button variant="ghost" onClick={handleGoBack} className="text-gray-600 hover:text-gray-800">
             <ChevronLeft className="h-5 w-5 mr-2" />
-            Indietro
+            {getBackLinkText()}
           </Button>
           <h1 className="text-3xl font-bold text-gray-800">Acquista Crediti</h1>
         </div>

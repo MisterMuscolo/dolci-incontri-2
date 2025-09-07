@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ChevronLeft, Mail, Send } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
+import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
 
 const newTicketSchema = z.object({
   senderEmail: z.string().email("L'email non è valida.").min(1, "L'email è obbligatoria."),
@@ -20,6 +21,7 @@ const newTicketSchema = z.object({
 const NewTicket = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const { getBackLinkText, handleGoBack } = useDynamicBackLink();
 
   const form = useForm<z.infer<typeof newTicketSchema>>({
     resolver: zodResolver(newTicketSchema),
@@ -86,9 +88,9 @@ const NewTicket = () => {
     <div className="bg-gray-50 p-4 sm:p-6 md:p-8 min-h-screen">
       <div className="max-w-3xl mx-auto space-y-8">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">
+          <Button variant="ghost" onClick={handleGoBack} className="text-gray-600 hover:text-gray-800">
             <ChevronLeft className="h-5 w-5 mr-2" />
-            Indietro
+            {getBackLinkText()}
           </Button>
           <h1 className="text-3xl font-bold text-gray-800">Apri un nuovo Ticket</h1>
         </div>

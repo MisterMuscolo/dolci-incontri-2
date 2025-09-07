@@ -1,17 +1,19 @@
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
 
 const Termini = () => {
   const navigate = useNavigate();
+  const { getBackLinkText, handleGoBack } = useDynamicBackLink();
 
   return (
     <div className="bg-gray-50 p-4 sm:p-6 md:p-8 min-h-screen">
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">
+          <Button variant="ghost" onClick={handleGoBack} className="text-gray-600 hover:text-gray-800">
             <ChevronLeft className="h-5 w-5 mr-2" />
-            Indietro
+            {getBackLinkText()}
           </Button>
           <h1 className="text-3xl font-bold text-gray-800">Termini e Condizioni d'Uso</h1>
         </div>

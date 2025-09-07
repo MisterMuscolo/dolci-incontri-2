@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { PasswordValidator, isPasswordValid } from '@/components/PasswordValidator';
 import { ChevronLeft, KeyRound } from 'lucide-react';
+import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
 
 const passwordChangeSchema = z.object({
   oldPassword: z.string().min(1, "La vecchia password è obbligatoria."),
@@ -31,6 +32,7 @@ const passwordChangeSchema = z.object({
 const ChangePassword = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const { getBackLinkText, handleGoBack } = useDynamicBackLink();
 
   const form = useForm<z.infer<typeof passwordChangeSchema>>({
     resolver: zodResolver(passwordChangeSchema),
@@ -90,9 +92,9 @@ const ChangePassword = () => {
     <div className="bg-gray-50 p-4 sm:p-6 md:p-8 min-h-screen">
       <div className="max-w-2xl mx-auto space-y-8">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">
+          <Button variant="ghost" onClick={handleGoBack} className="text-gray-600 hover:text-gray-800">
             <ChevronLeft className="h-5 w-5 mr-2" />
-            Indietro
+            {getBackLinkText()}
           </Button>
           <h1 className="text-3xl font-bold text-gray-800">Cambia Password</h1>
         </div>

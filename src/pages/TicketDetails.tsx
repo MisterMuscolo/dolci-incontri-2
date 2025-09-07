@@ -11,6 +11,7 @@ import { it } from 'date-fns/locale';
 import { ChevronLeft, MessageSquare, Send, User, Shield, Link as LinkIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
+import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
 
 interface TicketMessage {
   id: string;
@@ -45,6 +46,7 @@ const TicketDetails = () => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null); // Nuovo stato per il ruolo dell'utente
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { getBackLinkText, handleGoBack } = useDynamicBackLink();
 
   const fetchTicketDetails = async () => {
     setLoading(true);
@@ -332,9 +334,9 @@ const TicketDetails = () => {
     <div className="bg-gray-50 p-4 sm:p-6 md:p-8 min-h-screen">
       <div className="max-w-3xl mx-auto space-y-6">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">
+          <Button variant="ghost" onClick={handleGoBack} className="text-gray-600 hover:text-gray-800">
             <ChevronLeft className="h-5 w-5 mr-2" />
-            Indietro
+            {getBackLinkText()}
           </Button>
           <h1 className="text-3xl font-bold text-gray-800">Ticket #{ticket.id.substring(0, 8)}</h1>
         </div>

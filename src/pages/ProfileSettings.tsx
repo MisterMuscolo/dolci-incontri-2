@@ -16,11 +16,13 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { User, AlertTriangle, ChevronLeft, KeyRound } from 'lucide-react'; // Importa KeyRound
+import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
 
 const ProfileSettings = () => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { getBackLinkText, handleGoBack } = useDynamicBackLink();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -66,9 +68,9 @@ const ProfileSettings = () => {
     <div className="bg-gray-50 p-4 sm:p-6 md:p-8 min-h-screen">
       <div className="max-w-2xl mx-auto space-y-8">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">
+          <Button variant="ghost" onClick={handleGoBack} className="text-gray-600 hover:text-gray-800">
             <ChevronLeft className="h-5 w-5 mr-2" />
-            Indietro
+            {getBackLinkText()}
           </Button>
           <h1 className="text-3xl font-bold text-gray-800">Impostazioni Profilo</h1>
         </div>

@@ -8,6 +8,7 @@ import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils'; // Importa cn per le classi condizionali
+import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
 
 interface PromotionOption {
   id: 'day' | 'night';
@@ -97,6 +98,7 @@ const PromoteListingOptions = () => {
   });
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>(dayTimeSlots[0].value); // Default to first time slot
   const [initialPromotionMode, setInitialPromotionMode] = useState<string | null>(null); // Stato per il tipo di promozione iniziale (se si sta estendendo)
+  const { getBackLinkText, handleGoBack } = useDynamicBackLink();
 
   useEffect(() => {
     const fetchUserDataAndListing = async () => {
@@ -232,9 +234,9 @@ const PromoteListingOptions = () => {
     <div className="bg-gray-50 p-6 min-h-screen">
       <div className="max-w-3xl mx-auto space-y-8">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">
+          <Button variant="ghost" onClick={handleGoBack} className="text-gray-600 hover:text-gray-800">
             <ChevronLeft className="h-5 w-5 mr-2" />
-            Indietro
+            {getBackLinkText()}
           </Button>
           <h1 className="text-3xl font-bold text-gray-800">Promuovi Annuncio</h1>
         </div>

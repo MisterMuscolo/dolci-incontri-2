@@ -15,6 +15,7 @@ import { CreateTicketDialog } from '@/components/CreateTicketDialog';
 import { ReplyToListingDialog } from '@/components/ReplyToListingDialog';
 import { WatermarkedImage } from '@/components/WatermarkedImage';
 import { Helmet } from 'react-helmet-async';
+import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
 
 type FullListing = {
   id: string;
@@ -43,6 +44,7 @@ const ListingDetails = () => {
   const [listing, setListing] = useState<FullListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [activePhoto, setActivePhoto] = useState<string | null>(null);
+  const { getBackLinkText, handleGoBack } = useDynamicBackLink();
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -168,9 +170,9 @@ const ListingDetails = () => {
       </Helmet>
       <div className="container mx-auto p-4 sm:p-6 md:p-8">
         <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">
+          <Button variant="ghost" onClick={handleGoBack} className="text-gray-600 hover:text-gray-800">
             <ChevronLeft className="h-5 w-5 mr-2" />
-            Indietro
+            {getBackLinkText()}
           </Button>
         </div>
         <div className="max-w-3xl mx-auto space-y-6">

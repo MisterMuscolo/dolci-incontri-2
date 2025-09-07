@@ -9,6 +9,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Wallet, History, ChevronLeft } from 'lucide-react';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination"; // Importa i componenti di paginazione
+import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
 
 interface CreditTransaction {
   id: string;
@@ -29,6 +30,7 @@ const CreditHistory = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1); // Stato per la pagina corrente
   const [totalPages, setTotalPages] = useState(0); // Stato per il numero totale di pagine
+  const { getBackLinkText, handleGoBack } = useDynamicBackLink();
 
   const fetchCreditData = useCallback(async () => {
     setLoading(true);
@@ -123,9 +125,9 @@ const CreditHistory = () => {
     <div className="bg-gray-50 p-4 sm:p-6 md:p-8 min-h-screen">
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-800">
+          <Button variant="ghost" onClick={handleGoBack} className="text-gray-600 hover:text-gray-800">
             <ChevronLeft className="h-5 w-5 mr-2" />
-            Indietro
+            {getBackLinkText()}
           </Button>
           <h1 className="text-3xl font-bold text-gray-800">Portafoglio Crediti</h1>
         </div>
