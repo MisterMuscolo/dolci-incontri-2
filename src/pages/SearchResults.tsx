@@ -5,17 +5,20 @@ import { ListingListItem, Listing } from '@/components/ListingListItem';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { ChevronLeft, MapPin, Search, Heart } from 'lucide-react'; // Add Heart icon
+import { ChevronLeft, MapPin, Search, Heart, ChevronDown, ChevronUp } from 'lucide-react'; // Add ChevronDown, ChevronUp icons
 import { Helmet } from 'react-helmet-async';
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // Import Select components
-import { Input } from '@/components/ui/input'; // Import Input component
-import { italianProvinces } from '@/data/provinces'; // Import provinces
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { italianProvinces } from '@/data/provinces';
+import { Card } from '@/components/ui/card'; // Ensure Card is imported
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'; // Import Collapsible components
+import { Separator } from '@/components/ui/separator'; // Import Separator
 
 const LISTINGS_PER_PAGE = 10;
 
 const SearchResults = () => {
-  const [searchParams, setSearchParams] = useSearchParams(); // Use setSearchParams
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,13 +31,14 @@ const SearchResults = () => {
   const [currentCategory, setCurrentCategory] = useState(searchParams.get('category') || 'tutte');
   const [currentCity, setCurrentCity] = useState(searchParams.get('city') || 'tutte');
   const [currentKeyword, setCurrentKeyword] = useState(searchParams.get('keyword') || '');
+  const [isFilterFormOpen, setIsFilterFormOpen] = useState(false); // State for collapsible filter form
 
   // Update local states when URL search params change (e.g., direct URL access or browser back/forward)
   useEffect(() => {
     setCurrentCategory(searchParams.get('category') || 'tutte');
     setCurrentCity(searchParams.get('city') || 'tutte');
     setCurrentKeyword(searchParams.get('keyword') || '');
-    setCurrentPage(parseInt(searchParams.get('page') || '1', 10)); // Also update page
+    setCurrentPage(parseInt(searchParams.get('page') || '1', 10));
   }, [searchParams]);
 
   const fetchListings = useCallback(async () => {
@@ -108,7 +112,7 @@ const SearchResults = () => {
       }
     }
     setLoading(false);
-  }, [searchParams]); // Depend on searchParams directly
+  }, [searchParams]);
 
   useEffect(() => {
     fetchListings();
@@ -126,7 +130,7 @@ const SearchResults = () => {
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= totalPages) {
       setCurrentPage(page);
-      handleApplyFilters(page); // Apply filters with new page
+      handleApplyFilters(page);
     }
   };
 
@@ -138,9 +142,21 @@ const SearchResults = () => {
     { value: 'donna-cerca-donna', label: '👩‍❤️‍👩 Donna cerca Donna' },
   ];
 
+  // Helper to get category label
+  const getCategoryLabel = (value: string) => {
+    const cat = categories.find(c => c.value === value);
+    return cat ? cat.label : 'Tutte le categorie';
+  };
+
+  // Helper to get city label
+  const getCityLabel = (value: string) => {
+    const city = italianProvinces.find(p => p.label === value);
+    return city ? city.label : 'Tutte le città';
+  };
+
   const generateTitle = () => {
     let titleParts = ["Annunci Incontri"];
-    if (currentCategory && currentCategory !== 'tutte') titleParts.push(currentCategory.replace(/-/g, ' '));
+    if (currentCategory && currentCategory !== 'tutte') titleParts.push(getCategoryLabel(currentCategory));
     if (currentCity && currentCity !== 'tutte') titleParts.push(`a ${currentCity}`);
     if (currentKeyword) titleParts.push(`"${currentKeyword}"`);
     return `${titleParts.join(' ')} | IncontriDolci`;
@@ -148,7 +164,7 @@ const SearchResults = () => {
 
   const generateDescription = () => {
     let description = "Cerca annunci di incontri e appuntamenti";
-    if (currentCategory && currentCategory !== 'tutte') description += ` nella categoria "${currentCategory.replace(/-/g, ' ')}"`;
+    if (currentCategory && currentCategory !== 'tutte') description += ` nella categoria "${getCategoryLabel(currentCategory)}"`;
     if (currentCity && currentCity !== 'tutte') description += ` nella città di ${currentCity}`;
     if (currentKeyword) description += ` per la parola chiave "${currentKeyword}"`;
     description += ". Trova la tua prossima relazione su IncontriDolci.";
@@ -229,61 +245,87 @@ const SearchResults = () => {
           <h1 className="text-3xl font-bold">Risultati della ricerca</h1>
         </div>
 
-        {/* Dynamic Filter Section */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-gray-700">Modifica la tua ricerca</h2>
-          <form onSubmit={(e) => { e.preventDefault(); handleApplyFilters(); }} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="relative">
-                <Heart className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <Select value={currentCategory} onValueChange={setCurrentCategory}>
-                  <SelectTrigger className="w-full pl-10">
-                    <SelectValue placeholder="Categoria" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="tutte">Tutte le categorie</SelectItem>
-                    {categories.map((cat) => (
-                      <SelectItem key={cat.value} value={cat.value}>
-                        {cat.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+        {/* Dynamic Filter Section - now collapsible */}
+        <Card className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-6 mb-8">
+          <Collapsible
+            open={isFilterFormOpen}
+            onOpenChange={setIsFilterFormOpen}
+            className="w-full"
+          >
+            <CollapsibleTrigger asChild>
+              <div className="flex items-center justify-between cursor-pointer py-2">
+                <div className="flex flex-col items-start">
+                  <h2 className="text-xl font-semibold text-gray-700">
+                    Filtri di ricerca
+                  </h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Categoria: <span className="font-medium">{getCategoryLabel(currentCategory)}</span>, Città: <span className="font-medium">{getCityLabel(currentCity)}</span>
+                    {currentKeyword && `, Parola chiave: "${currentKeyword}"`}
+                  </p>
+                </div>
+                <Button variant="ghost" size="sm" className="w-9 p-0">
+                  {isFilterFormOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  <span className="sr-only">Toggle filters</span>
+                </Button>
               </div>
-              
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <Select value={currentCity} onValueChange={setCurrentCity}>
-                  <SelectTrigger className="w-full pl-10">
-                    <SelectValue placeholder="Città" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-72">
-                    <SelectItem value="tutte">Tutte le città</SelectItem>
-                    {italianProvinces.map((province) => (
-                      <SelectItem key={province.value} value={province.label}>
-                        {province.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <Separator className="my-4" />
+              <h3 className="text-lg font-semibold mb-4 text-gray-700">Modifica la tua ricerca</h3>
+              <form onSubmit={(e) => { e.preventDefault(); handleApplyFilters(); }} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="relative">
+                    <Heart className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Select value={currentCategory} onValueChange={setCurrentCategory}>
+                      <SelectTrigger className="w-full pl-10">
+                        <SelectValue placeholder="Categoria" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="tutte">Tutte le categorie</SelectItem>
+                        {categories.map((cat) => (
+                          <SelectItem key={cat.value} value={cat.value}>
+                            {cat.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Select value={currentCity} onValueChange={setCurrentCity}>
+                      <SelectTrigger className="w-full pl-10">
+                        <SelectValue placeholder="Città" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-72">
+                        <SelectItem value="tutte">Tutte le città</SelectItem>
+                        {italianProvinces.map((province) => (
+                          <SelectItem key={province.value} value={province.label}>
+                            {province.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-              <div className="relative md:col-span-2">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <Input 
-                  type="text" 
-                  placeholder="Parola chiave o zona..." 
-                  className="w-full pl-10"
-                  value={currentKeyword}
-                  onChange={(e) => setCurrentKeyword(e.target.value)}
-                />
-              </div>
-            </div>
-            <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600 text-lg py-6">
-              Applica Filtri
-            </Button>
-          </form>
-        </div>
+                  <div className="relative md:col-span-2">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Input 
+                      type="text" 
+                      placeholder="Parola chiave o zona..." 
+                      className="w-full pl-10"
+                      value={currentKeyword}
+                      onChange={(e) => setCurrentKeyword(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600 text-lg py-6">
+                  Applica Filtri
+                </Button>
+              </form>
+            </CollapsibleContent>
+          </Collapsible>
+        </Card>
 
         {renderContent()}
       </div>
