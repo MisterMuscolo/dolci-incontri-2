@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Wallet, History, ChevronLeft } from 'lucide-react';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination"; // Importa i componenti di paginazione
@@ -23,7 +23,6 @@ const TRANSACTIONS_PER_PAGE = 10; // Definisci il numero di transazioni per pagi
 
 const CreditHistory = () => {
   console.log("CreditHistory component is rendering."); // Aggiunto per il debug
-  const navigate = useNavigate();
   const [currentCredits, setCurrentCredits] = useState<number | null>(0); // Initialize with 0
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [loading, setLoading] = useState(true);

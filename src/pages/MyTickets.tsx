@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { showError } from '@/utils/toast';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -28,7 +28,6 @@ interface TicketItem {
 
 const MyTickets = () => {
   console.log("MyTickets component is rendering."); // Aggiunto per il debug
-  const navigate = useNavigate();
   const [tickets, setTickets] = useState<TicketItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

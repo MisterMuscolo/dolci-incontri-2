@@ -19,7 +19,7 @@ import { Badge } from '@/components/ui/badge'; // Import Badge
 const LISTINGS_PER_PAGE = 10;
 
 const SearchResults = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);

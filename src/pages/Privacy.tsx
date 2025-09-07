@@ -1,11 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
 import { Link } from 'react-router-dom'; // Importa Link
 
 const Privacy = () => {
-  const navigate = useNavigate();
   const { getBackLinkText, handleNavigateBack } = useDynamicBackLink(); // Usa handleNavigateBack
 
   return (

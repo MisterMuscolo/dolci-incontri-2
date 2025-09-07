@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ListingListItem, Listing } from "@/components/ListingListItem";
@@ -12,7 +12,6 @@ import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
 const LISTINGS_PER_PAGE = 10;
 
 const MyListings = () => {
-  const navigate = useNavigate();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
