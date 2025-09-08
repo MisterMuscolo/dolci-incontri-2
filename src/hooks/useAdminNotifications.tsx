@@ -4,7 +4,7 @@ import { showError } from '@/utils/toast';
 
 export interface AdminNotification {
   id: string;
-  type: 'new_report' | 'ticket_reply' | 'new_ticket'; // Added 'new_ticket' type
+  type: 'new_report' | 'ticket_reply' | 'new_ticket' | 'new_user_signup'; // Added 'new_user_signup' type
   entity_id: string;
   message: string;
   is_read: boolean;
@@ -22,7 +22,7 @@ export const useAdminNotifications = (isAdmin: boolean) => {
     // This hook is used in Header.tsx where isAdmin and isSupporto are passed.
     // The RLS policy will handle the actual database access based on the user's role.
     // So, we just need to ensure this hook is *called* if the user is admin or supporto.
-    // The `isAdmin` parameter here is actually `isAdmin || isSupporto` from Header.tsx.
+    // The `isAdmin` parameter here is actually `isAdmin || isSupporto` from the caller
     // If it's false, we don't fetch.
     if (!isAdmin) { // This `isAdmin` parameter now represents `isAdmin || isSupporto` from the caller
       setNotifications([]);
