@@ -2,6 +2,10 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
+      "source": "/sitemap.xml",
+      "destination": "https://bpfhentkvaelbphqlfot.supabase.co/functions/v1/generate-sitemap"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
