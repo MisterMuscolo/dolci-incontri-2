@@ -126,7 +126,8 @@ const ListingDetails = () => {
   const canContactByEmail = (listing.contact_preference === 'email' || listing.contact_preference === 'both') && !!listing.email;
   const canContactByPhone = (listing.contact_preference === 'phone' || listing.contact_preference === 'both') && !!listing.phone;
 
-  const whatsappMessage = encodeURIComponent(`Ciao, ho visto il tuo annuncio "${listing.title}" su IncontriDolci e vorrei saperne di più.`);
+  const truncatedTitle = listing.title.length > 25 ? listing.title.substring(0, 25) + '(...)' : listing.title;
+  const whatsappMessage = encodeURIComponent(`Ciao, ho visto su Incontri Dolci il tuo annuncio "${truncatedTitle}" e vorrei incontrarti.`);
   const phoneHref = listing.contact_whatsapp ? `https://wa.me/${listing.phone}?text=${whatsappMessage}` : `tel:${listing.phone}`;
   const phoneButtonClass = listing.contact_whatsapp ? "bg-green-500 hover:bg-green-600" : "bg-rose-500 hover:bg-rose-600";
   const phoneButtonIcon = listing.contact_whatsapp ? <MessageCircle className="h-6 w-6" /> : <Phone className="h-6 w-6" />;
