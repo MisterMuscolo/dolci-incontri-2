@@ -20,9 +20,33 @@ serve(async (req) => {
       throw new Error('Missing required field: newUserEmail');
     }
 
+    // Explicitly get environment variables and check them
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
+
+    if (!supabaseUrl) {
+      throw new Response(JSON.stringify({ error: 'SUPABASE_URL environment variable is not set.' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      });
+    }
+    if (!supabaseServiceRoleKey) {
+      throw new Response(JSON.stringify({ error: 'SUPABASE_SERVICE_ROLE_KEY environment variable is not set.' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      });
+    }
+    if (!resendApiKey) {
+      throw new Response(JSON.stringify({ error: 'RESEND_API_KEY environment variable is not set.' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      });
+    }
+
     const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      supabaseUrl,
+      supabaseServiceRoleKey
     );
 
     // Fetch all admin and supporto emails
@@ -46,7 +70,7 @@ serve(async (req) => {
       });
     }
 
-    const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
+    const resend = new Resend(resendApiKey); // Use the checked resendApiKey
 
     const { data, error: resendError } = await resend.emails.send({
       from: 'IncontriDolci <noreply@incontridolci.it>',
