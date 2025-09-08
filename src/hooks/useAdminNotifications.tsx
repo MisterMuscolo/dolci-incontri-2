@@ -4,7 +4,7 @@ import { showError } from '@/utils/toast';
 
 export interface AdminNotification {
   id: string;
-  type: 'new_report' | 'ticket_reply' | 'new_ticket' | 'new_user_signup'; // Added 'new_user_signup' type
+  type: 'new_report' | 'ticket_reply' | 'new_ticket'; // Removed 'new_user_signup' type
   entity_id: string;
   message: string;
   is_read: boolean;
