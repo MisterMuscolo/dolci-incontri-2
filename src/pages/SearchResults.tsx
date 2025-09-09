@@ -3,7 +3,7 @@ import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { ListingListItem, Listing } from '@/components/ListingListItem';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
+import { Button } => '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { ChevronLeft, MapPin, Search, Heart, ChevronDown, ChevronUp, Globe, Palette, Ruler, Eye, User } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
@@ -40,7 +40,7 @@ const SearchResults = () => {
   const [currentCategory, setCurrentCategory] = useState(searchParams.get('category') || 'tutte');
   const [currentCity, setCurrentCity] = useState(searchParams.get('city') || 'tutte');
   const [currentKeyword, setCurrentKeyword] = useState(searchParams.get('keyword') || '');
-  const [currentSelectedAgeRange, setCurrentSelectedAgeRange] = useState('tutte'); // Nuovo stato per la fascia d'età
+  const [currentSelectedAgeRange, setCurrentSelectedAgeRange] = useState('tutte'); // Stato per la fascia d'età
   const [currentEthnicity, setCurrentEthnicity] = useState(searchParams.get('ethnicity') || 'tutte');
   const [currentNationality, setCurrentNationality] = useState(searchParams.get('nationality') || 'tutte');
   const [currentBreastType, setCurrentBreastType] = useState(searchParams.get('breast_type') || 'tutte');
@@ -58,13 +58,13 @@ const SearchResults = () => {
     // Ricostruisci currentSelectedAgeRange dai parametri min_age e max_age
     const minAgeParam = searchParams.get('min_age');
     const maxAgeParam = searchParams.get('max_age');
+    let ageRangeValue = 'tutte';
     if (minAgeParam && maxAgeParam) {
-      setCurrentSelectedAgeRange(`${minAgeParam}-${maxAgeParam}`);
+      ageRangeValue = `${minAgeParam}-${maxAgeParam}`;
     } else if (minAgeParam && !maxAgeParam) {
-      setCurrentSelectedAgeRange(`${minAgeParam}+`);
-    } else {
-      setCurrentSelectedAgeRange('tutte');
+      ageRangeValue = `${minAgeParam}+`;
     }
+    setCurrentSelectedAgeRange(ageRangeValue);
 
     setCurrentEthnicity(searchParams.get('ethnicity') || 'tutte');
     setCurrentNationality(searchParams.get('nationality') || 'tutte');
@@ -589,7 +589,7 @@ const SearchResults = () => {
                   </div>
                 </div>
 
-                {/* Nuovo filtro per la fascia d'età */}
+                {/* Filtro per la fascia d'età */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -635,7 +635,7 @@ const SearchResults = () => {
                     </Select>
                   </div>
                   <div className="relative">
-                    <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /> {/* Modificato qui */}
+                    <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                     <Select value={currentBreastType} onValueChange={setCurrentBreastType}>
                       <SelectTrigger className="w-full pl-10">
                         <SelectValue placeholder="Tipo di Seno" />

@@ -28,7 +28,7 @@ export default function Index({ session }: IndexProps) {
   const [category, setCategory] = useState('tutte');
   const [city, setCity] = useState('tutte');
   const [keyword, setKeyword] = useState('');
-  const [selectedAgeRange, setSelectedAgeRange] = useState('tutte'); // Nuovo stato per la fascia d'età
+  const [selectedAgeRange, setSelectedAgeRange] = useState('tutte'); // Stato per la fascia d'età
   const [ethnicity, setEthnicity] = useState('tutte');
   const [nationality, setNationality] = useState('tutte');
   const [breastType, setBreastType] = useState('tutte');
@@ -48,6 +48,18 @@ export default function Index({ session }: IndexProps) {
       newSearchParams.delete('ref');
       navigate({ search: newSearchParams.toString() }, { replace: true });
     }
+
+    // Sincronizza lo stato del filtro età con i parametri URL all'avvio o al cambio URL
+    const minAgeParam = searchParams.get('min_age');
+    const maxAgeParam = searchParams.get('max_age');
+    let initialAgeRange = 'tutte';
+    if (minAgeParam && maxAgeParam) {
+      initialAgeRange = `${minAgeParam}-${maxAgeParam}`;
+    } else if (minAgeParam && !maxAgeParam) {
+      initialAgeRange = `${minAgeParam}+`;
+    }
+    setSelectedAgeRange(initialAgeRange);
+
   }, [searchParams, navigate]);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -355,7 +367,7 @@ export default function Index({ session }: IndexProps) {
                 <CollapsibleContent>
                   <Separator className="my-4" />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Nuovo campo per la fascia d'età */}
+                    {/* Campo per la fascia d'età */}
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                       <Select value={selectedAgeRange} onValueChange={setSelectedAgeRange}>
@@ -396,7 +408,7 @@ export default function Index({ session }: IndexProps) {
                       </Select>
                     </div>
                     <div className="relative">
-                      <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /> {/* Modificato qui */}
+                      <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                       <Select value={breastType} onValueChange={setBreastType}>
                         <SelectTrigger className="w-full pl-10">
                           <SelectValue placeholder="Tipo di Seno" />
