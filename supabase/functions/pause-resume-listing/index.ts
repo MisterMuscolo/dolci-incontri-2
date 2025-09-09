@@ -34,10 +34,10 @@ serve(async (req) => {
       });
     }
 
-    // Verify the listing belongs to the user
+    // Verify the listing belongs to the user and fetch all necessary promotion data
     const { data: listing, error: listingFetchError } = await supabaseClient
       .from('listings')
-      .select('user_id, expires_at, promotion_start_at, promotion_end_at, is_paused, remaining_expires_at_duration, remaining_promotion_duration')
+      .select('user_id, expires_at, promotion_start_at, promotion_end_at, is_paused, remaining_expires_at_duration, remaining_promotion_duration, is_premium, promotion_mode, paused_promotion_mode')
       .eq('id', listingId)
       .single();
 
@@ -69,7 +69,7 @@ serve(async (req) => {
         });
       }
 
-      // Calculate remaining durations
+      // Calculate remaining durations for expiry
       const expiresAtDate = new Date(listing.expires_at);
       const remainingExpiresAtDuration = expiresAtDate.getTime() - now.getTime(); // in milliseconds
 
@@ -80,15 +80,19 @@ serve(async (req) => {
         expires_at: null, // Set expires_at to null when paused
       };
 
-      if (listing.promotion_start_at && listing.promotion_end_at) {
+      // If the listing was premium, save its promotion state
+      if (listing.is_premium && listing.promotion_mode && listing.promotion_start_at && listing.promotion_end_at) {
         const promoEndDate = new Date(listing.promotion_end_at);
         const remainingPromotionDuration = promoEndDate.getTime() - now.getTime(); // in milliseconds
         
         updateData = {
           ...updateData,
           remaining_promotion_duration: `${remainingPromotionDuration} milliseconds`,
-          promotion_start_at: null, // Clear promotion times when paused
+          promotion_start_at: null, // Clear active promotion times
           promotion_end_at: null,
+          paused_promotion_mode: listing.promotion_mode, // Store current promotion_mode
+          is_premium: false, // Explicitly set to false when paused
+          promotion_mode: 'none', // Explicitly set to 'none' when paused
         };
       }
 
@@ -109,14 +113,17 @@ serve(async (req) => {
         remaining_expires_at_duration: null,
       };
 
-      // Restore promotion times if they existed
-      if (listing.remaining_promotion_duration) {
+      // Restore promotion times if they existed before pausing
+      if (listing.remaining_promotion_duration && listing.paused_promotion_mode) {
         const restoredPromotionEnd = new Date(now.getTime() + parseIntervalToMilliseconds(listing.remaining_promotion_duration));
         updateData = {
           ...updateData,
+          is_premium: true, // Restore premium status
+          promotion_mode: listing.paused_promotion_mode, // Restore promotion mode
           promotion_start_at: now.toISOString(), // Start promotion from now
           promotion_end_at: restoredPromotionEnd.toISOString(),
           remaining_promotion_duration: null,
+          paused_promotion_mode: null, // Clear stored promotion mode
         };
       }
     }
