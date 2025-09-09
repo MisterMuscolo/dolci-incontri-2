@@ -17,7 +17,6 @@ import { ChevronLeft } from 'lucide-react';
 import { cn, formatPhoneNumber } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
-// Rimosso l'import di MapInput
 
 const listingSchema = z.object({
   category: z.string({ required_error: 'La categoria è obbligatoria.' }),
@@ -75,8 +74,6 @@ const NewListing = () => {
 
   const contactPreference = form.watch('contact_preference');
   const phoneValue = form.watch('phone');
-  const cityValue = form.watch('city');
-  const zoneValue = form.watch('zone');
 
   useEffect(() => {
     const fetchUserEmailAndId = async () => {
@@ -89,8 +86,6 @@ const NewListing = () => {
     fetchUserEmailAndId();
   }, [form]);
 
-  // Rimosso handleLocationChange in quanto non più necessario
-
   const onSubmit = async (values: z.infer<typeof listingSchema>) => {
     setIsLoading(true);
     const toastId = showLoading('Pubblicazione annuncio in corso...');
@@ -101,26 +96,6 @@ const NewListing = () => {
 
       const { age, phone, ...restOfValues } = values;
       const formattedPhone = formatPhoneNumber(phone);
-
-      let finalLatitude: number | null = null;
-      let finalLongitude: number | null = null;
-      let finalAddressText: string | null = null;
-
-      // Sempre geocodifica la città e la zona
-      if (cityValue) {
-        const { data: geoData, error: geoError } = await supabase.functions.invoke('geocode-address', {
-          body: { city: cityValue, zone: zoneValue },
-        });
-
-        if (geoError) {
-          console.warn("Geocoding failed for city/zone:", geoError.message);
-          // Non bloccare la creazione dell'annuncio se la geocodifica fallisce, ma logga l'errore
-        } else if (geoData && geoData.latitude && geoData.longitude) {
-          finalLatitude = geoData.latitude;
-          finalLongitude = geoData.longitude;
-          finalAddressText = `${zoneValue ? zoneValue + ', ' : ''}${cityValue}, Italy`;
-        }
-      }
 
       const { data: newListing, error: listingError } = await supabase
         .from('listings')
@@ -137,9 +112,9 @@ const NewListing = () => {
           contact_preference: restOfValues.contact_preference,
           contact_whatsapp: restOfValues.contact_whatsapp,
           last_bumped_at: new Date().toISOString(),
-          latitude: finalLatitude,
-          longitude: finalLongitude,
-          address_text: finalAddressText,
+          latitude: null, // Rimosso geocodifica
+          longitude: null, // Rimosso geocodifica
+          address_text: null, // Rimosso geocodifica
         })
         .select('id')
         .single();
@@ -408,8 +383,6 @@ const NewListing = () => {
                     )}
                   />
                 )}
-
-                {/* Rimosso il campo use_map_location e il componente MapInput */}
 
                 <div>
                   <FormLabel>Fotografie</FormLabel>

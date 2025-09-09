@@ -21,6 +21,6 @@ export default defineConfig(() => ({
   },
   optimizeDeps: {
     // Escludi queste librerie dalla pre-ottimizzazione
-    include: ['react-leaflet', 'leaflet'], 
+    include: [], 
   },
 }));

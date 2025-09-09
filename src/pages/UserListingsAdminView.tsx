@@ -1,12 +1,11 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useParams } from 'react-router-dom'; // Rimosso Link non utilizzato
+import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { ListingListItem, Listing } from '@/components/ListingListItem';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronLeft, User } from 'lucide-react';
-// import { showError } from '@/utils/toast'; // Rimosso showError non utilizzato
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
 
 const UserListingsAdminView = () => {
@@ -70,7 +69,7 @@ const UserListingsAdminView = () => {
     query = query.eq('user_id', userId);
 
     query = query
-      .order('is_paused', { ascending: true }) // Ordina prima gli annunci non in pausa
+      .order('is_paused', { ascending: true })
       .order('last_bumped_at', { ascending: false, nullsFirst: false })
       .order('promotion_end_at', { ascending: false, nullsFirst: true })
       .order('created_at', { ascending: false });
@@ -81,7 +80,7 @@ const UserListingsAdminView = () => {
       console.error("Error fetching user listings:", listingsError);
       setError("Impossibile caricare gli annunci dell'utente.");
     } else if (data) {
-      const processedListings = data.map((listing: Listing) => ({ // Specifica il tipo di 'listing'
+      const processedListings = data.map((listing: Listing) => ({
         ...listing,
         listing_photos: (listing.listing_photos || []).sort((a, b) => {
           if (a.is_primary && !b.is_primary) return -1;
@@ -132,7 +131,7 @@ const UserListingsAdminView = () => {
                     canEdit={false}
                     canManagePhotos={true}
                     canDelete={true}
-                    canPauseResume={true} // Abilita il pulsante Pausa/Riprendi anche per gli admin
+                    canPauseResume={true}
                     onListingUpdated={fetchUserDataAndListings}
                     isAdminContext={true}
                     dateTypeToDisplay="expires_at"

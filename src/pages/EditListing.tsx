@@ -18,7 +18,6 @@ import { cn, formatPhoneNumber } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
-// Rimosso l'import di MapInput
 
 const listingSchema = z.object({
   category: z.string({ required_error: 'La categoria è obbligatoria.' }),
@@ -56,9 +55,6 @@ type FullListing = {
   contact_preference: 'email' | 'phone' | 'both';
   contact_whatsapp: boolean | null;
   listing_photos: ExistingPhoto[];
-  latitude: number | null;
-  longitude: number | null;
-  address_text: string | null;
 };
 
 const EditListing = () => {
@@ -85,8 +81,6 @@ const EditListing = () => {
 
   const contactPreference = form.watch('contact_preference');
   const phoneValue = form.watch('phone');
-  const cityValue = form.watch('city');
-  const zoneValue = form.watch('zone');
 
   const fetchListingData = useCallback(async () => {
     if (!id) {
@@ -121,7 +115,6 @@ const EditListing = () => {
       phone: listing.phone || '',
       contact_preference: listing.contact_preference || 'both',
       contact_whatsapp: listing.contact_whatsapp || false,
-      // Rimosso use_map_location, latitude, longitude, address_text dal reset
     });
 
     setExistingPhotos(listing.listing_photos || []);
@@ -131,8 +124,6 @@ const EditListing = () => {
   useEffect(() => {
     fetchListingData();
   }, [fetchListingData]);
-
-  // Rimosso handleLocationChange in quanto non più necessario
 
   const onSubmit = async (values: z.infer<typeof listingSchema>) => {
     setIsSubmitting(true);
@@ -144,26 +135,6 @@ const EditListing = () => {
 
       const formattedPhone = formatPhoneNumber(values.phone);
 
-      let finalLatitude: number | null = null;
-      let finalLongitude: number | null = null;
-      let finalAddressText: string | null = null;
-
-      // Sempre geocodifica la città e la zona
-      if (cityValue) {
-        const { data: geoData, error: geoError } = await supabase.functions.invoke('geocode-address', {
-          body: { city: cityValue, zone: zoneValue },
-        });
-
-        if (geoError) {
-          console.warn("Geocoding failed for city/zone:", geoError.message);
-          // Non bloccare l'aggiornamento dell'annuncio se la geocodifica fallisce, ma logga l'errore
-        } else if (geoData && geoData.latitude && geoData.longitude) {
-          finalLatitude = geoData.latitude;
-          finalLongitude = geoData.longitude;
-          finalAddressText = `${zoneValue ? zoneValue + ', ' : ''}${cityValue}, Italy`;
-        }
-      }
-
       const updateData = {
         title: values.title,
         description: values.description,
@@ -172,9 +143,9 @@ const EditListing = () => {
         contact_preference: values.contact_preference,
         contact_whatsapp: values.contact_whatsapp,
         zone: values.zone,
-        latitude: finalLatitude,
-        longitude: finalLongitude,
-        address_text: finalAddressText,
+        latitude: null, // Rimosso geocodifica
+        longitude: null, // Rimosso geocodifica
+        address_text: null, // Rimosso geocodifica
       };
 
       const { error: updateError } = await supabase
@@ -470,8 +441,6 @@ const EditListing = () => {
                     )}
                   />
                 )}
-
-                {/* Rimosso il campo use_map_location e il componente MapInput */}
 
                 <div>
                   <FormLabel>Fotografie</FormLabel>

@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, CalendarDays, User, Camera, MapPin, Tag, Flame, PauseCircle, PlayCircle } from "lucide-react"; // Aggiunte PauseCircle, PlayCircle
+import { Pencil, Trash2, CalendarDays, User, Camera, MapPin, Tag, Flame, PauseCircle, PlayCircle } from "lucide-react";
 import { format, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Link } from "react-router-dom";
@@ -31,6 +31,8 @@ export interface Listing {
   description: string;
   category: string;
   city: string;
+  zone: string | null;
+  age?: number;
   created_at: string;
   expires_at: string | null; // Può essere null se in pausa
   is_premium: boolean;
@@ -39,8 +41,6 @@ export interface Listing {
   promotion_end_at: string | null;
   last_bumped_at: string | null;
   listing_photos: { url: string; original_url: string | null; is_primary: boolean }[];
-  age?: number;
-  zone?: string | null;
   is_paused: boolean; // Nuovo campo
   paused_at: string | null; // Nuovo campo
   remaining_expires_at_duration: string | null; // Nuovo campo
@@ -52,7 +52,7 @@ interface ListingListItemProps {
   canEdit?: boolean;
   canManagePhotos?: boolean;
   canDelete?: boolean;
-  canPauseResume?: boolean; // Nuovo prop
+  canPauseResume?: boolean;
   onListingUpdated?: () => void;
   isAdminContext?: boolean;
   allowNonPremiumImage?: boolean;
@@ -351,7 +351,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                     "w-full h-8 px-2 text-xs flex items-center gap-1",
                     isActivePremium ? "bg-rose-500 hover:bg-rose-600" : "bg-blue-500 hover:bg-blue-600"
                   )}
-                  disabled={listing.is_paused} // Disabilita se in pausa
+                  disabled={listing.is_paused}
                 >
                   <Flame className="h-3 w-3" /> {isActivePremium ? 'Hot' : 'In Attesa'}
                 </Button>
@@ -380,7 +380,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
               </AlertDialogContent>
             </AlertDialog>
           ) : (
-            !isAdminContext && !listing.is_paused && ( // Non mostrare "Promuovi" se in pausa
+            !isAdminContext && !listing.is_paused && (
               <Link to={`/promote-listing/${listing.id}`} className="w-full">
                 <Button variant="default" size="sm" className="w-full h-8 px-2 text-xs bg-green-500 hover:bg-green-600 text-white">
                   <Flame className="h-3 w-3 md:mr-1" />
