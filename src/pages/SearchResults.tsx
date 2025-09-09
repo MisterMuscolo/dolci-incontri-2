@@ -3,7 +3,7 @@ import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { ListingListItem, Listing } from '@/components/ListingListItem';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Button } => '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { ChevronLeft, MapPin, Search, Heart, ChevronDown, ChevronUp, Globe, Palette, Ruler, Eye, User } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
