@@ -39,9 +39,9 @@ export const StaticMapDisplay = ({
     );
   }
 
-  const mapUrl = `https://tiles.stadiamaps.com/styles/alidade_smooth/static/${longitude},${latitude},${zoom}/${width}x${height}@2x.png?markers=lonlat:${longitude},${latitude}|color:ff0000|label:A&api_key=${STADIAMAPS_API_KEY}`;
+  // Modificato lo stile della mappa da 'alidade_smooth' a 'alidade_smooth_light'
+  const mapUrl = `https://tiles.stadiamaps.com/styles/alidade_smooth_light/static/${longitude},${latitude},${zoom}/${width}x${height}@2x.png?markers=lonlat:${longitude},${latitude}|color:ff0000|label:A&api_key=${STADIAMAPS_API_KEY}`;
   
-  // Aggiunto per il debug: stampa l'URL della mappa nella console
   console.log("Stadiamaps Map URL:", mapUrl);
 
   return (
