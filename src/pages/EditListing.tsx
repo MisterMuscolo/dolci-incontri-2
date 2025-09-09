@@ -33,6 +33,13 @@ const listingSchema = z.object({
   phone: z.string().optional(),
   contact_preference: z.enum(['email', 'phone', 'both'], { required_error: 'La preferenza di contatto è obbligatoria.' }),
   contact_whatsapp: z.boolean().optional().default(false),
+  // Nuovi campi per i dettagli personali
+  ethnicity: z.string().optional(),
+  nationality: z.string().optional(),
+  breast_type: z.string().optional(),
+  hair_color: z.string().optional(),
+  body_type: z.string().optional(),
+  eye_color: z.string().optional(),
 });
 
 type ExistingPhoto = { id: string; url: string; original_url: string | null; is_primary: boolean };
@@ -55,6 +62,13 @@ type FullListing = {
   contact_preference: 'email' | 'phone' | 'both';
   contact_whatsapp: boolean | null;
   listing_photos: ExistingPhoto[];
+  // Nuovi campi
+  ethnicity: string | null;
+  nationality: string | null;
+  breast_type: string | null;
+  hair_color: string | null;
+  body_type: string | null;
+  eye_color: string | null;
 };
 
 const EditListing = () => {
@@ -76,6 +90,12 @@ const EditListing = () => {
       phone: '',
       contact_preference: 'both',
       contact_whatsapp: false,
+      ethnicity: '',
+      nationality: '',
+      breast_type: '',
+      hair_color: '',
+      body_type: '',
+      eye_color: '',
     }
   });
 
@@ -115,6 +135,13 @@ const EditListing = () => {
       phone: listing.phone || '',
       contact_preference: listing.contact_preference || 'both',
       contact_whatsapp: listing.contact_whatsapp || false,
+      // Nuovi campi
+      ethnicity: listing.ethnicity || '',
+      nationality: listing.nationality || '',
+      breast_type: listing.breast_type || '',
+      hair_color: listing.hair_color || '',
+      body_type: listing.body_type || '',
+      eye_color: listing.eye_color || '',
     });
 
     setExistingPhotos(listing.listing_photos || []);
@@ -143,6 +170,13 @@ const EditListing = () => {
         contact_preference: values.contact_preference,
         contact_whatsapp: values.contact_whatsapp,
         zone: values.zone,
+        // Nuovi campi
+        ethnicity: values.ethnicity || null,
+        nationality: values.nationality || null,
+        breast_type: values.breast_type || null,
+        hair_color: values.hair_color || null,
+        body_type: values.body_type || null,
+        eye_color: values.eye_color || null,
       };
 
       const { error: updateError } = await supabase
@@ -238,6 +272,82 @@ const EditListing = () => {
   const promoStart = currentListing.promotion_start_at ? new Date(currentListing.promotion_start_at) : null;
   const promoEnd = currentListing.promotion_end_at ? new Date(currentListing.promotion_end_at) : null;
   const isPremiumOrPending = !!(currentListing.is_premium && promoStart && promoEnd && (promoStart <= now || promoEnd >= now));
+
+  const ethnicities = [
+    { value: 'africana', label: 'Africana' },
+    { value: 'indiana', label: 'Indiana' },
+    { value: 'asiatica', label: 'Asiatica' },
+    { value: 'araba', label: 'Araba' },
+    { value: 'latina', label: 'Latina' },
+    { value: 'caucasica', label: 'Caucasica' },
+    { value: 'italiana', label: 'Italiana' },
+    { value: 'mista', label: 'Mista' },
+    { value: 'altro', label: 'Altro' },
+  ];
+
+  const nationalities = [
+    { value: 'italiana', label: 'Italiana' },
+    { value: 'rumena', label: 'Rumena' },
+    { value: 'brasiliana', label: 'Brasiliana' },
+    { value: 'spagnola', label: 'Spagnola' },
+    { value: 'francese', label: 'Francese' },
+    { value: 'tedesca', label: 'Tedesca' },
+    { value: 'russa', label: 'Russa' },
+    { value: 'ucraina', label: 'Ucraina' },
+    { value: 'colombiana', label: 'Colombiana' },
+    { value: 'venezuelana', label: 'Venezuelana' },
+    { value: 'argentina', label: 'Argentina' },
+    { value: 'cubana', label: 'Cubana' },
+    { value: 'dominicana', label: 'Dominicana' },
+    { value: 'cinese', label: 'Cinese' },
+    { value: 'filippina', label: 'Filippina' },
+    { value: 'indonesiana', label: 'Indonesiana' },
+    { value: 'thailandese', label: 'Thailandese' },
+    { value: 'nigeriana', label: 'Nigeriana' },
+    { value: 'egiziana', label: 'Egiziana' },
+    { value: 'marocchina', label: 'Marocchina' },
+    { value: 'albanese', label: 'Albanese' },
+    { value: 'polacca', label: 'Polacca' },
+    { value: 'britannica', label: 'Britannica' },
+    { value: 'americana', label: 'Americana' },
+    { value: 'canadese', label: 'Canadese' },
+    { value: 'australiana', label: 'Australiana' },
+    { value: 'altro', label: 'Altro' },
+  ];
+
+  const breastTypes = [
+    { value: 'naturale', label: 'Naturale' },
+    { value: 'rifatto', label: 'Rifatto' },
+    { value: 'piccolo', label: 'Piccolo' },
+    { value: 'medio', label: 'Medio' },
+    { value: 'grande', label: 'Grande' },
+  ];
+
+  const hairColors = [
+    { value: 'biondi', label: 'Biondi' },
+    { value: 'castani', label: 'Castani' },
+    { value: 'neri', label: 'Neri' },
+    { value: 'rossi', label: 'Rossi' },
+    { value: 'grigi', label: 'Grigi' },
+    { value: 'colorati', label: 'Colorati' },
+  ];
+
+  const bodyTypes = [
+    { value: 'snella', label: 'Snella' },
+    { value: 'atletica', label: 'Atletica' },
+    { value: 'curvy', label: 'Curvy' },
+    { value: 'robusta', label: 'Robusta' },
+    { value: 'media', label: 'Media' },
+  ];
+
+  const eyeColors = [
+    { value: 'azzurri', label: 'Azzurri' },
+    { value: 'marroni', label: 'Marroni' },
+    { value: 'verdi', label: 'Verdi' },
+    { value: 'neri', label: 'Neri' },
+    { value: 'grigi', label: 'Grigi' },
+    { value: 'misti', label: 'Misti' },
+  ];
 
   return (
     <div className="bg-gray-50 p-4 sm:p-6 md:p-8">
@@ -348,6 +458,120 @@ const EditListing = () => {
                     </FormItem>
                   )}
                 />
+
+                {/* Nuova sezione Dettagli Personali */}
+                <h2 className="text-xl font-bold text-gray-800 pt-4">Dettagli Personali</h2>
+                <p className="text-sm text-gray-500 -mt-4">Questi dettagli saranno visibili pubblicamente solo per gli annunci Premium.</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <FormField
+                    control={form.control}
+                    name="ethnicity"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Origine (Opzionale)</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger><SelectValue placeholder="Seleziona la tua origine" /></SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {ethnicities.map((e) => <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="nationality"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nazionalità (Opzionale)</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger><SelectValue placeholder="Seleziona la tua nazionalità" /></SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="max-h-60">
+                            {nationalities.map((n) => <SelectItem key={n.value} value={n.value}>{n.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="breast_type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tipo di Seno (Opzionale)</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger><SelectValue placeholder="Seleziona il tipo di seno" /></SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {breastTypes.map((b) => <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="hair_color"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Colore Capelli (Opzionale)</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger><SelectValue placeholder="Seleziona il colore dei capelli" /></SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {hairColors.map((h) => <SelectItem key={h.value} value={h.value}>{h.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="body_type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Corporatura (Opzionale)</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger><SelectValue placeholder="Seleziona la corporatura" /></SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {bodyTypes.map((b) => <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="eye_color"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Colore Occhi (Opzionale)</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger><SelectValue placeholder="Seleziona il colore degli occhi" /></SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {eyeColors.map((e) => <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 <FormField
                   control={form.control}

@@ -5,7 +5,7 @@ import { ListingListItem, Listing } from '@/components/ListingListItem';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { ChevronLeft, MapPin, Search, Heart, ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronLeft, MapPin, Search, Heart, ChevronDown, ChevronUp, Globe, Palette, Ruler, Eye } from 'lucide-react'; // Aggiunte icone per i nuovi filtri
 import { Helmet } from 'react-helmet-async';
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -32,6 +32,12 @@ const SearchResults = () => {
   const [currentCategory, setCurrentCategory] = useState(searchParams.get('category') || 'tutte');
   const [currentCity, setCurrentCity] = useState(searchParams.get('city') || 'tutte');
   const [currentKeyword, setCurrentKeyword] = useState(searchParams.get('keyword') || '');
+  const [currentEthnicity, setCurrentEthnicity] = useState(searchParams.get('ethnicity') || 'tutte');
+  const [currentNationality, setCurrentNationality] = useState(searchParams.get('nationality') || 'tutte');
+  const [currentBreastType, setCurrentBreastType] = useState(searchParams.get('breast_type') || 'tutte');
+  const [currentHairColor, setCurrentHairColor] = useState(searchParams.get('hair_color') || 'tutte');
+  const [currentBodyType, setCurrentBodyType] = useState(searchParams.get('body_type') || 'tutte');
+  const [currentEyeColor, setCurrentEyeColor] = useState(searchParams.get('eye_color') || 'tutte');
   const [isFilterFormOpen, setIsFilterFormOpen] = useState(false); // State for collapsible filter form
 
   // Update local states when URL search params change (e.g., direct URL access or browser back/forward)
@@ -39,6 +45,12 @@ const SearchResults = () => {
     setCurrentCategory(searchParams.get('category') || 'tutte');
     setCurrentCity(searchParams.get('city') || 'tutte');
     setCurrentKeyword(searchParams.get('keyword') || '');
+    setCurrentEthnicity(searchParams.get('ethnicity') || 'tutte');
+    setCurrentNationality(searchParams.get('nationality') || 'tutte');
+    setCurrentBreastType(searchParams.get('breast_type') || 'tutte');
+    setCurrentHairColor(searchParams.get('hair_color') || 'tutte');
+    setCurrentBodyType(searchParams.get('body_type') || 'tutte');
+    setCurrentEyeColor(searchParams.get('eye_color') || 'tutte');
     setCurrentPage(parseInt(searchParams.get('page') || '1', 10));
   }, [searchParams]);
 
@@ -49,6 +61,12 @@ const SearchResults = () => {
     const categoryParam = searchParams.get('category');
     const cityParam = searchParams.get('city');
     const keywordParam = searchParams.get('keyword');
+    const ethnicityParam = searchParams.get('ethnicity');
+    const nationalityParam = searchParams.get('nationality');
+    const breastTypeParam = searchParams.get('breast_type');
+    const hairColorParam = searchParams.get('hair_color');
+    const bodyTypeParam = searchParams.get('body_type');
+    const eyeColorParam = searchParams.get('eye_color');
     const pageParam = parseInt(searchParams.get('page') || '1', 10);
 
     let query = supabase
@@ -73,7 +91,13 @@ const SearchResults = () => {
         paused_at,
         remaining_expires_at_duration,
         remaining_promotion_duration,
-        listing_photos ( url, original_url, is_primary )
+        listing_photos ( url, original_url, is_primary ),
+        ethnicity,
+        nationality,
+        breast_type,
+        hair_color,
+        body_type,
+        eye_color
       `, { count: 'exact' })
       .gt('expires_at', new Date().toISOString());
       // .eq('is_paused', false); // Rimosso il filtro is_paused per mostrare tutti gli annunci attivi, inclusi quelli riattivati
@@ -86,6 +110,24 @@ const SearchResults = () => {
     }
     if (keywordParam) {
       query = query.or(`title.ilike.%${keywordParam}%,description.ilike.%${keywordParam}%`);
+    }
+    if (ethnicityParam && ethnicityParam !== 'tutte') {
+      query = query.eq('ethnicity', ethnicityParam);
+    }
+    if (nationalityParam && nationalityParam !== 'tutte') {
+      query = query.eq('nationality', nationalityParam);
+    }
+    if (breastTypeParam && breastTypeParam !== 'tutte') {
+      query = query.eq('breast_type', breastTypeParam);
+    }
+    if (hairColorParam && hairColorParam !== 'tutte') {
+      query = query.eq('hair_color', hairColorParam);
+    }
+    if (bodyTypeParam && bodyTypeParam !== 'tutte') {
+      query = query.eq('body_type', bodyTypeParam);
+    }
+    if (eyeColorParam && eyeColorParam !== 'tutte') {
+      query = query.eq('eye_color', eyeColorParam);
     }
 
     query = query
@@ -130,6 +172,12 @@ const SearchResults = () => {
     if (currentCategory && currentCategory !== 'tutte') newSearchParams.append('category', currentCategory);
     if (currentCity && currentCity !== 'tutte') newSearchParams.append('city', currentCity);
     if (currentKeyword) newSearchParams.append('keyword', currentKeyword);
+    if (currentEthnicity && currentEthnicity !== 'tutte') newSearchParams.append('ethnicity', currentEthnicity);
+    if (currentNationality && currentNationality !== 'tutte') newSearchParams.append('nationality', currentNationality);
+    if (currentBreastType && currentBreastType !== 'tutte') newSearchParams.append('breast_type', currentBreastType);
+    if (currentHairColor && currentHairColor !== 'tutte') newSearchParams.append('hair_color', currentHairColor);
+    if (currentBodyType && currentBodyType !== 'tutte') newSearchParams.append('body_type', currentBodyType);
+    if (currentEyeColor && currentEyeColor !== 'tutte') newSearchParams.append('eye_color', currentEyeColor);
     newSearchParams.append('page', String(page));
     navigate(`/search?${newSearchParams.toString()}`);
     setIsFilterFormOpen(false); // Close the collapsible after applying filters
@@ -150,6 +198,82 @@ const SearchResults = () => {
     { value: 'donna-cerca-donna', label: '👩‍❤️‍👩 Donna cerca Donna' },
   ];
 
+  const ethnicities = [
+    { value: 'africana', label: 'Africana' },
+    { value: 'indiana', label: 'Indiana' },
+    { value: 'asiatica', label: 'Asiatica' },
+    { value: 'araba', label: 'Araba' },
+    { value: 'latina', label: 'Latina' },
+    { value: 'caucasica', label: 'Caucasica' },
+    { value: 'italiana', label: 'Italiana' },
+    { value: 'mista', label: 'Mista' },
+    { value: 'altro', label: 'Altro' },
+  ];
+
+  const nationalities = [
+    { value: 'italiana', label: 'Italiana' },
+    { value: 'rumena', label: 'Rumena' },
+    { value: 'brasiliana', label: 'Brasiliana' },
+    { value: 'spagnola', label: 'Spagnola' },
+    { value: 'francese', label: 'Francese' },
+    { value: 'tedesca', label: 'Tedesca' },
+    { value: 'russa', label: 'Russa' },
+    { value: 'ucraina', label: 'Ucraina' },
+    { value: 'colombiana', label: 'Colombiana' },
+    { value: 'venezuelana', label: 'Venezuelana' },
+    { value: 'argentina', label: 'Argentina' },
+    { value: 'cubana', label: 'Cubana' },
+    { value: 'dominicana', label: 'Dominicana' },
+    { value: 'cinese', label: 'Cinese' },
+    { value: 'filippina', label: 'Filippina' },
+    { value: 'indonesiana', label: 'Indonesiana' },
+    { value: 'thailandese', label: 'Thailandese' },
+    { value: 'nigeriana', label: 'Nigeriana' },
+    { value: 'egiziana', label: 'Egiziana' },
+    { value: 'marocchina', label: 'Marocchina' },
+    { value: 'albanese', label: 'Albanese' },
+    { value: 'polacca', label: 'Polacca' },
+    { value: 'britannica', label: 'Britannica' },
+    { value: 'americana', label: 'Americana' },
+    { value: 'canadese', label: 'Canadese' },
+    { value: 'australiana', label: 'Australiana' },
+    { value: 'altro', label: 'Altro' },
+  ];
+
+  const breastTypes = [
+    { value: 'naturale', label: 'Naturale' },
+    { value: 'rifatto', label: 'Rifatto' },
+    { value: 'piccolo', label: 'Piccolo' },
+    { value: 'medio', label: 'Medio' },
+    { value: 'grande', label: 'Grande' },
+  ];
+
+  const hairColors = [
+    { value: 'biondi', label: 'Biondi' },
+    { value: 'castani', label: 'Castani' },
+    { value: 'neri', label: 'Neri' },
+    { value: 'rossi', label: 'Rossi' },
+    { value: 'grigi', label: 'Grigi' },
+    { value: 'colorati', label: 'Colorati' },
+  ];
+
+  const bodyTypes = [
+    { value: 'snella', label: 'Snella' },
+    { value: 'atletica', label: 'Atletica' },
+    { value: 'curvy', label: 'Curvy' },
+    { value: 'robusta', label: 'Robusta' },
+    { value: 'media', label: 'Media' },
+  ];
+
+  const eyeColors = [
+    { value: 'azzurri', label: 'Azzurri' },
+    { value: 'marroni', label: 'Marroni' },
+    { value: 'verdi', label: 'Verdi' },
+    { value: 'neri', label: 'Neri' },
+    { value: 'grigi', label: 'Grigi' },
+    { value: 'misti', label: 'Misti' },
+  ];
+
   // Helper to get category label
   const getCategoryLabel = (value: string) => {
     const cat = categories.find(c => c.value === value);
@@ -161,6 +285,36 @@ const SearchResults = () => {
   const getCityLabel = (value: string) => {
     const city = italianProvinces.find(p => p.label === value);
     return city ? city.label : 'Tutte le città';
+  };
+
+  const getEthnicityLabel = (value: string) => {
+    const eth = ethnicities.find(e => e.value === value);
+    return eth ? eth.label : 'Tutte le origini';
+  };
+
+  const getNationalityLabel = (value: string) => {
+    const nat = nationalities.find(n => n.value === value);
+    return nat ? nat.label : 'Tutte le nazionalità';
+  };
+
+  const getBreastTypeLabel = (value: string) => {
+    const bt = breastTypes.find(b => b.value === value);
+    return bt ? bt.label : 'Tutti i tipi di seno';
+  };
+
+  const getHairColorLabel = (value: string) => {
+    const hc = hairColors.find(h => h.value === value);
+    return hc ? hc.label : 'Tutti i colori di capelli';
+  };
+
+  const getBodyTypeLabel = (value: string) => {
+    const bt = bodyTypes.find(b => b.value === value);
+    return bt ? bt.label : 'Tutte le corporature';
+  };
+
+  const getEyeColorLabel = (value: string) => {
+    const ec = eyeColors.find(e => e.value === value);
+    return ec ? ec.label : 'Tutti i colori di occhi';
   };
 
   const generateTitle = () => {
@@ -283,7 +437,45 @@ const SearchResults = () => {
                         <Search className="h-3 w-3 mr-1" /> "{currentKeyword}"
                       </Badge>
                     )}
-                    {(!currentCategory || currentCategory === 'tutte') && (!currentCity || currentCity === 'tutte') && !currentKeyword && (
+                    {currentEthnicity && currentEthnicity !== 'tutte' && (
+                      <Badge variant="secondary" className="capitalize">
+                        <Globe className="h-3 w-3 mr-1" /> {getEthnicityLabel(currentEthnicity)}
+                      </Badge>
+                    )}
+                    {currentNationality && currentNationality !== 'tutte' && (
+                      <Badge variant="secondary" className="capitalize">
+                        <Globe className="h-3 w-3 mr-1" /> {getNationalityLabel(currentNationality)}
+                      </Badge>
+                    )}
+                    {currentBreastType && currentBreastType !== 'tutte' && (
+                      <Badge variant="secondary" className="capitalize">
+                        <Palette className="h-3 w-3 mr-1" /> {getBreastTypeLabel(currentBreastType)}
+                      </Badge>
+                    )}
+                    {currentHairColor && currentHairColor !== 'tutte' && (
+                      <Badge variant="secondary" className="capitalize">
+                        <Palette className="h-3 w-3 mr-1" /> {getHairColorLabel(currentHairColor)}
+                      </Badge>
+                    )}
+                    {currentBodyType && currentBodyType !== 'tutte' && (
+                      <Badge variant="secondary" className="capitalize">
+                        <Ruler className="h-3 w-3 mr-1" /> {getBodyTypeLabel(currentBodyType)}
+                      </Badge>
+                    )}
+                    {currentEyeColor && currentEyeColor !== 'tutte' && (
+                      <Badge variant="secondary" className="capitalize">
+                        <Eye className="h-3 w-3 mr-1" /> {getEyeColorLabel(currentEyeColor)}
+                      </Badge>
+                    )}
+                    {(!currentCategory || currentCategory === 'tutte') && 
+                     (!currentCity || currentCity === 'tutte') && 
+                     !currentKeyword &&
+                     (!currentEthnicity || currentEthnicity === 'tutte') &&
+                     (!currentNationality || currentNationality === 'tutte') &&
+                     (!currentBreastType || currentBreastType === 'tutte') &&
+                     (!currentHairColor || currentHairColor === 'tutte') &&
+                     (!currentBodyType || currentBodyType === 'tutte') &&
+                     (!currentEyeColor || currentEyeColor === 'tutte') && (
                       <Badge variant="secondary">Tutti gli annunci</Badge>
                     )}
                   </div>
@@ -344,6 +536,83 @@ const SearchResults = () => {
                     />
                   </div>
                 </div>
+
+                {/* Nuovi filtri per Dettagli Personali */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="relative">
+                    <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Select value={currentEthnicity} onValueChange={setCurrentEthnicity}>
+                      <SelectTrigger className="w-full pl-10">
+                        <SelectValue placeholder="Origine" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="tutte">Tutte le origini</SelectItem>
+                        {ethnicities.map((e) => <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="relative">
+                    <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Select value={currentNationality} onValueChange={setCurrentNationality}>
+                      <SelectTrigger className="w-full pl-10">
+                        <SelectValue placeholder="Nazionalità" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-60">
+                        <SelectItem value="tutte">Tutte le nazionalità</SelectItem>
+                        {nationalities.map((n) => <SelectItem key={n.value} value={n.value}>{n.label}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="relative">
+                    <Palette className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Select value={currentBreastType} onValueChange={setCurrentBreastType}>
+                      <SelectTrigger className="w-full pl-10">
+                        <SelectValue placeholder="Tipo di Seno" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="tutte">Tutti i tipi di seno</SelectItem>
+                        {breastTypes.map((b) => <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="relative">
+                    <Palette className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Select value={currentHairColor} onValueChange={setCurrentHairColor}>
+                      <SelectTrigger className="w-full pl-10">
+                        <SelectValue placeholder="Colore Capelli" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="tutte">Tutti i colori di capelli</SelectItem>
+                        {hairColors.map((h) => <SelectItem key={h.value} value={h.value}>{h.label}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="relative">
+                    <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Select value={currentBodyType} onValueChange={setCurrentBodyType}>
+                      <SelectTrigger className="w-full pl-10">
+                        <SelectValue placeholder="Corporatura" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="tutte">Tutte le corporature</SelectItem>
+                        {bodyTypes.map((b) => <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="relative">
+                    <Eye className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Select value={currentEyeColor} onValueChange={setCurrentEyeColor}>
+                      <SelectTrigger className="w-full pl-10">
+                        <SelectValue placeholder="Colore Occhi" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="tutte">Tutti i colori di occhi</SelectItem>
+                        {eyeColors.map((e) => <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
                 <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600 text-lg py-6">
                   Applica Filtri
                 </Button>

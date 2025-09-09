@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, CalendarDays, User, Camera, MapPin, Tag, Flame, PauseCircle, PlayCircle } from "lucide-react";
+import { Pencil, Trash2, CalendarDays, User, Camera, MapPin, Tag, Flame, PauseCircle, PlayCircle, Globe, Palette, Ruler, Eye } from "lucide-react"; // Aggiunte icone per i nuovi campi
 import { format, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Link } from "react-router-dom";
@@ -45,6 +45,13 @@ export interface Listing {
   paused_at: string | null; // Nuovo campo
   remaining_expires_at_duration: string | null; // Nuovo campo
   remaining_promotion_duration: string | null; // Nuovo campo
+  // Nuovi campi
+  ethnicity: string | null;
+  nationality: string | null;
+  breast_type: string | null;
+  hair_color: string | null;
+  body_type: string | null;
+  eye_color: string | null;
 }
 
 interface ListingListItemProps {
@@ -297,6 +304,41 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
               <Badge variant="outline" className="text-xs">
                 <User className="h-3 w-3 mr-1" /> {listing.age} anni
               </Badge>
+            </div>
+          )}
+          {/* Nuovi badge per i dettagli personali, visibili solo se Premium attivo */}
+          {isActivePremium && (
+            <div className="flex flex-wrap gap-1 mt-1">
+              {listing.ethnicity && (
+                <Badge variant="secondary" className="capitalize text-xs">
+                  <Globe className="h-3 w-3 mr-1" /> {listing.ethnicity}
+                </Badge>
+              )}
+              {listing.nationality && (
+                <Badge variant="secondary" className="capitalize text-xs">
+                  <Globe className="h-3 w-3 mr-1" /> {listing.nationality}
+                </Badge>
+              )}
+              {listing.breast_type && (
+                <Badge variant="secondary" className="capitalize text-xs">
+                  <Palette className="h-3 w-3 mr-1" /> {listing.breast_type}
+                </Badge>
+              )}
+              {listing.hair_color && (
+                <Badge variant="secondary" className="capitalize text-xs">
+                  <Palette className="h-3 w-3 mr-1" /> {listing.hair_color}
+                </Badge>
+              )}
+              {listing.body_type && (
+                <Badge variant="secondary" className="capitalize text-xs">
+                  <Ruler className="h-3 w-3 mr-1" /> {listing.body_type}
+                </Badge>
+              )}
+              {listing.eye_color && (
+                <Badge variant="secondary" className="capitalize text-xs">
+                  <Eye className="h-3 w-3 mr-1" /> {listing.eye_color}
+                </Badge>
+              )}
             </div>
           )}
         </div>

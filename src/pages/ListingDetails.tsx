@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { showError } from '@/utils/toast';
-import { MapPin, User, Mail, BookText, ChevronLeft, CalendarDays, Phone, Flag, MessageCircle, Flame, PauseCircle } from 'lucide-react';
+import { MapPin, User, Mail, BookText, ChevronLeft, CalendarDays, Phone, Flag, MessageCircle, Flame, PauseCircle, Globe, Palette, Ruler, Eye } from 'lucide-react'; // Aggiunte icone per i nuovi campi
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -40,6 +40,13 @@ type FullListing = {
   paused_at: string | null; // Nuovo campo
   remaining_expires_at_duration: string | null; // Nuovo campo
   remaining_promotion_duration: string | null; // Nuovo campo
+  // Nuovi campi
+  ethnicity: string | null;
+  nationality: string | null;
+  breast_type: string | null;
+  hair_color: string | null;
+  body_type: string | null;
+  eye_color: string | null;
 };
 
 const ListingDetails = () => {
@@ -264,8 +271,6 @@ const ListingDetails = () => {
             />
           </div>
 
-          {/* Rimosso il blocco della mappa statica */}
-
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-xl"><BookText className="h-5 w-5 text-rose-500" /> Descrizione</CardTitle>
@@ -274,6 +279,50 @@ const ListingDetails = () => {
               <p className="text-gray-600 whitespace-pre-wrap">{listing.description}</p>
             </CardContent>
           </Card>
+
+          {/* Nuova Card per Dettagli Personali (visibile solo per Premium attivi) */}
+          {isActivePremium && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl"><User className="h-5 w-5 text-rose-500" /> Dettagli Personali</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-wrap gap-2">
+                {listing.ethnicity && (
+                  <Badge variant="secondary" className="capitalize flex items-center gap-1">
+                    <Globe className="h-4 w-4" /> Origine: {listing.ethnicity}
+                  </Badge>
+                )}
+                {listing.nationality && (
+                  <Badge variant="secondary" className="capitalize flex items-center gap-1">
+                    <Globe className="h-4 w-4" /> Nazionalità: {listing.nationality}
+                  </Badge>
+                )}
+                {listing.breast_type && (
+                  <Badge variant="secondary" className="capitalize flex items-center gap-1">
+                    <Palette className="h-4 w-4" /> Tipo di Seno: {listing.breast_type}
+                  </Badge>
+                )}
+                {listing.hair_color && (
+                  <Badge variant="secondary" className="capitalize flex items-center gap-1">
+                    <Palette className="h-4 w-4" /> Colore Capelli: {listing.hair_color}
+                  </Badge>
+                )}
+                {listing.body_type && (
+                  <Badge variant="secondary" className="capitalize flex items-center gap-1">
+                    <Ruler className="h-4 w-4" /> Corporatura: {listing.body_type}
+                  </Badge>
+                )}
+                {listing.eye_color && (
+                  <Badge variant="secondary" className="capitalize flex items-center gap-1">
+                    <Eye className="h-4 w-4" /> Colore Occhi: {listing.eye_color}
+                  </Badge>
+                )}
+                {(!listing.ethnicity && !listing.nationality && !listing.breast_type && !listing.hair_color && !listing.body_type && !listing.eye_color) && (
+                  <p className="text-gray-600">Nessun dettaglio personale aggiuntivo.</p>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           <div className="flex flex-col sm:flex-row justify-center py-4 gap-4">
             {canContactByPhone && (
