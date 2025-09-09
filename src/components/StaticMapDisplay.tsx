@@ -39,10 +39,16 @@ export const StaticMapDisplay = ({
     );
   }
 
-  // Ho rimosso nuovamente il parametro 'markers' per testare la mappa base.
-  const mapUrl = `https://tiles.stadiamaps.com/styles/osm_bright/static/${longitude},${latitude},${zoom}/${width}x${height}.png?api_key=${STADIAMAPS_API_KEY}`;
+  // Utilizzo coordinate di esempio da Stadiamaps (New York) per testare la chiave API
+  const testLongitude = -73.9796;
+  const testLatitude = 40.7654;
+  const testZoom = 13;
+  const testWidth = 600;
+  const testHeight = 400;
+
+  const mapUrl = `https://tiles.stadiamaps.com/styles/osm_bright/static/${testLongitude},${testLatitude},${testZoom}/${testWidth}x${testHeight}.png?api_key=${STADIAMAPS_API_KEY}`;
   
-  console.log("Stadiamaps Map URL (simplified, with new key):", mapUrl);
+  console.log("Stadiamaps Map URL (using NY example with your key):", mapUrl);
 
   return (
     <div className="relative w-full h-full rounded-md overflow-hidden">
