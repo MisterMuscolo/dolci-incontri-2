@@ -39,8 +39,8 @@ export const StaticMapDisplay = ({
     );
   }
 
-  // Modificato lo stile della mappa da 'alidade_smooth' a 'alidade_smooth_light'
-  const mapUrl = `https://tiles.stadiamaps.com/styles/alidade_smooth_light/static/${longitude},${latitude},${zoom}/${width}x${height}@2x.png?markers=lonlat:${longitude},${latitude}|color:ff0000|label:A&api_key=${STADIAMAPS_API_KEY}`;
+  // Modificato lo stile della mappa da 'alidade_smooth_light' a 'osm_bright' e rimosso '@2x'
+  const mapUrl = `https://tiles.stadiamaps.com/styles/osm_bright/static/${longitude},${latitude},${zoom}/${width}x${height}.png?markers=lonlat:${longitude},${latitude}|color:ff0000|label:A&api_key=${STADIAMAPS_API_KEY}`;
   
   console.log("Stadiamaps Map URL:", mapUrl);
 
