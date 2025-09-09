@@ -64,6 +64,12 @@ const SearchResults = () => {
     } else if (minAgeParam && !maxAgeParam) {
       ageRangeValue = `${minAgeParam}+`;
     }
+
+    // Validate if the constructed age range is actually one of the predefined ones
+    const isValidAgeRange = ageRanges.some(range => range.value === ageRangeValue);
+    if (!isValidAgeRange) {
+      ageRangeValue = 'tutte'; // Fallback to 'tutte' if invalid
+    }
     setCurrentSelectedAgeRange(ageRangeValue);
 
     setCurrentEthnicity(searchParams.get('ethnicity') || 'tutte');

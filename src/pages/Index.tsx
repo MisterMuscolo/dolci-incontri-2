@@ -58,6 +58,12 @@ export default function Index({ session }: IndexProps) {
     } else if (minAgeParam && !maxAgeParam) {
       initialAgeRange = `${minAgeParam}+`;
     }
+    
+    // Validate if the constructed age range is actually one of the predefined ones
+    const isValidAgeRange = ageRanges.some(range => range.value === initialAgeRange);
+    if (!isValidAgeRange) {
+      initialAgeRange = 'tutte'; // Fallback to 'tutte' if invalid
+    }
     setSelectedAgeRange(initialAgeRange);
 
   }, [searchParams, navigate]);
