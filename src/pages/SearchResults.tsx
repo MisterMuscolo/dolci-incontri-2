@@ -500,7 +500,7 @@ const SearchResults = () => {
                     )}
                     {currentBreastType && currentBreastType !== 'tutte' && (
                       <Badge variant="secondary" className="capitalize">
-                        <Palette className="h-3 w-3 mr-1" /> {getBreastTypeLabel(currentBreastType)}
+                        <Ruler className="h-3 w-3 mr-1" /> {getBreastTypeLabel(currentBreastType)}
                       </Badge>
                     )}
                     {currentHairColor && currentHairColor !== 'tutte' && (
@@ -635,7 +635,7 @@ const SearchResults = () => {
                     </Select>
                   </div>
                   <div className="relative">
-                    <Palette className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /> {/* Modificato qui */}
                     <Select value={currentBreastType} onValueChange={setCurrentBreastType}>
                       <SelectTrigger className="w-full pl-10">
                         <SelectValue placeholder="Tipo di Seno" />
