@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { italianProvinces } from '@/data/provinces';
-import { Heart, MapPin, Search, Globe, Palette, Ruler, Eye, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react'; // Importa RotateCcw per l'icona di reset
+import { Heart, MapPin, Search, Globe, Palette, Ruler, Eye, ChevronDown, ChevronUp, RotateCcw, User } from 'lucide-react'; // Importa RotateCcw e User per l'icona di reset
 import { Card, CardContent } from '@/components/ui/card';
 import { PWAInstallInstructions } from '@/components/PWAInstallInstructions';
 import { Helmet } from 'react-helmet-async';
@@ -20,6 +20,8 @@ export default function Index({ session }: IndexProps) {
   const [category, setCategory] = useState('tutte');
   const [city, setCity] = useState('tutte');
   const [keyword, setKeyword] = useState('');
+  const [minAge, setMinAge] = useState(''); // Nuovo stato per età minima
+  const [maxAge, setMaxAge] = useState(''); // Nuovo stato per età massima
   const [ethnicity, setEthnicity] = useState('tutte');
   const [nationality, setNationality] = useState('tutte');
   const [breastType, setBreastType] = useState('tutte');
@@ -47,6 +49,8 @@ export default function Index({ session }: IndexProps) {
     if (category && category !== 'tutte') searchParams.append('category', category);
     if (city && city !== 'tutte') searchParams.append('city', city);
     if (keyword) searchParams.append('keyword', keyword);
+    if (minAge) searchParams.append('min_age', minAge); // Aggiungi minAge
+    if (maxAge) searchParams.append('max_age', maxAge); // Aggiungi maxAge
     if (ethnicity && ethnicity !== 'tutte') searchParams.append('ethnicity', ethnicity);
     if (nationality && nationality !== 'tutte') searchParams.append('nationality', nationality);
     if (breastType && breastType !== 'tutte') searchParams.append('breast_type', breastType);
@@ -62,6 +66,8 @@ export default function Index({ session }: IndexProps) {
     setCategory('tutte');
     setCity('tutte');
     setKeyword('');
+    setMinAge(''); // Resetta minAge
+    setMaxAge(''); // Resetta maxAge
     setEthnicity('tutte');
     setNationality('tutte');
     setBreastType('tutte');
@@ -199,7 +205,9 @@ export default function Index({ session }: IndexProps) {
     (breastType && breastType !== 'tutte') ||
     (hairColor && hairColor !== 'tutte') ||
     (bodyType && bodyType !== 'tutte') ||
-    (eyeColor && eyeColor !== 'tutte');
+    (eyeColor && eyeColor !== 'tutte') ||
+    minAge !== '' || // Includi età nei filtri attivi
+    maxAge !== ''; // Includi età nei filtri attivi
 
   return (
     <>
@@ -280,6 +288,16 @@ export default function Index({ session }: IndexProps) {
                         Filtri
                       </h3>
                       <div className="flex flex-wrap gap-2 mt-1">
+                        {minAge && (
+                          <Badge variant="secondary" className="capitalize">
+                            <User className="h-3 w-3 mr-1" /> Min Età: {minAge}
+                          </Badge>
+                        )}
+                        {maxAge && (
+                          <Badge variant="secondary" className="capitalize">
+                            <User className="h-3 w-3 mr-1" /> Max Età: {maxAge}
+                          </Badge>
+                        )}
                         {ethnicity && ethnicity !== 'tutte' && (
                           <Badge variant="secondary" className="capitalize">
                             <Globe className="h-3 w-3 mr-1" /> {getEthnicityLabel(ethnicity)}
@@ -324,6 +342,29 @@ export default function Index({ session }: IndexProps) {
                 <CollapsibleContent>
                   <Separator className="my-4" />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Nuovi campi per l'età */}
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Input 
+                        type="number" 
+                        placeholder="Età Minima" 
+                        className="w-full pl-10"
+                        value={minAge}
+                        onChange={(e) => setMinAge(e.target.value)}
+                        min="18"
+                      />
+                    </div>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Input 
+                        type="number" 
+                        placeholder="Età Massima" 
+                        className="w-full pl-10"
+                        value={maxAge}
+                        onChange={(e) => setMaxAge(e.target.value)}
+                        min="18"
+                      />
+                    </div>
                     <div className="relative">
                       <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                       <Select value={ethnicity} onValueChange={setEthnicity}>
