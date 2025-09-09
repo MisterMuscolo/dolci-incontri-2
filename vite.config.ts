@@ -19,4 +19,7 @@ export default defineConfig(() => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    exclude: ['react-leaflet', 'leaflet'], // Escludi queste librerie dalla pre-ottimizzazione
+  },
 }));
