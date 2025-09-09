@@ -10,19 +10,19 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { italianProvinces } from '@/data/provinces';
-import { ImageUploader, NewFilePair } from '@/components/ImageUploader'; // Importa NewFilePair
+import { ImageUploader, NewFilePair } from '@/components/ImageUploader';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { ChevronLeft } from 'lucide-react';
-import { cn, formatPhoneNumber } from '@/lib/utils'; // Rimosso slugifyFilename, generateListingSlug
+import { cn, formatPhoneNumber } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
-import { MapInput } from '@/components/MapInput'; // Importa MapInput
+// Rimosso l'import di MapInput
 
 const listingSchema = z.object({
   category: z.string({ required_error: 'La categoria è obbligatoria.' }),
   city: z.string({ required_error: 'La città è obbligatoria.' }),
-  zone: z.string().optional(), // Reso nuovamente opzionale
+  zone: z.string().optional(),
   age: z.string()
     .min(1, "L'età è obbligatoria.")
     .refine((val) => !isNaN(parseInt(val, 10)), { message: "L'età deve essere un numero." })
@@ -33,11 +33,6 @@ const listingSchema = z.object({
   phone: z.string().optional(),
   contact_preference: z.enum(['email', 'phone', 'both'], { required_error: 'La preferenza di contatto è obbligatoria.' }),
   contact_whatsapp: z.boolean().optional().default(false),
-  // Nuovi campi per la mappa
-  use_map_location: z.boolean().default(true),
-  latitude: z.number().nullable().optional(),
-  longitude: z.number().nullable().optional(),
-  address_text: z.string().nullable().optional(),
 }).superRefine((data, ctx) => {
   if (data.contact_preference === 'email' || data.contact_preference === 'both') {
     if (!data.email || data.email.trim() === '') {
@@ -57,30 +52,15 @@ const listingSchema = z.object({
       });
     }
   }
-  // Validazione per la mappa: se use_map_location è true, latitude e longitude sono obbligatori
-  if (data.use_map_location) {
-    if (data.latitude === null || data.longitude === null) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "La posizione sulla mappa è obbligatoria se la funzione mappa è attiva.",
-        path: ['latitude'], // O un path più generico come 'use_map_location'
-      });
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "La posizione sulla mappa è obbligatoria se la funzione mappa è attiva.",
-        path: ['longitude'],
-      });
-    }
-  }
 });
 
 const NewListing = () => {
   const navigate = useNavigate();
-  const [filesToUpload, setFilesToUpload] = useState<NewFilePair[]>([]); // Aggiornato a NewFilePair[]
+  const [filesToUpload, setFilesToUpload] = useState<NewFilePair[]>([]);
   const [primaryIndex, setPrimaryIndex] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const { getBackLinkText, handleNavigateBack } = useDynamicBackLink(); // Usa handleNavigateBack
+  const { getBackLinkText, handleNavigateBack } = useDynamicBackLink();
 
   const form = useForm<z.infer<typeof listingSchema>>({
     resolver: zodResolver(listingSchema),
@@ -90,10 +70,6 @@ const NewListing = () => {
       phone: '',
       contact_preference: 'both',
       contact_whatsapp: false,
-      use_map_location: true, // Default to true
-      latitude: null,
-      longitude: null,
-      address_text: null,
     }
   });
 
@@ -101,7 +77,6 @@ const NewListing = () => {
   const phoneValue = form.watch('phone');
   const cityValue = form.watch('city');
   const zoneValue = form.watch('zone');
-  const useMapLocation = form.watch('use_map_location');
 
   useEffect(() => {
     const fetchUserEmailAndId = async () => {
@@ -114,12 +89,7 @@ const NewListing = () => {
     fetchUserEmailAndId();
   }, [form]);
 
-  const handleLocationChange = (latitude: number | null, longitude: number | null, addressText: string | null) => {
-    form.setValue('latitude', latitude);
-    form.setValue('longitude', longitude);
-    form.setValue('address_text', addressText);
-    form.trigger(['latitude', 'longitude', 'address_text']); // Trigger validation
-  };
+  // Rimosso handleLocationChange in quanto non più necessario
 
   const onSubmit = async (values: z.infer<typeof listingSchema>) => {
     setIsLoading(true);
@@ -129,31 +99,26 @@ const NewListing = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Devi essere autenticato per creare un annuncio.');
 
-      const { age, phone, use_map_location, latitude, longitude, address_text, ...restOfValues } = values;
+      const { age, phone, ...restOfValues } = values;
       const formattedPhone = formatPhoneNumber(phone);
 
       let finalLatitude: number | null = null;
       let finalLongitude: number | null = null;
       let finalAddressText: string | null = null;
 
-      if (use_map_location) {
-        finalLatitude = latitude;
-        finalLongitude = longitude;
-        finalAddressText = address_text;
-      } else {
-        // If map is not used, try to geocode city/zone as a fallback for coordinates
-        if (cityValue) {
-          const { data: geoData, error: geoError } = await supabase.functions.invoke('geocode-address', {
-            body: { city: cityValue, zone: zoneValue },
-          });
+      // Sempre geocodifica la città e la zona
+      if (cityValue) {
+        const { data: geoData, error: geoError } = await supabase.functions.invoke('geocode-address', {
+          body: { city: cityValue, zone: zoneValue },
+        });
 
-          if (geoError) {
-            console.warn("Geocoding failed for city/zone:", geoError.message);
-          } else if (geoData && geoData.latitude && geoData.longitude) {
-            finalLatitude = geoData.latitude;
-            finalLongitude = geoData.longitude;
-            finalAddressText = `${zoneValue ? zoneValue + ', ' : ''}${cityValue}, Italy`; // Simple address text
-          }
+        if (geoError) {
+          console.warn("Geocoding failed for city/zone:", geoError.message);
+          // Non bloccare la creazione dell'annuncio se la geocodifica fallisce, ma logga l'errore
+        } else if (geoData && geoData.latitude && geoData.longitude) {
+          finalLatitude = geoData.latitude;
+          finalLongitude = geoData.longitude;
+          finalAddressText = `${zoneValue ? zoneValue + ', ' : ''}${cityValue}, Italy`;
         }
       }
 
@@ -217,8 +182,8 @@ const NewListing = () => {
           
           return {
             listing_id: listingId,
-            url: croppedPublicUrl, // Cropped URL for display
-            original_url: originalPublicUrl, // Original URL for full view
+            url: croppedPublicUrl,
+            original_url: originalPublicUrl,
             is_primary: index === primaryIndex,
           };
         });
@@ -228,7 +193,6 @@ const NewListing = () => {
         const { error: photosError } = await supabase.from('listing_photos').insert(photoPayloads);
 
         if (photosError) {
-          // Se il salvataggio delle foto fallisce, eliminiamo l'annuncio appena creato
           await supabase.from('listings').delete().eq('id', listingId);
           throw new Error(photosError.message || 'Errore nel salvataggio delle foto.');
         }
@@ -236,7 +200,7 @@ const NewListing = () => {
 
       dismissToast(toastId);
       showSuccess('Annuncio pubblicato con successo!');
-      navigate(`/promote-listing/${listingId}`); // Reindirizza direttamente alla promozione
+      navigate(`/promote-listing/${listingId}`);
     } catch (error: any) {
       dismissToast(toastId);
       showError(error.message || 'Si è verificato un errore imprevisto.');
@@ -445,41 +409,7 @@ const NewListing = () => {
                   />
                 )}
 
-                {/* Nuova sezione per la posizione sulla mappa */}
-                <FormField
-                  control={form.control}
-                  name="use_map_location"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={isLoading}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>Usa posizione sulla mappa</FormLabel>
-                        <FormDescription>
-                          Attiva per specificare la posizione esatta del tuo annuncio tramite mappa o indirizzo.
-                        </FormDescription>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-                {useMapLocation && (
-                  <MapInput
-                    initialLatitude={form.getValues('latitude')}
-                    initialLongitude={form.getValues('longitude')}
-                    initialAddressText={form.getValues('address_text')}
-                    initialCity={cityValue} // Passa la città selezionata per pre-centrare la mappa
-                    onLocationChange={handleLocationChange}
-                    disabled={isLoading}
-                  />
-                )}
-                {form.formState.errors.latitude && useMapLocation && (
-                  <p className="text-sm font-medium text-destructive">{form.formState.errors.latitude.message}</p>
-                )}
+                {/* Rimosso il campo use_map_location e il componente MapInput */}
 
                 <div>
                   <FormLabel>Fotografie</FormLabel>
@@ -489,7 +419,7 @@ const NewListing = () => {
                     userId={currentUserId ?? undefined}
                     initialPhotos={[]}
                     isPremiumOrPending={true}
-                    onFilesChange={setFilesToUpload} // Correttamente tipizzato
+                    onFilesChange={setFilesToUpload}
                     onPrimaryIndexChange={setPrimaryIndex}
                     onExistingPhotosUpdated={() => {}}
                     hideMainPreview={false}

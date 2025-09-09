@@ -10,20 +10,20 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { italianProvinces } from '@/data/provinces';
-import { ImageUploader, NewFilePair } from '@/components/ImageUploader'; // Importa NewFilePair
+import { ImageUploader, NewFilePair } from '@/components/ImageUploader';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { ChevronLeft } from 'lucide-react';
-import { cn, formatPhoneNumber } from '@/lib/utils'; // Rimosso slugifyFilename, generateListingSlug
+import { cn, formatPhoneNumber } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
-import { MapInput } from '@/components/MapInput'; // Importa MapInput
+// Rimosso l'import di MapInput
 
 const listingSchema = z.object({
   category: z.string({ required_error: 'La categoria è obbligatoria.' }),
   city: z.string({ required_error: 'La città è obbligatoria.' }),
-  zone: z.string().optional(), // Reso nuovamente opzionale
+  zone: z.string().optional(),
   age: z.string()
     .min(1, "L'età è obbligatoria.")
     .refine((val) => !isNaN(parseInt(val, 10)), { message: "L'età deve essere un numero." })
@@ -34,45 +34,6 @@ const listingSchema = z.object({
   phone: z.string().optional(),
   contact_preference: z.enum(['email', 'phone', 'both'], { required_error: 'La preferenza di contatto è obbligatoria.' }),
   contact_whatsapp: z.boolean().optional().default(false),
-  // Nuovi campi per la mappa
-  use_map_location: z.boolean().default(true),
-  latitude: z.number().nullable().optional(),
-  longitude: z.number().nullable().optional(),
-  address_text: z.string().nullable().optional(),
-}).superRefine((data, ctx) => {
-  if (data.contact_preference === 'email' || data.contact_preference === 'both') {
-    if (!data.email || data.email.trim() === '') {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "L'email è obbligatoria per la preferenza di contatto selezionata.",
-        path: ['email'],
-      });
-    }
-  }
-  if (data.contact_preference === 'phone' || data.contact_preference === 'both') {
-    if (!data.phone || data.phone.trim() === '') {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Il numero di telefono è obbligatorio per la preferenza di contatto selezionata.",
-        path: ['phone'],
-      });
-    }
-  }
-  // Validazione per la mappa: se use_map_location è true, latitude e longitude sono obbligatori
-  if (data.use_map_location) {
-    if (data.latitude === null || data.longitude === null) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "La posizione sulla mappa è obbligatoria se la funzione mappa è attiva.",
-        path: ['latitude'], // O un path più generico come 'use_map_location'
-      });
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "La posizione sulla mappa è obbligatoria se la funzione mappa è attiva.",
-        path: ['longitude'],
-      });
-    }
-  }
 });
 
 type ExistingPhoto = { id: string; url: string; original_url: string | null; is_primary: boolean };
@@ -95,21 +56,21 @@ type FullListing = {
   contact_preference: 'email' | 'phone' | 'both';
   contact_whatsapp: boolean | null;
   listing_photos: ExistingPhoto[];
-  latitude: number | null; // Add latitude
-  longitude: number | null; // Add longitude
-  address_text: string | null; // Add address_text
+  latitude: number | null;
+  longitude: number | null;
+  address_text: string | null;
 };
 
 const EditListing = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [newFilesToUpload, setNewFilesToUpload] = useState<NewFilePair[]>([]); // Aggiornato a NewFilePair[]
+  const [newFilesToUpload, setNewFilesToUpload] = useState<NewFilePair[]>([]);
   const [newPrimaryIndex, setNewPrimaryIndex] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [existingPhotos, setExistingPhotos] = useState<ExistingPhoto[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentListing, setCurrentListing] = useState<FullListing | null>(null);
-  const { getBackLinkText, handleNavigateBack } = useDynamicBackLink(); // Usa handleNavigateBack
+  const { getBackLinkText, handleNavigateBack } = useDynamicBackLink();
 
   const form = useForm<z.infer<typeof listingSchema>>({
     resolver: zodResolver(listingSchema),
@@ -119,10 +80,6 @@ const EditListing = () => {
       phone: '',
       contact_preference: 'both',
       contact_whatsapp: false,
-      use_map_location: true, // Default to true
-      latitude: null,
-      longitude: null,
-      address_text: null,
     }
   });
 
@@ -130,7 +87,6 @@ const EditListing = () => {
   const phoneValue = form.watch('phone');
   const cityValue = form.watch('city');
   const zoneValue = form.watch('zone');
-  const useMapLocation = form.watch('use_map_location');
 
   const fetchListingData = useCallback(async () => {
     if (!id) {
@@ -165,10 +121,7 @@ const EditListing = () => {
       phone: listing.phone || '',
       contact_preference: listing.contact_preference || 'both',
       contact_whatsapp: listing.contact_whatsapp || false,
-      use_map_location: (listing.latitude !== null && listing.longitude !== null) || false, // Set based on existing coords
-      latitude: listing.latitude,
-      longitude: listing.longitude,
-      address_text: listing.address_text,
+      // Rimosso use_map_location, latitude, longitude, address_text dal reset
     });
 
     setExistingPhotos(listing.listing_photos || []);
@@ -179,12 +132,7 @@ const EditListing = () => {
     fetchListingData();
   }, [fetchListingData]);
 
-  const handleLocationChange = (latitude: number | null, longitude: number | null, addressText: string | null) => {
-    form.setValue('latitude', latitude);
-    form.setValue('longitude', longitude);
-    form.setValue('address_text', addressText);
-    form.trigger(['latitude', 'longitude', 'address_text']); // Trigger validation
-  };
+  // Rimosso handleLocationChange in quanto non più necessario
 
   const onSubmit = async (values: z.infer<typeof listingSchema>) => {
     setIsSubmitting(true);
@@ -200,32 +148,19 @@ const EditListing = () => {
       let finalLongitude: number | null = null;
       let finalAddressText: string | null = null;
 
-      if (values.use_map_location) {
-        finalLatitude = values.latitude;
-        finalLongitude = values.longitude;
-        finalAddressText = values.address_text;
-      } else {
-        // If map is not used, try to geocode city/zone as a fallback for coordinates
-        // Only re-geocode if city/zone changed or if no coordinates were previously set
-        if (cityValue !== currentListing?.city || zoneValue !== currentListing?.zone || (currentListing?.latitude === null && currentListing?.longitude === null)) {
-          if (cityValue) {
-            const { data: geoData, error: geoError } = await supabase.functions.invoke('geocode-address', {
-              body: { city: cityValue, zone: zoneValue },
-            });
+      // Sempre geocodifica la città e la zona
+      if (cityValue) {
+        const { data: geoData, error: geoError } = await supabase.functions.invoke('geocode-address', {
+          body: { city: cityValue, zone: zoneValue },
+        });
 
-            if (geoError) {
-              console.warn("Geocoding failed for city/zone:", geoError.message);
-            } else if (geoData && geoData.latitude && geoData.longitude) {
-              finalLatitude = geoData.latitude;
-              finalLongitude = geoData.longitude;
-              finalAddressText = `${zoneValue ? zoneValue + ', ' : ''}${cityValue}, Italy`; // Simple address text
-            }
-          }
-        } else {
-          // If map is not used and city/zone haven't changed, keep existing coordinates/address_text
-          finalLatitude = currentListing?.latitude || null;
-          finalLongitude = currentListing?.longitude || null;
-          finalAddressText = currentListing?.address_text || null;
+        if (geoError) {
+          console.warn("Geocoding failed for city/zone:", geoError.message);
+          // Non bloccare l'aggiornamento dell'annuncio se la geocodifica fallisce, ma logga l'errore
+        } else if (geoData && geoData.latitude && geoData.longitude) {
+          finalLatitude = geoData.latitude;
+          finalLongitude = geoData.longitude;
+          finalAddressText = `${zoneValue ? zoneValue + ', ' : ''}${cityValue}, Italy`;
         }
       }
 
@@ -283,8 +218,8 @@ const EditListing = () => {
           
           return {
             listing_id: id,
-            url: croppedPublicUrl, // Cropped URL for display
-            original_url: originalPublicUrl, // Original URL for full view
+            url: croppedPublicUrl,
+            original_url: originalPublicUrl,
             is_primary: newPrimaryIndex === index && existingPhotos.length === 0,
           };
         });
@@ -334,7 +269,7 @@ const EditListing = () => {
   const now = new Date();
   const promoStart = currentListing.promotion_start_at ? new Date(currentListing.promotion_start_at) : null;
   const promoEnd = currentListing.promotion_end_at ? new Date(currentListing.promotion_end_at) : null;
-  const isPremiumOrPending = !!(currentListing.is_premium && promoStart && promoEnd && (promoStart <= now || promoEnd >= now)); // Convert to boolean
+  const isPremiumOrPending = !!(currentListing.is_premium && promoStart && promoEnd && (promoStart <= now || promoEnd >= now));
 
   return (
     <div className="bg-gray-50 p-4 sm:p-6 md:p-8">
@@ -536,41 +471,7 @@ const EditListing = () => {
                   />
                 )}
 
-                {/* Nuova sezione per la posizione sulla mappa */}
-                <FormField
-                  control={form.control}
-                  name="use_map_location"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={isSubmitting}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>Usa posizione sulla mappa</FormLabel>
-                        <FormDescription>
-                          Attiva per specificare la posizione esatta del tuo annuncio tramite mappa o indirizzo.
-                        </FormDescription>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-                {useMapLocation && (
-                  <MapInput
-                    initialLatitude={form.getValues('latitude')}
-                    initialLongitude={form.getValues('longitude')}
-                    initialAddressText={form.getValues('address_text')}
-                    initialCity={cityValue} // Passa la città selezionata per pre-centrare la mappa
-                    onLocationChange={handleLocationChange}
-                    disabled={isSubmitting}
-                  />
-                )}
-                {form.formState.errors.latitude && useMapLocation && (
-                  <p className="text-sm font-medium text-destructive">{form.formState.errors.latitude.message}</p>
-                )}
+                {/* Rimosso il campo use_map_location e il componente MapInput */}
 
                 <div>
                   <FormLabel>Fotografie</FormLabel>
@@ -580,7 +481,7 @@ const EditListing = () => {
                     userId={currentListing.user_id}
                     initialPhotos={existingPhotos}
                     isPremiumOrPending={isPremiumOrPending}
-                    onFilesChange={setNewFilesToUpload} // Correttamente tipizzato
+                    onFilesChange={setNewFilesToUpload}
                     onPrimaryIndexChange={setNewPrimaryIndex}
                     onExistingPhotosUpdated={setExistingPhotos}
                     hideMainPreview={false}
