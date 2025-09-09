@@ -9,22 +9,31 @@ interface WatermarkedImageProps extends React.ImgHTMLAttributes<HTMLImageElement
   className?: string;
   imageClassName?: string; // Classi specifiche per l'elemento img
   watermarkClassName?: string; // Classi specifiche per la filigrana
+  // Nuove prop per controllare la dimensione predefinita del testo/icona del watermark
+  defaultWatermarkIconSizeClass?: string;
+  defaultWatermarkTextSizeClass?: string;
 }
 
 export const WatermarkedImage = ({
   src,
   alt,
-  watermarkText = ( // Il valore predefinito ora include l'icona Heart
-    <div className="flex items-center justify-center gap-0.5"> {/* Ridotto il gap */}
-      <Heart className="h-4 w-4" /> {/* Ridotto del 50% (da h-8 w-8) */}
-      <span>IncontriDolci</span>
-    </div>
-  ),
+  watermarkText, // Rimosso il valore predefinito qui, lo definiremo all'interno se non fornito
   className,
   imageClassName,
   watermarkClassName,
+  defaultWatermarkIconSizeClass = "h-4 w-4", // Dimensione predefinita per l'icona (es. per l'immagine principale)
+  defaultWatermarkTextSizeClass = "text-xs", // Dimensione predefinita per il testo (es. per l'immagine principale)
   ...props
 }: WatermarkedImageProps) => {
+
+  // Definisci il watermarkText predefinito qui, usando le nuove prop di dimensione
+  const defaultWatermarkContent = (
+    <div className="flex items-center justify-center gap-0.5">
+      <Heart className={defaultWatermarkIconSizeClass} />
+      <span className={defaultWatermarkTextSizeClass}>IncontriDolci</span>
+    </div>
+  );
+
   return (
     <div className={cn("relative w-full h-full overflow-hidden", className)}>
       <img
@@ -36,7 +45,7 @@ export const WatermarkedImage = ({
       <div
         className={cn(
           "absolute inset-0 flex items-center justify-center pointer-events-none",
-          "text-white text-center font-bold text-xs sm:text-sm md:text-base lg:text-lg opacity-50", // Ridotto del 50% circa
+          "text-white text-center font-bold opacity-50", // Rimosse le classi di dimensione del testo predefinite
           "whitespace-nowrap overflow-hidden", // Evita che il testo vada a capo
           watermarkClassName
         )}
@@ -44,7 +53,7 @@ export const WatermarkedImage = ({
           textShadow: '1px 1px 2px rgba(0,0,0,0.7)', // Ombra più piccola per maggiore leggibilità
         }}
       >
-        {watermarkText}
+        {watermarkText || defaultWatermarkContent} {/* Usa il contenuto fornito o quello predefinito */}
       </div>
     </div>
   );

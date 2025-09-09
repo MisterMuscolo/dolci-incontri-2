@@ -228,7 +228,8 @@ const ListingDetails = () => {
                         src={photo.url} 
                         alt="Miniatura foto" 
                         imageClassName="object-cover bg-gray-200 rounded-md" 
-                        watermarkClassName="text-[0.375rem] opacity-70 [&>div>svg]:h-[6px] [&>div>svg]:w-[6px]" // Ridotto ulteriormente il testo e l'icona
+                        defaultWatermarkIconSizeClass="h-[6px] w-[6px]" // Icona più piccola
+                        defaultWatermarkTextSizeClass="text-[0.375rem]" // Testo più piccolo
                       />
                     </div>
                   ))}
