@@ -99,6 +99,3 @@
     @apply bg-background text-foreground;
   }
 }
-
-/* Import Leaflet CSS */
-@import 'leaflet/dist/leaflet.css';
