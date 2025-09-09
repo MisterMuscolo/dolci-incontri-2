@@ -19,7 +19,8 @@ export const StaticMapDisplay = ({
   width = 600, 
   height = 250 
 }: StaticMapDisplayProps) => {
-  const STADIAMAPS_API_KEY = 'f07c111b-25ba-482e-b3e2-b66bc4df25ab'; 
+  // Aggiornata la chiave API con quella fornita dall'utente
+  const STADIAMAPS_API_KEY = '7991c8df-df40-4d2e-98b7-5124e7ac4f7b'; 
 
   if (!STADIAMAPS_API_KEY || STADIAMAPS_API_KEY === 'YOUR_STADIAMAPS_API_KEY') {
     console.warn("Stadiamaps API Key non configurata. La mappa statica non verrà visualizzata correttamente.");
@@ -39,11 +40,10 @@ export const StaticMapDisplay = ({
     );
   }
 
-  // Ho rimosso il parametro 'markers' per testare se la mappa base si carica.
-  // Se funziona, il problema è nella formattazione dei marker.
-  const mapUrl = `https://tiles.stadiamaps.com/styles/osm_bright/static/${longitude},${latitude},${zoom}/${width}x${height}.png?api_key=${STADIAMAPS_API_KEY}`;
+  // URL completo con il parametro 'markers' ripristinato
+  const mapUrl = `https://tiles.stadiamaps.com/styles/osm_bright/static/${longitude},${latitude},${zoom}/${width}x${height}.png?markers=lonlat:${longitude},${latitude}|color:ff0000|label:A&api_key=${STADIAMAPS_API_KEY}`;
   
-  console.log("Stadiamaps Map URL (simplified):", mapUrl);
+  console.log("Stadiamaps Map URL (with new key and markers):", mapUrl);
 
   return (
     <div className="relative w-full h-full rounded-md overflow-hidden">
