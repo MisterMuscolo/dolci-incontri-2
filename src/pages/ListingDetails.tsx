@@ -16,6 +16,7 @@ import { ReplyToListingDialog } from '@/components/ReplyToListingDialog';
 import { WatermarkedImage } from '@/components/WatermarkedImage';
 import { Helmet } from 'react-helmet-async';
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
+import { MapDisplay } from '@/components/MapDisplay'; // Importa il nuovo componente MapDisplay
 
 type FullListing = {
   id: string;
@@ -274,9 +275,12 @@ const ListingDetails = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 mb-2">{listing.address_text || 'Posizione fittizia'}</p>
-                <div className="w-full h-48 bg-gray-200 rounded-md flex items-center justify-center text-gray-500 text-sm">
-                  {/* Qui potresti integrare una vera mappa (es. Google Maps, OpenStreetMap) */}
-                  <p>Mappa fittizia: Lat {listing.latitude}, Lng {listing.longitude}</p>
+                <div className="w-full h-48 bg-gray-200 rounded-md overflow-hidden">
+                  <MapDisplay 
+                    latitude={listing.latitude} 
+                    longitude={listing.longitude} 
+                    addressText={listing.address_text} 
+                  />
                 </div>
               </CardContent>
             </Card>
