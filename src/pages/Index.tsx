@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { italianProvinces } from '@/data/provinces';
-import { Heart, MapPin, Search, Globe, Palette, Ruler, Eye, ChevronDown, ChevronUp, RotateCcw, User, Handshake, Clock, Home, Euro } from 'lucide-react'; // Aggiunte icone per i nuovi filtri
+import { Heart, MapPin, Search, Globe, Palette, Ruler, Eye, ChevronDown, ChevronUp, RotateCcw, User, Handshake, Clock, Home, Euro, Sparkles } from 'lucide-react'; // Aggiunte icone per i nuovi filtri
 import { Card, CardContent } from '@/components/ui/card';
 import { PWAInstallInstructions } from '@/components/PWAInstallInstructions';
 import { Helmet } from 'react-helmet-async';
@@ -48,6 +48,21 @@ const meetingLocationOptions = [
   { id: 'hotel', label: 'Hotel' },
   { id: 'esterno', label: 'Esterno' },
   { id: 'online', label: 'Online' },
+];
+
+const offeredServicesOptions = [
+  { id: 'orale', label: 'Orale' },
+  { id: 'esperienza-fidanzata', label: 'Esperienza Fidanzata' },
+  { id: 'massaggio-erotico', label: 'Massaggio Erotico' },
+  { id: 'sesso-anale', label: 'Sesso Anale' },
+  { id: 'duo', label: 'Duo' },
+  { id: 'baci-profondi', label: 'Baci Profondi' },
+  { id: 'giochi-erotici', label: 'Giochi Erotici' },
+  { id: 'lingerie', label: 'Lingerie' },
+  { id: 'travestimento', label: 'Travestimento' },
+  { id: 'fetish', label: 'Fetish' },
+  { id: 'bdsm', label: 'BDSM' },
+  { id: 'altro', label: 'Altro' },
 ];
 
 const ethnicities = [
@@ -143,6 +158,8 @@ export default function Index({ session }: IndexProps) {
   const [selectedMeetingLocations, setSelectedMeetingLocations] = useState<string[]>([]);
   const [hourlyRateMin, setHourlyRateMin] = useState<string>('');
   const [hourlyRateMax, setHourlyRateMax] = useState<string>('');
+  // Nuovo stato per i servizi offerti
+  const [selectedOfferedServices, setSelectedOfferedServices] = useState<string[]>([]);
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -183,6 +200,7 @@ export default function Index({ session }: IndexProps) {
     setSelectedMeetingLocations(searchParams.getAll('meeting_location'));
     setHourlyRateMin(searchParams.get('hourly_rate_min') || '');
     setHourlyRateMax(searchParams.get('hourly_rate_max') || '');
+    setSelectedOfferedServices(searchParams.getAll('offered_services')); // Sincronizza il nuovo campo
 
   }, [searchParams, navigate]);
 
@@ -219,6 +237,7 @@ export default function Index({ session }: IndexProps) {
     selectedMeetingLocations.forEach(loc => searchParams.append('meeting_location', loc));
     if (hourlyRateMin) searchParams.append('hourly_rate_min', hourlyRateMin);
     if (hourlyRateMax) searchParams.append('hourly_rate_max', hourlyRateMax);
+    selectedOfferedServices.forEach(service => searchParams.append('offered_services', service)); // Aggiungi il nuovo campo
 
     navigate(`/search?${searchParams.toString()}`);
     setIsPersonalFiltersOpen(false);
@@ -241,6 +260,7 @@ export default function Index({ session }: IndexProps) {
     setSelectedMeetingLocations([]);
     setHourlyRateMin('');
     setHourlyRateMax('');
+    setSelectedOfferedServices([]); // Resetta il nuovo campo
 
     setIsPersonalFiltersOpen(false); // Chiudi la sezione filtri personali
     navigate('/'); // Naviga alla homepage senza parametri di ricerca
@@ -311,6 +331,11 @@ export default function Index({ session }: IndexProps) {
     return loc ? loc.label : value;
   };
 
+  const getOfferedServiceLabel = (value: string) => {
+    const service = offeredServicesOptions.find(o => o.id === value);
+    return service ? service.label : value;
+  };
+
   const hasActivePersonalFilters = 
     (selectedAgeRange && selectedAgeRange !== 'tutte') || // Includi età nei filtri attivi
     (ethnicity && ethnicity !== 'tutte') ||
@@ -323,7 +348,8 @@ export default function Index({ session }: IndexProps) {
     selectedAvailabilityFor.length > 0 ||
     selectedMeetingLocations.length > 0 ||
     hourlyRateMin !== '' ||
-    hourlyRateMax !== '';
+    hourlyRateMax !== '' ||
+    selectedOfferedServices.length > 0; // Includi il nuovo campo
 
   return (
     <>
@@ -457,6 +483,11 @@ export default function Index({ session }: IndexProps) {
                         {(hourlyRateMin || hourlyRateMax) && (
                           <Badge variant="secondary" className="capitalize">
                             <Euro className="h-3 w-3 mr-1" /> Tariffa: {hourlyRateMin || 'Min'} - {hourlyRateMax || 'Max'}€
+                          </Badge>
+                        )}
+                        {selectedOfferedServices.length > 0 && (
+                          <Badge variant="secondary" className="capitalize">
+                            <Sparkles className="h-3 w-3 mr-1" /> {selectedOfferedServices.map(getOfferedServiceLabel).join(', ')}
                           </Badge>
                         )}
                         {!hasActivePersonalFilters && (
@@ -643,6 +674,29 @@ export default function Index({ session }: IndexProps) {
                           onChange={(e) => setHourlyRateMax(e.target.value)}
                         />
                       </div>
+                    </div>
+                  </div>
+                  <Separator className="my-4" />
+                  <h3 className="text-lg font-semibold text-gray-700 mb-4">Filtri Servizi Offerti</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="relative">
+                      <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Select
+                        value={selectedOfferedServices.length > 0 ? selectedOfferedServices[0] : 'tutte'}
+                        onValueChange={(value) => setSelectedOfferedServices(value === 'tutte' ? [] : [value])}
+                      >
+                        <SelectTrigger className="w-full pl-10">
+                          <SelectValue placeholder="Servizi Offerti" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="tutte">Tutti i servizi</SelectItem>
+                          {offeredServicesOptions.map((option) => (
+                            <SelectItem key={option.id} value={option.id}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                   <Button type="button" variant="outline" onClick={handleResetFilters} className="w-full border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-800 text-lg py-6 mt-2">

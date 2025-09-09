@@ -44,6 +44,21 @@ const meetingLocationOptions = [
   { id: 'online', label: 'Online' },
 ];
 
+const offeredServicesOptions = [
+  { id: 'orale', label: 'Orale' },
+  { id: 'esperienza-fidanzata', label: 'Esperienza Fidanzata' },
+  { id: 'massaggio-erotico', label: 'Massaggio Erotico' },
+  { id: 'sesso-anale', label: 'Sesso Anale' },
+  { id: 'duo', label: 'Duo' },
+  { id: 'baci-profondi', label: 'Baci Profondi' },
+  { id: 'giochi-erotici', label: 'Giochi Erotici' },
+  { id: 'lingerie', label: 'Lingerie' },
+  { id: 'travestimento', label: 'Travestimento' },
+  { id: 'fetish', label: 'Fetish' },
+  { id: 'bdsm', label: 'BDSM' },
+  { id: 'altro', label: 'Altro' },
+];
+
 const listingSchema = z.object({
   category: z.string({ required_error: 'La categoria è obbligatoria.' }),
   city: z.string({ required_error: 'La città è obbligatoria.' }),
@@ -70,6 +85,8 @@ const listingSchema = z.object({
   availability_for: z.array(z.string()).optional().default([]),
   meeting_location: z.array(z.string()).optional().default([]),
   hourly_rate: z.coerce.number().min(0, "La tariffa oraria non può essere negativa.").optional().nullable(),
+  // Nuovo campo per i servizi offerti
+  offered_services: z.array(z.string()).optional().default([]),
 });
 
 const NewListing = () => {
@@ -98,6 +115,7 @@ const NewListing = () => {
       availability_for: [],
       meeting_location: [],
       hourly_rate: null,
+      offered_services: [], // Default per il nuovo campo
     }
   });
 
@@ -152,6 +170,7 @@ const NewListing = () => {
           availability_for: restOfValues.availability_for,
           meeting_location: restOfValues.meeting_location,
           hourly_rate: restOfValues.hourly_rate,
+          offered_services: restOfValues.offered_services, // Inserisci il nuovo campo
         })
         .select('id')
         .single();
@@ -670,6 +689,52 @@ const NewListing = () => {
                         />
                       </FormControl>
                       <FormDescription>Inserisci la tua tariffa oraria in Euro.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Nuovo campo per i servizi offerti */}
+                <h2 className="text-xl font-bold text-gray-800 pt-4">Servizi Offerti</h2>
+                <p className="text-sm text-gray-500 -mt-4">Questi dettagli saranno visibili pubblicamente solo per gli annunci Premium.</p>
+                <FormField
+                  control={form.control}
+                  name="offered_services"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Quali servizi offri? (Opzionale)</FormLabel>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {offeredServicesOptions.map((item) => (
+                          <FormField
+                            key={item.id}
+                            control={form.control}
+                            name="offered_services"
+                            render={({ field: innerField }) => {
+                              return (
+                                <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={innerField.value?.includes(item.id)}
+                                      onCheckedChange={(checked) => {
+                                        return checked
+                                          ? innerField.onChange([...(innerField.value || []), item.id])
+                                          : innerField.onChange(
+                                              innerField.value?.filter(
+                                                (value) => value !== item.id
+                                              )
+                                            );
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">
+                                    {item.label}
+                                  </FormLabel>
+                                </FormItem>
+                              );
+                            }}
+                          />
+                        ))}
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}

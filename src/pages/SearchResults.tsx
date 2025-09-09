@@ -5,7 +5,7 @@ import { ListingListItem, Listing } from '@/components/ListingListItem';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { ChevronLeft, MapPin, Search, Heart, ChevronDown, ChevronUp, Globe, Palette, Ruler, Eye, User, Handshake, Clock, Home, Euro } from 'lucide-react'; // Aggiunte icone per i nuovi filtri
+import { ChevronLeft, MapPin, Search, Heart, ChevronDown, ChevronUp, Globe, Palette, Ruler, Eye, User, Handshake, Clock, Home, Euro, Sparkles } from 'lucide-react'; // Aggiunte icone per i nuovi filtri
 import { Helmet } from 'react-helmet-async';
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -50,6 +50,21 @@ const meetingLocationOptions = [
   { id: 'hotel', label: 'Hotel' },
   { id: 'esterno', label: 'Esterno' },
   { id: 'online', label: 'Online' },
+];
+
+const offeredServicesOptions = [
+  { id: 'orale', label: 'Orale' },
+  { id: 'esperienza-fidanzata', label: 'Esperienza Fidanzata' },
+  { id: 'massaggio-erotico', label: 'Massaggio Erotico' },
+  { id: 'sesso-anale', label: 'Sesso Anale' },
+  { id: 'duo', label: 'Duo' },
+  { id: 'baci-profondi', label: 'Baci Profondi' },
+  { id: 'giochi-erotici', label: 'Giochi Erotici' },
+  { id: 'lingerie', label: 'Lingerie' },
+  { id: 'travestimento', label: 'Travestimento' },
+  { id: 'fetish', label: 'Fetish' },
+  { id: 'bdsm', label: 'BDSM' },
+  { id: 'altro', label: 'Altro' },
 ];
 
 const ethnicities = [
@@ -155,6 +170,8 @@ const SearchResults = () => {
   const [currentMeetingLocations, setCurrentMeetingLocations] = useState<string[]>(searchParams.getAll('meeting_location'));
   const [currentHourlyRateMin, setCurrentHourlyRateMin] = useState<string>(searchParams.get('hourly_rate_min') || '');
   const [currentHourlyRateMax, setCurrentHourlyRateMax] = useState<string>(searchParams.get('hourly_rate_max') || '');
+  // Nuovo stato per i servizi offerti
+  const [currentOfferedServices, setCurrentOfferedServices] = useState<string[]>(searchParams.getAll('offered_services'));
 
   const [isFilterFormOpen, setIsFilterFormOpen] = useState(false); // State for collapsible filter form
 
@@ -195,6 +212,7 @@ const SearchResults = () => {
     setCurrentMeetingLocations(searchParams.getAll('meeting_location'));
     setCurrentHourlyRateMin(searchParams.get('hourly_rate_min') || '');
     setCurrentHourlyRateMax(searchParams.get('hourly_rate_max') || '');
+    setCurrentOfferedServices(searchParams.getAll('offered_services')); // Sincronizza il nuovo campo
 
     setCurrentPage(parseInt(searchParams.get('page') || '1', 10));
   }, [searchParams]);
@@ -219,6 +237,7 @@ const SearchResults = () => {
     const meetingLocationParams = searchParams.getAll('meeting_location');
     const hourlyRateMinParam = searchParams.get('hourly_rate_min');
     const hourlyRateMaxParam = searchParams.get('hourly_rate_max');
+    const offeredServicesParams = searchParams.getAll('offered_services'); // Nuovo parametro
     const pageParam = parseInt(searchParams.get('page') || '1', 10);
 
     let query = supabase
@@ -253,7 +272,8 @@ const SearchResults = () => {
         meeting_type,
         availability_for,
         meeting_location,
-        hourly_rate
+        hourly_rate,
+        offered_services
       `, { count: 'exact' })
       .gt('expires_at', new Date().toISOString());
       // .eq('is_paused', false); // Rimosso il filtro is_paused per mostrare tutti gli annunci attivi, inclusi quelli riattivati
@@ -306,6 +326,9 @@ const SearchResults = () => {
     }
     if (hourlyRateMaxParam) {
       query = query.lte('hourly_rate', parseFloat(hourlyRateMaxParam));
+    }
+    if (offeredServicesParams.length > 0) { // Applica il nuovo filtro
+      query = query.overlaps('offered_services', offeredServicesParams);
     }
 
     query = query
@@ -376,6 +399,7 @@ const SearchResults = () => {
     currentMeetingLocations.forEach(loc => newSearchParams.append('meeting_location', loc));
     if (currentHourlyRateMin) newSearchParams.append('hourly_rate_min', currentHourlyRateMin);
     if (currentHourlyRateMax) newSearchParams.append('hourly_rate_max', currentHourlyRateMax);
+    currentOfferedServices.forEach(service => newSearchParams.append('offered_services', service)); // Aggiungi il nuovo campo
 
     newSearchParams.append('page', String(page));
     navigate(`/search?${newSearchParams.toString()}`);
@@ -458,6 +482,11 @@ const SearchResults = () => {
   const getMeetingLocationLabel = (value: string) => {
     const loc = meetingLocationOptions.find(o => o.id === value);
     return loc ? loc.label : value;
+  };
+
+  const getOfferedServiceLabel = (value: string) => {
+    const service = offeredServicesOptions.find(o => o.id === value);
+    return service ? service.label : value;
   };
 
   const generateTitle = () => {
@@ -637,6 +666,11 @@ const SearchResults = () => {
                         <Euro className="h-3 w-3 mr-1" /> Tariffa: {currentHourlyRateMin || 'Min'} - {currentHourlyRateMax || 'Max'}€
                       </Badge>
                     )}
+                    {currentOfferedServices.length > 0 && (
+                      <Badge variant="secondary" className="capitalize">
+                        <Sparkles className="h-3 w-3 mr-1" /> {currentOfferedServices.map(getOfferedServiceLabel).join(', ')}
+                      </Badge>
+                    )}
                     {(!currentCategory || currentCategory === 'tutte') && 
                      (!currentCity || currentCity === 'tutte') && 
                      !currentKeyword &&
@@ -651,7 +685,8 @@ const SearchResults = () => {
                      currentAvailabilityFor.length === 0 &&
                      currentMeetingLocations.length === 0 &&
                      !currentHourlyRateMin &&
-                     !currentHourlyRateMax && (
+                     !currentHourlyRateMax &&
+                     currentOfferedServices.length === 0 && (
                       <Badge variant="secondary">Tutti gli annunci</Badge>
                     )}
                   </div>
@@ -888,6 +923,29 @@ const SearchResults = () => {
                         value={currentHourlyRateMax}
                         onChange={(e) => setCurrentHourlyRateMax(e.target.value)}
                       />
+                    </div>
+                  </div>
+                  <Separator className="my-4" />
+                  <h3 className="text-lg font-semibold text-gray-700 mb-4">Filtri Servizi Offerti</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="relative">
+                      <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Select
+                        value={currentOfferedServices.length > 0 ? currentOfferedServices[0] : 'tutte'}
+                        onValueChange={(value) => setCurrentOfferedServices(value === 'tutte' ? [] : [value])}
+                      >
+                        <SelectTrigger className="w-full pl-10">
+                          <SelectValue placeholder="Servizi Offerti" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="tutte">Tutti i servizi</SelectItem>
+                          {offeredServicesOptions.map((option) => (
+                            <SelectItem key={option.id} value={option.id}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 </div>

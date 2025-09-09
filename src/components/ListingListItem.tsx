@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, CalendarDays, User, Camera, MapPin, Tag, Flame, PauseCircle, PlayCircle, Globe, Palette, Ruler, Eye, Handshake, Clock, Home, Euro } from "lucide-react"; // Aggiunte icone per i nuovi campi
+import { Pencil, Trash2, CalendarDays, User, Camera, MapPin, Tag, Flame, PauseCircle, PlayCircle, Globe, Palette, Ruler, Eye, Handshake, Clock, Home, Euro, Sparkles } from "lucide-react"; // Aggiunte icone per i nuovi campi
 import { format, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Link } from "react-router-dom";
@@ -56,6 +56,7 @@ export interface Listing {
   availability_for: string[] | null;
   meeting_location: string[] | null;
   hourly_rate: number | null;
+  offered_services: string[] | null; // Nuovo campo
 }
 
 interface ListingListItemProps {
@@ -299,6 +300,24 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
     }
   };
 
+  const getOfferedServiceLabel = (value: string) => {
+    switch (value) {
+      case 'orale': return 'Orale';
+      case 'esperienza-fidanzata': return 'Esperienza Fidanzata';
+      case 'massaggio-erotico': return 'Massaggio Erotico';
+      case 'sesso-anale': return 'Sesso Anale';
+      case 'duo': return 'Duo';
+      case 'baci-profondi': return 'Baci Profondi';
+      case 'giochi-erotici': return 'Giochi Erotici';
+      case 'lingerie': return 'Lingerie';
+      case 'travestimento': return 'Travestimento';
+      case 'fetish': return 'Fetish';
+      case 'bdsm': return 'BDSM';
+      case 'altro': return 'Altro';
+      default: return value;
+    }
+  };
+
   return (
     <Card className={cn(
       "w-full overflow-hidden transition-shadow hover:shadow-md flex relative",
@@ -400,6 +419,11 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                 {listing.hourly_rate !== null && listing.hourly_rate !== undefined && (
                   <Badge variant="secondary" className="capitalize flex items-center gap-1 text-xs">
                     <Euro className="h-3 w-3" /> {listing.hourly_rate}€/h
+                  </Badge>
+                )}
+                {listing.offered_services && listing.offered_services.length > 0 && (
+                  <Badge variant="secondary" className="flex items-center gap-1 text-xs">
+                    <Sparkles className="h-3 w-3" /> {listing.offered_services.map(service => getOfferedServiceLabel(service)).join(', ')}
                   </Badge>
                 )}
               </div>

@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { showError } from '@/utils/toast';
-import { MapPin, User, Mail, BookText, ChevronLeft, CalendarDays, Phone, Flag, MessageCircle, Flame, PauseCircle, Globe, Palette, Ruler, Eye, Handshake, Clock, Home, Euro } from 'lucide-react'; // Aggiunte icone per i nuovi campi
+import { MapPin, User, Mail, BookText, ChevronLeft, CalendarDays, Phone, Flag, MessageCircle, Flame, PauseCircle, Globe, Palette, Ruler, Eye, Handshake, Clock, Home, Euro, Sparkles } from 'lucide-react'; // Aggiunte icone per i nuovi campi
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -51,6 +51,7 @@ type FullListing = {
   availability_for: string[] | null;
   meeting_location: string[] | null;
   hourly_rate: number | null;
+  offered_services: string[] | null; // Nuovo campo
 };
 
 const ListingDetails = () => {
@@ -92,6 +93,24 @@ const ListingDetails = () => {
       case 'hotel': return 'Hotel';
       case 'esterno': return 'Esterno';
       case 'online': return 'Online';
+      default: return value;
+    }
+  };
+
+  const getOfferedServiceLabel = (value: string) => {
+    switch (value) {
+      case 'orale': return 'Orale';
+      case 'esperienza-fidanzata': return 'Esperienza Fidanzata';
+      case 'massaggio-erotico': return 'Massaggio Erotico';
+      case 'sesso-anale': return 'Sesso Anale';
+      case 'duo': return 'Duo';
+      case 'baci-profondi': return 'Baci Profondi';
+      case 'giochi-erotici': return 'Giochi Erotici';
+      case 'lingerie': return 'Lingerie';
+      case 'travestimento': return 'Travestimento';
+      case 'fetish': return 'Fetish';
+      case 'bdsm': return 'BDSM';
+      case 'altro': return 'Altro';
       default: return value;
     }
   };
@@ -409,6 +428,22 @@ const ListingDetails = () => {
                    (!listing.meeting_location || listing.meeting_location.length === 0) &&
                    (listing.hourly_rate === null || listing.hourly_rate === undefined) && (
                     <p className="text-gray-600">Nessun dettaglio incontro aggiuntivo.</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Nuova Card per Servizi Offerti (visibile solo per Premium attivi) */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-xl"><Sparkles className="h-5 w-5 text-rose-500" /> Servizi Offerti</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-wrap gap-2">
+                  {listing.offered_services && listing.offered_services.length > 0 ? (
+                    listing.offered_services.map(service => (
+                      <Badge key={service} variant="secondary" className="capitalize">{getOfferedServiceLabel(service)}</Badge>
+                    ))
+                  ) : (
+                    <p className="text-gray-600">Nessun servizio offerto specificato.</p>
                   )}
                 </CardContent>
               </Card>
