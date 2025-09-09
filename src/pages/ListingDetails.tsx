@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,7 +16,8 @@ import { ReplyToListingDialog } from '@/components/ReplyToListingDialog';
 import { WatermarkedImage } from '@/components/WatermarkedImage';
 import { Helmet } from 'react-helmet-async';
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
-import { MapDisplay } from '@/components/MapDisplay'; // Importa il nuovo componente MapDisplay
+// Importa il nuovo componente MapDisplay dinamicamente
+const MapDisplay = lazy(() => import('@/components/MapDisplay').then(module => ({ default: module.MapDisplay })));
 
 type FullListing = {
   id: string;
@@ -276,11 +277,13 @@ const ListingDetails = () => {
               <CardContent>
                 <p className="text-gray-600 mb-2">{listing.address_text || 'Posizione fittizia'}</p>
                 <div className="w-full h-48 bg-gray-200 rounded-md overflow-hidden">
-                  <MapDisplay 
-                    latitude={listing.latitude} 
-                    longitude={listing.longitude} 
-                    addressText={listing.address_text} 
-                  />
+                  <Suspense fallback={<div className="flex items-center justify-center h-full"><Skeleton className="h-10 w-10 animate-spin" /></div>}>
+                    <MapDisplay 
+                      latitude={listing.latitude} 
+                      longitude={listing.longitude} 
+                      addressText={listing.address_text} 
+                    />
+                  </Suspense>
                 </div>
               </CardContent>
             </Card>
