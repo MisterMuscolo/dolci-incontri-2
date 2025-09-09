@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { showError } from '@/utils/toast';
-import { MapPin, User, Mail, BookText, ChevronLeft, CalendarDays, Phone, Flag, MessageCircle, Flame, PauseCircle, Globe, Palette, Ruler, Eye } from 'lucide-react'; // Aggiunte icone per i nuovi campi
+import { MapPin, User, Mail, BookText, ChevronLeft, CalendarDays, Phone, Flag, MessageCircle, Flame, PauseCircle, Globe, Palette, Ruler, Eye, Handshake, Clock, Home, Euro } from 'lucide-react'; // Aggiunte icone per i nuovi campi
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -47,6 +47,10 @@ type FullListing = {
   hair_color: string | null;
   body_type: string | null;
   eye_color: string | null;
+  meeting_type: string[] | null;
+  availability_for: string[] | null;
+  meeting_location: string[] | null;
+  hourly_rate: number | null;
 };
 
 const ListingDetails = () => {
@@ -56,6 +60,41 @@ const ListingDetails = () => {
   const [loading, setLoading] = useState(true);
   const [activePhoto, setActivePhoto] = useState<string | null>(null);
   const { getBackLinkText, handleNavigateBack } = useDynamicBackLink();
+
+  // Helper per ottenere le label dai valori (per i badge)
+  const getMeetingTypeLabel = (value: string) => {
+    switch (value) {
+      case 'cena': return 'Cena';
+      case 'aperitivo': return 'Aperitivo';
+      case 'relax': return 'Relax';
+      case 'massaggio': return 'Massaggio';
+      case 'viaggio': return 'Viaggio';
+      case 'altro': return 'Altro';
+      default: return value;
+    }
+  };
+
+  const getAvailabilityForLabel = (value: string) => {
+    switch (value) {
+      case 'mattina': return 'Mattina';
+      case 'pomeriggio': return 'Pomeriggio';
+      case 'sera': return 'Sera';
+      case 'notte': return 'Notte';
+      case 'weekend': return 'Weekend';
+      default: return value;
+    }
+  };
+
+  const getMeetingLocationLabel = (value: string) => {
+    switch (value) {
+      case 'mio-domicilio': return 'Mio domicilio';
+      case 'tuo-domicilio': return 'Tuo domicilio';
+      case 'hotel': return 'Hotel';
+      case 'esterno': return 'Esterno';
+      case 'online': return 'Online';
+      default: return value;
+    }
+  };
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -282,46 +321,98 @@ const ListingDetails = () => {
 
           {/* Nuova Card per Dettagli Personali (visibile solo per Premium attivi) */}
           {isActivePremium && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl"><User className="h-5 w-5 text-rose-500" /> Dettagli Personali</CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-wrap gap-2">
-                {listing.ethnicity && (
-                  <Badge variant="secondary" className="capitalize flex items-center gap-1">
-                    <Globe className="h-4 w-4" /> Origine: {listing.ethnicity}
-                  </Badge>
-                )}
-                {listing.nationality && (
-                  <Badge variant="secondary" className="capitalize flex items-center gap-1">
-                    <Globe className="h-4 w-4" /> Nazionalità: {listing.nationality}
-                  </Badge>
-                )}
-                {listing.breast_type && (
-                  <Badge variant="secondary" className="capitalize flex items-center gap-1">
-                    <Palette className="h-4 w-4" /> Tipo di Seno: {listing.breast_type}
-                  </Badge>
-                )}
-                {listing.hair_color && (
-                  <Badge variant="secondary" className="capitalize flex items-center gap-1">
-                    <Palette className="h-4 w-4" /> Colore Capelli: {listing.hair_color}
-                  </Badge>
-                )}
-                {listing.body_type && (
-                  <Badge variant="secondary" className="capitalize flex items-center gap-1">
-                    <Ruler className="h-4 w-4" /> Corporatura: {listing.body_type}
-                  </Badge>
-                )}
-                {listing.eye_color && (
-                  <Badge variant="secondary" className="capitalize flex items-center gap-1">
-                    <Eye className="h-4 w-4" /> Colore Occhi: {listing.eye_color}
-                  </Badge>
-                )}
-                {(!listing.ethnicity && !listing.nationality && !listing.breast_type && !listing.hair_color && !listing.body_type && !listing.eye_color) && (
-                  <p className="text-gray-600">Nessun dettaglio personale aggiuntivo.</p>
-                )}
-              </CardContent>
-            </Card>
+            <>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-xl"><User className="h-5 w-5 text-rose-500" /> Dettagli Personali</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-wrap gap-2">
+                  {listing.ethnicity && (
+                    <Badge variant="secondary" className="capitalize flex items-center gap-1">
+                      <Globe className="h-4 w-4" /> Origine: {listing.ethnicity}
+                    </Badge>
+                  )}
+                  {listing.nationality && (
+                    <Badge variant="secondary" className="capitalize flex items-center gap-1">
+                      <Globe className="h-4 w-4" /> Nazionalità: {listing.nationality}
+                    </Badge>
+                  )}
+                  {listing.breast_type && (
+                    <Badge variant="secondary" className="capitalize flex items-center gap-1">
+                      <Palette className="h-4 w-4" /> Tipo di Seno: {listing.breast_type}
+                    </Badge>
+                  )}
+                  {listing.hair_color && (
+                    <Badge variant="secondary" className="capitalize flex items-center gap-1">
+                      <Palette className="h-4 w-4" /> Colore Capelli: {listing.hair_color}
+                    </Badge>
+                  )}
+                  {listing.body_type && (
+                    <Badge variant="secondary" className="capitalize flex items-center gap-1">
+                      <Ruler className="h-4 w-4" /> Corporatura: {listing.body_type}
+                    </Badge>
+                  )}
+                  {listing.eye_color && (
+                    <Badge variant="secondary" className="capitalize flex items-center gap-1">
+                      <Eye className="h-4 w-4" /> Colore Occhi: {listing.eye_color}
+                    </Badge>
+                  )}
+                  {(!listing.ethnicity && !listing.nationality && !listing.breast_type && !listing.hair_color && !listing.body_type && !listing.eye_color) && (
+                    <p className="text-gray-600">Nessun dettaglio personale aggiuntivo.</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Nuova Card per Dettagli Incontro (visibile solo per Premium attivi) */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-xl"><Handshake className="h-5 w-5 text-rose-500" /> Dettagli Incontro</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-wrap gap-2">
+                  {listing.meeting_type && listing.meeting_type.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="secondary" className="flex items-center gap-1">
+                        <Handshake className="h-4 w-4" /> Tipologia:
+                      </Badge>
+                      {listing.meeting_type.map(type => (
+                        <Badge key={type} variant="outline" className="capitalize">{getMeetingTypeLabel(type)}</Badge>
+                      ))}
+                    </div>
+                  )}
+                  {listing.availability_for && listing.availability_for.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="secondary" className="flex items-center gap-1">
+                        <Clock className="h-4 w-4" /> Disponibilità:
+                      </Badge>
+                      {listing.availability_for.map(avail => (
+                        <Badge key={avail} variant="outline" className="capitalize">{getAvailabilityForLabel(avail)}</Badge>
+                      ))}
+                    </div>
+                  )}
+                  {listing.meeting_location && listing.meeting_location.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="secondary" className="flex items-center gap-1">
+                        <Home className="h-4 w-4" /> Luogo:
+                      </Badge>
+                      {listing.meeting_location.map(loc => (
+                        <Badge key={loc} variant="outline" className="capitalize">{getMeetingLocationLabel(loc)}</Badge>
+                      ))}
+                    </div>
+                  )}
+                  {listing.hourly_rate !== null && listing.hourly_rate !== undefined && (
+                    <Badge variant="secondary" className="capitalize flex items-center gap-1">
+                      <Euro className="h-4 w-4" /> Tariffa Oraria: {listing.hourly_rate}€
+                    </Badge>
+                  )}
+                  {(!listing.meeting_type || listing.meeting_type.length === 0) &&
+                   (!listing.availability_for || listing.availability_for.length === 0) &&
+                   (!listing.meeting_location || listing.meeting_location.length === 0) &&
+                   (listing.hourly_rate === null || listing.hourly_rate === undefined) && (
+                    <p className="text-gray-600">Nessun dettaglio incontro aggiuntivo.</p>
+                  )}
+                </CardContent>
+              </Card>
+            </>
           )}
 
           <div className="flex flex-col sm:flex-row justify-center py-4 gap-4">

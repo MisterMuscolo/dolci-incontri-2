@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form'; // Importa Controller
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,32 @@ import { cn, formatPhoneNumber } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
+
+// Definizioni delle opzioni per i nuovi campi
+const meetingTypeOptions = [
+  { id: 'cena', label: 'Cena' },
+  { id: 'aperitivo', label: 'Aperitivo' },
+  { id: 'relax', label: 'Relax' },
+  { id: 'massaggio', label: 'Massaggio' },
+  { id: 'viaggio', label: 'Viaggio' },
+  { id: 'altro', label: 'Altro' },
+];
+
+const availabilityForOptions = [
+  { id: 'mattina', label: 'Mattina' },
+  { id: 'pomeriggio', label: 'Pomeriggio' },
+  { id: 'sera', label: 'Sera' },
+  { id: 'notte', label: 'Notte' },
+  { id: 'weekend', label: 'Weekend' },
+];
+
+const meetingLocationOptions = [
+  { id: 'mio-domicilio', label: 'Mio domicilio' },
+  { id: 'tuo-domicilio', label: 'Tuo domicilio' },
+  { id: 'hotel', label: 'Hotel' },
+  { id: 'esterno', label: 'Esterno' },
+  { id: 'online', label: 'Online' },
+];
 
 const listingSchema = z.object({
   category: z.string({ required_error: 'La categoria è obbligatoria.' }),
@@ -40,6 +66,11 @@ const listingSchema = z.object({
   hair_color: z.string().optional(),
   body_type: z.string().optional(),
   eye_color: z.string().optional(),
+  // Nuovi campi per tipologia di incontro, disponibilità, luogo e tariffa oraria
+  meeting_type: z.array(z.string()).optional().default([]),
+  availability_for: z.array(z.string()).optional().default([]),
+  meeting_location: z.array(z.string()).optional().default([]),
+  hourly_rate: z.coerce.number().min(0, "La tariffa oraria non può essere negativa.").optional().nullable(),
 });
 
 type ExistingPhoto = { id: string; url: string; original_url: string | null; is_primary: boolean };
@@ -69,6 +100,10 @@ type FullListing = {
   hair_color: string | null;
   body_type: string | null;
   eye_color: string | null;
+  meeting_type: string[] | null;
+  availability_for: string[] | null;
+  meeting_location: string[] | null;
+  hourly_rate: number | null;
 };
 
 const EditListing = () => {
@@ -96,6 +131,10 @@ const EditListing = () => {
       hair_color: '',
       body_type: '',
       eye_color: '',
+      meeting_type: [],
+      availability_for: [],
+      meeting_location: [],
+      hourly_rate: null,
     }
   });
 
@@ -142,6 +181,10 @@ const EditListing = () => {
       hair_color: listing.hair_color || '',
       body_type: listing.body_type || '',
       eye_color: listing.eye_color || '',
+      meeting_type: listing.meeting_type || [],
+      availability_for: listing.availability_for || [],
+      meeting_location: listing.meeting_location || [],
+      hourly_rate: listing.hourly_rate || null,
     });
 
     setExistingPhotos(listing.listing_photos || []);
@@ -177,6 +220,10 @@ const EditListing = () => {
         hair_color: values.hair_color || null,
         body_type: values.body_type || null,
         eye_color: values.eye_color || null,
+        meeting_type: values.meeting_type,
+        availability_for: values.availability_for,
+        meeting_location: values.meeting_location,
+        hourly_rate: values.hourly_rate,
       };
 
       const { error: updateError } = await supabase
@@ -572,6 +619,160 @@ const EditListing = () => {
                     )}
                   />
                 </div>
+
+                {/* Nuovi campi per tipologia di incontro, disponibilità, luogo e tariffa oraria */}
+                <h2 className="text-xl font-bold text-gray-800 pt-4">Dettagli Incontro</h2>
+                <p className="text-sm text-gray-500 -mt-4">Questi dettagli saranno visibili pubblicamente solo per gli annunci Premium.</p>
+                
+                <FormField
+                  control={form.control}
+                  name="meeting_type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipologia di Incontro (Opzionale)</FormLabel>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {meetingTypeOptions.map((item) => (
+                          <FormField
+                            key={item.id}
+                            control={form.control}
+                            name="meeting_type"
+                            render={({ field: innerField }) => {
+                              return (
+                                <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={innerField.value?.includes(item.id)}
+                                      onCheckedChange={(checked) => {
+                                        return checked
+                                          ? innerField.onChange([...(innerField.value || []), item.id])
+                                          : innerField.onChange(
+                                              innerField.value?.filter(
+                                                (value) => value !== item.id
+                                              )
+                                            );
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">
+                                    {item.label}
+                                  </FormLabel>
+                                </FormItem>
+                              );
+                            }}
+                          />
+                        ))}
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="availability_for"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Disponibilità per (Opzionale)</FormLabel>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {availabilityForOptions.map((item) => (
+                          <FormField
+                            key={item.id}
+                            control={form.control}
+                            name="availability_for"
+                            render={({ field: innerField }) => {
+                              return (
+                                <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={innerField.value?.includes(item.id)}
+                                      onCheckedChange={(checked) => {
+                                        return checked
+                                          ? innerField.onChange([...(innerField.value || []), item.id])
+                                          : innerField.onChange(
+                                              innerField.value?.filter(
+                                                (value) => value !== item.id
+                                              )
+                                            );
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">
+                                    {item.label}
+                                  </FormLabel>
+                                </FormItem>
+                              );
+                            }}
+                          />
+                        ))}
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="meeting_location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Luogo Incontro (Opzionale)</FormLabel>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {meetingLocationOptions.map((item) => (
+                          <FormField
+                            key={item.id}
+                            control={form.control}
+                            name="meeting_location"
+                            render={({ field: innerField }) => {
+                              return (
+                                <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={innerField.value?.includes(item.id)}
+                                      onCheckedChange={(checked) => {
+                                        return checked
+                                          ? innerField.onChange([...(innerField.value || []), item.id])
+                                          : innerField.onChange(
+                                              innerField.value?.filter(
+                                                (value) => value !== item.id
+                                              )
+                                            );
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">
+                                    {item.label}
+                                  </FormLabel>
+                                </FormItem>
+                              );
+                            }}
+                          />
+                        ))}
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="hourly_rate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tariffa Oraria (Opzionale)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          placeholder="Es. 50" 
+                          {...field} 
+                          value={field.value === null ? '' : field.value}
+                          onChange={(e) => field.onChange(e.target.value === '' ? null : Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormDescription>Inserisci la tua tariffa oraria in Euro.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <FormField
                   control={form.control}

@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, CalendarDays, User, Camera, MapPin, Tag, Flame, PauseCircle, PlayCircle, Globe, Palette, Ruler, Eye } from "lucide-react"; // Aggiunte icone per i nuovi campi
+import { Pencil, Trash2, CalendarDays, User, Camera, MapPin, Tag, Flame, PauseCircle, PlayCircle, Globe, Palette, Ruler, Eye, Handshake, Clock, Home, Euro } from "lucide-react"; // Aggiunte icone per i nuovi campi
 import { format, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Link } from "react-router-dom";
@@ -52,6 +52,10 @@ export interface Listing {
   hair_color: string | null;
   body_type: string | null;
   eye_color: string | null;
+  meeting_type: string[] | null;
+  availability_for: string[] | null;
+  meeting_location: string[] | null;
+  hourly_rate: number | null;
 }
 
 interface ListingListItemProps {
@@ -260,6 +264,41 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
     }
   };
 
+  // Helper per ottenere le label dai valori (per i badge)
+  const getMeetingTypeLabel = (value: string) => {
+    switch (value) {
+      case 'cena': return 'Cena';
+      case 'aperitivo': return 'Aperitivo';
+      case 'relax': return 'Relax';
+      case 'massaggio': return 'Massaggio';
+      case 'viaggio': return 'Viaggio';
+      case 'altro': return 'Altro';
+      default: return value;
+    }
+  };
+
+  const getAvailabilityForLabel = (value: string) => {
+    switch (value) {
+      case 'mattina': return 'Mattina';
+      case 'pomeriggio': return 'Pomeriggio';
+      case 'sera': return 'Sera';
+      case 'notte': return 'Notte';
+      case 'weekend': return 'Weekend';
+      default: return value;
+    }
+  };
+
+  const getMeetingLocationLabel = (value: string) => {
+    switch (value) {
+      case 'mio-domicilio': return 'Mio domicilio';
+      case 'tuo-domicilio': return 'Tuo domicilio';
+      case 'hotel': return 'Hotel';
+      case 'esterno': return 'Esterno';
+      case 'online': return 'Online';
+      default: return value;
+    }
+  };
+
   return (
     <Card className={cn(
       "w-full overflow-hidden transition-shadow hover:shadow-md flex relative",
@@ -308,38 +347,63 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           )}
           {/* Nuovi badge per i dettagli personali, visibili solo se Premium attivo */}
           {isActivePremium && (
-            <div className="flex flex-wrap gap-1 mt-1">
-              {listing.ethnicity && (
-                <Badge variant="secondary" className="capitalize text-xs">
-                  <Globe className="h-3 w-3 mr-1" /> {listing.ethnicity}
-                </Badge>
-              )}
-              {listing.nationality && (
-                <Badge variant="secondary" className="capitalize text-xs">
-                  <Globe className="h-3 w-3 mr-1" /> {listing.nationality}
-                </Badge>
-              )}
-              {listing.breast_type && (
-                <Badge variant="secondary" className="capitalize text-xs">
-                  <Palette className="h-3 w-3 mr-1" /> {listing.breast_type}
-                </Badge>
-              )}
-              {listing.hair_color && (
-                <Badge variant="secondary" className="capitalize text-xs">
-                  <Palette className="h-3 w-3 mr-1" /> {listing.hair_color}
-                </Badge>
-              )}
-              {listing.body_type && (
-                <Badge variant="secondary" className="capitalize text-xs">
-                  <Ruler className="h-3 w-3 mr-1" /> {listing.body_type}
-                </Badge>
-              )}
-              {listing.eye_color && (
-                <Badge variant="secondary" className="capitalize text-xs">
-                  <Eye className="h-3 w-3 mr-1" /> {listing.eye_color}
-                </Badge>
-              )}
-            </div>
+            <>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {listing.ethnicity && (
+                  <Badge variant="secondary" className="capitalize text-xs">
+                    <Globe className="h-3 w-3 mr-1" /> {listing.ethnicity}
+                  </Badge>
+                )}
+                {listing.nationality && (
+                  <Badge variant="secondary" className="capitalize text-xs">
+                    <Globe className="h-3 w-3 mr-1" /> {listing.nationality}
+                  </Badge>
+                )}
+                {listing.breast_type && (
+                  <Badge variant="secondary" className="capitalize text-xs">
+                    <Palette className="h-3 w-3 mr-1" /> {listing.breast_type}
+                  </Badge>
+                )}
+                {listing.hair_color && (
+                  <Badge variant="secondary" className="capitalize text-xs">
+                    <Palette className="h-3 w-3 mr-1" /> {listing.hair_color}
+                  </Badge>
+                )}
+                {listing.body_type && (
+                  <Badge variant="secondary" className="capitalize text-xs">
+                    <Ruler className="h-3 w-3 mr-1" /> {listing.body_type}
+                  </Badge>
+                )}
+                {listing.eye_color && (
+                  <Badge variant="secondary" className="capitalize text-xs">
+                    <Eye className="h-3 w-3 mr-1" /> {listing.eye_color}
+                  </Badge>
+                )}
+              </div>
+              {/* Nuovi badge per i dettagli incontro, visibili solo se Premium attivo */}
+              <div className="flex flex-wrap gap-1 mt-1">
+                {listing.meeting_type && listing.meeting_type.length > 0 && (
+                  <Badge variant="secondary" className="flex items-center gap-1 text-xs">
+                    <Handshake className="h-3 w-3" /> {listing.meeting_type.map(type => getMeetingTypeLabel(type)).join(', ')}
+                  </Badge>
+                )}
+                {listing.availability_for && listing.availability_for.length > 0 && (
+                  <Badge variant="secondary" className="flex items-center gap-1 text-xs">
+                    <Clock className="h-3 w-3" /> {listing.availability_for.map(avail => getAvailabilityForLabel(avail)).join(', ')}
+                  </Badge>
+                )}
+                {listing.meeting_location && listing.meeting_location.length > 0 && (
+                  <Badge variant="secondary" className="flex items-center gap-1 text-xs">
+                    <Home className="h-3 w-3" /> {listing.meeting_location.map(loc => getMeetingLocationLabel(loc)).join(', ')}
+                  </Badge>
+                )}
+                {listing.hourly_rate !== null && listing.hourly_rate !== undefined && (
+                  <Badge variant="secondary" className="capitalize flex items-center gap-1 text-xs">
+                    <Euro className="h-3 w-3" /> {listing.hourly_rate}€/h
+                  </Badge>
+                )}
+              </div>
+            </>
           )}
         </div>
       </Link>

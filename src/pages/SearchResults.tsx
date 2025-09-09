@@ -5,7 +5,7 @@ import { ListingListItem, Listing } from '@/components/ListingListItem';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { ChevronLeft, MapPin, Search, Heart, ChevronDown, ChevronUp, Globe, Palette, Ruler, Eye, User } from 'lucide-react';
+import { ChevronLeft, MapPin, Search, Heart, ChevronDown, ChevronUp, Globe, Palette, Ruler, Eye, User, Handshake, Clock, Home, Euro } from 'lucide-react'; // Aggiunte icone per i nuovi filtri
 import { Helmet } from 'react-helmet-async';
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -24,6 +24,108 @@ const ageRanges = [
   { value: '25-36', label: '25-36 anni' },
   { value: '37-45', label: '37-45 anni' },
   { value: 'over45', label: '+46 anni' }, // Modificato il value
+];
+
+// Definizioni delle opzioni per i nuovi campi (copiate da NewListing.tsx)
+const meetingTypeOptions = [
+  { id: 'cena', label: 'Cena' },
+  { id: 'aperitivo', label: 'Aperitivo' },
+  { id: 'relax', label: 'Relax' },
+  { id: 'massaggio', label: 'Massaggio' },
+  { id: 'viaggio', label: 'Viaggio' },
+  { id: 'altro', label: 'Altro' },
+];
+
+const availabilityForOptions = [
+  { id: 'mattina', label: 'Mattina' },
+  { id: 'pomeriggio', label: 'Pomeriggio' },
+  { id: 'sera', label: 'Sera' },
+  { id: 'notte', label: 'Notte' },
+  { id: 'weekend', label: 'Weekend' },
+];
+
+const meetingLocationOptions = [
+  { id: 'mio-domicilio', label: 'Mio domicilio' },
+  { id: 'tuo-domicilio', label: 'Tuo domicilio' },
+  { id: 'hotel', label: 'Hotel' },
+  { id: 'esterno', label: 'Esterno' },
+  { id: 'online', label: 'Online' },
+];
+
+const ethnicities = [
+  { value: 'africana', label: 'Africana' },
+  { value: 'indiana', label: 'Indiana' },
+  { value: 'asiatica', label: 'Asiatica' },
+  { value: 'araba', label: 'Araba' },
+  { value: 'latina', label: 'Latina' },
+  { value: 'caucasica', label: 'Caucasica' },
+  { value: 'italiana', label: 'Italiana' },
+  { value: 'mista', label: 'Mista' },
+  { value: 'altro', label: 'Altro' },
+];
+
+const nationalities = [
+  { value: 'italiana', label: 'Italiana' },
+  { value: 'rumena', label: 'Rumena' },
+  { value: 'brasiliana', label: 'Brasiliana' },
+  { value: 'spagnola', label: 'Spagnola' },
+  { value: 'francese', label: 'Francese' },
+  { value: 'tedesca', label: 'Tedesca' },
+  { value: 'russa', label: 'Russa' },
+  { value: 'ucraina', label: 'Ucraina' },
+  { value: 'colombiana', label: 'Colombiana' },
+  { value: 'venezuelana', label: 'Venezuelana' },
+  { value: 'argentina', label: 'Argentina' },
+  { value: 'cubana', label: 'Cubana' },
+  { value: 'dominicana', label: 'Dominicana' },
+  { value: 'cinese', label: 'Cinese' },
+  { value: 'filippina', label: 'Filippina' },
+  { value: 'indonesiana', label: 'Indonesiana' },
+  { value: 'thailandese', label: 'Thailandese' },
+  { value: 'nigeriana', label: 'Nigeriana' },
+  { value: 'egiziana', label: 'Egiziana' },
+  { value: 'marocchina', label: 'Marocchina' },
+  { value: 'albanese', label: 'Albanese' },
+  { value: 'polacca', label: 'Polacca' },
+  { value: 'britannica', label: 'Britannica' },
+  { value: 'americana', label: 'Americana' },
+  { value: 'canadese', label: 'Canadese' },
+  { value: 'australiana', label: 'Australiana' },
+  { value: 'altro', label: 'Altro' },
+];
+
+const breastTypes = [
+  { value: 'naturale', label: 'Naturale' },
+  { value: 'rifatto', label: 'Rifatto' },
+  { value: 'piccolo', label: 'Piccolo' },
+  { value: 'medio', label: 'Medio' },
+  { value: 'grande', label: 'Grande' },
+];
+
+const hairColors = [
+  { value: 'biondi', label: 'Biondi' },
+  { value: 'castani', label: 'Castani' },
+  { value: 'neri', label: 'Neri' },
+  { value: 'rossi', label: 'Rossi' },
+  { value: 'grigi', label: 'Grigi' },
+  { value: 'colorati', label: 'Colorati' },
+];
+
+const bodyTypes = [
+  { value: 'snella', label: 'Snella' },
+  { value: 'atletica', label: 'Atletica' },
+  { value: 'curvy', label: 'Curvy' },
+  { value: 'robusta', label: 'Robusta' },
+  { value: 'media', label: 'Media' },
+];
+
+const eyeColors = [
+  { value: 'azzurri', label: 'Azzurri' },
+  { value: 'marroni', label: 'Marroni' },
+  { value: 'verdi', label: 'Verdi' },
+  { value: 'neri', label: 'Neri' },
+  { value: 'grigi', label: 'Grigi' },
+  { value: 'misti', label: 'Misti' },
 ];
 
 const SearchResults = () => {
@@ -47,6 +149,13 @@ const SearchResults = () => {
   const [currentHairColor, setCurrentHairColor] = useState(searchParams.get('hair_color') || 'tutte');
   const [currentBodyType, setCurrentBodyType] = useState(searchParams.get('body_type') || 'tutte');
   const [currentEyeColor, setCurrentEyeColor] = useState(searchParams.get('eye_color') || 'tutte');
+  // Nuovi stati per i filtri di incontro
+  const [currentMeetingTypes, setCurrentMeetingTypes] = useState<string[]>(searchParams.getAll('meeting_type'));
+  const [currentAvailabilityFor, setCurrentAvailabilityFor] = useState<string[]>(searchParams.getAll('availability_for'));
+  const [currentMeetingLocations, setCurrentMeetingLocations] = useState<string[]>(searchParams.getAll('meeting_location'));
+  const [currentHourlyRateMin, setCurrentHourlyRateMin] = useState<string>(searchParams.get('hourly_rate_min') || '');
+  const [currentHourlyRateMax, setCurrentHourlyRateMax] = useState<string>(searchParams.get('hourly_rate_max') || '');
+
   const [isFilterFormOpen, setIsFilterFormOpen] = useState(false); // State for collapsible filter form
 
   // Update local states when URL search params change (e.g., direct URL access or browser back/forward)
@@ -80,6 +189,13 @@ const SearchResults = () => {
     setCurrentHairColor(searchParams.get('hair_color') || 'tutte');
     setCurrentBodyType(searchParams.get('body_type') || 'tutte');
     setCurrentEyeColor(searchParams.get('eye_color') || 'tutte');
+    // Sincronizza i nuovi filtri con i parametri URL
+    setCurrentMeetingTypes(searchParams.getAll('meeting_type'));
+    setCurrentAvailabilityFor(searchParams.getAll('availability_for'));
+    setCurrentMeetingLocations(searchParams.getAll('meeting_location'));
+    setCurrentHourlyRateMin(searchParams.get('hourly_rate_min') || '');
+    setCurrentHourlyRateMax(searchParams.get('hourly_rate_max') || '');
+
     setCurrentPage(parseInt(searchParams.get('page') || '1', 10));
   }, [searchParams]);
 
@@ -98,6 +214,11 @@ const SearchResults = () => {
     const hairColorParam = searchParams.get('hair_color');
     const bodyTypeParam = searchParams.get('body_type');
     const eyeColorParam = searchParams.get('eye_color');
+    const meetingTypeParams = searchParams.getAll('meeting_type');
+    const availabilityForParams = searchParams.getAll('availability_for');
+    const meetingLocationParams = searchParams.getAll('meeting_location');
+    const hourlyRateMinParam = searchParams.get('hourly_rate_min');
+    const hourlyRateMaxParam = searchParams.get('hourly_rate_max');
     const pageParam = parseInt(searchParams.get('page') || '1', 10);
 
     let query = supabase
@@ -128,7 +249,11 @@ const SearchResults = () => {
         breast_type,
         hair_color,
         body_type,
-        eye_color
+        eye_color,
+        meeting_type,
+        availability_for,
+        meeting_location,
+        hourly_rate
       `, { count: 'exact' })
       .gt('expires_at', new Date().toISOString());
       // .eq('is_paused', false); // Rimosso il filtro is_paused per mostrare tutti gli annunci attivi, inclusi quelli riattivati
@@ -165,6 +290,22 @@ const SearchResults = () => {
     }
     if (eyeColorParam && eyeColorParam !== 'tutte') {
       query = query.eq('eye_color', eyeColorParam);
+    }
+    // Nuovi filtri per array (usiamo `cs` per "contains string" o `ov` per "overlaps")
+    if (meetingTypeParams.length > 0) {
+      query = query.overlaps('meeting_type', meetingTypeParams);
+    }
+    if (availabilityForParams.length > 0) {
+      query = query.overlaps('availability_for', availabilityForParams);
+    }
+    if (meetingLocationParams.length > 0) {
+      query = query.overlaps('meeting_location', meetingLocationParams);
+    }
+    if (hourlyRateMinParam) {
+      query = query.gte('hourly_rate', parseFloat(hourlyRateMinParam));
+    }
+    if (hourlyRateMaxParam) {
+      query = query.lte('hourly_rate', parseFloat(hourlyRateMaxParam));
     }
 
     query = query
@@ -229,6 +370,13 @@ const SearchResults = () => {
     if (currentHairColor && currentHairColor !== 'tutte') newSearchParams.append('hair_color', currentHairColor);
     if (currentBodyType && currentBodyType !== 'tutte') newSearchParams.append('body_type', currentBodyType);
     if (currentEyeColor && currentEyeColor !== 'tutte') newSearchParams.append('eye_color', currentEyeColor);
+    // Aggiungi i nuovi filtri
+    currentMeetingTypes.forEach(type => newSearchParams.append('meeting_type', type));
+    currentAvailabilityFor.forEach(avail => newSearchParams.append('availability_for', avail));
+    currentMeetingLocations.forEach(loc => newSearchParams.append('meeting_location', loc));
+    if (currentHourlyRateMin) newSearchParams.append('hourly_rate_min', currentHourlyRateMin);
+    if (currentHourlyRateMax) newSearchParams.append('hourly_rate_max', currentHourlyRateMax);
+
     newSearchParams.append('page', String(page));
     navigate(`/search?${newSearchParams.toString()}`);
     setIsFilterFormOpen(false); // Close the collapsible after applying filters
@@ -247,82 +395,6 @@ const SearchResults = () => {
     { value: 'coppie', label: '👩‍❤️‍💋‍👨 Coppie' },
     { value: 'uomo-cerca-uomo', label: '👨‍❤️‍👨 Uomo cerca Uomo' },
     { value: 'donna-cerca-donna', label: '👩‍❤️‍👩 Donna cerca Donna' },
-  ];
-
-  const ethnicities = [
-    { value: 'africana', label: 'Africana' },
-    { value: 'indiana', label: 'Indiana' },
-    { value: 'asiatica', label: 'Asiatica' },
-    { value: 'araba', label: 'Araba' },
-    { value: 'latina', label: 'Latina' },
-    { value: 'caucasica', label: 'Caucasica' },
-    { value: 'italiana', label: 'Italiana' },
-    { value: 'mista', label: 'Mista' },
-    { value: 'altro', label: 'Altro' },
-  ];
-
-  const nationalities = [
-    { value: 'italiana', label: 'Italiana' },
-    { value: 'rumena', label: 'Rumena' },
-    { value: 'brasiliana', label: 'Brasiliana' },
-    { value: 'spagnola', label: 'Spagnola' },
-    { value: 'francese', label: 'Francese' },
-    { value: 'tedesca', label: 'Tedesca' },
-    { value: 'russa', label: 'Russa' },
-    { value: 'ucraina', label: 'Ucraina' },
-    { value: 'colombiana', label: 'Colombiana' },
-    { value: 'venezuelana', label: 'Venezuelana' },
-    { value: 'argentina', label: 'Argentina' },
-    { value: 'cubana', label: 'Cubana' },
-    { value: 'dominicana', label: 'Dominicana' },
-    { value: 'cinese', label: 'Cinese' },
-    { value: 'filippina', label: 'Filippina' },
-    { value: 'indonesiana', label: 'Indonesiana' },
-    { value: 'thailandese', label: 'Thailandese' },
-    { value: 'nigeriana', label: 'Nigeriana' },
-    { value: 'egiziana', label: 'Egiziana' },
-    { value: 'marocchina', label: 'Marocchina' },
-    { value: 'albanese', label: 'Albanese' },
-    { value: 'polacca', label: 'Polacca' },
-    { value: 'britannica', label: 'Britannica' },
-    { value: 'americana', label: 'Americana' },
-    { value: 'canadese', label: 'Canadese' },
-    { value: 'australiana', label: 'Australiana' },
-    { value: 'altro', label: 'Altro' },
-  ];
-
-  const breastTypes = [
-    { value: 'naturale', label: 'Naturale' },
-    { value: 'rifatto', label: 'Rifatto' },
-    { value: 'piccolo', label: 'Piccolo' },
-    { value: 'medio', label: 'Medio' },
-    { value: 'grande', label: 'Grande' },
-  ];
-
-  const hairColors = [
-    { value: 'biondi', label: 'Biondi' },
-    { value: 'castani', label: 'Castani' },
-    { value: 'neri', label: 'Neri' },
-    { value: 'rossi', label: 'Rossi' },
-    { value: 'grigi', label: 'Grigi' },
-    { value: 'colorati', label: 'Colorati' },
-  ];
-
-  const bodyTypes = [
-    { value: 'snella', label: 'Snella' },
-    { value: 'atletica', label: 'Atletica' },
-    { value: 'curvy', label: 'Curvy' },
-    { value: 'robusta', label: 'Robusta' },
-    { value: 'media', label: 'Media' },
-  ];
-
-  const eyeColors = [
-    { value: 'azzurri', label: 'Azzurri' },
-    { value: 'marroni', label: 'Marroni' },
-    { value: 'verdi', label: 'Verdi' },
-    { value: 'neri', label: 'Neri' },
-    { value: 'grigi', label: 'Grigi' },
-    { value: 'misti', label: 'Misti' },
   ];
 
   // Helper to get category label
@@ -371,6 +443,21 @@ const SearchResults = () => {
   const getAgeRangeLabel = (value: string) => {
     const range = ageRanges.find(r => r.value === value);
     return range ? range.label : 'Tutte le età';
+  };
+
+  const getMeetingTypeLabel = (value: string) => {
+    const type = meetingTypeOptions.find(o => o.id === value);
+    return type ? type.label : value;
+  };
+
+  const getAvailabilityForLabel = (value: string) => {
+    const avail = availabilityForOptions.find(o => o.id === value);
+    return avail ? avail.label : value;
+  };
+
+  const getMeetingLocationLabel = (value: string) => {
+    const loc = meetingLocationOptions.find(o => o.id === value);
+    return loc ? loc.label : value;
   };
 
   const generateTitle = () => {
@@ -530,6 +617,26 @@ const SearchResults = () => {
                         <Eye className="h-3 w-3 mr-1" /> {getEyeColorLabel(currentEyeColor)}
                       </Badge>
                     )}
+                    {currentMeetingTypes.length > 0 && (
+                      <Badge variant="secondary" className="capitalize">
+                        <Handshake className="h-3 w-3 mr-1" /> {currentMeetingTypes.map(getMeetingTypeLabel).join(', ')}
+                      </Badge>
+                    )}
+                    {currentAvailabilityFor.length > 0 && (
+                      <Badge variant="secondary" className="capitalize">
+                        <Clock className="h-3 w-3 mr-1" /> {currentAvailabilityFor.map(getAvailabilityForLabel).join(', ')}
+                      </Badge>
+                    )}
+                    {currentMeetingLocations.length > 0 && (
+                      <Badge variant="secondary" className="capitalize">
+                        <Home className="h-3 w-3 mr-1" /> {currentMeetingLocations.map(getMeetingLocationLabel).join(', ')}
+                      </Badge>
+                    )}
+                    {(currentHourlyRateMin || currentHourlyRateMax) && (
+                      <Badge variant="secondary" className="capitalize">
+                        <Euro className="h-3 w-3 mr-1" /> Tariffa: {currentHourlyRateMin || 'Min'} - {currentHourlyRateMax || 'Max'}€
+                      </Badge>
+                    )}
                     {(!currentCategory || currentCategory === 'tutte') && 
                      (!currentCity || currentCity === 'tutte') && 
                      !currentKeyword &&
@@ -539,7 +646,12 @@ const SearchResults = () => {
                      (!currentBreastType || currentBreastType === 'tutte') &&
                      (!currentHairColor || currentHairColor === 'tutte') &&
                      (!currentBodyType || currentBodyType === 'tutte') &&
-                     (!currentEyeColor || currentEyeColor === 'tutte') && (
+                     (!currentEyeColor || currentEyeColor === 'tutte') &&
+                     currentMeetingTypes.length === 0 &&
+                     currentAvailabilityFor.length === 0 &&
+                     currentMeetingLocations.length === 0 &&
+                     !currentHourlyRateMin &&
+                     !currentHourlyRateMax && (
                       <Badge variant="secondary">Tutti gli annunci</Badge>
                     )}
                   </div>
@@ -693,6 +805,90 @@ const SearchResults = () => {
                         {eyeColors.map((e) => <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>)}
                       </SelectContent>
                     </Select>
+                  </div>
+                </div>
+
+                <Separator className="my-4" />
+                <h3 className="text-lg font-semibold text-gray-700 mb-4">Filtri Incontro</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="relative">
+                    <Handshake className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Select
+                      value={currentMeetingTypes.length > 0 ? currentMeetingTypes[0] : 'tutte'}
+                      onValueChange={(value) => setCurrentMeetingTypes(value === 'tutte' ? [] : [value])}
+                    >
+                      <SelectTrigger className="w-full pl-10">
+                        <SelectValue placeholder="Tipologia di Incontro" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="tutte">Tutte le tipologie</SelectItem>
+                        {meetingTypeOptions.map((option) => (
+                          <SelectItem key={option.id} value={option.id}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="relative">
+                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Select
+                      value={currentAvailabilityFor.length > 0 ? currentAvailabilityFor[0] : 'tutte'}
+                      onValueChange={(value) => setCurrentAvailabilityFor(value === 'tutte' ? [] : [value])}
+                    >
+                      <SelectTrigger className="w-full pl-10">
+                        <SelectValue placeholder="Disponibilità per" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="tutte">Tutte le disponibilità</SelectItem>
+                        {availabilityForOptions.map((option) => (
+                          <SelectItem key={option.id} value={option.id}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="relative">
+                    <Home className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Select
+                      value={currentMeetingLocations.length > 0 ? currentMeetingLocations[0] : 'tutte'}
+                      onValueChange={(value) => setCurrentMeetingLocations(value === 'tutte' ? [] : [value])}
+                    >
+                      <SelectTrigger className="w-full pl-10">
+                        <SelectValue placeholder="Luogo Incontro" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="tutte">Tutti i luoghi</SelectItem>
+                        {meetingLocationOptions.map((option) => (
+                          <SelectItem key={option.id} value={option.id}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="relative">
+                      <Euro className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Input
+                        type="number"
+                        placeholder="Tariffa Min"
+                        className="w-full pl-10"
+                        value={currentHourlyRateMin}
+                        onChange={(e) => setCurrentHourlyRateMin(e.target.value)}
+                      />
+                    </div>
+                    <div className="relative">
+                      <Euro className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Input
+                        type="number"
+                        placeholder="Tariffa Max"
+                        className="w-full pl-10"
+                        value={currentHourlyRateMax}
+                        onChange={(e) => setCurrentHourlyRateMax(e.target.value)}
+                      />
+                    </div>
                   </div>
                 </div>
 
