@@ -21,7 +21,7 @@ export const StaticMapDisplay = ({
 }: StaticMapDisplayProps) => {
   // Sostituisci 'YOUR_STADIAMAPS_API_KEY' con la tua chiave API di Stadiamaps
   // Puoi ottenere una chiave API gratuita su https://stadiamaps.com/
-  const STADIAMAPS_API_KEY = 'YOUR_STADIAMAPS_API_KEY'; 
+  const STADIAMAPS_API_KEY = 'f07c111b-25ba-482e-b3e2-b66bc4df25ab'; 
 
   if (!STADIAMAPS_API_KEY || STADIAMAPS_API_KEY === 'YOUR_STADIAMAPS_API_KEY') {
     console.warn("Stadiamaps API Key non configurata. La mappa statica non verrà visualizzata correttamente.");
