@@ -16,7 +16,7 @@ import { ReplyToListingDialog } from '@/components/ReplyToListingDialog';
 import { WatermarkedImage } from '@/components/WatermarkedImage';
 import { Helmet } from 'react-helmet-async';
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
-import { StaticMapDisplay } from '@/components/StaticMapDisplay'; // Importa il nuovo componente StaticMapDisplay
+import { StaticMapDisplay } from '@/components/StaticMapDisplay'; // Importa il componente StaticMapDisplay
 
 type FullListing = {
   id: string;
@@ -280,7 +280,6 @@ const ListingDetails = () => {
                     latitude={listing.latitude} 
                     longitude={listing.longitude} 
                     addressText={listing.address_text} 
-                    city={listing.city} {/* Passa il nome della città qui */}
                   />
                 </div>
               </CardContent>
