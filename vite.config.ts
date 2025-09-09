@@ -20,7 +20,6 @@ export default defineConfig(() => ({
     },
   },
   optimizeDeps: {
-    // Escludi queste librerie dalla pre-ottimizzazione
-    include: [], 
+    exclude: ['react', 'react-dom'], // Escludi React e ReactDOM dalla pre-ottimizzazione
   },
 }));
