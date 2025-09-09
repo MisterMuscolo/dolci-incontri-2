@@ -224,7 +224,12 @@ const ListingDetails = () => {
                       )}
                       onClick={() => setActivePhoto(photo.original_url ?? photo.url)}
                     >
-                      <WatermarkedImage src={photo.url} alt="Miniatura foto" imageClassName="object-cover bg-gray-200 rounded-md" />
+                      <WatermarkedImage 
+                        src={photo.url} 
+                        alt="Miniatura foto" 
+                        imageClassName="object-cover bg-gray-200 rounded-md" 
+                        watermarkClassName="text-xs opacity-70 [&>div>svg]:h-3 [&>div>svg]:w-3" // Ridotto il testo e l'icona
+                      />
                     </div>
                   ))}
                 </div>
