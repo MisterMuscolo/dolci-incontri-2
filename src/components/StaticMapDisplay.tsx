@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { MapPin } from 'lucide-react'; // Import MapPin icon
 
 interface StaticMapDisplayProps {
   latitude: number;
@@ -15,49 +16,49 @@ export const StaticMapDisplay = ({
   latitude, 
   longitude, 
   addressText, 
-  zoom = 13, 
-  width = 600, 
-  height = 250 
+  zoom = 13, // Mantenuto per coerenza, ma non usato direttamente
+  width = 600, // Mantenuto per coerenza, ma non usato direttamente
+  height = 250 // Mantenuto per coerenza, ma non usato direttamente
 }: StaticMapDisplayProps) => {
-  // Sostituisci 'YOUR_MAPQUEST_API_KEY' con la tua chiave API di MapQuest
-  const MAPQUEST_API_KEY = 'YOUR_MAPQUEST_API_KEY'; 
+  // Poiché le API di mappe statiche veramente gratuite con marker e senza carta di credito per uso non-locale sono difficili da trovare,
+  // forniremo un segnaposto visivo con il testo dell'indirizzo.
+  // Questo evita chiavi API, costi e requisiti di carta di credito.
 
-  if (!MAPQUEST_API_KEY || MAPQUEST_API_KEY === 'YOUR_MAPQUEST_API_KEY') {
-    console.warn("MapQuest API Key non configurata. La mappa statica non verrà visualizzata correttamente.");
-    return (
-      <div className="flex items-center justify-center h-full w-full bg-gray-200 rounded-md text-gray-600 text-center p-4">
-        Chiave API di MapQuest mancante o non configurata.
-      </div>
-    );
-  }
+  // Un'immagine di sfondo generica per dare l'idea di una mappa.
+  // Potrebbe essere un'icona stilizzata di mappa o un pattern.
+  // Per ora, useremo un'immagine generica di OpenStreetMap.
+  const genericMapBackground = "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Openstreetmap_logo.svg/1200px-Openstreetmap_logo.svg.png"; 
 
+  // Se le coordinate non sono valide, mostriamo un messaggio di errore più specifico.
   if (typeof latitude !== 'number' || isNaN(latitude) || typeof longitude !== 'number' || isNaN(longitude)) {
-    console.warn("Coordinate di latitudine o longitudine non valide per la mappa statica.");
     return (
       <div className="flex items-center justify-center h-full w-full bg-gray-200 rounded-md text-gray-600 text-center p-4">
-        Coordinate mappa non valide.
+        <MapPin className="h-8 w-8 text-gray-500 mr-2" />
+        Coordinate mappa non valide per la visualizzazione.
       </div>
     );
   }
-
-  // URL per MapQuest Static Map API
-  // Aggiunge un marker rosso di piccole dimensioni ('marker-sm-red') alle coordinate specificate.
-  const mapUrl = `https://www.mapquestapi.com/staticmap/v5/map?key=${MAPQUEST_API_KEY}&center=${latitude},${longitude}&zoom=${zoom}&size=${width},${height}&locations=${latitude},${longitude}|marker-sm-red`;
-  
-  console.log("MapQuest Static Map URL:", mapUrl);
 
   return (
-    <div className="relative w-full h-full rounded-md overflow-hidden">
-      <img
-        src={mapUrl}
-        alt={addressText || `Mappa di ${latitude}, ${longitude}`}
-        className="w-full h-full object-cover"
-      />
-      {addressText && (
-        <div className="absolute bottom-2 left-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded-md">
-          {addressText}
-        </div>
-      )}
+    <div 
+      className="relative w-full h-full rounded-md overflow-hidden flex flex-col items-center justify-center p-4 text-center"
+      style={{
+        backgroundImage: `url(${genericMapBackground})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundColor: '#e0e0e0', // Colore di sfondo di fallback
+        minHeight: '150px', // Assicura un'altezza minima
+      }}
+    >
+      <div className="absolute inset-0 bg-black opacity-40"></div> {/* Overlay scuro per leggibilità del testo */}
+      <div className="relative z-10 text-white">
+        <MapPin className="h-10 w-10 mx-auto mb-2 text-rose-300" />
+        <p className="text-lg font-semibold mb-1">Posizione dell'annuncio:</p>
+        <p className="text-xl font-bold">{addressText || 'Posizione non specificata'}</p>
+        <p className="text-sm mt-2">
+          Mappa dinamica non disponibile senza chiave API a pagamento.
+        </p>
+      </div>
     </div>
   );
 };
