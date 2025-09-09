@@ -4,10 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { italianProvinces } from '@/data/provinces';
-import { Heart, MapPin, Search, Globe, Palette, Ruler, Eye } from 'lucide-react'; // Aggiunte icone per i nuovi filtri
+import { Heart, MapPin, Search, Globe, Palette, Ruler, Eye, ChevronDown, ChevronUp } from 'lucide-react'; // Aggiunte icone per i nuovi filtri
 import { Card, CardContent } from '@/components/ui/card';
 import { PWAInstallInstructions } from '@/components/PWAInstallInstructions';
 import { Helmet } from 'react-helmet-async';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'; // Importa Collapsible
+import { Separator } from '@/components/ui/separator'; // Importa Separator
+import { Badge } from '@/components/ui/badge'; // Importa Badge
 
 interface IndexProps {
   session: any;
@@ -25,6 +28,7 @@ export default function Index({ session }: IndexProps) {
   const [eyeColor, setEyeColor] = useState('tutte');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams(); // Ottieni i parametri di ricerca
+  const [isFilterFormOpen, setIsFilterFormOpen] = useState(false); // Stato per la sezione filtri collassabile
 
   useEffect(() => {
     const referrerCode = searchParams.get('ref');
@@ -53,6 +57,7 @@ export default function Index({ session }: IndexProps) {
     if (eyeColor && eyeColor !== 'tutte') searchParams.append('eye_color', eyeColor);
     
     navigate(`/search?${searchParams.toString()}`);
+    setIsFilterFormOpen(false); // Chiudi la sezione filtri dopo la ricerca
   };
 
   const handleCategoryCardClick = (selectedCategory: string) => {
@@ -145,6 +150,58 @@ export default function Index({ session }: IndexProps) {
     { value: 'misti', label: 'Misti' },
   ];
 
+  // Helper functions to get labels for badges
+  const getCategoryLabel = (value: string) => {
+    const cat = categories.find(c => c.value === value);
+    return cat ? cat.label.substring(cat.label.indexOf(' ') + 1) : null;
+  };
+
+  const getCityLabel = (value: string) => {
+    const city = italianProvinces.find(p => p.label === value);
+    return city ? city.label : null;
+  };
+
+  const getEthnicityLabel = (value: string) => {
+    const eth = ethnicities.find(e => e.value === value);
+    return eth ? eth.label : null;
+  };
+
+  const getNationalityLabel = (value: string) => {
+    const nat = nationalities.find(n => n.value === value);
+    return nat ? nat.label : null;
+  };
+
+  const getBreastTypeLabel = (value: string) => {
+    const bt = breastTypes.find(b => b.value === value);
+    return bt ? bt.label : null;
+  };
+
+  const getHairColorLabel = (value: string) => {
+    const hc = hairColors.find(h => h.value === value);
+    return hc ? hc.label : null;
+  };
+
+  const getBodyTypeLabel = (value: string) => {
+    const bt = bodyTypes.find(b => b.value === value);
+    return bt ? bt.label : null;
+  };
+
+  const getEyeColorLabel = (value: string) => {
+    const ec = eyeColors.find(e => e.value === value);
+    return ec ? ec.label : null;
+  };
+
+  const hasActiveFilters = 
+    (category && category !== 'tutte') ||
+    (city && city !== 'tutte') ||
+    keyword ||
+    (ethnicity && ethnicity !== 'tutte') ||
+    (nationality && nationality !== 'tutte') ||
+    (breastType && breastType !== 'tutte') ||
+    (hairColor && hairColor !== 'tutte') ||
+    (bodyType && bodyType !== 'tutte') ||
+    (eyeColor && eyeColor !== 'tutte');
+
   return (
     <>
       <Helmet>
@@ -154,8 +211,6 @@ export default function Index({ session }: IndexProps) {
       </Helmet>
       <div className="bg-gradient-to-br from-rose-100 via-white to-sky-100">
         <div className="container mx-auto px-4 py-16 text-center">
-          {/* Rimosso i pulsanti di download */}
-
           <h1 className="text-5xl font-bold text-rose-600 mb-4">
             IncontriDolci
           </h1>
@@ -165,131 +220,204 @@ export default function Index({ session }: IndexProps) {
           
           <div className="max-w-2xl mx-auto bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-8">
             <h2 className="text-2xl font-semibold mb-6 text-gray-700">Cerca il tuo incontro ideale</h2>
-            <form onSubmit={handleSearch} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="relative">
-                  <Heart className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <Select defaultValue="tutte" onValueChange={setCategory}>
-                    <SelectTrigger className="w-full pl-10">
-                      <SelectValue placeholder="Categoria" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="tutte">Tutte le categorie</SelectItem>
-                      <SelectItem value="donna-cerca-uomo">👩‍❤️‍👨 Donna cerca Uomo</SelectItem>
-                      <SelectItem value="donna-cerca-donna">👩‍❤️‍👩 Donna cerca Donna</SelectItem>
-                      <SelectItem value="uomo-cerca-donna">👨‍❤️‍👩 Uomo cerca Donna</SelectItem>
-                      <SelectItem value="uomo-cerca-uomo">👨‍❤️‍👨 Uomo cerca Uomo</SelectItem>
-                      <SelectItem value="coppie">👩‍❤️‍💋‍👨 Coppie</SelectItem>
-                    </SelectContent>
-                  </Select>
+            
+            <Collapsible
+              open={isFilterFormOpen}
+              onOpenChange={setIsFilterFormOpen}
+              className="w-full"
+            >
+              <CollapsibleTrigger asChild>
+                <div className="flex items-center justify-between cursor-pointer py-2 mb-4">
+                  <div className="flex flex-col items-start">
+                    <h3 className="text-xl font-semibold text-gray-700">
+                      Filtri
+                    </h3>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {category && category !== 'tutte' && (
+                        <Badge variant="secondary" className="capitalize">
+                          <Heart className="h-3 w-3 mr-1" /> {getCategoryLabel(category)}
+                        </Badge>
+                      )}
+                      {city && city !== 'tutte' && (
+                        <Badge variant="secondary" className="capitalize">
+                          <MapPin className="h-3 w-3 mr-1" /> {getCityLabel(city)}
+                        </Badge>
+                      )}
+                      {keyword && (
+                        <Badge variant="secondary" className="capitalize">
+                          <Search className="h-3 w-3 mr-1" /> "{keyword}"
+                        </Badge>
+                      )}
+                      {ethnicity && ethnicity !== 'tutte' && (
+                        <Badge variant="secondary" className="capitalize">
+                          <Globe className="h-3 w-3 mr-1" /> {getEthnicityLabel(ethnicity)}
+                        </Badge>
+                      )}
+                      {nationality && nationality !== 'tutte' && (
+                        <Badge variant="secondary" className="capitalize">
+                          <Globe className="h-3 w-3 mr-1" /> {getNationalityLabel(nationality)}
+                        </Badge>
+                      )}
+                      {breastType && breastType !== 'tutte' && (
+                        <Badge variant="secondary" className="capitalize">
+                          <Palette className="h-3 w-3 mr-1" /> {getBreastTypeLabel(breastType)}
+                        </Badge>
+                      )}
+                      {hairColor && hairColor !== 'tutte' && (
+                        <Badge variant="secondary" className="capitalize">
+                          <Palette className="h-3 w-3 mr-1" /> {getHairColorLabel(hairColor)}
+                        </Badge>
+                      )}
+                      {bodyType && bodyType !== 'tutte' && (
+                        <Badge variant="secondary" className="capitalize">
+                          <Ruler className="h-3 w-3 mr-1" /> {getBodyTypeLabel(bodyType)}
+                        </Badge>
+                      )}
+                      {eyeColor && eyeColor !== 'tutte' && (
+                        <Badge variant="secondary" className="capitalize">
+                          <Eye className="h-3 w-3 mr-1" /> {getEyeColorLabel(eyeColor)}
+                        </Badge>
+                      )}
+                      {!hasActiveFilters && (
+                        <Badge variant="secondary">Tutti gli annunci</Badge>
+                      )}
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="sm" className="w-9 p-0">
+                    {isFilterFormOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    <span className="sr-only">Toggle filters</span>
+                  </Button>
                 </div>
-                
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <Select defaultValue="tutte" onValueChange={setCity}>
-                    <SelectTrigger className="w-full pl-10">
-                      <SelectValue placeholder="Città" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-72">
-                      <SelectItem value="tutte">Tutte le città</SelectItem>
-                      {italianProvinces.map((province) => (
-                        <SelectItem key={province.value} value={province.label}>
-                          {province.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <Separator className="my-4" />
+                <form onSubmit={handleSearch} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="relative">
+                      <Heart className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Select defaultValue="tutte" onValueChange={setCategory}>
+                        <SelectTrigger className="w-full pl-10">
+                          <SelectValue placeholder="Categoria" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="tutte">Tutte le categorie</SelectItem>
+                          <SelectItem value="donna-cerca-uomo">👩‍❤️‍👨 Donna cerca Uomo</SelectItem>
+                          <SelectItem value="donna-cerca-donna">👩‍❤️‍👩 Donna cerca Donna</SelectItem>
+                          <SelectItem value="uomo-cerca-donna">👨‍❤️‍👩 Uomo cerca Donna</SelectItem>
+                          <SelectItem value="uomo-cerca-uomo">👨‍❤️‍👨 Uomo cerca Uomo</SelectItem>
+                          <SelectItem value="coppie">👩‍❤️‍💋‍👨 Coppie</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Select defaultValue="tutte" onValueChange={setCity}>
+                        <SelectTrigger className="w-full pl-10">
+                          <SelectValue placeholder="Città" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-72">
+                          <SelectItem value="tutte">Tutte le città</SelectItem>
+                          {italianProvinces.map((province) => (
+                            <SelectItem key={province.value} value={province.label}>
+                              {province.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                <div className="relative md:col-span-2">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <Input 
-                    type="text" 
-                    placeholder="Parola chiave o zona..." 
-                    className="w-full pl-10"
-                    value={keyword}
-                    onChange={(e) => setKeyword(e.target.value)}
-                  />
-                </div>
+                    <div className="relative md:col-span-2">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Input 
+                        type="text" 
+                        placeholder="Parola chiave o zona..." 
+                        className="w-full pl-10"
+                        value={keyword}
+                        onChange={(e) => setKeyword(e.target.value)}
+                      />
+                    </div>
 
-                {/* Nuovi filtri per Dettagli Personali */}
-                <div className="relative">
-                  <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <Select defaultValue="tutte" onValueChange={setEthnicity}>
-                    <SelectTrigger className="w-full pl-10">
-                      <SelectValue placeholder="Origine" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="tutte">Tutte le origini</SelectItem>
-                      {ethnicities.map((e) => <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="relative">
-                  <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <Select defaultValue="tutte" onValueChange={setNationality}>
-                    <SelectTrigger className="w-full pl-10">
-                      <SelectValue placeholder="Nazionalità" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-60">
-                      <SelectItem value="tutte">Tutte le nazionalità</SelectItem>
-                      {nationalities.map((n) => <SelectItem key={n.value} value={n.value}>{n.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="relative">
-                  <Palette className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <Select defaultValue="tutte" onValueChange={setBreastType}>
-                    <SelectTrigger className="w-full pl-10">
-                      <SelectValue placeholder="Tipo di Seno" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="tutte">Tutti i tipi di seno</SelectItem>
-                      {breastTypes.map((b) => <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="relative">
-                  <Palette className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <Select defaultValue="tutte" onValueChange={setHairColor}>
-                    <SelectTrigger className="w-full pl-10">
-                      <SelectValue placeholder="Colore Capelli" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="tutte">Tutti i colori di capelli</SelectItem>
-                      {hairColors.map((h) => <SelectItem key={h.value} value={h.value}>{h.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="relative">
-                  <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <Select defaultValue="tutte" onValueChange={setBodyType}>
-                    <SelectTrigger className="w-full pl-10">
-                      <SelectValue placeholder="Corporatura" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="tutte">Tutte le corporature</SelectItem>
-                      {bodyTypes.map((b) => <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="relative">
-                  <Eye className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <Select defaultValue="tutte" onValueChange={setEyeColor}>
-                    <SelectTrigger className="w-full pl-10">
-                      <SelectValue placeholder="Colore Occhi" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="tutte">Tutti i colori di occhi</SelectItem>
-                      {eyeColors.map((e) => <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600 text-white text-lg py-6">
-                Cerca
-              </Button>
-            </form>
+                    {/* Nuovi filtri per Dettagli Personali */}
+                    <div className="relative">
+                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Select defaultValue="tutte" onValueChange={setEthnicity}>
+                        <SelectTrigger className="w-full pl-10">
+                          <SelectValue placeholder="Origine" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="tutte">Tutte le origini</SelectItem>
+                          {ethnicities.map((e) => <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="relative">
+                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Select defaultValue="tutte" onValueChange={setNationality}>
+                        <SelectTrigger className="w-full pl-10">
+                          <SelectValue placeholder="Nazionalità" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-60">
+                          <SelectItem value="tutte">Tutte le nazionalità</SelectItem>
+                          {nationalities.map((n) => <SelectItem key={n.value} value={n.value}>{n.label}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="relative">
+                      <Palette className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Select defaultValue="tutte" onValueChange={setBreastType}>
+                        <SelectTrigger className="w-full pl-10">
+                          <SelectValue placeholder="Tipo di Seno" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="tutte">Tutti i tipi di seno</SelectItem>
+                          {breastTypes.map((b) => <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="relative">
+                      <Palette className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Select defaultValue="tutte" onValueChange={setHairColor}>
+                        <SelectTrigger className="w-full pl-10">
+                          <SelectValue placeholder="Colore Capelli" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="tutte">Tutti i colori di capelli</SelectItem>
+                          {hairColors.map((h) => <SelectItem key={h.value} value={h.value}>{h.label}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="relative">
+                      <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Select defaultValue="tutte" onValueChange={setBodyType}>
+                        <SelectTrigger className="w-full pl-10">
+                          <SelectValue placeholder="Corporatura" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="tutte">Tutte le corporature</SelectItem>
+                          {bodyTypes.map((b) => <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="relative">
+                      <Eye className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Select defaultValue="tutte" onValueChange={setEyeColor}>
+                        <SelectTrigger className="w-full pl-10">
+                          <SelectValue placeholder="Colore Occhi" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="tutte">Tutti i colori di occhi</SelectItem>
+                          {eyeColors.map((e) => <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600 text-white text-lg py-6">
+                    Cerca
+                  </Button>
+                </form>
+              </CollapsibleContent>
+            </Collapsible>
             
             <div className="mt-8 text-center">
               {!session ? (
@@ -304,7 +432,6 @@ export default function Index({ session }: IndexProps) {
                   </Link>
                 </p>
               ) : (
-                // Rimosso il pulsante "Vai alla tua Dashboard"
                 <p className="text-gray-600">
                   Benvenuto! Esplora gli annunci o crea il tuo.
                 </p>
