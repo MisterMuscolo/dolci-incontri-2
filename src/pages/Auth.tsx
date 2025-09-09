@@ -142,7 +142,8 @@ const Auth = () => {
       }
 
       showSuccess('Accesso effettuato con successo!');
-      navigate(redirectTo);
+      // Reindirizza sempre a /auth/callback per gestire la logica di reindirizzamento basata sul ruolo
+      navigate(`/auth/callback?redirect=${encodeURIComponent(redirectTo)}`);
     } catch (error: any) {
       dismissToast(toastId);
       showError(error.message || 'Si è verificato un errore imprevisto.');

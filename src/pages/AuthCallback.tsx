@@ -20,17 +20,33 @@ const AuthCallback = () => {
       }
 
       if (session) {
-        // Se c'è una sessione, l'utente è autenticato.
-        // Controlla se c'è un parametro 'redirect' nell'URL per sapere dove andare.
-        const redirectTo = searchParams.get('redirect');
-        if (redirectTo) {
-          navigate(redirectTo);
+        // Fetch user role
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profileError || !profile) {
+          console.error("AuthCallback: Error fetching profile role:", profileError);
+          showError("Errore nel recupero del ruolo utente.");
+          navigate('/auth?tab=login'); // Fallback to login if role can't be fetched
+          return;
+        }
+
+        const userRole = profile.role;
+        const originalRedirectTo = searchParams.get('redirect');
+
+        if (userRole === 'admin' || userRole === 'supporto') {
+          navigate('/admin');
+        } else if (userRole === 'banned') {
+          navigate('/banned');
+        } else if (originalRedirectTo) {
+          navigate(originalRedirectTo);
         } else {
-          // Reindirizzamento predefinito se non specificato (es. dashboard)
-          navigate('/dashboard'); 
+          navigate('/dashboard');
         }
       } else {
-        // Nessuna sessione, potrebbe essere un errore o un link non valido
         console.warn("AuthCallback: No session found after callback. Redirecting to login.");
         navigate('/auth?tab=login');
       }
