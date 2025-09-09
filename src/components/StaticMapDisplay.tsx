@@ -39,10 +39,11 @@ export const StaticMapDisplay = ({
     );
   }
 
-  // L'URL corretto per l'API delle mappe statiche di Stadiamaps
-  const mapUrl = `https://tiles.stadiamaps.com/styles/osm_bright/static/${longitude},${latitude},${zoom}/${width}x${height}.png?markers=lonlat:${longitude},${latitude}|color:ff0000|label:A&api_key=${STADIAMAPS_API_KEY}`;
+  // Ho rimosso il parametro 'markers' per testare se la mappa base si carica.
+  // Se funziona, il problema è nella formattazione dei marker.
+  const mapUrl = `https://tiles.stadiamaps.com/styles/osm_bright/static/${longitude},${latitude},${zoom}/${width}x${height}.png?api_key=${STADIAMAPS_API_KEY}`;
   
-  console.log("Stadiamaps Map URL:", mapUrl);
+  console.log("Stadiamaps Map URL (simplified):", mapUrl);
 
   return (
     <div className="relative w-full h-full rounded-md overflow-hidden">
