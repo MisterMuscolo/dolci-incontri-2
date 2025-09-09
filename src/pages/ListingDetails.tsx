@@ -213,7 +213,8 @@ const ListingDetails = () => {
               <AspectRatio ratio={16 / 10} className="bg-gray-100 rounded-lg overflow-hidden mb-4">
                 <WatermarkedImage src={activePhoto!} alt={listing.title} imageClassName="object-contain bg-gray-200" />
               </AspectRatio>
-              {listing.listing_photos.length > 1 && (
+              {/* Modificata la condizione per mostrare le miniature se ci sono foto */}
+              {listing.listing_photos.length > 0 && ( 
                 <div className="flex gap-2 overflow-x-auto pb-2">
                   {listing.listing_photos.map((photo) => (
                     <div 
