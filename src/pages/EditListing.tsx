@@ -74,6 +74,8 @@ type FullListing = {
   contact_preference: 'email' | 'phone' | 'both';
   contact_whatsapp: boolean | null;
   listing_photos: ExistingPhoto[];
+  latitude: number | null; // Add latitude
+  longitude: number | null; // Add longitude
 };
 
 const EditListing = () => {
@@ -100,6 +102,8 @@ const EditListing = () => {
 
   const contactPreference = form.watch('contact_preference');
   const phoneValue = form.watch('phone');
+  const cityValue = form.watch('city');
+  const zoneValue = form.watch('zone');
 
   const fetchListingData = useCallback(async () => {
     if (!id) {
@@ -154,6 +158,31 @@ const EditListing = () => {
 
       const formattedPhone = formatPhoneNumber(values.phone);
 
+      // Geocode the address if city or zone changed
+      let latitude: number | null = currentListing?.latitude || null;
+      let longitude: number | null = currentListing?.longitude || null;
+
+      if (cityValue !== currentListing?.city || zoneValue !== currentListing?.zone) {
+        if (cityValue) {
+          const { data: geoData, error: geoError } = await supabase.functions.invoke('geocode-address', {
+            body: { city: cityValue, zone: zoneValue },
+          });
+
+          if (geoError) {
+            console.warn("Geocoding failed during update:", geoError.message);
+          } else if (geoData && geoData.latitude && geoData.longitude) {
+            latitude = geoData.latitude;
+            longitude = geoData.longitude;
+          } else {
+            latitude = null; // Clear if not found
+            longitude = null;
+          }
+        } else {
+          latitude = null; // Clear if city is empty
+          longitude = null;
+        }
+      }
+
       const updateData = {
         title: values.title,
         description: values.description,
@@ -162,6 +191,8 @@ const EditListing = () => {
         contact_preference: values.contact_preference,
         contact_whatsapp: values.contact_whatsapp,
         zone: values.zone,
+        latitude: latitude, // Update latitude
+        longitude: longitude, // Update longitude
       };
 
       const { error: updateError } = await supabase

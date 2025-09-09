@@ -5,7 +5,7 @@ import { ListingListItem, Listing } from '@/components/ListingListItem';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { ChevronLeft, MapPin, Search, Heart, ChevronDown, ChevronUp } from 'lucide-react'; // Add ChevronDown, ChevronUp icons
+import { ChevronLeft, MapPin, Search, Heart, ChevronDown, ChevronUp, List, Map } from 'lucide-react'; // Add Map icon
 import { Helmet } from 'react-helmet-async';
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -15,6 +15,7 @@ import { Card } from '@/components/ui/card'; // Ensure Card is imported
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'; // Import Collapsible components
 import { Separator } from '@/components/ui/separator'; // Import Separator
 import { Badge } from '@/components/ui/badge'; // Import Badge
+import { ListingMap, MapListing } from '@/components/ListingMap'; // Import ListingMap and MapListing types
 
 const LISTINGS_PER_PAGE = 10;
 
@@ -33,6 +34,7 @@ const SearchResults = () => {
   const [currentCity, setCurrentCity] = useState(searchParams.get('city') || 'tutte');
   const [currentKeyword, setCurrentKeyword] = useState(searchParams.get('keyword') || '');
   const [isFilterFormOpen, setIsFilterFormOpen] = useState(false); // State for collapsible filter form
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list'); // New state for view mode
 
   // Update local states when URL search params change (e.g., direct URL access or browser back/forward)
   useEffect(() => {
@@ -40,6 +42,7 @@ const SearchResults = () => {
     setCurrentCity(searchParams.get('city') || 'tutte');
     setCurrentKeyword(searchParams.get('keyword') || '');
     setCurrentPage(parseInt(searchParams.get('page') || '1', 10));
+    setViewMode((searchParams.get('view') as 'list' | 'map') || 'list'); // Read view mode from URL
   }, [searchParams]);
 
   const fetchListings = useCallback(async () => {
@@ -73,9 +76,11 @@ const SearchResults = () => {
         paused_at,
         remaining_expires_at_duration,
         remaining_promotion_duration,
+        latitude,
+        longitude,
         listing_photos ( url, original_url, is_primary )
       `, { count: 'exact' })
-      .gt('expires_at', new Date().toISOString())
+      .gt('expires_at', new Date().toISOString());
       // .eq('is_paused', false); // Rimosso il filtro is_paused per mostrare tutti gli annunci attivi, inclusi quelli riattivati
 
     if (categoryParam && categoryParam !== 'tutte') {
@@ -125,12 +130,13 @@ const SearchResults = () => {
     fetchListings();
   }, [fetchListings]);
 
-  const handleApplyFilters = (page: number = 1) => {
+  const handleApplyFilters = (page: number = 1, newViewMode: 'list' | 'map' = viewMode) => {
     const newSearchParams = new URLSearchParams();
     if (currentCategory && currentCategory !== 'tutte') newSearchParams.append('category', currentCategory);
     if (currentCity && currentCity !== 'tutte') newSearchParams.append('city', currentCity);
     if (currentKeyword) newSearchParams.append('keyword', currentKeyword);
     newSearchParams.append('page', String(page));
+    newSearchParams.append('view', newViewMode); // Add view mode to URL
     navigate(`/search?${newSearchParams.toString()}`);
     setIsFilterFormOpen(false); // Close the collapsible after applying filters
   };
@@ -180,6 +186,11 @@ const SearchResults = () => {
     return description;
   };
 
+  const handleToggleView = (mode: 'list' | 'map') => {
+    setViewMode(mode);
+    handleApplyFilters(currentPage, mode);
+  };
+
   const renderContent = () => {
     if (loading) {
       return (
@@ -202,6 +213,32 @@ const SearchResults = () => {
           </Link>
         </div>
       );
+    }
+
+    if (viewMode === 'map') {
+      const mapListings: MapListing[] = listings.filter(l => l.latitude && l.longitude).map(l => ({
+        id: l.id,
+        title: l.title,
+        category: l.category,
+        city: l.city,
+        zone: l.zone,
+        age: l.age || 0, // Provide a default if age can be null
+        latitude: l.latitude!,
+        longitude: l.longitude!,
+        is_premium: l.is_premium,
+        listing_photos: l.listing_photos.map(p => ({ url: p.url, is_primary: p.is_primary })),
+      }));
+
+      if (mapListings.length === 0) {
+        return (
+          <div className="text-center py-12 bg-white rounded-lg shadow">
+            <p className="text-gray-600 text-lg">Nessun annuncio con coordinate geografiche trovato per la tua ricerca.</p>
+            <Button onClick={() => handleToggleView('list')} className="mt-4">Torna alla Lista</Button>
+          </div>
+        );
+      }
+
+      return <ListingMap listings={mapListings} />;
     }
 
     return (
@@ -351,6 +388,24 @@ const SearchResults = () => {
             </CollapsibleContent>
           </Collapsible>
         </Card>
+
+        {/* Toggle View Buttons */}
+        <div className="flex justify-end gap-2 mb-4">
+          <Button
+            variant={viewMode === 'list' ? 'default' : 'outline'}
+            onClick={() => handleToggleView('list')}
+            className={viewMode === 'list' ? 'bg-rose-500 hover:bg-rose-600' : ''}
+          >
+            <List className="h-4 w-4 mr-2" /> Lista
+          </Button>
+          <Button
+            variant={viewMode === 'map' ? 'default' : 'outline'}
+            onClick={() => handleToggleView('map')}
+            className={viewMode === 'map' ? 'bg-rose-500 hover:bg-rose-600' : ''}
+          >
+            <Map className="h-4 w-4 mr-2" /> Mappa
+          </Button>
+        </div>
 
         {renderContent()}
       </div>

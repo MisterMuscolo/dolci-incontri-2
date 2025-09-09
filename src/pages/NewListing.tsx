@@ -74,6 +74,8 @@ const NewListing = () => {
 
   const contactPreference = form.watch('contact_preference');
   const phoneValue = form.watch('phone');
+  const cityValue = form.watch('city');
+  const zoneValue = form.watch('zone');
 
   useEffect(() => {
     const fetchUserEmailAndId = async () => {
@@ -97,6 +99,24 @@ const NewListing = () => {
       const { age, phone, ...restOfValues } = values;
       const formattedPhone = formatPhoneNumber(phone);
 
+      // Geocode the address
+      let latitude: number | null = null;
+      let longitude: number | null = null;
+
+      if (cityValue) {
+        const { data: geoData, error: geoError } = await supabase.functions.invoke('geocode-address', {
+          body: { city: cityValue, zone: zoneValue },
+        });
+
+        if (geoError) {
+          console.warn("Geocoding failed:", geoError.message);
+          // Don't block listing creation, but log the error
+        } else if (geoData && geoData.latitude && geoData.longitude) {
+          latitude = geoData.latitude;
+          longitude = geoData.longitude;
+        }
+      }
+
       const { data: newListing, error: listingError } = await supabase
         .from('listings')
         .insert({
@@ -112,6 +132,8 @@ const NewListing = () => {
           contact_preference: restOfValues.contact_preference,
           contact_whatsapp: restOfValues.contact_whatsapp,
           last_bumped_at: new Date().toISOString(),
+          latitude: latitude, // Save latitude
+          longitude: longitude, // Save longitude
         })
         .select('id')
         .single();
