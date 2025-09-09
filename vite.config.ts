@@ -19,7 +19,5 @@ export default defineConfig(() => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  optimizeDeps: {
-    exclude: ['react', 'react-dom'], // Escludi React e ReactDOM dalla pre-ottimizzazione
-  },
+  // Rimosso optimizeDeps.exclude per React e ReactDOM
 }));
