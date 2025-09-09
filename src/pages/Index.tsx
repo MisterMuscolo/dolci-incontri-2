@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { italianProvinces } from '@/data/provinces';
-import { Heart, MapPin, Search, Globe, Palette, Ruler, Eye, ChevronDown, ChevronUp } from 'lucide-react';
+import { Heart, MapPin, Search, Globe, Palette, Ruler, Eye, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react'; // Importa RotateCcw per l'icona di reset
 import { Card, CardContent } from '@/components/ui/card';
 import { PWAInstallInstructions } from '@/components/PWAInstallInstructions';
 import { Helmet } from 'react-helmet-async';
@@ -56,6 +56,20 @@ export default function Index({ session }: IndexProps) {
     
     navigate(`/search?${searchParams.toString()}`);
     setIsPersonalFiltersOpen(false);
+  };
+
+  const handleResetFilters = () => {
+    setCategory('tutte');
+    setCity('tutte');
+    setKeyword('');
+    setEthnicity('tutte');
+    setNationality('tutte');
+    setBreastType('tutte');
+    setHairColor('tutte');
+    setBodyType('tutte');
+    setEyeColor('tutte');
+    setIsPersonalFiltersOpen(false); // Chiudi la sezione filtri personali
+    navigate('/'); // Naviga alla homepage senza parametri di ricerca
   };
 
   const handleCategoryCardClick = (selectedCategory: string) => {
@@ -209,7 +223,7 @@ export default function Index({ session }: IndexProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="relative">
                   <Heart className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <Select defaultValue="tutte" onValueChange={setCategory}>
+                  <Select value={category} onValueChange={setCategory}>
                     <SelectTrigger className="w-full pl-10">
                       <SelectValue placeholder="Categoria" />
                     </SelectTrigger>
@@ -226,7 +240,7 @@ export default function Index({ session }: IndexProps) {
                 
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <Select defaultValue="tutte" onValueChange={setCity}>
+                  <Select value={city} onValueChange={setCity}>
                     <SelectTrigger className="w-full pl-10">
                       <SelectValue placeholder="Città" />
                     </SelectTrigger>
@@ -301,7 +315,7 @@ export default function Index({ session }: IndexProps) {
                         )}
                       </div>
                     </div>
-                    <Button type="button" variant="ghost" size="sm" className="w-9 p-0"> {/* Aggiunto type="button" */}
+                    <Button type="button" variant="ghost" size="sm" className="w-9 p-0">
                       {isPersonalFiltersOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                       <span className="sr-only">Toggle personal filters</span>
                     </Button>
@@ -312,7 +326,7 @@ export default function Index({ session }: IndexProps) {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="relative">
                       <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Select defaultValue="tutte" onValueChange={setEthnicity}>
+                      <Select value={ethnicity} onValueChange={setEthnicity}>
                         <SelectTrigger className="w-full pl-10">
                           <SelectValue placeholder="Origine" />
                         </SelectTrigger>
@@ -324,7 +338,7 @@ export default function Index({ session }: IndexProps) {
                     </div>
                     <div className="relative">
                       <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Select defaultValue="tutte" onValueChange={setNationality}>
+                      <Select value={nationality} onValueChange={setNationality}>
                         <SelectTrigger className="w-full pl-10">
                           <SelectValue placeholder="Nazionalità" />
                         </SelectTrigger>
@@ -336,7 +350,7 @@ export default function Index({ session }: IndexProps) {
                     </div>
                     <div className="relative">
                       <Palette className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Select defaultValue="tutte" onValueChange={setBreastType}>
+                      <Select value={breastType} onValueChange={setBreastType}>
                         <SelectTrigger className="w-full pl-10">
                           <SelectValue placeholder="Tipo di Seno" />
                         </SelectTrigger>
@@ -348,7 +362,7 @@ export default function Index({ session }: IndexProps) {
                     </div>
                     <div className="relative">
                       <Palette className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Select defaultValue="tutte" onValueChange={setHairColor}>
+                      <Select value={hairColor} onValueChange={setHairColor}>
                         <SelectTrigger className="w-full pl-10">
                           <SelectValue placeholder="Colore Capelli" />
                         </SelectTrigger>
@@ -360,7 +374,7 @@ export default function Index({ session }: IndexProps) {
                     </div>
                     <div className="relative">
                       <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Select defaultValue="tutte" onValueChange={setBodyType}>
+                      <Select value={bodyType} onValueChange={setBodyType}>
                         <SelectTrigger className="w-full pl-10">
                           <SelectValue placeholder="Corporatura" />
                         </SelectTrigger>
@@ -372,7 +386,7 @@ export default function Index({ session }: IndexProps) {
                     </div>
                     <div className="relative">
                       <Eye className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Select defaultValue="tutte" onValueChange={setEyeColor}>
+                      <Select value={eyeColor} onValueChange={setEyeColor}>
                         <SelectTrigger className="w-full pl-10">
                           <SelectValue placeholder="Colore Occhi" />
                         </SelectTrigger>
@@ -383,12 +397,15 @@ export default function Index({ session }: IndexProps) {
                       </Select>
                     </div>
                   </div>
+                  <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600 text-white text-lg py-6">
+                    Cerca
+                  </Button>
+                  <Button type="button" variant="outline" onClick={handleResetFilters} className="w-full border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-800 text-lg py-6 mt-2">
+                    <RotateCcw className="h-5 w-5 mr-2" /> Reset Filtri
+                  </Button>
                 </CollapsibleContent>
               </Collapsible>
               
-              <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600 text-white text-lg py-6">
-                Cerca
-              </Button>
             </form>
             
             <div className="mt-8 text-center">
@@ -414,7 +431,7 @@ export default function Index({ session }: IndexProps) {
           {/* Sezione per le categorie cliccabili */}
           <div className="mt-16">
             <h2 className="text-3xl font-bold text-gray-800 mb-8">Esplora per Categoria</h2>
-            <div className="grid grid-cols-1 sm:grid-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
               {categories.map((cat) => {
                 return (
                   <Card 
