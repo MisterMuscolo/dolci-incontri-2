@@ -32,7 +32,6 @@ const listingSchema = z.object({
   phone: z.string().optional(),
   contact_preference: z.enum(['email', 'phone', 'both'], { required_error: 'La preferenza di contatto è obbligatoria.' }),
   contact_whatsapp: z.boolean().optional().default(false),
-  // Rimosso i campi per la mappa
 });
 
 const NewListing = () => {
@@ -43,8 +42,6 @@ const NewListing = () => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const { getBackLinkText, handleNavigateBack } = useDynamicBackLink();
 
-  // Rimosso lo stato per la checkbox della mappa
-
   const form = useForm<z.infer<typeof listingSchema>>({
     resolver: zodResolver(listingSchema),
     defaultValues: {
@@ -53,15 +50,11 @@ const NewListing = () => {
       phone: '',
       contact_preference: 'both',
       contact_whatsapp: false,
-      // Rimosso i valori di default per la mappa
     }
   });
 
   const contactPreference = form.watch('contact_preference');
   const phoneValue = form.watch('phone');
-  // Rimosso selectedCity e selectedZone
-
-  // Rimosso generateFictitiousLocation
 
   useEffect(() => {
     const fetchUserEmailAndId = async () => {
@@ -73,8 +66,6 @@ const NewListing = () => {
     };
     fetchUserEmailAndId();
   }, [form]);
-
-  // Rimosso useEffect per la logica della mappa
 
   const onSubmit = async (values: z.infer<typeof listingSchema>) => {
     setIsLoading(true);
@@ -102,7 +93,6 @@ const NewListing = () => {
           contact_preference: restOfValues.contact_preference,
           contact_whatsapp: restOfValues.contact_whatsapp,
           last_bumped_at: new Date().toISOString(),
-          // Rimosso i campi per la mappa
         })
         .select('id')
         .single();
@@ -371,8 +361,6 @@ const NewListing = () => {
                     )}
                   />
                 )}
-
-                {/* Rimosso la sezione per la mappa */}
 
                 <div>
                   <FormLabel>Fotografie</FormLabel>

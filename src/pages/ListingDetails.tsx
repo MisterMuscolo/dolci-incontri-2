@@ -16,7 +16,6 @@ import { ReplyToListingDialog } from '@/components/ReplyToListingDialog';
 import { WatermarkedImage } from '@/components/WatermarkedImage';
 import { Helmet } from 'react-helmet-async';
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
-import { StaticMapDisplay } from '@/components/StaticMapDisplay'; // Importa il componente StaticMapDisplay
 
 type FullListing = {
   id: string;
@@ -41,9 +40,6 @@ type FullListing = {
   paused_at: string | null; // Nuovo campo
   remaining_expires_at_duration: string | null; // Nuovo campo
   remaining_promotion_duration: string | null; // Nuovo campo
-  latitude: number | null; // Aggiunto
-  longitude: number | null; // Aggiunto
-  address_text: string | null; // Aggiunto
 };
 
 const ListingDetails = () => {
@@ -268,23 +264,7 @@ const ListingDetails = () => {
             />
           </div>
 
-          {listing.latitude !== null && listing.longitude !== null && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl"><MapPin className="h-5 w-5 text-rose-500" /> Posizione</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 mb-2">{listing.address_text || 'Posizione fittizia'}</p>
-                <div className="w-full h-48 bg-gray-200 rounded-md overflow-hidden">
-                  <StaticMapDisplay 
-                    latitude={listing.latitude} 
-                    longitude={listing.longitude} 
-                    addressText={listing.address_text} 
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          {/* Rimosso il blocco della mappa statica */}
 
           <Card>
             <CardHeader>

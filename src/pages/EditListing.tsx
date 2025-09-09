@@ -33,7 +33,6 @@ const listingSchema = z.object({
   phone: z.string().optional(),
   contact_preference: z.enum(['email', 'phone', 'both'], { required_error: 'La preferenza di contatto è obbligatoria.' }),
   contact_whatsapp: z.boolean().optional().default(false),
-  // Rimosso i campi per la mappa
 });
 
 type ExistingPhoto = { id: string; url: string; original_url: string | null; is_primary: boolean };
@@ -56,9 +55,6 @@ type FullListing = {
   contact_preference: 'email' | 'phone' | 'both';
   contact_whatsapp: boolean | null;
   listing_photos: ExistingPhoto[];
-  latitude: number | null; // Rimosso
-  longitude: number | null; // Rimosso
-  address_text: string | null; // Rimosso
 };
 
 const EditListing = () => {
@@ -72,8 +68,6 @@ const EditListing = () => {
   const [currentListing, setCurrentListing] = useState<FullListing | null>(null);
   const { getBackLinkText, handleNavigateBack } = useDynamicBackLink();
 
-  // Rimosso lo stato per la checkbox della mappa
-
   const form = useForm<z.infer<typeof listingSchema>>({
     resolver: zodResolver(listingSchema),
     defaultValues: {
@@ -82,15 +76,11 @@ const EditListing = () => {
       phone: '',
       contact_preference: 'both',
       contact_whatsapp: false,
-      // Rimosso i valori di default per la mappa
     }
   });
 
   const contactPreference = form.watch('contact_preference');
   const phoneValue = form.watch('phone');
-  // Rimosso selectedCity e selectedZone
-
-  // Rimosso generateFictitiousLocation
 
   const fetchListingData = useCallback(async () => {
     if (!id) {
@@ -125,10 +115,7 @@ const EditListing = () => {
       phone: listing.phone || '',
       contact_preference: listing.contact_preference || 'both',
       contact_whatsapp: listing.contact_whatsapp || false,
-      // Rimosso i campi per la mappa
     });
-
-    // Rimosso il pre-check della checkbox della mappa
 
     setExistingPhotos(listing.listing_photos || []);
     setIsLoading(false);
@@ -137,8 +124,6 @@ const EditListing = () => {
   useEffect(() => {
     fetchListingData();
   }, [fetchListingData]);
-
-  // Rimosso useEffect per la logica della mappa
 
   const onSubmit = async (values: z.infer<typeof listingSchema>) => {
     setIsSubmitting(true);
@@ -158,7 +143,6 @@ const EditListing = () => {
         contact_preference: values.contact_preference,
         contact_whatsapp: values.contact_whatsapp,
         zone: values.zone,
-        // Rimosso i campi per la mappa
       };
 
       const { error: updateError } = await supabase
@@ -454,8 +438,6 @@ const EditListing = () => {
                     )}
                   />
                 )}
-
-                {/* Rimosso la sezione per la mappa */}
 
                 <div>
                   <FormLabel>Fotografie</FormLabel>
