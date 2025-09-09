@@ -397,15 +397,15 @@ export default function Index({ session }: IndexProps) {
                       </Select>
                     </div>
                   </div>
-                  <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600 text-white text-lg py-6">
-                    Cerca
-                  </Button>
                   <Button type="button" variant="outline" onClick={handleResetFilters} className="w-full border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-800 text-lg py-6 mt-2">
                     <RotateCcw className="h-5 w-5 mr-2" /> Reset Filtri
                   </Button>
                 </CollapsibleContent>
               </Collapsible>
               
+              <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600 text-white text-lg py-6">
+                Cerca
+              </Button>
             </form>
             
             <div className="mt-8 text-center">
