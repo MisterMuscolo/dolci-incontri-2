@@ -280,6 +280,7 @@ const ListingDetails = () => {
                     latitude={listing.latitude} 
                     longitude={listing.longitude} 
                     addressText={listing.address_text} 
+                    city={listing.city} {/* Passa il nome della città qui */}
                   />
                 </div>
               </CardContent>
