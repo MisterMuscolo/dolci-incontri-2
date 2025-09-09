@@ -2,11 +2,12 @@ import { UserManagementTable } from "@/components/admin/UserManagementTable";
 import { OverviewStats } from "@/components/admin/OverviewStats";
 import { CreditManagement } from "@/components/admin/CreditManagement";
 import { AllCreditTransactionsTable } from "@/components/admin/AllCreditTransactionsTable";
-import { CouponManagementTable } from "@/components/admin/CouponManagementTable"; // Importa il nuovo componente
-import { Button } from "@/components/ui/button"; // Importa Button
-import { MapPin } from "lucide-react"; // Importa MapPin
-import { supabase } from '@/integrations/supabase/client'; // Importa supabase client
-import { showSuccess, showError, showLoading, dismissToast } from '@/utils/toast'; // Importa toast
+import { CouponManagementTable } from "@/components/admin/CouponManagementTable";
+import { TicketManagementTable } from "@/components/admin/TicketManagementTable"; // Importazione aggiunta
+import { Button } from "@/components/ui/button";
+import { MapPin } from "lucide-react";
+import { supabase } from '@/integrations/supabase/client';
+import { showSuccess, showError, showLoading, dismissToast } from '@/utils/toast';
 
 interface AdminDashboardProps {
   isAdmin: boolean;
@@ -60,7 +61,7 @@ const AdminDashboard = ({ isAdmin, isSupporto }: AdminDashboardProps) => {
             </div>
             <CreditManagement />
             <AllCreditTransactionsTable />
-            <CouponManagementTable /> {/* Aggiunto il componente di gestione coupon */}
+            <CouponManagementTable />
           </>
         )}
         
