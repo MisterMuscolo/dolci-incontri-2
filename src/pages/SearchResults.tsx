@@ -55,6 +55,7 @@ const SearchResults = () => {
       .from('listings')
       .select(`
         id,
+        user_id, -- Aggiunto user_id
         title,
         category,
         city,
@@ -91,6 +92,10 @@ const SearchResults = () => {
       .order('last_bumped_at', { ascending: false, nullsFirst: false })
       .order('promotion_end_at', { ascending: false, nullsFirst: true })
       .order('created_at', { ascending: false });
+
+    const from = (pageParam - 1) * LISTINGS_PER_PAGE;
+    const to = from + LISTINGS_PER_PAGE - 1;
+    query = query.range(from, to);
 
     const { data, error, count } = await query;
 
