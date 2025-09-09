@@ -21,7 +21,7 @@ const ageRanges = [
   { value: '18-24', label: '18-24 anni' },
   { value: '25-36', label: '25-36 anni' },
   { value: '37-45', label: '37-45 anni' },
-  { value: '46+', label: '+46 anni' },
+  { value: 'over45', label: '+46 anni' }, // Modificato il value
 ];
 
 export default function Index({ session }: IndexProps) {
@@ -55,7 +55,9 @@ export default function Index({ session }: IndexProps) {
     let initialAgeRange = 'tutte';
     if (minAgeParam && maxAgeParam) {
       initialAgeRange = `${minAgeParam}-${maxAgeParam}`;
-    } else if (minAgeParam && !maxAgeParam) {
+    } else if (minAgeParam === '46' && !maxAgeParam) { // Gestisce il caso '+46 anni'
+      initialAgeRange = 'over45';
+    } else if (minAgeParam && !maxAgeParam) { // Caso generico per altri min_age senza max_age
       initialAgeRange = `${minAgeParam}+`;
     }
     
@@ -77,10 +79,14 @@ export default function Index({ session }: IndexProps) {
     
     // Logica per la fascia d'età
     if (selectedAgeRange && selectedAgeRange !== 'tutte') {
-      const [min, max] = selectedAgeRange.split('-');
-      searchParams.append('min_age', min);
-      if (max && max !== '+') {
-        searchParams.append('max_age', max);
+      if (selectedAgeRange === 'over45') { // Gestisce il nuovo valore 'over45'
+        searchParams.append('min_age', '46');
+      } else {
+        const [min, max] = selectedAgeRange.split('-');
+        searchParams.append('min_age', min);
+        if (max && max !== '+') {
+          searchParams.append('max_age', max);
+        }
       }
     }
 
