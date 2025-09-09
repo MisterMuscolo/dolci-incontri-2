@@ -3,8 +3,7 @@ import { OverviewStats } from "@/components/admin/OverviewStats";
 import { CreditManagement } from "@/components/admin/CreditManagement";
 import { AllCreditTransactionsTable } from "@/components/admin/AllCreditTransactionsTable";
 import { CouponManagementTable } from "@/components/admin/CouponManagementTable";
-import { TicketManagementTable } from "@/components/admin/TicketManagementTable"; // Importazione aggiunta
-// Rimosso l'import di MapPin e la logica di geocodifica
+import { TicketManagementTable } from "@/components/admin/TicketManagementTable";
 
 interface AdminDashboardProps {
   isAdmin: boolean;
@@ -12,8 +11,6 @@ interface AdminDashboardProps {
 }
 
 const AdminDashboard = ({ isAdmin, isSupporto }: AdminDashboardProps) => {
-  // Rimosso handleGeocodeAllListings
-
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -23,7 +20,6 @@ const AdminDashboard = ({ isAdmin, isSupporto }: AdminDashboardProps) => {
         
         {isAdmin && (
           <>
-            {/* Rimosso il pulsante per la geocodifica */}
             <CreditManagement />
             <AllCreditTransactionsTable />
             <CouponManagementTable />
