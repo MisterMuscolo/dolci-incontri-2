@@ -1,17 +1,8 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet'; // Importa Leaflet per risolvere il problema dell'icona predefinita
-
-// Correzione per l'icona del marker predefinita che non viene visualizzata
-// Questo è un workaround comune per react-leaflet con Webpack/Vite
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-});
 
 interface MapDisplayProps {
   latitude: number;
@@ -25,6 +16,17 @@ export const MapDisplay = ({ latitude, longitude, addressText, zoom = 13 }: MapD
   if (typeof window === 'undefined') {
     return null;
   }
+
+  // Sposta la configurazione dell'icona predefinita all'interno di useEffect
+  // per assicurarsi che venga eseguita solo nel contesto del browser.
+  useEffect(() => {
+    delete L.Icon.Default.prototype._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
+      iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+      shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+    });
+  }, []); // Esegui solo una volta al montaggio del componente
 
   const position: [number, number] = [latitude, longitude];
 
