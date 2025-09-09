@@ -19,20 +19,22 @@ export const StaticMapDisplay = ({
   width = 600, 
   height = 250 
 }: StaticMapDisplayProps) => {
-  // Sostituisci 'YOUR_GOOGLE_MAPS_API_KEY' con la tua chiave API di Google Maps
-  const GOOGLE_MAPS_API_KEY = 'YOUR_GOOGLE_MAPS_API_KEY'; 
+  // Sostituisci 'YOUR_STADIAMAPS_API_KEY' con la tua chiave API di Stadiamaps
+  // Puoi ottenere una chiave API gratuita su https://stadiamaps.com/
+  const STADIAMAPS_API_KEY = 'YOUR_STADIAMAPS_API_KEY'; 
 
-  if (!GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY === 'YOUR_GOOGLE_MAPS_API_KEY') {
-    console.warn("Google Maps API Key non configurata. La mappa statica non verrà visualizzata correttamente.");
+  if (!STADIAMAPS_API_KEY || STADIAMAPS_API_KEY === 'YOUR_STADIAMAPS_API_KEY') {
+    console.warn("Stadiamaps API Key non configurata. La mappa statica non verrà visualizzata correttamente.");
     return (
       <div className="flex items-center justify-center h-full w-full bg-gray-200 rounded-md text-gray-600 text-center p-4">
-        Chiave API di Google Maps mancante o non configurata.
+        Chiave API di Stadiamaps mancante o non configurata.
       </div>
     );
   }
 
-  const marker = `markers=color:red%7Clabel:A%7C${latitude},${longitude}`;
-  const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=${zoom}&size=${width}x${height}&${marker}&key=${GOOGLE_MAPS_API_KEY}`;
+  // Utilizziamo lo stile "alidade_smooth" di Stadiamaps
+  // Per i marker, Stadiamaps usa un formato diverso: markers=lonlat:{lon},{lat}|color:{hex_color}|label:{char}
+  const mapUrl = `https://tiles.stadiamaps.com/styles/alidade_smooth/static/${longitude},${latitude},${zoom}/${width}x${height}@2x.png?markers=lonlat:${longitude},${latitude}|color:ff0000|label:A&api_key=${STADIAMAPS_API_KEY}`;
 
   return (
     <div className="relative w-full h-full rounded-md overflow-hidden">
