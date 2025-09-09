@@ -7,7 +7,7 @@ import { MapPin, Heart, User, Camera } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { WatermarkedImage } from './WatermarkedImage';
-import { Button } from '@/components/ui/button'; // Importa il componente Button
+import { Button } from '@/components/ui/button';
 
 // Fix default icon issues with Webpack
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -98,10 +98,11 @@ export const ListingMap: React.FC<ListingMapProps> = ({
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      {onMapMove && <MapEventsHandler onMapMove={onMapMove} />}
-      {listings.map((listing) => (
-        listing.latitude && listing.longitude && (
-          <Marker key={listing.id} position={[listing.latitude, listing.longitude]}>
+      {onMapMove ? <MapEventsHandler onMapMove={onMapMove} /> : null}
+      {listings
+        .filter(listing => listing.latitude && listing.longitude) // Filtra gli annunci senza coordinate
+        .map((listing) => (
+          <Marker key={listing.id} position={[listing.latitude!, listing.longitude!]}>
             <Popup>
               <Link to={`/listing/${listing.id}`} className="block w-64">
                 <div className="flex flex-col space-y-2">
@@ -135,8 +136,7 @@ export const ListingMap: React.FC<ListingMapProps> = ({
               </Link>
             </Popup>
           </Marker>
-        )
-      ))}
+        ))}
     </MapContainer>
   );
 };
