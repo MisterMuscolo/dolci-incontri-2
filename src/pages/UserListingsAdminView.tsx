@@ -15,11 +15,7 @@ const UserListingsAdminView = () => {
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { getBackLinkText, handleNavigateBack } = useDynamicBackLink(); // Usa handleNavigateBack
-
-  // Workaround per il linter: forza l'utilizzo
-  console.log(Link);
-  console.log(showError);
+  const { getBackLinkText, handleNavigateBack } = useDynamicBackLink();
 
   const fetchUserDataAndListings = useCallback(async () => {
     setLoading(true);
@@ -53,21 +49,27 @@ const UserListingsAdminView = () => {
         title,
         category,
         city,
+        zone,
+        age,
         description,
         created_at,
         expires_at,
         is_premium,
-        age,
         promotion_mode,
         promotion_start_at,
         promotion_end_at,
         last_bumped_at,
+        is_paused, -- Nuovo campo
+        paused_at, -- Nuovo campo
+        remaining_expires_at_duration, -- Nuovo campo
+        remaining_promotion_duration, -- Nuovo campo
         listing_photos ( url, original_url, is_primary ),
         slug
       `)
       .eq('user_id', userId);
 
     query = query
+      .order('is_paused', { ascending: true }) // Ordina prima gli annunci non in pausa
       .order('last_bumped_at', { ascending: false, nullsFirst: false })
       .order('promotion_end_at', { ascending: false, nullsFirst: true })
       .order('created_at', { ascending: false });
@@ -121,6 +123,7 @@ const UserListingsAdminView = () => {
                     canEdit={false}
                     canManagePhotos={true}
                     canDelete={true}
+                    canPauseResume={true} // Abilita il pulsante Pausa/Riprendi anche per gli admin
                     onListingUpdated={fetchUserDataAndListings}
                     isAdminContext={true}
                     dateTypeToDisplay="expires_at"

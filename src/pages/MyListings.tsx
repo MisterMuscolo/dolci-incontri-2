@@ -16,8 +16,7 @@ const MyListings = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  // const [currentUserId, setCurrentUserId] = useState<string | null>(null); // Rimosso: non utilizzato
-  const { getBackLinkText, handleNavigateBack } = useDynamicBackLink(); // Usa handleNavigateBack
+  const { getBackLinkText, handleNavigateBack } = useDynamicBackLink();
 
   const fetchListings = useCallback(async () => {
     setLoading(true);
@@ -26,13 +25,11 @@ const MyListings = () => {
       setLoading(false);
       return;
     }
-    // setCurrentUserId(user.id); // Rimosso: non utilizzato
 
     const { count, error: countError } = await supabase
       .from('listings')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .gt('expires_at', new Date().toISOString());
+      .eq('user_id', user.id); // Rimosso il filtro expires_at per mostrare anche gli annunci scaduti/in pausa
 
     if (countError) {
       console.error("MyListings: Errore nel conteggio degli annunci:", countError.message, countError.details);
@@ -65,13 +62,17 @@ const MyListings = () => {
         promotion_start_at,
         promotion_end_at,
         last_bumped_at,
+        is_paused, -- Nuovo campo
+        paused_at, -- Nuovo campo
+        remaining_expires_at_duration, -- Nuovo campo
+        remaining_promotion_duration, -- Nuovo campo
         listing_photos ( url, original_url, is_primary ),
         slug
       `)
-      .eq('user_id', user.id)
-      .gt('expires_at', new Date().toISOString());
+      .eq('user_id', user.id);
 
     query = query
+      .order('is_paused', { ascending: true }) // Ordina prima gli annunci non in pausa
       .order('last_bumped_at', { ascending: false, nullsFirst: false })
       .order('promotion_end_at', { ascending: false, nullsFirst: true })
       .order('created_at', { ascending: false });
@@ -137,12 +138,13 @@ const MyListings = () => {
                     canEdit={true}
                     canManagePhotos={false}
                     canDelete={true}
+                    canPauseResume={true} // Abilita il pulsante Pausa/Riprendi
                     onListingUpdated={fetchListings} 
                     dateTypeToDisplay="expires_at"
                   />
                 ))}
                 {totalPages > 1 && (
-                  <Pagination className="pt-4">
+                  <Pagination className="pt-4 col-span-full">
                     <PaginationContent>
                       <PaginationItem>
                         <PaginationPrevious href="#" onClick={(e) => { e.preventDefault(); handlePageChange(currentPage - 1); }} />

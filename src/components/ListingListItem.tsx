@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, CalendarDays, User, Camera, MapPin, Tag, Flame } from "lucide-react";
+import { Pencil, Trash2, CalendarDays, User, Camera, MapPin, Tag, Flame, PauseCircle, PlayCircle } from "lucide-react"; // Aggiunte PauseCircle, PlayCircle
 import { format, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Link } from "react-router-dom";
@@ -32,15 +32,19 @@ export interface Listing {
   category: string;
   city: string;
   created_at: string;
-  expires_at: string;
+  expires_at: string | null; // Può essere null se in pausa
   is_premium: boolean;
   promotion_mode: string | null;
   promotion_start_at: string | null;
   promotion_end_at: string | null;
   last_bumped_at: string | null;
-  listing_photos: { url: string; original_url: string | null; is_primary: boolean }[]; // Added original_url
+  listing_photos: { url: string; original_url: string | null; is_primary: boolean }[];
   age?: number;
   zone?: string | null;
+  is_paused: boolean; // Nuovo campo
+  paused_at: string | null; // Nuovo campo
+  remaining_expires_at_duration: string | null; // Nuovo campo
+  remaining_promotion_duration: string | null; // Nuovo campo
 }
 
 interface ListingListItemProps {
@@ -48,6 +52,7 @@ interface ListingListItemProps {
   canEdit?: boolean;
   canManagePhotos?: boolean;
   canDelete?: boolean;
+  canPauseResume?: boolean; // Nuovo prop
   onListingUpdated?: () => void;
   isAdminContext?: boolean;
   allowNonPremiumImage?: boolean;
@@ -55,8 +60,9 @@ interface ListingListItemProps {
   dateTypeToDisplay?: 'created_at' | 'expires_at';
 }
 
-export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = false, canDelete = false, onListingUpdated, isAdminContext = false, allowNonPremiumImage = true, isCompact = false, dateTypeToDisplay = 'expires_at' }: ListingListItemProps) => {
+export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = false, canDelete = false, canPauseResume = false, onListingUpdated, isAdminContext = false, allowNonPremiumImage = true, isCompact = false, dateTypeToDisplay = 'expires_at' }: ListingListItemProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isPausingResuming, setIsPausingResuming] = useState(false);
 
   const nowUtcTime = Date.now(); 
 
@@ -66,8 +72,8 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
   const promoStartTime = promoStart?.getTime(); 
   const promoEndTime = promoEnd?.getTime(); 
 
-  const isActivePremium = listing.is_premium && promoStartTime && promoEndTime && promoStartTime <= nowUtcTime && promoEndTime >= nowUtcTime;
-  const isPendingPremium = listing.is_premium && promoStartTime && promoStartTime > nowUtcTime;
+  const isActivePremium = listing.is_premium && promoStartTime && promoEndTime && promoStartTime <= nowUtcTime && promoEndTime >= nowUtcTime && !listing.is_paused;
+  const isPendingPremium = listing.is_premium && promoStartTime && promoStartTime > nowUtcTime && !listing.is_paused;
 
   let photosToRender: { url: string; original_url: string | null; is_primary: boolean }[] = [];
   
@@ -82,7 +88,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
 
   const hasPhotosToRender = photosToRender.length > 0;
 
-  let dateToDisplay: Date;
+  let dateToDisplay: Date | null = null;
   let prefix: string;
   let currentDateFormat: string;
 
@@ -96,12 +102,14 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
       currentDateFormat = 'dd MMMM yyyy';
     }
   } else {
-    dateToDisplay = new Date(listing.expires_at);
+    if (listing.expires_at) {
+      dateToDisplay = new Date(listing.expires_at);
+    }
     prefix = 'Scade il:';
     currentDateFormat = 'dd MMMM yyyy';
   }
 
-  const formattedDate = !isNaN(dateToDisplay.getTime()) 
+  const formattedDate = dateToDisplay && !isNaN(dateToDisplay.getTime()) 
     ? format(dateToDisplay, currentDateFormat, { locale: it }) 
     : 'N/D';
 
@@ -205,10 +213,51 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
     }
   };
 
+  const handlePauseResumeListing = async (action: 'pause' | 'resume') => {
+    setIsPausingResuming(true);
+    const toastId = showLoading(action === 'pause' ? 'Mettendo in pausa annuncio...' : 'Riprendendo annuncio...');
+
+    try {
+      const { error } = await supabase.functions.invoke('pause-resume-listing', {
+        body: { listingId: listing.id, action },
+      });
+
+      dismissToast(toastId);
+
+      if (error) {
+        let errorMessage = `Errore durante la ${action === 'pause' ? 'pausa' : 'ripresa'} dell'annuncio.`;
+        // @ts-ignore
+        if (error.context && typeof error.context.body === 'string') {
+          try {
+            // @ts-ignore
+            const errorBody = JSON.parse(error.context.body);
+            if (errorBody.error) {
+              errorMessage = errorBody.error;
+            }
+          } catch (e) {
+            console.error("Could not parse error response from edge function:", e);
+          }
+        }
+        throw new Error(errorMessage);
+      }
+
+      showSuccess(`Annuncio ${action === 'pause' ? 'messo in pausa' : 'ripreso'} con successo!`);
+      if (onListingUpdated) {
+        onListingUpdated();
+      }
+    } catch (error: any) {
+      dismissToast(toastId);
+      showError(error.message || 'Si è verificato un errore imprevisto.');
+    } finally {
+      setIsPausingResuming(false);
+    }
+  };
+
   return (
     <Card className={cn(
       "w-full overflow-hidden transition-shadow hover:shadow-md flex relative",
-      (canEdit || canManagePhotos || canDelete) && isPendingPremium && "border-2 border-blue-400 shadow-lg bg-blue-50"
+      (canEdit || canManagePhotos || canDelete || canPauseResume) && isPendingPremium && "border-2 border-blue-400 shadow-lg bg-blue-50",
+      listing.is_paused && "border-2 border-gray-400 bg-gray-100 opacity-70" // Stile per annuncio in pausa
     )}>
       {hasPhotosToRender && (
         <div className="flex-shrink-0 relative w-32 sm:w-44 h-auto">
@@ -252,7 +301,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           )}
         </div>
       </Link>
-      {(canEdit || canManagePhotos || canDelete) && (
+      {(canEdit || canManagePhotos || canDelete || canPauseResume) && (
         <div className="flex-shrink-0 flex flex-col justify-center items-center gap-2 p-3 border-l">
           {canEdit && (
             <Link to={`/edit-listing/${listing.id}`} className="w-full">
@@ -271,6 +320,27 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
             />
           )}
 
+          {canPauseResume && (
+            <Button
+              variant="outline"
+              size="sm"
+              className={cn(
+                "w-full h-8 px-2 text-xs",
+                listing.is_paused ? "border-green-500 text-green-600 hover:bg-green-50" : "border-gray-500 text-gray-600 hover:bg-gray-50"
+              )}
+              onClick={() => handlePauseResumeListing(listing.is_paused ? 'resume' : 'pause')}
+              disabled={isPausingResuming}
+            >
+              {isPausingResuming ? (
+                <span className="flex items-center"><PlayCircle className="h-3 w-3 mr-1 animate-spin" /> Caricamento...</span>
+              ) : listing.is_paused ? (
+                <span className="flex items-center"><PlayCircle className="h-3 w-3 mr-1" /> Riprendi</span>
+              ) : (
+                <span className="flex items-center"><PauseCircle className="h-3 w-3 mr-1" /> Pausa</span>
+              )}
+            </Button>
+          )}
+
           {isActivePremium || isPendingPremium ? ( 
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -281,6 +351,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                     "w-full h-8 px-2 text-xs flex items-center gap-1",
                     isActivePremium ? "bg-rose-500 hover:bg-rose-600" : "bg-blue-500 hover:bg-blue-600"
                   )}
+                  disabled={listing.is_paused} // Disabilita se in pausa
                 >
                   <Flame className="h-3 w-3" /> {isActivePremium ? 'Hot' : 'In Attesa'}
                 </Button>
@@ -289,12 +360,16 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                 <AlertDialogHeader>
                   <AlertDialogTitle>Promozione {isActivePremium ? 'Attiva' : 'In Attesa'}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    {getPromotionPeriodDetails()}
+                    {listing.is_paused ? (
+                      <p className="text-red-500">L'annuncio è in pausa. La promozione non è attiva.</p>
+                    ) : (
+                      getPromotionPeriodDetails()
+                    )}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Chiudi</AlertDialogCancel>
-                  {!isAdminContext && listing.promotion_mode && ( 
+                  {!isAdminContext && listing.promotion_mode && !listing.is_paused && ( 
                     <Link to={`/promote-listing/${listing.id}?mode=${listing.promotion_mode}`}>
                       <AlertDialogAction className="bg-rose-500 hover:bg-rose-600">
                         Estendi
@@ -305,7 +380,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
               </AlertDialogContent>
             </AlertDialog>
           ) : (
-            !isAdminContext && (
+            !isAdminContext && !listing.is_paused && ( // Non mostrare "Promuovi" se in pausa
               <Link to={`/promote-listing/${listing.id}`} className="w-full">
                 <Button variant="default" size="sm" className="w-full h-8 px-2 text-xs bg-green-500 hover:bg-green-600 text-white">
                   <Flame className="h-3 w-3 md:mr-1" />
@@ -349,9 +424,14 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           )}
         </div>
       )}
-      {!(canEdit || canManagePhotos || canDelete) && isActivePremium && (
+      {!(canEdit || canManagePhotos || canDelete || canPauseResume) && isActivePremium && (
         <Badge className="bg-rose-500 hover:bg-rose-600 text-white absolute top-1 right-1 z-20 px-1.5 py-0.5 rounded-full text-xs font-semibold flex items-center gap-0.5">
           <Flame className="h-3 w-3 mr-0.5" /> Hot
+        </Badge>
+      )}
+      {listing.is_paused && (
+        <Badge className="bg-gray-600 text-white absolute top-1 right-1 z-20 px-1.5 py-0.5 rounded-full text-xs font-semibold flex items-center gap-0.5">
+          <PauseCircle className="h-3 w-3 mr-0.5" /> In Pausa
         </Badge>
       )}
     </Card>

@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { showError } from '@/utils/toast';
-import { MapPin, User, Mail, BookText, ChevronLeft, CalendarDays, Phone, Flag, MessageCircle, Flame } from 'lucide-react';
+import { MapPin, User, Mail, BookText, ChevronLeft, CalendarDays, Phone, Flag, MessageCircle, Flame, PauseCircle } from 'lucide-react'; // Aggiunto PauseCircle
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -28,7 +28,7 @@ type FullListing = {
   phone: string | null;
   email: string | null;
   created_at: string;
-  expires_at: string;
+  expires_at: string | null; // Può essere null se in pausa
   is_premium: boolean;
   promotion_mode: string | null;
   promotion_start_at: string | null;
@@ -36,19 +36,23 @@ type FullListing = {
   contact_preference: 'email' | 'phone' | 'both';
   contact_whatsapp: boolean | null;
   listing_photos: { id: string; url: string; original_url: string | null; is_primary: boolean }[];
+  is_paused: boolean; // Nuovo campo
+  paused_at: string | null; // Nuovo campo
+  remaining_expires_at_duration: string | null; // Nuovo campo
+  remaining_promotion_duration: string | null; // Nuovo campo
 };
 
 const ListingDetails = () => {
-  const { id } = useParams<{ id: string }>(); // Modificato da slug a id
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [listing, setListing] = useState<FullListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [activePhoto, setActivePhoto] = useState<string | null>(null);
-  const { getBackLinkText, handleNavigateBack } = useDynamicBackLink(); // Usa handleNavigateBack
+  const { getBackLinkText, handleNavigateBack } = useDynamicBackLink();
 
   useEffect(() => {
     const fetchListing = async () => {
-      if (!id) return; // Controlla l'id
+      if (!id) return;
       setLoading(true);
       const { data, error } = await supabase
         .from('listings')
@@ -56,7 +60,7 @@ const ListingDetails = () => {
           *, 
           listing_photos(id, url, original_url, is_primary)
         `)
-        .eq('id', id) // Cerca per id
+        .eq('id', id)
         .single();
 
       if (error || !data) {
@@ -75,7 +79,7 @@ const ListingDetails = () => {
         const promoStart = data.promotion_start_at ? new Date(data.promotion_start_at).getTime() : null;
         const promoEnd = data.promotion_end_at ? new Date(data.promotion_end_at).getTime() : null;
 
-        const isActivePremium = data.is_premium && promoStart && promoEnd && promoStart <= nowUtcTime && promoEnd >= nowUtcTime;
+        const isActivePremium = data.is_premium && promoStart && promoEnd && promoStart <= nowUtcTime && promoEnd >= nowUtcTime && !data.is_paused;
 
         let photosToDisplay = sortedPhotos;
         if (!isActivePremium) {
@@ -94,7 +98,7 @@ const ListingDetails = () => {
       setLoading(false);
     };
     fetchListing();
-  }, [id, navigate]); // Dipendenza da id
+  }, [id, navigate]);
 
   if (loading) {
     return (
@@ -119,12 +123,12 @@ const ListingDetails = () => {
   const nowUtcTime = Date.now(); 
   const promoStart = listing.promotion_start_at ? new Date(listing.promotion_start_at).getTime() : null;
   const promoEnd = listing.promotion_end_at ? new Date(listing.promotion_end_at).getTime() : null;
-  const isActivePremium = listing.is_premium && promoStart && promoEnd && promoStart <= nowUtcTime && promoEnd >= nowUtcTime;
+  const isActivePremium = listing.is_premium && promoStart && promoEnd && promoStart <= nowUtcTime && promoEnd >= nowUtcTime && !listing.is_paused;
 
   const hasPhotos = listing.listing_photos && listing.listing_photos.length > 0;
 
-  const canContactByEmail = (listing.contact_preference === 'email' || listing.contact_preference === 'both') && !!listing.email;
-  const canContactByPhone = (listing.contact_preference === 'phone' || listing.contact_preference === 'both') && !!listing.phone;
+  const canContactByEmail = (listing.contact_preference === 'email' || listing.contact_preference === 'both') && !!listing.email && !listing.is_paused;
+  const canContactByPhone = (listing.contact_preference === 'phone' || listing.contact_preference === 'both') && !!listing.phone && !listing.is_paused;
 
   const truncatedTitle = listing.title.length > 25 ? listing.title.substring(0, 25) + '(...)' : listing.title;
   const whatsappMessage = encodeURIComponent(`Ciao, ho visto su Incontri Dolci il tuo annuncio "${truncatedTitle}" e vorrei incontrarti.`);
@@ -142,7 +146,7 @@ const ListingDetails = () => {
         {hasPhotos && <meta property="og:image" content={listing.listing_photos[0].url} />}
         <meta property="og:title" content={`${listing.title} - Incontri a ${listing.city} | IncontriDolci`} />
         <meta property="og:description" content={`${listing.description.substring(0, 150)}... Annuncio di ${listing.category.replace(/-/g, ' ')} a ${listing.city}. Trova il tuo appuntamento ideale.`} />
-        <meta property="og:url" content={`${window.location.origin}/listing/${listing.id}`} /> {/* Usa id qui */}
+        <meta property="og:url" content={`${window.location.origin}/listing/${listing.id}`} />
         <meta property="og:type" content="website" />
         {/* Schema Markup per il servizio */}
         <script type="application/ld+json">
@@ -184,11 +188,16 @@ const ListingDetails = () => {
                 <Flame className="h-4 w-4" /> Hot
               </Badge>
             )}
+            {listing.is_paused && (
+              <Badge className="bg-gray-600 text-white text-base px-3 py-1 rounded-full font-semibold flex items-center gap-1 w-fit absolute top-4 right-4 z-10">
+                <PauseCircle className="h-4 w-4" /> In Pausa
+              </Badge>
+            )}
             <CardHeader>
               <div className="mb-2">
                 <Badge variant="outline" className="text-xs">
                   <CalendarDays className="h-4 w-4 mr-1.5" />
-                  {format(new Date(listing.created_at), 'dd MMMM', { locale: it })}
+                  {listing.is_paused ? 'In pausa' : format(new Date(listing.created_at), 'dd MMMM', { locale: it })}
                 </Badge>
               </div>
               <div className="flex flex-wrap gap-2 mb-2">
@@ -230,6 +239,7 @@ const ListingDetails = () => {
                   variant="outline"
                   size="sm"
                   className="text-red-500 border-red-500 hover:bg-red-50 hover:text-red-600 flex items-center gap-2"
+                  disabled={listing.is_paused} // Disabilita se in pausa
                 >
                   <Flag className="h-5 w-5" /> Segnala Annuncio
                 </Button>
@@ -280,6 +290,11 @@ const ListingDetails = () => {
                   </Button>
                 }
               />
+            )}
+            {listing.is_paused && (
+              <p className="text-center text-gray-600 text-lg mt-4 col-span-full">
+                Questo annuncio è in pausa. I contatti sono disabilitati.
+              </p>
             )}
           </div>
         </div>

@@ -26,7 +26,7 @@ const SearchResults = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const { getBackLinkText, handleNavigateBack } = useDynamicBackLink(); // Usa handleNavigateBack
+  const { getBackLinkText, handleNavigateBack } = useDynamicBackLink();
 
   // Local states for filters
   const [currentCategory, setCurrentCategory] = useState(searchParams.get('category') || 'tutte');
@@ -68,9 +68,14 @@ const SearchResults = () => {
         promotion_start_at,
         promotion_end_at,
         last_bumped_at,
+        is_paused, -- Nuovo campo
+        paused_at, -- Nuovo campo
+        remaining_expires_at_duration, -- Nuovo campo
+        remaining_promotion_duration, -- Nuovo campo
         listing_photos ( url, original_url, is_primary )
       `, { count: 'exact' })
-      .gt('expires_at', new Date().toISOString());
+      .gt('expires_at', new Date().toISOString())
+      .eq('is_paused', false); // Filtra gli annunci in pausa
 
     if (categoryParam && categoryParam !== 'tutte') {
       query = query.eq('category', categoryParam);
