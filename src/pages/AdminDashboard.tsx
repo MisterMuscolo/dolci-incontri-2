@@ -4,10 +4,8 @@ import { CreditManagement } from "@/components/admin/CreditManagement";
 import { AllCreditTransactionsTable } from "@/components/admin/AllCreditTransactionsTable";
 import { CouponManagementTable } from "@/components/admin/CouponManagementTable";
 import { TicketManagementTable } from "@/components/admin/TicketManagementTable"; // Importazione aggiunta
-import { Button } from "@/components/ui/button";
-import { MapPin } from "lucide-react";
-import { supabase } from '@/integrations/supabase/client';
-import { showSuccess, showError, showLoading, dismissToast } from '@/utils/toast';
+// Rimosso l'import di Button e MapPin in quanto non più necessari
+// Rimosso l'import di supabase, showSuccess, showError, showLoading, dismissToast in quanto non più necessari
 
 interface AdminDashboardProps {
   isAdmin: boolean;
@@ -15,36 +13,8 @@ interface AdminDashboardProps {
 }
 
 const AdminDashboard = ({ isAdmin, isSupporto }: AdminDashboardProps) => {
-  const handleGeocodeAllListings = async () => {
-    const toastId = showLoading('Avvio geocodifica annunci esistenti...');
-    try {
-      const { data, error } = await supabase.functions.invoke('update-listing-geocodes');
-      dismissToast(toastId);
-
-      if (error) {
-        let errorMessage = 'Errore durante la geocodifica degli annunci.';
-        // @ts-ignore
-        if (error.context && typeof error.context.body === 'string') {
-          try {
-            // @ts-ignore
-            const errorBody = JSON.parse(error.context.body);
-            if (errorBody.error) {
-              errorMessage = errorBody.error;
-            }
-          } catch (e) {
-            console.error("Could not parse error response from edge function:", e);
-          }
-        }
-        throw new Error(errorMessage);
-      }
-
-      showSuccess(data.message || 'Geocodifica annunci completata con successo!');
-    } catch (error: any) {
-      dismissToast(toastId);
-      showError(error.message || 'Si è verificato un errore imprevisto durante la geocodifica.');
-    }
-  };
-
+  // Rimosso la funzione handleGeocodeAllListings in quanto non più necessaria
+  
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -54,11 +24,7 @@ const AdminDashboard = ({ isAdmin, isSupporto }: AdminDashboardProps) => {
         
         {isAdmin && (
           <>
-            <div className="flex justify-end mb-4">
-              <Button onClick={handleGeocodeAllListings} className="bg-blue-500 hover:bg-blue-600">
-                <MapPin className="h-4 w-4 mr-2" /> Geocodifica Annunci Esistenti
-              </Button>
-            </div>
+            {/* Rimosso il div con il pulsante Geocodifica */}
             <CreditManagement />
             <AllCreditTransactionsTable />
             <CouponManagementTable />
