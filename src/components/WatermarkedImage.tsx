@@ -15,8 +15,8 @@ export const WatermarkedImage = ({
   src,
   alt,
   watermarkText = ( // Il valore predefinito ora include l'icona Heart
-    <div className="flex items-center justify-center gap-1"> {/* Ridotto il gap */}
-      <Heart className="h-6 w-6" /> {/* Ridotto del 25% (da h-8 w-8) */}
+    <div className="flex items-center justify-center gap-0.5"> {/* Ridotto il gap */}
+      <Heart className="h-4 w-4" /> {/* Ridotto del 50% (da h-8 w-8) */}
       <span>IncontriDolci</span>
     </div>
   ),
@@ -36,12 +36,12 @@ export const WatermarkedImage = ({
       <div
         className={cn(
           "absolute inset-0 flex items-center justify-center pointer-events-none",
-          "text-white text-center font-bold text-lg sm:text-xl md:text-2xl lg:text-3xl opacity-50", // Ridotto del 25% circa
+          "text-white text-center font-bold text-xs sm:text-sm md:text-base lg:text-lg opacity-50", // Ridotto del 50% circa
           "whitespace-nowrap overflow-hidden", // Evita che il testo vada a capo
           watermarkClassName
         )}
         style={{
-          textShadow: '2px 2px 4px rgba(0,0,0,0.7)', // Ombra per maggiore leggibilità
+          textShadow: '1px 1px 2px rgba(0,0,0,0.7)', // Ombra più piccola per maggiore leggibilità
         }}
       >
         {watermarkText}
