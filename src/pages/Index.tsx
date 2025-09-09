@@ -28,7 +28,7 @@ export default function Index({ session }: IndexProps) {
   const [eyeColor, setEyeColor] = useState('tutte');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [isPersonalFiltersOpen, setIsPersonalFiltersOpen] = useState(false); // Stato per la sezione filtri personali collassabile
+  const [isPersonalFiltersOpen, setIsPersonalFiltersOpen] = useState(false);
 
   useEffect(() => {
     const referrerCode = searchParams.get('ref');
@@ -55,7 +55,7 @@ export default function Index({ session }: IndexProps) {
     if (eyeColor && eyeColor !== 'tutte') searchParams.append('eye_color', eyeColor);
     
     navigate(`/search?${searchParams.toString()}`);
-    setIsPersonalFiltersOpen(false); // Chiudi la sezione filtri personali dopo la ricerca
+    setIsPersonalFiltersOpen(false);
   };
 
   const handleCategoryCardClick = (selectedCategory: string) => {
@@ -263,7 +263,7 @@ export default function Index({ session }: IndexProps) {
                   <div className="flex items-center justify-between cursor-pointer py-2">
                     <div className="flex flex-col items-start">
                       <h3 className="text-xl font-semibold text-gray-700">
-                        Filtri Dettagli Personali
+                        Filtri
                       </h3>
                       <div className="flex flex-wrap gap-2 mt-1">
                         {ethnicity && ethnicity !== 'tutte' && (
@@ -301,7 +301,7 @@ export default function Index({ session }: IndexProps) {
                         )}
                       </div>
                     </div>
-                    <Button variant="ghost" size="sm" className="w-9 p-0">
+                    <Button type="button" variant="ghost" size="sm" className="w-9 p-0"> {/* Aggiunto type="button" */}
                       {isPersonalFiltersOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                       <span className="sr-only">Toggle personal filters</span>
                     </Button>
@@ -414,7 +414,7 @@ export default function Index({ session }: IndexProps) {
           {/* Sezione per le categorie cliccabili */}
           <div className="mt-16">
             <h2 className="text-3xl font-bold text-gray-800 mb-8">Esplora per Categoria</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+            <div className="grid grid-cols-1 sm:grid-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
               {categories.map((cat) => {
                 return (
                   <Card 
