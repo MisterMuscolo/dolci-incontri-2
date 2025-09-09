@@ -30,7 +30,6 @@ export const StaticMapDisplay = ({
     );
   }
 
-  // Aggiungi un controllo per le coordinate valide
   if (typeof latitude !== 'number' || isNaN(latitude) || typeof longitude !== 'number' || isNaN(longitude)) {
     console.warn("Coordinate di latitudine o longitudine non valide per la mappa statica.");
     return (
@@ -41,6 +40,9 @@ export const StaticMapDisplay = ({
   }
 
   const mapUrl = `https://tiles.stadiamaps.com/styles/alidade_smooth/static/${longitude},${latitude},${zoom}/${width}x${height}@2x.png?markers=lonlat:${longitude},${latitude}|color:ff0000|label:A&api_key=${STADIAMAPS_API_KEY}`;
+  
+  // Aggiunto per il debug: stampa l'URL della mappa nella console
+  console.log("Stadiamaps Map URL:", mapUrl);
 
   return (
     <div className="relative w-full h-full rounded-md overflow-hidden">
