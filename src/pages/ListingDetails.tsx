@@ -40,6 +40,7 @@ type FullListing = {
   paused_at: string | null; // Nuovo campo
   remaining_expires_at_duration: string | null; // Nuovo campo
   remaining_promotion_duration: string | null; // Nuovo campo
+  address_text: string | null; // Nuovo campo
 };
 
 const ListingDetails = () => {
@@ -272,6 +273,17 @@ const ListingDetails = () => {
               <p className="text-gray-600 whitespace-pre-wrap">{listing.description}</p>
             </CardContent>
           </Card>
+
+          {listing.address_text && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl"><MapPin className="h-5 w-5 text-rose-500" /> Posizione</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">{listing.address_text}</p>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="flex flex-col sm:flex-row justify-center py-4 gap-4">
             {canContactByPhone && (

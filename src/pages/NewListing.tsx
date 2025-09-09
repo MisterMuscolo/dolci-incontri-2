@@ -17,6 +17,7 @@ import { ChevronLeft } from 'lucide-react';
 import { cn, formatPhoneNumber } from '@/lib/utils'; // Rimosso slugifyFilename, generateListingSlug
 import { Checkbox } from '@/components/ui/checkbox';
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
+import { MapInput } from '@/components/MapInput'; // Importa MapInput
 
 const listingSchema = z.object({
   category: z.string({ required_error: 'La categoria è obbligatoria.' }),
@@ -32,6 +33,11 @@ const listingSchema = z.object({
   phone: z.string().optional(),
   contact_preference: z.enum(['email', 'phone', 'both'], { required_error: 'La preferenza di contatto è obbligatoria.' }),
   contact_whatsapp: z.boolean().optional().default(false),
+  // Nuovi campi per la mappa
+  use_map_location: z.boolean().default(true),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
+  address_text: z.string().nullable().optional(),
 }).superRefine((data, ctx) => {
   if (data.contact_preference === 'email' || data.contact_preference === 'both') {
     if (!data.email || data.email.trim() === '') {
@@ -48,6 +54,21 @@ const listingSchema = z.object({
         code: z.ZodIssueCode.custom,
         message: "Il numero di telefono è obbligatorio per la preferenza di contatto selezionata.",
         path: ['phone'],
+      });
+    }
+  }
+  // Validazione per la mappa: se use_map_location è true, latitude e longitude sono obbligatori
+  if (data.use_map_location) {
+    if (data.latitude === null || data.longitude === null) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "La posizione sulla mappa è obbligatoria se la funzione mappa è attiva.",
+        path: ['latitude'], // O un path più generico come 'use_map_location'
+      });
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "La posizione sulla mappa è obbligatoria se la funzione mappa è attiva.",
+        path: ['longitude'],
       });
     }
   }
@@ -69,6 +90,10 @@ const NewListing = () => {
       phone: '',
       contact_preference: 'both',
       contact_whatsapp: false,
+      use_map_location: true, // Default to true
+      latitude: null,
+      longitude: null,
+      address_text: null,
     }
   });
 
@@ -76,6 +101,7 @@ const NewListing = () => {
   const phoneValue = form.watch('phone');
   const cityValue = form.watch('city');
   const zoneValue = form.watch('zone');
+  const useMapLocation = form.watch('use_map_location');
 
   useEffect(() => {
     const fetchUserEmailAndId = async () => {
@@ -88,6 +114,13 @@ const NewListing = () => {
     fetchUserEmailAndId();
   }, [form]);
 
+  const handleLocationChange = (latitude: number | null, longitude: number | null, addressText: string | null) => {
+    form.setValue('latitude', latitude);
+    form.setValue('longitude', longitude);
+    form.setValue('address_text', addressText);
+    form.trigger(['latitude', 'longitude', 'address_text']); // Trigger validation
+  };
+
   const onSubmit = async (values: z.infer<typeof listingSchema>) => {
     setIsLoading(true);
     const toastId = showLoading('Pubblicazione annuncio in corso...');
@@ -96,24 +129,31 @@ const NewListing = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Devi essere autenticato per creare un annuncio.');
 
-      const { age, phone, ...restOfValues } = values;
+      const { age, phone, use_map_location, latitude, longitude, address_text, ...restOfValues } = values;
       const formattedPhone = formatPhoneNumber(phone);
 
-      // Geocode the address
-      let latitude: number | null = null;
-      let longitude: number | null = null;
+      let finalLatitude: number | null = null;
+      let finalLongitude: number | null = null;
+      let finalAddressText: string | null = null;
 
-      if (cityValue) {
-        const { data: geoData, error: geoError } = await supabase.functions.invoke('geocode-address', {
-          body: { city: cityValue, zone: zoneValue },
-        });
+      if (use_map_location) {
+        finalLatitude = latitude;
+        finalLongitude = longitude;
+        finalAddressText = address_text;
+      } else {
+        // If map is not used, try to geocode city/zone as a fallback for coordinates
+        if (cityValue) {
+          const { data: geoData, error: geoError } = await supabase.functions.invoke('geocode-address', {
+            body: { city: cityValue, zone: zoneValue },
+          });
 
-        if (geoError) {
-          console.warn("Geocoding failed:", geoError.message);
-          // Don't block listing creation, but log the error
-        } else if (geoData && geoData.latitude && geoData.longitude) {
-          latitude = geoData.latitude;
-          longitude = geoData.longitude;
+          if (geoError) {
+            console.warn("Geocoding failed for city/zone:", geoError.message);
+          } else if (geoData && geoData.latitude && geoData.longitude) {
+            finalLatitude = geoData.latitude;
+            finalLongitude = geoData.longitude;
+            finalAddressText = `${zoneValue ? zoneValue + ', ' : ''}${cityValue}, Italy`; // Simple address text
+          }
         }
       }
 
@@ -132,8 +172,9 @@ const NewListing = () => {
           contact_preference: restOfValues.contact_preference,
           contact_whatsapp: restOfValues.contact_whatsapp,
           last_bumped_at: new Date().toISOString(),
-          latitude: latitude, // Save latitude
-          longitude: longitude, // Save longitude
+          latitude: finalLatitude,
+          longitude: finalLongitude,
+          address_text: finalAddressText,
         })
         .select('id')
         .single();
@@ -402,6 +443,42 @@ const NewListing = () => {
                       </FormItem>
                     )}
                   />
+                )}
+
+                {/* Nuova sezione per la posizione sulla mappa */}
+                <FormField
+                  control={form.control}
+                  name="use_map_location"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          disabled={isLoading}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Usa posizione sulla mappa</FormLabel>
+                        <FormDescription>
+                          Attiva per specificare la posizione esatta del tuo annuncio tramite mappa o indirizzo.
+                        </FormDescription>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+                {useMapLocation && (
+                  <MapInput
+                    initialLatitude={form.getValues('latitude')}
+                    initialLongitude={form.getValues('longitude')}
+                    initialAddressText={form.getValues('address_text')}
+                    initialCity={cityValue} // Passa la città selezionata per pre-centrare la mappa
+                    onLocationChange={handleLocationChange}
+                    disabled={isLoading}
+                  />
+                )}
+                {form.formState.errors.latitude && useMapLocation && (
+                  <p className="text-sm font-medium text-destructive">{form.formState.errors.latitude.message}</p>
                 )}
 
                 <div>
