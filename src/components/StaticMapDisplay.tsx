@@ -39,7 +39,7 @@ export const StaticMapDisplay = ({
     );
   }
 
-  // Ho corretto la struttura dell'URL per l'API delle mappe statiche di Stadiamaps
+  // L'URL corretto per l'API delle mappe statiche di Stadiamaps dovrebbe includere /api/static/v1/
   const mapUrl = `https://tiles.stadiamaps.com/api/static/v1/osm_bright/${longitude},${latitude},${zoom}/${width}x${height}.png?markers=lonlat:${longitude},${latitude}|color:ff0000|label:A&api_key=${STADIAMAPS_API_KEY}`;
   
   console.log("Stadiamaps Map URL:", mapUrl);
