@@ -19,13 +19,14 @@ export const StaticMapDisplay = ({
   width = 600, 
   height = 250 
 }: StaticMapDisplayProps) => {
-  const STADIAMAPS_API_KEY = '7991c8df-df40-4d2e-98b7-5124e7ac4f7b'; 
+  // Sostituisci 'YOUR_MAPQUEST_API_KEY' con la tua chiave API di MapQuest
+  const MAPQUEST_API_KEY = 'YOUR_MAPQUEST_API_KEY'; 
 
-  if (!STADIAMAPS_API_KEY || STADIAMAPS_API_KEY === 'YOUR_STADIAMAPS_API_KEY') {
-    console.warn("Stadiamaps API Key non configurata. La mappa statica non verrà visualizzata correttamente.");
+  if (!MAPQUEST_API_KEY || MAPQUEST_API_KEY === 'YOUR_MAPQUEST_API_KEY') {
+    console.warn("MapQuest API Key non configurata. La mappa statica non verrà visualizzata correttamente.");
     return (
       <div className="flex items-center justify-center h-full w-full bg-gray-200 rounded-md text-gray-600 text-center p-4">
-        Chiave API di Stadiamaps mancante o non configurata.
+        Chiave API di MapQuest mancante o non configurata.
       </div>
     );
   }
@@ -39,10 +40,11 @@ export const StaticMapDisplay = ({
     );
   }
 
-  // URL ripristinato con le coordinate dell'annuncio e il parametro 'markers'
-  const mapUrl = `https://tiles.stadiamaps.com/styles/osm_bright/static/${longitude},${latitude},${zoom}/${width}x${height}.png?markers=lonlat:${longitude},${latitude}|color:ff0000|label:A&api_key=${STADIAMAPS_API_KEY}`;
+  // URL per MapQuest Static Map API
+  // Aggiunge un marker rosso di piccole dimensioni ('marker-sm-red') alle coordinate specificate.
+  const mapUrl = `https://www.mapquestapi.com/staticmap/v5/map?key=${MAPQUEST_API_KEY}&center=${latitude},${longitude}&zoom=${zoom}&size=${width},${height}&locations=${latitude},${longitude}|marker-sm-red`;
   
-  console.log("Stadiamaps Map URL (restored with listing data and markers):", mapUrl);
+  console.log("MapQuest Static Map URL:", mapUrl);
 
   return (
     <div className="relative w-full h-full rounded-md overflow-hidden">
