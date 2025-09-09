@@ -76,7 +76,7 @@ const SearchResults = () => {
         listing_photos ( url, original_url, is_primary )
       `, { count: 'exact' })
       .gt('expires_at', new Date().toISOString())
-      .eq('is_paused', false); // Filtra gli annunci in pausa
+      // .eq('is_paused', false); // Rimosso il filtro is_paused per mostrare tutti gli annunci attivi, inclusi quelli riattivati
 
     if (categoryParam && categoryParam !== 'tutte') {
       query = query.eq('category', categoryParam);
