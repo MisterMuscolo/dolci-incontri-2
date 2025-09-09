@@ -72,7 +72,7 @@ const MyListings = () => {
       .eq('user_id', user.id);
 
     query = query
-      .order('is_paused', { ascending: true }) // Ordina prima gli annunci non in pausa
+      // Rimosso l'ordinamento per 'is_paused' per mantenere la posizione originale
       .order('last_bumped_at', { ascending: false, nullsFirst: false })
       .order('promotion_end_at', { ascending: false, nullsFirst: true })
       .order('created_at', { ascending: false });
