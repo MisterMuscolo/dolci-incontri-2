@@ -55,7 +55,7 @@ const SearchResults = () => {
       .from('listings')
       .select(`
         id,
-        user_id, -- Aggiunto user_id
+        user_id,
         title,
         category,
         city,
