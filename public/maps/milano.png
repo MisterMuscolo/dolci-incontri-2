@@ -1,0 +1,8 @@
+<!-- This is a placeholder image. You can replace it with a real screenshot of Milano from Google Maps or similar. -->
+<svg width="600" height="250" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 250">
+  <rect width="600" height="250" fill="#ADD8E6"/>
+  <circle cx="300" cy="125" r="80" fill="#87CEEB"/>
+  <text x="300" y="135" font-family="Arial" font-size="40" fill="#FFFFFF" text-anchor="middle">Milano</text>
+  <circle cx="300" cy="100" r="10" fill="#FF0000"/>
+  <path d="M295 100 L300 90 L305 100 Z" fill="#FF0000"/>
+</svg>
