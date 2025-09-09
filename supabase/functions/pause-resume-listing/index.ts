@@ -34,7 +34,7 @@ serve(async (req) => {
       });
     }
 
-    // Verify the listing belongs to the user and fetch all necessary promotion data
+    // Verify the listing belongs to the user and fetch all necessary data
     const { data: listing, error: listingFetchError } = await supabaseClient
       .from('listings')
       .select('user_id, expires_at, promotion_start_at, promotion_end_at, is_paused, remaining_expires_at_duration, remaining_promotion_duration, is_premium, promotion_mode, paused_promotion_mode')
@@ -81,7 +81,7 @@ serve(async (req) => {
       };
 
       // If the listing was premium, save its promotion state
-      if (listing.is_premium && listing.promotion_mode && listing.promotion_start_at && listing.promotion_end_at) {
+      if (listing.is_premium && listing.promotion_mode) { // Check if it was premium and had a mode
         const promoEndDate = new Date(listing.promotion_end_at);
         const remainingPromotionDuration = promoEndDate.getTime() - now.getTime(); // in milliseconds
         
@@ -104,8 +104,16 @@ serve(async (req) => {
         });
       }
 
-      // Restore expires_at
-      const restoredExpiresAt = new Date(now.getTime() + parseIntervalToMilliseconds(listing.remaining_expires_at_duration));
+      // Restore expires_at: ensure it's always a future date
+      let restoredExpiresAt: Date;
+      const remainingExpiresMs = parseIntervalToMilliseconds(listing.remaining_expires_at_duration);
+      if (remainingExpiresMs > 0) {
+        restoredExpiresAt = new Date(now.getTime() + remainingExpiresMs);
+      } else {
+        // If it was already expired or about to expire, give it a default active period (e.g., 30 days)
+        restoredExpiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      }
+
       updateData = {
         is_paused: false,
         paused_at: null,
@@ -114,8 +122,16 @@ serve(async (req) => {
       };
 
       // Restore promotion times if they existed before pausing
-      if (listing.remaining_promotion_duration && listing.paused_promotion_mode) {
-        const restoredPromotionEnd = new Date(now.getTime() + parseIntervalToMilliseconds(listing.remaining_promotion_duration));
+      if (listing.paused_promotion_mode) { // Check if a promotion mode was saved
+        let restoredPromotionEnd: Date;
+        const remainingPromotionMs = parseIntervalToMilliseconds(listing.remaining_promotion_duration);
+        if (remainingPromotionMs > 0) {
+          restoredPromotionEnd = new Date(now.getTime() + remainingPromotionMs);
+        } else {
+          // If promotion was already expired, give it a default short promotion (e.g., 1 day)
+          restoredPromotionEnd = new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000);
+        }
+
         updateData = {
           ...updateData,
           is_premium: true, // Restore premium status
@@ -124,6 +140,17 @@ serve(async (req) => {
           promotion_end_at: restoredPromotionEnd.toISOString(),
           remaining_promotion_duration: null,
           paused_promotion_mode: null, // Clear stored promotion mode
+        };
+      } else {
+        // If no paused_promotion_mode, ensure premium status is off
+        updateData = {
+          ...updateData,
+          is_premium: false,
+          promotion_mode: 'none',
+          promotion_start_at: null,
+          promotion_end_at: null,
+          remaining_promotion_duration: null,
+          paused_promotion_mode: null,
         };
       }
     }
