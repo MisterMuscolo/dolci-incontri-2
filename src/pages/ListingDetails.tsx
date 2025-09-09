@@ -232,7 +232,11 @@ const ListingDetails = () => {
             </div>
           )}
 
-          <div className="flex justify-end -mt-4 mb-4">
+          <div className="flex justify-between items-center -mt-4 mb-4">
+            {/* Nuovo elemento per l'ID dell'annuncio */}
+            <div className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full flex items-center gap-1">
+              ID Annuncio: <span className="font-semibold text-gray-700">{listing.id.substring(0, 8)}</span>
+            </div>
             <CreateTicketDialog
               triggerButton={
                 <Button
