@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { italianProvinces } from '@/data/provinces';
-import { Heart, MapPin, Search, Globe, Palette, Ruler, Eye, ChevronDown, ChevronUp, RotateCcw, User } from 'lucide-react'; // Importa RotateCcw e User per l'icona di reset
+import { Heart, MapPin, Search, Globe, Palette, Ruler, Eye, ChevronDown, ChevronUp, RotateCcw, User } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { PWAInstallInstructions } from '@/components/PWAInstallInstructions';
 import { Helmet } from 'react-helmet-async';
@@ -16,12 +16,19 @@ interface IndexProps {
   session: any;
 }
 
+const ageRanges = [
+  { value: 'tutte', label: 'Tutte le età' },
+  { value: '18-24', label: '18-24 anni' },
+  { value: '25-36', label: '25-36 anni' },
+  { value: '37-45', label: '37-45 anni' },
+  { value: '46+', label: '+46 anni' },
+];
+
 export default function Index({ session }: IndexProps) {
   const [category, setCategory] = useState('tutte');
   const [city, setCity] = useState('tutte');
   const [keyword, setKeyword] = useState('');
-  const [minAge, setMinAge] = useState(''); // Nuovo stato per età minima
-  const [maxAge, setMaxAge] = useState(''); // Nuovo stato per età massima
+  const [selectedAgeRange, setSelectedAgeRange] = useState('tutte'); // Nuovo stato per la fascia d'età
   const [ethnicity, setEthnicity] = useState('tutte');
   const [nationality, setNationality] = useState('tutte');
   const [breastType, setBreastType] = useState('tutte');
@@ -49,8 +56,16 @@ export default function Index({ session }: IndexProps) {
     if (category && category !== 'tutte') searchParams.append('category', category);
     if (city && city !== 'tutte') searchParams.append('city', city);
     if (keyword) searchParams.append('keyword', keyword);
-    if (minAge) searchParams.append('min_age', minAge); // Aggiungi minAge
-    if (maxAge) searchParams.append('max_age', maxAge); // Aggiungi maxAge
+    
+    // Logica per la fascia d'età
+    if (selectedAgeRange && selectedAgeRange !== 'tutte') {
+      const [min, max] = selectedAgeRange.split('-');
+      searchParams.append('min_age', min);
+      if (max && max !== '+') {
+        searchParams.append('max_age', max);
+      }
+    }
+
     if (ethnicity && ethnicity !== 'tutte') searchParams.append('ethnicity', ethnicity);
     if (nationality && nationality !== 'tutte') searchParams.append('nationality', nationality);
     if (breastType && breastType !== 'tutte') searchParams.append('breast_type', breastType);
@@ -66,8 +81,7 @@ export default function Index({ session }: IndexProps) {
     setCategory('tutte');
     setCity('tutte');
     setKeyword('');
-    setMinAge(''); // Resetta minAge
-    setMaxAge(''); // Resetta maxAge
+    setSelectedAgeRange('tutte'); // Resetta la fascia d'età
     setEthnicity('tutte');
     setNationality('tutte');
     setBreastType('tutte');
@@ -199,15 +213,19 @@ export default function Index({ session }: IndexProps) {
     return ec ? ec.label : null;
   };
 
+  const getAgeRangeLabel = (value: string) => {
+    const range = ageRanges.find(r => r.value === value);
+    return range ? range.label : null;
+  };
+
   const hasActivePersonalFilters = 
+    (selectedAgeRange && selectedAgeRange !== 'tutte') || // Includi età nei filtri attivi
     (ethnicity && ethnicity !== 'tutte') ||
     (nationality && nationality !== 'tutte') ||
     (breastType && breastType !== 'tutte') ||
     (hairColor && hairColor !== 'tutte') ||
     (bodyType && bodyType !== 'tutte') ||
-    (eyeColor && eyeColor !== 'tutte') ||
-    minAge !== '' || // Includi età nei filtri attivi
-    maxAge !== ''; // Includi età nei filtri attivi
+    (eyeColor && eyeColor !== 'tutte');
 
   return (
     <>
@@ -288,14 +306,9 @@ export default function Index({ session }: IndexProps) {
                         Filtri
                       </h3>
                       <div className="flex flex-wrap gap-2 mt-1">
-                        {minAge && (
+                        {selectedAgeRange && selectedAgeRange !== 'tutte' && (
                           <Badge variant="secondary" className="capitalize">
-                            <User className="h-3 w-3 mr-1" /> Min Età: {minAge}
-                          </Badge>
-                        )}
-                        {maxAge && (
-                          <Badge variant="secondary" className="capitalize">
-                            <User className="h-3 w-3 mr-1" /> Max Età: {maxAge}
+                            <User className="h-3 w-3 mr-1" /> {getAgeRangeLabel(selectedAgeRange)}
                           </Badge>
                         )}
                         {ethnicity && ethnicity !== 'tutte' && (
@@ -342,28 +355,21 @@ export default function Index({ session }: IndexProps) {
                 <CollapsibleContent>
                   <Separator className="my-4" />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Nuovi campi per l'età */}
+                    {/* Nuovo campo per la fascia d'età */}
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Input 
-                        type="number" 
-                        placeholder="Età Minima" 
-                        className="w-full pl-10"
-                        value={minAge}
-                        onChange={(e) => setMinAge(e.target.value)}
-                        min="18"
-                      />
-                    </div>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Input 
-                        type="number" 
-                        placeholder="Età Massima" 
-                        className="w-full pl-10"
-                        value={maxAge}
-                        onChange={(e) => setMaxAge(e.target.value)}
-                        min="18"
-                      />
+                      <Select value={selectedAgeRange} onValueChange={setSelectedAgeRange}>
+                        <SelectTrigger className="w-full pl-10">
+                          <SelectValue placeholder="Fascia d'età" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {ageRanges.map((range) => (
+                            <SelectItem key={range.value} value={range.value}>
+                              {range.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="relative">
                       <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />

@@ -5,7 +5,7 @@ import { ListingListItem, Listing } from '@/components/ListingListItem';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { ChevronLeft, MapPin, Search, Heart, ChevronDown, ChevronUp, Globe, Palette, Ruler, Eye, User } from 'lucide-react'; // Aggiunte icone per i nuovi filtri
+import { ChevronLeft, MapPin, Search, Heart, ChevronDown, ChevronUp, Globe, Palette, Ruler, Eye, User } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -17,6 +17,14 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 
 const LISTINGS_PER_PAGE = 10;
+
+const ageRanges = [
+  { value: 'tutte', label: 'Tutte le età' },
+  { value: '18-24', label: '18-24 anni' },
+  { value: '25-36', label: '25-36 anni' },
+  { value: '37-45', label: '37-45 anni' },
+  { value: '46+', label: '+46 anni' },
+];
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
@@ -32,8 +40,7 @@ const SearchResults = () => {
   const [currentCategory, setCurrentCategory] = useState(searchParams.get('category') || 'tutte');
   const [currentCity, setCurrentCity] = useState(searchParams.get('city') || 'tutte');
   const [currentKeyword, setCurrentKeyword] = useState(searchParams.get('keyword') || '');
-  const [currentMinAge, setCurrentMinAge] = useState(searchParams.get('min_age') || ''); // Nuovo stato
-  const [currentMaxAge, setCurrentMaxAge] = useState(searchParams.get('max_age') || ''); // Nuovo stato
+  const [currentSelectedAgeRange, setCurrentSelectedAgeRange] = useState('tutte'); // Nuovo stato per la fascia d'età
   const [currentEthnicity, setCurrentEthnicity] = useState(searchParams.get('ethnicity') || 'tutte');
   const [currentNationality, setCurrentNationality] = useState(searchParams.get('nationality') || 'tutte');
   const [currentBreastType, setCurrentBreastType] = useState(searchParams.get('breast_type') || 'tutte');
@@ -47,8 +54,18 @@ const SearchResults = () => {
     setCurrentCategory(searchParams.get('category') || 'tutte');
     setCurrentCity(searchParams.get('city') || 'tutte');
     setCurrentKeyword(searchParams.get('keyword') || '');
-    setCurrentMinAge(searchParams.get('min_age') || ''); // Aggiorna stato
-    setCurrentMaxAge(searchParams.get('max_age') || ''); // Aggiorna stato
+    
+    // Ricostruisci currentSelectedAgeRange dai parametri min_age e max_age
+    const minAgeParam = searchParams.get('min_age');
+    const maxAgeParam = searchParams.get('max_age');
+    if (minAgeParam && maxAgeParam) {
+      setCurrentSelectedAgeRange(`${minAgeParam}-${maxAgeParam}`);
+    } else if (minAgeParam && !maxAgeParam) {
+      setCurrentSelectedAgeRange(`${minAgeParam}+`);
+    } else {
+      setCurrentSelectedAgeRange('tutte');
+    }
+
     setCurrentEthnicity(searchParams.get('ethnicity') || 'tutte');
     setCurrentNationality(searchParams.get('nationality') || 'tutte');
     setCurrentBreastType(searchParams.get('breast_type') || 'tutte');
@@ -65,8 +82,8 @@ const SearchResults = () => {
     const categoryParam = searchParams.get('category');
     const cityParam = searchParams.get('city');
     const keywordParam = searchParams.get('keyword');
-    const minAgeParam = searchParams.get('min_age'); // Nuovo parametro
-    const maxAgeParam = searchParams.get('max_age'); // Nuovo parametro
+    const minAgeParam = searchParams.get('min_age');
+    const maxAgeParam = searchParams.get('max_age');
     const ethnicityParam = searchParams.get('ethnicity');
     const nationalityParam = searchParams.get('nationality');
     const breastTypeParam = searchParams.get('breast_type');
@@ -117,10 +134,10 @@ const SearchResults = () => {
     if (keywordParam) {
       query = query.or(`title.ilike.%${keywordParam}%,description.ilike.%${keywordParam}%`);
     }
-    if (minAgeParam) { // Applica filtro età minima
+    if (minAgeParam) {
       query = query.gte('age', parseInt(minAgeParam, 10));
     }
-    if (maxAgeParam) { // Applica filtro età massima
+    if (maxAgeParam) {
       query = query.lte('age', parseInt(maxAgeParam, 10));
     }
     if (ethnicityParam && ethnicityParam !== 'tutte') {
@@ -161,7 +178,7 @@ const SearchResults = () => {
         setTotalPages(Math.ceil(count / LISTINGS_PER_PAGE));
       }
       if (data) {
-        const processedListings = data.map((listing: Listing) => ({ // Specifica il tipo di 'listing'
+        const processedListings = data.map((listing: Listing) => ({
           ...listing,
           listing_photos: (listing.listing_photos || []).sort((a, b) => {
             if (a.is_primary && !b.is_primary) return -1;
@@ -184,8 +201,16 @@ const SearchResults = () => {
     if (currentCategory && currentCategory !== 'tutte') newSearchParams.append('category', currentCategory);
     if (currentCity && currentCity !== 'tutte') newSearchParams.append('city', currentCity);
     if (currentKeyword) newSearchParams.append('keyword', currentKeyword);
-    if (currentMinAge) newSearchParams.append('min_age', currentMinAge); // Aggiungi minAge
-    if (currentMaxAge) newSearchParams.append('max_age', currentMaxAge); // Aggiungi maxAge
+    
+    // Logica per la fascia d'età
+    if (currentSelectedAgeRange && currentSelectedAgeRange !== 'tutte') {
+      const [min, max] = currentSelectedAgeRange.split('-');
+      newSearchParams.append('min_age', min);
+      if (max && max !== '+') {
+        newSearchParams.append('max_age', max);
+      }
+    }
+
     if (currentEthnicity && currentEthnicity !== 'tutte') newSearchParams.append('ethnicity', currentEthnicity);
     if (currentNationality && currentNationality !== 'tutte') newSearchParams.append('nationality', currentNationality);
     if (currentBreastType && currentBreastType !== 'tutte') newSearchParams.append('breast_type', currentBreastType);
@@ -331,14 +356,17 @@ const SearchResults = () => {
     return ec ? ec.label : 'Tutti i colori di occhi';
   };
 
+  const getAgeRangeLabel = (value: string) => {
+    const range = ageRanges.find(r => r.value === value);
+    return range ? range.label : 'Tutte le età';
+  };
+
   const generateTitle = () => {
     let titleParts = ["Annunci Incontri"];
     if (currentCategory && currentCategory !== 'tutte') titleParts.push(getCategoryLabel(currentCategory));
     if (currentCity && currentCity !== 'tutte') titleParts.push(`a ${currentCity}`);
     if (currentKeyword) titleParts.push(`"${currentKeyword}"`);
-    if (currentMinAge && currentMaxAge) titleParts.push(`tra ${currentMinAge} e ${currentMaxAge} anni`);
-    else if (currentMinAge) titleParts.push(`da ${currentMinAge} anni`);
-    else if (currentMaxAge) titleParts.push(`fino a ${currentMaxAge} anni`);
+    if (currentSelectedAgeRange && currentSelectedAgeRange !== 'tutte') titleParts.push(getAgeRangeLabel(currentSelectedAgeRange));
     return `${titleParts.join(' ')} | IncontriDolci`;
   };
 
@@ -347,9 +375,7 @@ const SearchResults = () => {
     if (currentCategory && currentCategory !== 'tutte') description += ` nella categoria "${getCategoryLabel(currentCategory)}"`;
     if (currentCity && currentCity !== 'tutte') description += ` nella città di ${currentCity}`;
     if (currentKeyword) description += ` per la parola chiave "${currentKeyword}"`;
-    if (currentMinAge && currentMaxAge) description += ` con età tra ${currentMinAge} e ${currentMaxAge} anni`;
-    else if (currentMinAge) description += ` con età minima di ${currentMinAge} anni`;
-    else if (currentMaxAge) description += ` con età massima di ${currentMaxAge} anni`;
+    if (currentSelectedAgeRange && currentSelectedAgeRange !== 'tutte') description += ` con età ${getAgeRangeLabel(currentSelectedAgeRange)}`;
     description += ". Trova la tua prossima relazione su IncontriDolci.";
     return description;
   };
@@ -457,14 +483,9 @@ const SearchResults = () => {
                         <Search className="h-3 w-3 mr-1" /> "{currentKeyword}"
                       </Badge>
                     )}
-                    {currentMinAge && (
+                    {currentSelectedAgeRange && currentSelectedAgeRange !== 'tutte' && (
                       <Badge variant="secondary" className="capitalize">
-                        <User className="h-3 w-3 mr-1" /> Min Età: {currentMinAge}
-                      </Badge>
-                    )}
-                    {currentMaxAge && (
-                      <Badge variant="secondary" className="capitalize">
-                        <User className="h-3 w-3 mr-1" /> Max Età: {currentMaxAge}
+                        <User className="h-3 w-3 mr-1" /> {getAgeRangeLabel(currentSelectedAgeRange)}
                       </Badge>
                     )}
                     {currentEthnicity && currentEthnicity !== 'tutte' && (
@@ -500,7 +521,7 @@ const SearchResults = () => {
                     {(!currentCategory || currentCategory === 'tutte') && 
                      (!currentCity || currentCity === 'tutte') && 
                      !currentKeyword &&
-                     !currentMinAge && !currentMaxAge && // Includi età nei filtri attivi
+                     (!currentSelectedAgeRange || currentSelectedAgeRange === 'tutte') &&
                      (!currentEthnicity || currentEthnicity === 'tutte') &&
                      (!currentNationality || currentNationality === 'tutte') &&
                      (!currentBreastType || currentBreastType === 'tutte') &&
@@ -568,29 +589,22 @@ const SearchResults = () => {
                   </div>
                 </div>
 
-                {/* Nuovi filtri per Età */}
+                {/* Nuovo filtro per la fascia d'età */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    <Input 
-                      type="number" 
-                      placeholder="Età Minima" 
-                      className="w-full pl-10"
-                      value={currentMinAge}
-                      onChange={(e) => setCurrentMinAge(e.target.value)}
-                      min="18"
-                    />
-                  </div>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    <Input 
-                      type="number" 
-                      placeholder="Età Massima" 
-                      className="w-full pl-10"
-                      value={currentMaxAge}
-                      onChange={(e) => setCurrentMaxAge(e.target.value)}
-                      min="18"
-                    />
+                    <Select value={currentSelectedAgeRange} onValueChange={setCurrentSelectedAgeRange}>
+                      <SelectTrigger className="w-full pl-10">
+                        <SelectValue placeholder="Fascia d'età" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ageRanges.map((range) => (
+                          <SelectItem key={range.value} value={range.value}>
+                            {range.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
