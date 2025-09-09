@@ -6,18 +6,19 @@ import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { Input } => '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { italianProvinces } from '@/data/provinces';
 import { ImageUploader, NewFilePair } from '@/components/ImageUploader';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, MapPin } from 'lucide-react'; // Importa MapPin
 import { cn, formatPhoneNumber } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
+import { cityCoordinates } from '@/data/cityCoordinates'; // Importa le coordinate delle città
 
 const listingSchema = z.object({
   category: z.string({ required_error: 'La categoria è obbligatoria.' }),
@@ -33,6 +34,10 @@ const listingSchema = z.object({
   phone: z.string().optional(),
   contact_preference: z.enum(['email', 'phone', 'both'], { required_error: 'La preferenza di contatto è obbligatoria.' }),
   contact_whatsapp: z.boolean().optional().default(false),
+  // Nuovi campi per la mappa
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
+  address_text: z.string().nullable().optional(),
 });
 
 type ExistingPhoto = { id: string; url: string; original_url: string | null; is_primary: boolean };
@@ -55,6 +60,9 @@ type FullListing = {
   contact_preference: 'email' | 'phone' | 'both';
   contact_whatsapp: boolean | null;
   listing_photos: ExistingPhoto[];
+  latitude: number | null; // Aggiunto
+  longitude: number | null; // Aggiunto
+  address_text: string | null; // Aggiunto
 };
 
 const EditListing = () => {
@@ -68,6 +76,8 @@ const EditListing = () => {
   const [currentListing, setCurrentListing] = useState<FullListing | null>(null);
   const { getBackLinkText, handleNavigateBack } = useDynamicBackLink();
 
+  const [isMapActive, setIsMapActive] = useState(false); // Stato per la checkbox della mappa
+
   const form = useForm<z.infer<typeof listingSchema>>({
     resolver: zodResolver(listingSchema),
     defaultValues: {
@@ -76,11 +86,40 @@ const EditListing = () => {
       phone: '',
       contact_preference: 'both',
       contact_whatsapp: false,
+      latitude: null,
+      longitude: null,
+      address_text: null,
     }
   });
 
   const contactPreference = form.watch('contact_preference');
   const phoneValue = form.watch('phone');
+  const selectedCity = form.watch('city');
+  const selectedZone = form.watch('zone');
+
+  const generateFictitiousLocation = useCallback((city: string, zone?: string) => {
+    const baseCoords = cityCoordinates[city];
+    if (baseCoords) {
+      const latOffset = (Math.random() - 0.5) * 0.02;
+      const lngOffset = (Math.random() - 0.5) * 0.02;
+
+      const fictitiousLat = parseFloat((baseCoords.lat + latOffset).toFixed(6));
+      const fictitiousLng = parseFloat((baseCoords.lng + lngOffset).toFixed(6));
+      
+      let addressText = `Posizione fittizia per ${city}`;
+      if (zone) {
+        addressText += `, ${zone}`;
+      }
+
+      form.setValue('latitude', fictitiousLat);
+      form.setValue('longitude', fictitiousLng);
+      form.setValue('address_text', addressText);
+    } else {
+      form.setValue('latitude', null);
+      form.setValue('longitude', null);
+      form.setValue('address_text', null);
+    }
+  }, [form]);
 
   const fetchListingData = useCallback(async () => {
     if (!id) {
@@ -115,7 +154,17 @@ const EditListing = () => {
       phone: listing.phone || '',
       contact_preference: listing.contact_preference || 'both',
       contact_whatsapp: listing.contact_whatsapp || false,
+      latitude: listing.latitude,
+      longitude: listing.longitude,
+      address_text: listing.address_text,
     });
+
+    // Pre-check the map checkbox if coordinates exist
+    if (listing.latitude !== null && listing.longitude !== null) {
+      setIsMapActive(true);
+    } else {
+      setIsMapActive(false);
+    }
 
     setExistingPhotos(listing.listing_photos || []);
     setIsLoading(false);
@@ -124,6 +173,16 @@ const EditListing = () => {
   useEffect(() => {
     fetchListingData();
   }, [fetchListingData]);
+
+  useEffect(() => {
+    if (isMapActive && selectedCity) {
+      generateFictitiousLocation(selectedCity, selectedZone);
+    } else if (!isMapActive) {
+      form.setValue('latitude', null);
+      form.setValue('longitude', null);
+      form.setValue('address_text', null);
+    }
+  }, [isMapActive, selectedCity, selectedZone, generateFictitiousLocation, form]);
 
   const onSubmit = async (values: z.infer<typeof listingSchema>) => {
     setIsSubmitting(true);
@@ -143,9 +202,9 @@ const EditListing = () => {
         contact_preference: values.contact_preference,
         contact_whatsapp: values.contact_whatsapp,
         zone: values.zone,
-        latitude: null, // Rimosso geocodifica
-        longitude: null, // Rimosso geocodifica
-        address_text: null, // Rimosso geocodifica
+        latitude: isMapActive ? values.latitude : null, // Salva solo se la mappa è attiva
+        longitude: isMapActive ? values.longitude : null, // Salva solo se la mappa è attiva
+        address_text: isMapActive ? values.address_text : null, // Salva solo se la mappa è attiva
       };
 
       const { error: updateError } = await supabase
@@ -441,6 +500,69 @@ const EditListing = () => {
                     )}
                   />
                 )}
+
+                {/* Nuova sezione per la mappa */}
+                <div>
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={isMapActive}
+                        onCheckedChange={(checked) => setIsMapActive(!!checked)}
+                        disabled={isSubmitting}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="flex items-center gap-2">
+                        <MapPin className="h-5 w-5 text-rose-500" /> Attiva Mappa (Posizione Fittizia)
+                      </FormLabel>
+                      <FormDescription>
+                        Attiva questa opzione per mostrare una posizione fittizia sulla mappa, basata sulla tua città e zona.
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                  {isMapActive && (
+                    <div className="mt-4 space-y-4 p-4 border rounded-md bg-gray-100">
+                      <p className="text-sm text-gray-600">
+                        La posizione mostrata sarà fittizia e generata automaticamente.
+                      </p>
+                      <FormField
+                        control={form.control}
+                        name="address_text"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Indirizzo Mappa</FormLabel>
+                            <FormControl><Input {...field} readOnly className="bg-gray-200 cursor-not-allowed" /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="latitude"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Latitudine</FormLabel>
+                              <FormControl><Input type="number" step="0.000001" {...field} readOnly className="bg-gray-200 cursor-not-allowed" /></FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="longitude"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Longitudine</FormLabel>
+                              <FormControl><Input type="number" step="0.000001" {...field} readOnly className="bg-gray-200 cursor-not-allowed" /></FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 <div>
                   <FormLabel>Fotografie</FormLabel>

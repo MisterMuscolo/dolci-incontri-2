@@ -40,6 +40,9 @@ type FullListing = {
   paused_at: string | null; // Nuovo campo
   remaining_expires_at_duration: string | null; // Nuovo campo
   remaining_promotion_duration: string | null; // Nuovo campo
+  latitude: number | null; // Aggiunto
+  longitude: number | null; // Aggiunto
+  address_text: string | null; // Aggiunto
 };
 
 const ListingDetails = () => {
@@ -263,6 +266,21 @@ const ListingDetails = () => {
               redirectPathOnAuth={`/listing/${listing.id}`}
             />
           </div>
+
+          {listing.latitude !== null && listing.longitude !== null && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl"><MapPin className="h-5 w-5 text-rose-500" /> Posizione</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 mb-2">{listing.address_text || 'Posizione fittizia'}</p>
+                <div className="w-full h-48 bg-gray-200 rounded-md flex items-center justify-center text-gray-500 text-sm">
+                  {/* Qui potresti integrare una vera mappa (es. Google Maps, OpenStreetMap) */}
+                  <p>Mappa fittizia: Lat {listing.latitude}, Lng {listing.longitude}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader>
