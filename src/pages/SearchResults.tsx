@@ -68,10 +68,10 @@ const SearchResults = () => {
         promotion_start_at,
         promotion_end_at,
         last_bumped_at,
-        is_paused, -- Nuovo campo
-        paused_at, -- Nuovo campo
-        remaining_expires_at_duration, -- Nuovo campo
-        remaining_promotion_duration, -- Nuovo campo
+        is_paused,
+        paused_at,
+        remaining_expires_at_duration,
+        remaining_promotion_duration,
         listing_photos ( url, original_url, is_primary )
       `, { count: 'exact' })
       .gt('expires_at', new Date().toISOString())
@@ -92,10 +92,6 @@ const SearchResults = () => {
       .order('promotion_end_at', { ascending: false, nullsFirst: true })
       .order('created_at', { ascending: false });
 
-    const from = (pageParam - 1) * LISTINGS_PER_PAGE;
-    const to = from + LISTINGS_PER_PAGE - 1;
-    query = query.range(from, to);
-
     const { data, error, count } = await query;
 
     if (error) {
@@ -106,7 +102,7 @@ const SearchResults = () => {
         setTotalPages(Math.ceil(count / LISTINGS_PER_PAGE));
       }
       if (data) {
-        const processedListings = data.map(listing => ({
+        const processedListings = data.map((listing: Listing) => ({ // Specifica il tipo di 'listing'
           ...listing,
           listing_photos: (listing.listing_photos || []).sort((a, b) => {
             if (a.is_primary && !b.is_primary) return -1;

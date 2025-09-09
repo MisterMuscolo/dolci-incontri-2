@@ -62,10 +62,10 @@ const MyListings = () => {
         promotion_start_at,
         promotion_end_at,
         last_bumped_at,
-        is_paused, -- Nuovo campo
-        paused_at, -- Nuovo campo
-        remaining_expires_at_duration, -- Nuovo campo
-        remaining_promotion_duration, -- Nuovo campo
+        is_paused,
+        paused_at,
+        remaining_expires_at_duration,
+        remaining_promotion_duration,
         listing_photos ( url, original_url, is_primary ),
         slug
       `)
@@ -82,7 +82,7 @@ const MyListings = () => {
     if (error) {
       console.error("MyListings: Errore nel recupero degli annunci:", error.message, error.details);
     } else if (data) {
-      const processedListings = data.map(listing => ({
+      const processedListings = data.map((listing: Listing) => ({ // Specifica il tipo di 'listing'
         ...listing,
         listing_photos: (listing.listing_photos || []).sort((a, b) => {
           if (a.is_primary && !b.is_primary) return -1;

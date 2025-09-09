@@ -1,12 +1,12 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom'; // Rimosso Link non utilizzato
 import { supabase } from '@/integrations/supabase/client';
 import { ListingListItem, Listing } from '@/components/ListingListItem';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronLeft, User } from 'lucide-react';
-import { showError } from '@/utils/toast';
+// import { showError } from '@/utils/toast'; // Rimosso showError non utilizzato
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
 
 const UserListingsAdminView = () => {
@@ -59,14 +59,15 @@ const UserListingsAdminView = () => {
         promotion_start_at,
         promotion_end_at,
         last_bumped_at,
-        is_paused, -- Nuovo campo
-        paused_at, -- Nuovo campo
-        remaining_expires_at_duration, -- Nuovo campo
-        remaining_promotion_duration, -- Nuovo campo
+        is_paused,
+        paused_at,
+        remaining_expires_at_duration,
+        remaining_promotion_duration,
         listing_photos ( url, original_url, is_primary ),
         slug
-      `)
-      .eq('user_id', userId);
+      `);
+
+    query = query.eq('user_id', userId);
 
     query = query
       .order('is_paused', { ascending: true }) // Ordina prima gli annunci non in pausa
@@ -80,7 +81,15 @@ const UserListingsAdminView = () => {
       console.error("Error fetching user listings:", listingsError);
       setError("Impossibile caricare gli annunci dell'utente.");
     } else if (data) {
-      setListings(data as Listing[]);
+      const processedListings = data.map((listing: Listing) => ({ // Specifica il tipo di 'listing'
+        ...listing,
+        listing_photos: (listing.listing_photos || []).sort((a, b) => {
+          if (a.is_primary && !b.is_primary) return -1;
+          if (!a.is_primary && b.is_primary) return 1;
+          return 0;
+        })
+      }));
+      setListings(processedListings as Listing[]);
     }
     setLoading(false);
   }, [userId]);
