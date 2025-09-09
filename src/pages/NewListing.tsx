@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,7 +13,7 @@ import { italianProvinces } from '@/data/provinces';
 import { ImageUploader, NewFilePair } from '@/components/ImageUploader';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
-import { ChevronLeft, MapPin } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { cn, formatPhoneNumber } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';

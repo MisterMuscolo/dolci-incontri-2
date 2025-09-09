@@ -13,7 +13,7 @@ import { italianProvinces } from '@/data/provinces';
 import { ImageUploader, NewFilePair } from '@/components/ImageUploader';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
-import { ChevronLeft, MapPin } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { cn, formatPhoneNumber } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
