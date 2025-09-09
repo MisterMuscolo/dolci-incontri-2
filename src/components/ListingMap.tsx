@@ -7,6 +7,7 @@ import { MapPin, Heart, User, Camera } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { WatermarkedImage } from './WatermarkedImage';
+import { Button } from '@/components/ui/button'; // Importa il componente Button
 
 // Fix default icon issues with Webpack
 delete (L.Icon.Default.prototype as any)._getIconUrl;
