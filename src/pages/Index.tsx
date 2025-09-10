@@ -439,7 +439,7 @@ export default function Index({ session }: IndexProps) {
               <Collapsible
                 open={isPersonalFiltersOpen}
                 onOpenChange={setIsPersonalFiltersOpen}
-                className="w-full mt-4" // Aggiunto mt-4 qui
+                className="w-full mt-4"
               >
                 <CollapsibleTrigger asChild>
                   <div className="flex items-center justify-between cursor-pointer py-2">
@@ -699,7 +699,7 @@ export default function Index({ session }: IndexProps) {
                   <Collapsible
                     open={isOfferedServicesFiltersOpen}
                     onOpenChange={setIsOfferedServicesFiltersOpen}
-                    className="w-full mt-4" // Aggiunto mt-4 qui
+                    className="w-full mt-4"
                   >
                     <CollapsibleTrigger asChild>
                       <div className="flex items-center justify-between cursor-pointer py-2">
@@ -711,7 +711,7 @@ export default function Index({ session }: IndexProps) {
                       </div>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
                         {offeredServicesOptions.map((option) => (
                           <div key={option.id} className="flex items-center space-x-2">
                             <Checkbox
@@ -736,7 +736,7 @@ export default function Index({ session }: IndexProps) {
                 </CollapsibleContent>
               </Collapsible>
               
-              <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600 text-white text-lg py-6 mt-4"> {/* Aggiunto mt-4 qui */}
+              <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600 text-white text-lg py-6 mt-4">
                 Cerca
               </Button>
             </form>
