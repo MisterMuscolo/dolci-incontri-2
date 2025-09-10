@@ -184,7 +184,7 @@ export default function Index({ session }: IndexProps) {
   // Nuovi stati per i popover dei filtri personali
   const [isAgeRangePopoverOpen, setIsAgeRangePopoverOpen] = useState(false);
   const [isEthnicityPopoverOpen, setIsEthnicityPopoverOpen] = useState(false);
-  const [isNationalityPopoverOpen, setIsNationalityPopoverOpen] = useState(false);
+  const [isNationalityPopoverOpen, setIsOpenNationalityPopover] = useState(false);
   const [isBreastTypePopoverOpen, setIsBreastTypePopoverOpen] = useState(false);
   const [isHairColorPopoverOpen, setIsHairColorPopoverOpen] = useState(false);
   const [isBodyTypePopoverOpen, setIsBodyTypePopoverOpen] = useState(false);
@@ -268,13 +268,14 @@ export default function Index({ session }: IndexProps) {
     setSelectedOfferedServices([]); // Resetta il nuovo campo
 
     setIsPersonalFiltersOpen(false); // Chiudi la sezione filtri personali
-    setIsOfferedServicesPopoverOpen(false); // Resetta anche il nuovo stato del popover
+    // Chiudi tutti i popover individuali
+    setIsOfferedServicesPopoverOpen(false); 
     setIsMeetingTypePopoverOpen(false);
     setIsAvailabilityForPopoverOpen(false);
     setIsMeetingLocationPopoverOpen(false);
-    setIsAgeRangePopoverOpen(false); // Resetta i nuovi stati dei popover
+    setIsAgeRangePopoverOpen(false);
     setIsEthnicityPopoverOpen(false);
-    setIsNationalityPopoverOpen(false);
+    setIsOpenNationalityPopover(false); // Corretto il nome della funzione
     setIsBreastTypePopoverOpen(false);
     setIsHairColorPopoverOpen(false);
     setIsBodyTypePopoverOpen(false);
@@ -668,7 +669,7 @@ export default function Index({ session }: IndexProps) {
                     </Popover>
 
                     {/* Multi-select per Nazionalità */}
-                    <Popover open={isNationalityPopoverOpen} onOpenChange={setIsNationalityPopoverOpen}>
+                    <Popover open={isNationalityPopoverOpen} onOpenChange={setIsOpenNationalityPopover}>
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
