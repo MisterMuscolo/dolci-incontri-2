@@ -174,6 +174,7 @@ export default function Index({ session }: IndexProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isPersonalFiltersOpen, setIsPersonalFiltersOpen] = useState(false);
+  const [isOfferedServicesFiltersOpen, setIsOfferedServicesFiltersOpen] = useState(false); // Nuovo stato per i servizi offerti
 
   useEffect(() => {
     const referrerCode = searchParams.get('ref');
@@ -273,6 +274,7 @@ export default function Index({ session }: IndexProps) {
     setSelectedOfferedServices([]); // Resetta il nuovo campo
 
     setIsPersonalFiltersOpen(false); // Chiudi la sezione filtri personali
+    setIsOfferedServicesFiltersOpen(false); // Resetta anche il nuovo stato
     navigate('/'); // Naviga alla homepage senza parametri di ricerca
   };
 
@@ -693,24 +695,41 @@ export default function Index({ session }: IndexProps) {
                     </div>
                   </div>
                   <Separator className="my-4" />
-                  <h3 className="text-lg font-semibold text-gray-700 mb-4">Filtri Servizi Offerti</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"> {/* Modificato a grid di checkbox */}
-                    {offeredServicesOptions.map((option) => (
-                      <div key={option.id} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`service-${option.id}`}
-                          checked={selectedOfferedServices.includes(option.id)}
-                          onCheckedChange={(checked) => handleOfferedServiceChange(option.id, checked as boolean)}
-                        />
-                        <label
-                          htmlFor={`service-${option.id}`}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                        >
-                          {option.label}
-                        </label>
+                  {/* Nuova Collapsible per Filtri Servizi Offerti */}
+                  <Collapsible
+                    open={isOfferedServicesFiltersOpen}
+                    onOpenChange={setIsOfferedServicesFiltersOpen}
+                    className="w-full"
+                  >
+                    <CollapsibleTrigger asChild>
+                      <div className="flex items-center justify-between cursor-pointer py-2">
+                        <h3 className="text-lg font-semibold text-gray-700">Filtri Servizi Offerti</h3>
+                        <Button type="button" variant="ghost" size="sm" className="w-9 p-0">
+                          {isOfferedServicesFiltersOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                          <span className="sr-only">Toggle offered services filters</span>
+                        </Button>
                       </div>
-                    ))}
-                  </div>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-2">
+                        {offeredServicesOptions.map((option) => (
+                          <div key={option.id} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`service-${option.id}`}
+                              checked={selectedOfferedServices.includes(option.id)}
+                              onCheckedChange={(checked) => handleOfferedServiceChange(option.id, checked as boolean)}
+                            />
+                            <label
+                              htmlFor={`service-${option.id}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              {option.label}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
                   <Button type="button" variant="outline" onClick={handleResetFilters} className="w-full border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-800 text-lg py-6 mt-2">
                     <RotateCcw className="h-5 w-5 mr-2" /> Reset Filtri
                   </Button>

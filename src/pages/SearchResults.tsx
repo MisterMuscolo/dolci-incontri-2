@@ -184,6 +184,7 @@ const SearchResults = () => {
   const [currentOfferedServices, setCurrentOfferedServices] = useState<string[]>(searchParams.getAll('offered_services'));
 
   const [isFilterFormOpen, setIsFilterFormOpen] = useState(false); // State for collapsible filter form
+  const [isOfferedServicesFiltersOpen, setIsOfferedServicesFiltersOpen] = useState(false); // Nuovo stato per i servizi offerti
 
   // Update local states when URL search params change (e.g., direct URL access or browser back/forward)
   useEffect(() => {
@@ -943,24 +944,41 @@ const SearchResults = () => {
                     </div>
                   </div>
                   <Separator className="my-4" />
-                  <h3 className="text-lg font-semibold text-gray-700 mb-4">Filtri Servizi Offerti</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"> {/* Modificato a grid di checkbox */}
-                    {offeredServicesOptions.map((option) => (
-                      <div key={option.id} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`service-search-${option.id}`}
-                          checked={currentOfferedServices.includes(option.id)}
-                          onCheckedChange={(checked) => handleOfferedServiceChange(option.id, checked as boolean)}
-                        />
-                        <label
-                          htmlFor={`service-search-${option.id}`}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                        >
-                          {option.label}
-                        </label>
+                  {/* Nuova Collapsible per Filtri Servizi Offerti */}
+                  <Collapsible
+                    open={isOfferedServicesFiltersOpen}
+                    onOpenChange={setIsOfferedServicesFiltersOpen}
+                    className="w-full"
+                  >
+                    <CollapsibleTrigger asChild>
+                      <div className="flex items-center justify-between cursor-pointer py-2">
+                        <h3 className="text-lg font-semibold text-gray-700">Filtri Servizi Offerti</h3>
+                        <Button type="button" variant="ghost" size="sm" className="w-9 p-0">
+                          {isOfferedServicesFiltersOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                          <span className="sr-only">Toggle offered services filters</span>
+                        </Button>
                       </div>
-                    ))}
-                  </div>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-2">
+                        {offeredServicesOptions.map((option) => (
+                          <div key={option.id} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`service-search-${option.id}`}
+                              checked={currentOfferedServices.includes(option.id)}
+                              onCheckedChange={(checked) => handleOfferedServiceChange(option.id, checked as boolean)}
+                            />
+                            <label
+                              htmlFor={`service-search-${option.id}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              {option.label}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
                 </div>
 
                 <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600 text-lg py-6">
