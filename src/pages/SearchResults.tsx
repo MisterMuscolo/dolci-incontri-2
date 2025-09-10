@@ -5,7 +5,7 @@ import { ListingListItem, Listing } from '@/components/ListingListItem';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { ChevronLeft, MapPin, Search, Heart, ChevronDown, ChevronUp, Globe, Palette, Ruler, Eye, User, Handshake, Clock, Home, Euro, Sparkles } from 'lucide-react'; // Aggiunte icone per i nuovi filtri
+import { ChevronLeft, MapPin, Search, Heart, ChevronDown, ChevronUp, Globe, Palette, Ruler, Eye, User, Handshake, Clock, Home, Euro, Sparkles, CheckIcon, X } from 'lucide-react'; // Aggiunte icone per i nuovi filtri
 import { Helmet } from 'react-helmet-async';
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -16,6 +16,9 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox'; // Importa Checkbox
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
+import { cn } from '@/lib/utils';
 
 const LISTINGS_PER_PAGE = 10;
 
@@ -184,7 +187,7 @@ const SearchResults = () => {
   const [currentOfferedServices, setCurrentOfferedServices] = useState<string[]>(searchParams.getAll('offered_services'));
 
   const [isFilterFormOpen, setIsFilterFormOpen] = useState(false); // State for collapsible filter form
-  const [isOfferedServicesFiltersOpen, setIsOfferedServicesFiltersOpen] = useState(false); // Nuovo stato per i servizi offerti
+  const [isOfferedServicesPopoverOpen, setIsOfferedServicesPopoverOpen] = useState(false); // Nuovo stato per il popover dei servizi offerti
 
   // Update local states when URL search params change (e.g., direct URL access or browser back/forward)
   useEffect(() => {
@@ -944,41 +947,74 @@ const SearchResults = () => {
                     </div>
                   </div>
                   <Separator className="my-4" />
-                  {/* Nuova Collapsible per Filtri Servizi Offerti */}
-                  <Collapsible
-                    open={isOfferedServicesFiltersOpen}
-                    onOpenChange={setIsOfferedServicesFiltersOpen}
-                    className="w-full mt-4"
-                  >
-                    <CollapsibleTrigger asChild>
-                      <div className="flex items-center justify-between cursor-pointer py-2">
-                        <h3 className="text-lg font-semibold text-gray-700">Filtri Servizi Offerti</h3>
-                        <Button type="button" variant="ghost" size="sm" className="w-9 p-0">
-                          {isOfferedServicesFiltersOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                          <span className="sr-only">Toggle offered services filters</span>
-                        </Button>
-                      </div>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-                        {offeredServicesOptions.map((option) => (
-                          <div key={option.id} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={`service-search-${option.id}`}
-                              checked={currentOfferedServices.includes(option.id)}
-                              onCheckedChange={(checked) => handleOfferedServiceChange(option.id, checked as boolean)}
-                            />
-                            <label
-                              htmlFor={`service-search-${option.id}`}
-                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                            >
-                              {option.label}
-                            </label>
+                  {/* Multi-select per Filtri Servizi Offerti */}
+                  <h3 className="text-lg font-semibold text-gray-700 mb-4">Filtri Servizi Offerti</h3>
+                  <Popover open={isOfferedServicesPopoverOpen} onOpenChange={setIsOfferedServicesPopoverOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={isOfferedServicesPopoverOpen}
+                        className="w-full justify-between"
+                      >
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        {currentOfferedServices.length > 0
+                          ? `${currentOfferedServices.length} selezionati`
+                          : "Seleziona servizi..."}
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                      <Command>
+                        <CommandInput placeholder="Cerca servizio..." />
+                        <CommandEmpty>Nessun servizio trovato.</CommandEmpty>
+                        <CommandGroup>
+                          <div className="max-h-60 overflow-y-auto">
+                            {offeredServicesOptions.map((option) => {
+                              const isSelected = currentOfferedServices.includes(option.id);
+                              return (
+                                <CommandItem
+                                  key={option.id}
+                                  value={option.label}
+                                  onSelect={() => {
+                                    handleOfferedServiceChange(option.id, !isSelected);
+                                  }}
+                                  className="flex items-center cursor-pointer"
+                                >
+                                  <Checkbox
+                                    checked={isSelected}
+                                    onCheckedChange={(checked) => handleOfferedServiceChange(option.id, checked as boolean)}
+                                    className="mr-2"
+                                  />
+                                  {option.label}
+                                  <CheckIcon
+                                    className={cn(
+                                      "ml-auto h-4 w-4",
+                                      isSelected ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                </CommandItem>
+                              );
+                            })}
                           </div>
-                        ))}
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
+                        </CommandGroup>
+                        {currentOfferedServices.length > 0 && (
+                          <>
+                            <Separator className="my-2" />
+                            <div className="p-2">
+                              <Button
+                                variant="ghost"
+                                className="w-full justify-center text-red-500 hover:text-red-600"
+                                onClick={() => setCurrentOfferedServices([])}
+                              >
+                                <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                              </Button>
+                            </div>
+                          </>
+                        )}
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
                 <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600 text-lg py-6 mt-4">

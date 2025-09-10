@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { italianProvinces } from '@/data/provinces';
-import { Heart, MapPin, Search, Globe, Palette, Ruler, Eye, ChevronDown, ChevronUp, RotateCcw, User, Handshake, Clock, Home, Euro, Sparkles } from 'lucide-react'; // Aggiunte icone per i nuovi filtri
+import { Heart, MapPin, Search, Globe, Palette, Ruler, Eye, ChevronDown, ChevronUp, RotateCcw, User, Handshake, Clock, Home, Euro, Sparkles, CheckIcon, X } from 'lucide-react'; // Aggiunte icone per i nuovi filtri
 import { Card, CardContent } from '@/components/ui/card';
 import { PWAInstallInstructions } from '@/components/PWAInstallInstructions';
 import { Helmet } from 'react-helmet-async';
@@ -12,6 +12,9 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox'; // Importa Checkbox
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
+import { cn } from '@/lib/utils';
 
 interface IndexProps {
   session: any;
@@ -174,7 +177,7 @@ export default function Index({ session }: IndexProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isPersonalFiltersOpen, setIsPersonalFiltersOpen] = useState(false);
-  const [isOfferedServicesFiltersOpen, setIsOfferedServicesFiltersOpen] = useState(false); // Nuovo stato per i servizi offerti
+  const [isOfferedServicesPopoverOpen, setIsOfferedServicesPopoverOpen] = useState(false); // Nuovo stato per il popover dei servizi offerti
 
   useEffect(() => {
     const referrerCode = searchParams.get('ref');
@@ -274,7 +277,7 @@ export default function Index({ session }: IndexProps) {
     setSelectedOfferedServices([]); // Resetta il nuovo campo
 
     setIsPersonalFiltersOpen(false); // Chiudi la sezione filtri personali
-    setIsOfferedServicesFiltersOpen(false); // Resetta anche il nuovo stato
+    setIsOfferedServicesPopoverOpen(false); // Resetta anche il nuovo stato del popover
     navigate('/'); // Naviga alla homepage senza parametri di ricerca
   };
 
@@ -695,42 +698,75 @@ export default function Index({ session }: IndexProps) {
                     </div>
                   </div>
                   <Separator className="my-4" />
-                  {/* Nuova Collapsible per Filtri Servizi Offerti */}
-                  <Collapsible
-                    open={isOfferedServicesFiltersOpen}
-                    onOpenChange={setIsOfferedServicesFiltersOpen}
-                    className="w-full mt-4"
-                  >
-                    <CollapsibleTrigger asChild>
-                      <div className="flex items-center justify-between cursor-pointer py-2">
-                        <h3 className="text-lg font-semibold text-gray-700">Filtri Servizi Offerti</h3>
-                        <Button type="button" variant="ghost" size="sm" className="w-9 p-0">
-                          {isOfferedServicesFiltersOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                          <span className="sr-only">Toggle offered services filters</span>
-                        </Button>
-                      </div>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-                        {offeredServicesOptions.map((option) => (
-                          <div key={option.id} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={`service-${option.id}`}
-                              checked={selectedOfferedServices.includes(option.id)}
-                              onCheckedChange={(checked) => handleOfferedServiceChange(option.id, checked as boolean)}
-                            />
-                            <label
-                              htmlFor={`service-${option.id}`}
-                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                            >
-                              {option.label}
-                            </label>
+                  {/* Multi-select per Filtri Servizi Offerti */}
+                  <h3 className="text-lg font-semibold text-gray-700 mb-4">Filtri Servizi Offerti</h3>
+                  <Popover open={isOfferedServicesPopoverOpen} onOpenChange={setIsOfferedServicesPopoverOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={isOfferedServicesPopoverOpen}
+                        className="w-full justify-between"
+                      >
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        {selectedOfferedServices.length > 0
+                          ? `${selectedOfferedServices.length} selezionati`
+                          : "Seleziona servizi..."}
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                      <Command>
+                        <CommandInput placeholder="Cerca servizio..." />
+                        <CommandEmpty>Nessun servizio trovato.</CommandEmpty>
+                        <CommandGroup>
+                          <div className="max-h-60 overflow-y-auto">
+                            {offeredServicesOptions.map((option) => {
+                              const isSelected = selectedOfferedServices.includes(option.id);
+                              return (
+                                <CommandItem
+                                  key={option.id}
+                                  value={option.label}
+                                  onSelect={() => {
+                                    handleOfferedServiceChange(option.id, !isSelected);
+                                  }}
+                                  className="flex items-center cursor-pointer"
+                                >
+                                  <Checkbox
+                                    checked={isSelected}
+                                    onCheckedChange={(checked) => handleOfferedServiceChange(option.id, checked as boolean)}
+                                    className="mr-2"
+                                  />
+                                  {option.label}
+                                  <CheckIcon
+                                    className={cn(
+                                      "ml-auto h-4 w-4",
+                                      isSelected ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                </CommandItem>
+                              );
+                            })}
                           </div>
-                        ))}
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
-                  <Button type="button" variant="outline" onClick={handleResetFilters} className="w-full border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-800 text-lg py-6 mt-2">
+                        </CommandGroup>
+                        {selectedOfferedServices.length > 0 && (
+                          <>
+                            <Separator className="my-2" />
+                            <div className="p-2">
+                              <Button
+                                variant="ghost"
+                                className="w-full justify-center text-red-500 hover:text-red-600"
+                                onClick={() => setSelectedOfferedServices([])}
+                              >
+                                <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                              </Button>
+                            </div>
+                          </>
+                        )}
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  <Button type="button" variant="outline" onClick={handleResetFilters} className="w-full border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-800 text-lg py-6 mt-4">
                     <RotateCcw className="h-5 w-5 mr-2" /> Reset Filtri
                   </Button>
                 </CollapsibleContent>
