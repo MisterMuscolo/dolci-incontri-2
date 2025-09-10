@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form'; // Rimosso Controller
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,7 @@ const meetingTypeOptions = [
   { id: 'relax', label: 'Relax' },
   { id: 'massaggio', label: 'Massaggio' },
   { id: 'viaggio', label: 'Viaggio' },
-  { id: 'altro', label: 'Altro' },
+  { id: 'altro', 'label': 'Altro' },
 ];
 
 const availabilityForOptions = [
@@ -556,39 +556,30 @@ const NewListing = () => {
                 <FormField
                   control={form.control}
                   name="meeting_type"
-                  render={({ field: innerField }) => ( // Rinominato 'field' in 'innerField'
+                  render={({ field }) => (
                     <FormItem>
                       <FormLabel>Tipologia di Incontro (Opzionale)</FormLabel>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                         {meetingTypeOptions.map((item) => (
-                          <FormField
-                            key={item.id}
-                            control={form.control}
-                            name="meeting_type"
-                            render={({ field }) => { // Usato 'field' qui
-                              return (
-                                <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={field.value?.includes(item.id)}
-                                      onCheckedChange={(checked) => {
-                                        return checked
-                                          ? field.onChange([...(field.value || []), item.id])
-                                          : field.onChange(
-                                              field.value?.filter(
-                                                (value) => value !== item.id
-                                              )
-                                            );
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormLabel className="font-normal">
-                                    {item.label}
-                                  </FormLabel>
-                                </FormItem>
-                              );
-                            }}
-                          />
+                          <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value?.includes(item.id)}
+                                onCheckedChange={(checked) => {
+                                  return checked
+                                    ? field.onChange([...(field.value || []), item.id])
+                                    : field.onChange(
+                                        field.value?.filter(
+                                          (value) => value !== item.id
+                                        )
+                                      );
+                                }}
+                              />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                              {item.label}
+                            </FormLabel>
+                          </FormItem>
                         ))}
                       </div>
                       <FormMessage />
@@ -599,39 +590,30 @@ const NewListing = () => {
                 <FormField
                   control={form.control}
                   name="availability_for"
-                  render={({ field: innerField }) => ( // Rinominato 'field' in 'innerField'
+                  render={({ field }) => (
                     <FormItem>
                       <FormLabel>Disponibilità per (Opzionale)</FormLabel>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                         {availabilityForOptions.map((item) => (
-                          <FormField
-                            key={item.id}
-                            control={form.control}
-                            name="availability_for"
-                            render={({ field }) => { // Usato 'field' qui
-                              return (
-                                <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={field.value?.includes(item.id)}
-                                      onCheckedChange={(checked) => {
-                                        return checked
-                                          ? field.onChange([...(field.value || []), item.id])
-                                          : field.onChange(
-                                              field.value?.filter(
-                                                (value) => value !== item.id
-                                              )
-                                            );
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormLabel className="font-normal">
-                                    {item.label}
-                                  </FormLabel>
-                                </FormItem>
-                              );
-                            }}
-                          />
+                          <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value?.includes(item.id)}
+                                onCheckedChange={(checked) => {
+                                  return checked
+                                    ? field.onChange([...(field.value || []), item.id])
+                                    : field.onChange(
+                                        field.value?.filter(
+                                          (value) => value !== item.id
+                                        )
+                                      );
+                                }}
+                              />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                              {item.label}
+                            </FormLabel>
+                          </FormItem>
                         ))}
                       </div>
                       <FormMessage />
@@ -642,39 +624,30 @@ const NewListing = () => {
                 <FormField
                   control={form.control}
                   name="meeting_location"
-                  render={({ field: innerField }) => ( // Rinominato 'field' in 'innerField'
+                  render={({ field }) => (
                     <FormItem>
                       <FormLabel>Luogo Incontro (Opzionale)</FormLabel>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                         {meetingLocationOptions.map((item) => (
-                          <FormField
-                            key={item.id}
-                            control={form.control}
-                            name="meeting_location"
-                            render={({ field }) => { // Usato 'field' qui
-                              return (
-                                <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={field.value?.includes(item.id)}
-                                      onCheckedChange={(checked) => {
-                                        return checked
-                                          ? field.onChange([...(field.value || []), item.id])
-                                          : field.onChange(
-                                              field.value?.filter(
-                                                (value) => value !== item.id
-                                              )
-                                            );
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormLabel className="font-normal">
-                                    {item.label}
-                                  </FormLabel>
-                                </FormItem>
-                              );
-                            }}
-                          />
+                          <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value?.includes(item.id)}
+                                onCheckedChange={(checked) => {
+                                  return checked
+                                    ? field.onChange([...(field.value || []), item.id])
+                                    : field.onChange(
+                                        field.value?.filter(
+                                          (value) => value !== item.id
+                                        )
+                                      );
+                                }}
+                              />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                              {item.label}
+                            </FormLabel>
+                          </FormItem>
                         ))}
                       </div>
                       <FormMessage />
@@ -709,39 +682,30 @@ const NewListing = () => {
                 <FormField
                   control={form.control}
                   name="offered_services"
-                  render={({ field: innerField }) => ( // Rinominato 'field' in 'innerField'
+                  render={({ field }) => (
                     <FormItem>
                       <FormLabel>Quali servizi offri? (Opzionale)</FormLabel>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                         {offeredServicesOptions.map((item) => (
-                          <FormField
-                            key={item.id}
-                            control={form.control}
-                            name="offered_services"
-                            render={({ field }) => { // Usato 'field' qui
-                              return (
-                                <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={field.value?.includes(item.id)}
-                                      onCheckedChange={(checked) => {
-                                        return checked
-                                          ? field.onChange([...(field.value || []), item.id])
-                                          : field.onChange(
-                                              field.value?.filter(
-                                                (value) => value !== item.id
-                                              )
-                                            );
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormLabel className="font-normal">
-                                    {item.label}
-                                  </FormLabel>
-                                </FormItem>
-                              );
-                            }}
-                          />
+                          <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value?.includes(item.id)}
+                                onCheckedChange={(checked) => {
+                                  return checked
+                                    ? field.onChange([...(field.value || []), item.id])
+                                    : field.onChange(
+                                        field.value?.filter(
+                                          (value) => value !== item.id
+                                        )
+                                      );
+                                }}
+                              />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                              {item.label}
+                            </FormLabel>
+                          </FormItem>
                         ))}
                       </div>
                       <FormMessage />
