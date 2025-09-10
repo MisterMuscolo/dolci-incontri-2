@@ -178,6 +178,10 @@ export default function Index({ session }: IndexProps) {
   const [searchParams] = useSearchParams();
   const [isPersonalFiltersOpen, setIsPersonalFiltersOpen] = useState(false);
   const [isOfferedServicesPopoverOpen, setIsOfferedServicesPopoverOpen] = useState(false); // Nuovo stato per il popover dei servizi offerti
+  const [isMeetingTypePopoverOpen, setIsMeetingTypePopoverOpen] = useState(false);
+  const [isAvailabilityForPopoverOpen, setIsAvailabilityForPopoverOpen] = useState(false);
+  const [isMeetingLocationPopoverOpen, setIsMeetingLocationPopoverOpen] = useState(false);
+
 
   useEffect(() => {
     const referrerCode = searchParams.get('ref');
@@ -278,6 +282,9 @@ export default function Index({ session }: IndexProps) {
 
     setIsPersonalFiltersOpen(false); // Chiudi la sezione filtri personali
     setIsOfferedServicesPopoverOpen(false); // Resetta anche il nuovo stato del popover
+    setIsMeetingTypePopoverOpen(false);
+    setIsAvailabilityForPopoverOpen(false);
+    setIsMeetingLocationPopoverOpen(false);
     navigate('/'); // Naviga alla homepage senza parametri di ricerca
   };
 
@@ -351,9 +358,14 @@ export default function Index({ session }: IndexProps) {
     return service ? service.label : value;
   };
 
-  const handleOfferedServiceChange = (serviceId: string, checked: boolean) => {
-    setSelectedOfferedServices(prev =>
-      checked ? [...prev, serviceId] : prev.filter(id => id !== serviceId)
+  const handleMultiSelectChange = (
+    currentSelection: string[],
+    setSelection: React.Dispatch<React.SetStateAction<string[]>>,
+    itemId: string,
+    checked: boolean
+  ) => {
+    setSelection(prev =>
+      checked ? [...prev, itemId] : prev.filter(id => id !== itemId)
     );
   };
 
@@ -617,63 +629,210 @@ export default function Index({ session }: IndexProps) {
                   <Separator className="my-4" />
                   <h3 className="text-lg font-semibold text-gray-700 mb-4">Filtri Incontro</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="relative">
-                      <Handshake className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Select
-                        value={selectedMeetingTypes.length > 0 ? selectedMeetingTypes[0] : 'tutte'}
-                        onValueChange={(value) => setSelectedMeetingTypes(value === 'tutte' ? [] : [value])}
-                      >
-                        <SelectTrigger className="w-full pl-10">
-                          <SelectValue placeholder="Tipologia di Incontro" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="tutte">Tutte le tipologie</SelectItem>
-                          {meetingTypeOptions.map((option) => (
-                            <SelectItem key={option.id} value={option.id}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="relative">
-                      <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Select
-                        value={selectedAvailabilityFor.length > 0 ? selectedAvailabilityFor[0] : 'tutte'}
-                        onValueChange={(value) => setSelectedAvailabilityFor(value === 'tutte' ? [] : [value])}
-                      >
-                        <SelectTrigger className="w-full pl-10">
-                          <SelectValue placeholder="Disponibilità per" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="tutte">Tutte le disponibilità</SelectItem>
-                          {availabilityForOptions.map((option) => (
-                            <SelectItem key={option.id} value={option.id}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="relative">
-                      <Home className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Select
-                        value={selectedMeetingLocations.length > 0 ? selectedMeetingLocations[0] : 'tutte'}
-                        onValueChange={(value) => setSelectedMeetingLocations(value === 'tutte' ? [] : [value])}
-                      >
-                        <SelectTrigger className="w-full pl-10">
-                          <SelectValue placeholder="Luogo Incontro" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="tutte">Tutti i luoghi</SelectItem>
-                          {meetingLocationOptions.map((option) => (
-                            <SelectItem key={option.id} value={option.id}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    {/* Multi-select per Tipologia di Incontro */}
+                    <Popover open={isMeetingTypePopoverOpen} onOpenChange={setIsMeetingTypePopoverOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={isMeetingTypePopoverOpen}
+                          className="w-full justify-between pl-10 relative"
+                        >
+                          <Handshake className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                          {selectedMeetingTypes.length > 0
+                            ? `${selectedMeetingTypes.length} selezionati`
+                            : "Tipologia di Incontro"}
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                        <Command>
+                          <CommandInput placeholder="Cerca tipologia..." />
+                          <CommandEmpty>Nessuna tipologia trovata.</CommandEmpty>
+                          <CommandGroup>
+                            <div className="max-h-60 overflow-y-auto">
+                              {meetingTypeOptions.map((option) => {
+                                const isSelected = selectedMeetingTypes.includes(option.id);
+                                return (
+                                  <CommandItem
+                                    key={option.id}
+                                    value={option.label}
+                                    onSelect={() => {
+                                      handleMultiSelectChange(selectedMeetingTypes, setSelectedMeetingTypes, option.id, !isSelected);
+                                    }}
+                                    className="flex items-center cursor-pointer"
+                                  >
+                                    <Checkbox
+                                      checked={isSelected}
+                                      onCheckedChange={(checked) => handleMultiSelectChange(selectedMeetingTypes, setSelectedMeetingTypes, option.id, checked as boolean)}
+                                      className="mr-2"
+                                    />
+                                    {option.label}
+                                    <CheckIcon
+                                      className={cn(
+                                        "ml-auto h-4 w-4",
+                                        isSelected ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                  </CommandItem>
+                                );
+                              })}
+                            </div>
+                          </CommandGroup>
+                          {selectedMeetingTypes.length > 0 && (
+                            <>
+                              <Separator className="my-2" />
+                              <div className="p-2">
+                                <Button
+                                  variant="ghost"
+                                  className="w-full justify-center text-red-500 hover:text-red-600"
+                                  onClick={() => setSelectedMeetingTypes([])}
+                                >
+                                  <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                </Button>
+                              </div>
+                            </>
+                          )}
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+
+                    {/* Multi-select per Disponibilità per */}
+                    <Popover open={isAvailabilityForPopoverOpen} onOpenChange={setIsAvailabilityForPopoverOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={isAvailabilityForPopoverOpen}
+                          className="w-full justify-between pl-10 relative"
+                        >
+                          <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                          {selectedAvailabilityFor.length > 0
+                            ? `${selectedAvailabilityFor.length} selezionati`
+                            : "Disponibilità per"}
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                        <Command>
+                          <CommandInput placeholder="Cerca disponibilità..." />
+                          <CommandEmpty>Nessuna disponibilità trovata.</CommandEmpty>
+                          <CommandGroup>
+                            <div className="max-h-60 overflow-y-auto">
+                              {availabilityForOptions.map((option) => {
+                                const isSelected = selectedAvailabilityFor.includes(option.id);
+                                return (
+                                  <CommandItem
+                                    key={option.id}
+                                    value={option.label}
+                                    onSelect={() => {
+                                      handleMultiSelectChange(selectedAvailabilityFor, setSelectedAvailabilityFor, option.id, !isSelected);
+                                    }}
+                                    className="flex items-center cursor-pointer"
+                                  >
+                                    <Checkbox
+                                      checked={isSelected}
+                                      onCheckedChange={(checked) => handleMultiSelectChange(selectedAvailabilityFor, setSelectedAvailabilityFor, option.id, checked as boolean)}
+                                      className="mr-2"
+                                    />
+                                    {option.label}
+                                    <CheckIcon
+                                      className={cn(
+                                        "ml-auto h-4 w-4",
+                                        isSelected ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                  </CommandItem>
+                                );
+                              })}
+                            </div>
+                          </CommandGroup>
+                          {selectedAvailabilityFor.length > 0 && (
+                            <>
+                              <Separator className="my-2" />
+                              <div className="p-2">
+                                <Button
+                                  variant="ghost"
+                                  className="w-full justify-center text-red-500 hover:text-red-600"
+                                  onClick={() => setSelectedAvailabilityFor([])}
+                                >
+                                  <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                </Button>
+                              </div>
+                            </>
+                          )}
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+
+                    {/* Multi-select per Luogo Incontro */}
+                    <Popover open={isMeetingLocationPopoverOpen} onOpenChange={setIsMeetingLocationPopoverOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={isMeetingLocationPopoverOpen}
+                          className="w-full justify-between pl-10 relative"
+                        >
+                          <Home className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                          {selectedMeetingLocations.length > 0
+                            ? `${selectedMeetingLocations.length} selezionati`
+                            : "Luogo Incontro"}
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                        <Command>
+                          <CommandInput placeholder="Cerca luogo..." />
+                          <CommandEmpty>Nessun luogo trovato.</CommandEmpty>
+                          <CommandGroup>
+                            <div className="max-h-60 overflow-y-auto">
+                              {meetingLocationOptions.map((option) => {
+                                const isSelected = selectedMeetingLocations.includes(option.id);
+                                return (
+                                  <CommandItem
+                                    key={option.id}
+                                    value={option.label}
+                                    onSelect={() => {
+                                      handleMultiSelectChange(selectedMeetingLocations, setSelectedMeetingLocations, option.id, !isSelected);
+                                    }}
+                                    className="flex items-center cursor-pointer"
+                                  >
+                                    <Checkbox
+                                      checked={isSelected}
+                                      onCheckedChange={(checked) => handleMultiSelectChange(selectedMeetingLocations, setSelectedMeetingLocations, option.id, checked as boolean)}
+                                      className="mr-2"
+                                    />
+                                    {option.label}
+                                    <CheckIcon
+                                      className={cn(
+                                        "ml-auto h-4 w-4",
+                                        isSelected ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                  </CommandItem>
+                                );
+                              })}
+                            </div>
+                          </CommandGroup>
+                          {selectedMeetingLocations.length > 0 && (
+                            <>
+                              <Separator className="my-2" />
+                              <div className="p-2">
+                                <Button
+                                  variant="ghost"
+                                  className="w-full justify-center text-red-500 hover:text-red-600"
+                                  onClick={() => setSelectedMeetingLocations([])}
+                                >
+                                  <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                </Button>
+                              </div>
+                            </>
+                          )}
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+
                     <div className="grid grid-cols-2 gap-2">
                       <div className="relative">
                         <Euro className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -728,13 +887,13 @@ export default function Index({ session }: IndexProps) {
                                   key={option.id}
                                   value={option.label}
                                   onSelect={() => {
-                                    handleOfferedServiceChange(option.id, !isSelected);
+                                    handleMultiSelectChange(selectedOfferedServices, setSelectedOfferedServices, option.id, !isSelected);
                                   }}
                                   className="flex items-center cursor-pointer"
                                 >
                                   <Checkbox
                                     checked={isSelected}
-                                    onCheckedChange={(checked) => handleOfferedServiceChange(option.id, checked as boolean)}
+                                    onCheckedChange={(checked) => handleMultiSelectChange(selectedOfferedServices, setSelectedOfferedServices, option.id, checked as boolean)}
                                     className="mr-2"
                                   />
                                   {option.label}
