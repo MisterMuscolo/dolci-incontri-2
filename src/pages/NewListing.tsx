@@ -13,10 +13,13 @@ import { italianProvinces } from '@/data/provinces';
 import { ImageUploader, NewFilePair } from '@/components/ImageUploader';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, CheckIcon, X, Globe, Palette, Ruler, Eye, Handshake, Clock, Home, Euro, Sparkles } from 'lucide-react'; // Aggiunte icone per i nuovi filtri
 import { cn, formatPhoneNumber } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
+import { Separator } from '@/components/ui/separator';
 
 // Definizioni delle opzioni per i nuovi campi
 const meetingTypeOptions = [
@@ -68,6 +71,82 @@ const offeredServicesOptions = [
   { id: 'altro', label: 'Altro' },
 ];
 
+const ethnicities = [
+  { value: 'africana', label: 'Africana' },
+  { value: 'indiana', label: 'Indiana' },
+  { value: 'asiatica', label: 'Asiatica' },
+  { value: 'araba', label: 'Araba' },
+  { value: 'latina', label: 'Latina' },
+  { value: 'caucasica', label: 'Caucasica' },
+  { value: 'italiana', label: 'Italiana' },
+  { value: 'mista', label: 'Mista' },
+  { value: 'altro', label: 'Altro' },
+];
+
+const nationalities = [
+  { value: 'italiana', label: 'Italiana' },
+  { value: 'rumena', label: 'Rumena' },
+  { value: 'brasiliana', label: 'Brasiliana' },
+  { value: 'spagnola', label: 'Spagnola' },
+  { value: 'francese', label: 'Francese' },
+  { value: 'tedesca', label: 'Tedesca' },
+  { value: 'russa', label: 'Russa' },
+  { value: 'ucraina', label: 'Ucraina' },
+  { value: 'colombiana', label: 'Colombiana' },
+  { value: 'venezuelana', label: 'Venezuelana' },
+  { value: 'argentina', label: 'Argentina' },
+  { value: 'cubana', label: 'Cubana' },
+  { value: 'dominicana', label: 'Dominicana' },
+  { value: 'cinese', label: 'Cinese' },
+  { value: 'filippina', label: 'Filippina' },
+  { value: 'indonesiana', label: 'Indonesiana' },
+  { value: 'thailandese', label: 'Thailandese' },
+  { value: 'nigeriana', label: 'Nigeriana' },
+  { value: 'egiziana', label: 'Egiziana' },
+  { value: 'marocchina', label: 'Marocchina' },
+  { value: 'albanese', label: 'Albanese' },
+  { value: 'polacca', label: 'Polacca' },
+  { value: 'britannica', label: 'Britannica' },
+  { value: 'americana', label: 'Americana' },
+    { value: 'canadese', label: 'Canadese' },
+    { value: 'australiana', label: 'Australiana' },
+    { value: 'altro', label: 'Altro' },
+  ];
+
+  const breastTypes = [
+    { value: 'naturale', label: 'Naturale' },
+    { value: 'rifatto', label: 'Rifatto' },
+    { value: 'piccolo', label: 'Piccolo' },
+    { value: 'medio', label: 'Medio' },
+    { value: 'grande', label: 'Grande' },
+  ];
+
+  const hairColors = [
+    { value: 'biondi', label: 'Biondi' },
+    { value: 'castani', label: 'Castani' },
+    { value: 'neri', label: 'Neri' },
+    { value: 'rossi', label: 'Rossi' },
+    { value: 'grigi', label: 'Grigi' },
+    { value: 'colorati', label: 'Colorati' },
+  ];
+
+  const bodyTypes = [
+    { value: 'snella', label: 'Snella' },
+    { value: 'atletica', label: 'Atletica' },
+    { value: 'curvy', label: 'Curvy' },
+    { value: 'robusta', label: 'Robusta' },
+    { value: 'media', label: 'Media' },
+  ];
+
+  const eyeColors = [
+    { value: 'azzurri', label: 'Azzurri' },
+    { value: 'marroni', label: 'Marroni' },
+    { value: 'verdi', label: 'Verdi' },
+    { value: 'neri', label: 'Neri' },
+    { value: 'grigi', label: 'Grigi' },
+    { value: 'misti', label: 'Misti' },
+  ];
+
 const listingSchema = z.object({
   category: z.string({ required_error: 'La categoria è obbligatoria.' }),
   city: z.string({ required_error: 'La città è obbligatoria.' }),
@@ -83,12 +162,12 @@ const listingSchema = z.object({
   contact_preference: z.enum(['email', 'phone', 'both'], { required_error: 'La preferenza di contatto è obbligatoria.' }),
   contact_whatsapp: z.boolean().optional().default(false),
   // Nuovi campi per i dettagli personali
-  ethnicity: z.string().optional(),
-  nationality: z.string().optional(),
-  breast_type: z.string().optional(),
-  hair_color: z.string().optional(),
-  body_type: z.string().optional(),
-  eye_color: z.string().optional(),
+  ethnicity: z.array(z.string()).optional().default([]),
+  nationality: z.array(z.string()).optional().default([]),
+  breast_type: z.array(z.string()).optional().default([]),
+  hair_color: z.array(z.string()).optional().default([]),
+  body_type: z.array(z.string()).optional().default([]),
+  eye_color: z.array(z.string()).optional().default([]),
   // Nuovi campi per tipologia di incontro, disponibilità, luogo e tariffa oraria
   meeting_type: z.array(z.string()).optional().default([]),
   availability_for: z.array(z.string()).optional().default([]),
@@ -106,6 +185,23 @@ const NewListing = () => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const { getBackLinkText, handleNavigateBack } = useDynamicBackLink();
 
+  // Stati per i popover dei filtri personali
+  const [isEthnicityPopoverOpen, setIsEthnicityPopoverOpen] = useState(false);
+  const [isNationalityPopoverOpen, setIsNationalityPopoverOpen] = useState(false);
+  const [isBreastTypePopoverOpen, setIsBreastTypePopoverOpen] = useState(false);
+  const [isHairColorPopoverOpen, setIsHairColorPopoverOpen] = useState(false);
+  const [isBodyTypePopoverOpen, setIsBodyTypePopoverOpen] = useState(false);
+  const [isEyeColorPopoverOpen, setIsEyeColorPopoverOpen] = useState(false);
+
+  // Stati per i popover dei filtri incontro
+  const [isMeetingTypePopoverOpen, setIsMeetingTypePopoverOpen] = useState(false);
+  const [isAvailabilityForPopoverOpen, setIsAvailabilityForPopoverOpen] = useState(false);
+  const [isMeetingLocationPopoverOpen, setIsMeetingLocationPopoverOpen] = useState(false);
+
+  // Stato per il popover dei servizi offerti
+  const [isOfferedServicesPopoverOpen, setIsOfferedServicesPopoverOpen] = useState(false);
+
+
   const form = useForm<z.infer<typeof listingSchema>>({
     resolver: zodResolver(listingSchema),
     defaultValues: {
@@ -114,12 +210,12 @@ const NewListing = () => {
       phone: '',
       contact_preference: 'both',
       contact_whatsapp: false,
-      ethnicity: '',
-      nationality: '',
-      breast_type: '',
-      hair_color: '',
-      body_type: '',
-      eye_color: '',
+      ethnicity: [],
+      nationality: [],
+      breast_type: [],
+      hair_color: [],
+      body_type: [],
+      eye_color: [],
       meeting_type: [],
       availability_for: [],
       meeting_location: [],
@@ -169,12 +265,12 @@ const NewListing = () => {
           contact_whatsapp: restOfValues.contact_whatsapp,
           last_bumped_at: new Date().toISOString(),
           // Nuovi campi
-          ethnicity: restOfValues.ethnicity || null,
-          nationality: restOfValues.nationality || null,
-          breast_type: restOfValues.breast_type || null,
-          hair_color: restOfValues.hair_color || null,
-          body_type: restOfValues.body_type || null,
-          eye_color: restOfValues.eye_color || null,
+          ethnicity: restOfValues.ethnicity,
+          nationality: restOfValues.nationality,
+          breast_type: restOfValues.breast_type,
+          hair_color: restOfValues.hair_color,
+          body_type: restOfValues.body_type,
+          eye_color: restOfValues.eye_color,
           meeting_type: restOfValues.meeting_type,
           availability_for: restOfValues.availability_for,
           meeting_location: restOfValues.meeting_location,
@@ -325,6 +421,24 @@ const NewListing = () => {
     { value: 'misti', label: 'Misti' },
   ];
 
+  const handleMultiSelectChange = (
+    currentSelection: string[],
+    onChange: (...event: any[]) => void,
+    itemId: string,
+    checked: boolean
+  ) => {
+    const newSelection = checked
+      ? [...currentSelection, itemId]
+      : currentSelection.filter(id => id !== itemId);
+    onChange(newSelection);
+  };
+
+  const getSelectedLabel = (selectedItems: string[], options: { value: string; label: string }[]) => {
+    if (selectedItems.length === 0) return "Seleziona...";
+    if (selectedItems.length === 1) return options.find(o => o.value === selectedItems[0])?.label || "Seleziona...";
+    return `${selectedItems.length} selezionati`;
+  };
+
   return (
     <div className="bg-gray-50 p-4 sm:p-6 md:p-8">
       <div className="max-w-4xl mx-auto">
@@ -445,14 +559,69 @@ const NewListing = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Origine (Opzionale)</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger><SelectValue placeholder="Seleziona la tua origine" /></SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {ethnicities.map((e) => <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
+                        <Popover open={isEthnicityPopoverOpen} onOpenChange={setIsEthnicityPopoverOpen}>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={isEthnicityPopoverOpen}
+                                className="w-full justify-between"
+                              >
+                                {getSelectedLabel(field.value, ethnicities)}
+                                <ChevronLeft className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                            <Command>
+                              <CommandInput placeholder="Cerca origine..." />
+                              <CommandEmpty>Nessuna origine trovata.</CommandEmpty>
+                              <CommandGroup>
+                                <div className="max-h-60 overflow-y-auto">
+                                  {ethnicities.map((option) => {
+                                    const isSelected = field.value.includes(option.value);
+                                    return (
+                                      <CommandItem
+                                        key={option.value}
+                                        value={option.label}
+                                        onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.value, !isSelected)}
+                                        className="flex items-center cursor-pointer"
+                                      >
+                                        <Checkbox
+                                          checked={isSelected}
+                                          onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.value, checked as boolean)}
+                                          className="mr-2"
+                                        />
+                                        {option.label}
+                                        <CheckIcon
+                                          className={cn(
+                                            "ml-auto h-4 w-4",
+                                            isSelected ? "opacity-100" : "opacity-0"
+                                          )}
+                                        />
+                                      </CommandItem>
+                                    );
+                                  })}
+                                </div>
+                              </CommandGroup>
+                              {field.value.length > 0 && (
+                                <>
+                                  <Separator className="my-2" />
+                                  <div className="p-2">
+                                    <Button
+                                      variant="ghost"
+                                      className="w-full justify-center text-red-500 hover:text-red-600"
+                                      onClick={() => field.onChange([])}
+                                    >
+                                      <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                    </Button>
+                                  </div>
+                                </>
+                              )}
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -463,14 +632,69 @@ const NewListing = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Nazionalità (Opzionale)</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger><SelectValue placeholder="Seleziona la tua nazionalità" /></SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="max-h-60">
-                            {nationalities.map((n) => <SelectItem key={n.value} value={n.value}>{n.label}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
+                        <Popover open={isNationalityPopoverOpen} onOpenChange={setIsNationalityPopoverOpen}>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={isNationalityPopoverOpen}
+                                className="w-full justify-between"
+                              >
+                                {getSelectedLabel(field.value, nationalities)}
+                                <ChevronLeft className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                            <Command>
+                              <CommandInput placeholder="Cerca nazionalità..." />
+                              <CommandEmpty>Nessuna nazionalità trovata.</CommandEmpty>
+                              <CommandGroup>
+                                <div className="max-h-60 overflow-y-auto">
+                                  {nationalities.map((option) => {
+                                    const isSelected = field.value.includes(option.value);
+                                    return (
+                                      <CommandItem
+                                        key={option.value}
+                                        value={option.label}
+                                        onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.value, !isSelected)}
+                                        className="flex items-center cursor-pointer"
+                                      >
+                                        <Checkbox
+                                          checked={isSelected}
+                                          onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.value, checked as boolean)}
+                                          className="mr-2"
+                                        />
+                                        {option.label}
+                                        <CheckIcon
+                                          className={cn(
+                                            "ml-auto h-4 w-4",
+                                            isSelected ? "opacity-100" : "opacity-0"
+                                          )}
+                                        />
+                                      </CommandItem>
+                                    );
+                                  })}
+                                </div>
+                              </CommandGroup>
+                              {field.value.length > 0 && (
+                                <>
+                                  <Separator className="my-2" />
+                                  <div className="p-2">
+                                    <Button
+                                      variant="ghost"
+                                      className="w-full justify-center text-red-500 hover:text-red-600"
+                                      onClick={() => field.onChange([])}
+                                    >
+                                      <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                    </Button>
+                                  </div>
+                                </>
+                              )}
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -481,14 +705,69 @@ const NewListing = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Tipo di Seno (Opzionale)</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger><SelectValue placeholder="Seleziona il tipo di seno" /></SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {breastTypes.map((b) => <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
+                        <Popover open={isBreastTypePopoverOpen} onOpenChange={setIsBreastTypePopoverOpen}>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={isBreastTypePopoverOpen}
+                                className="w-full justify-between"
+                              >
+                                {getSelectedLabel(field.value, breastTypes)}
+                                <ChevronLeft className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                            <Command>
+                              <CommandInput placeholder="Cerca tipo di seno..." />
+                              <CommandEmpty>Nessun tipo di seno trovato.</CommandEmpty>
+                              <CommandGroup>
+                                <div className="max-h-60 overflow-y-auto">
+                                  {breastTypes.map((option) => {
+                                    const isSelected = field.value.includes(option.value);
+                                    return (
+                                      <CommandItem
+                                        key={option.value}
+                                        value={option.label}
+                                        onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.value, !isSelected)}
+                                        className="flex items-center cursor-pointer"
+                                      >
+                                        <Checkbox
+                                          checked={isSelected}
+                                          onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.value, checked as boolean)}
+                                          className="mr-2"
+                                        />
+                                        {option.label}
+                                        <CheckIcon
+                                          className={cn(
+                                            "ml-auto h-4 w-4",
+                                            isSelected ? "opacity-100" : "opacity-0"
+                                          )}
+                                        />
+                                      </CommandItem>
+                                    );
+                                  })}
+                                </div>
+                              </CommandGroup>
+                              {field.value.length > 0 && (
+                                <>
+                                  <Separator className="my-2" />
+                                  <div className="p-2">
+                                    <Button
+                                      variant="ghost"
+                                      className="w-full justify-center text-red-500 hover:text-red-600"
+                                      onClick={() => field.onChange([])}
+                                    >
+                                      <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                    </Button>
+                                  </div>
+                                </>
+                              )}
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -499,14 +778,69 @@ const NewListing = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Colore Capelli (Opzionale)</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger><SelectValue placeholder="Seleziona il colore dei capelli" /></SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {hairColors.map((h) => <SelectItem key={h.value} value={h.value}>{h.label}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
+                        <Popover open={isHairColorPopoverOpen} onOpenChange={setIsHairColorPopoverOpen}>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={isHairColorPopoverOpen}
+                                className="w-full justify-between"
+                              >
+                                {getSelectedLabel(field.value, hairColors)}
+                                <ChevronLeft className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                            <Command>
+                              <CommandInput placeholder="Cerca colore capelli..." />
+                              <CommandEmpty>Nessun colore capelli trovato.</CommandEmpty>
+                              <CommandGroup>
+                                <div className="max-h-60 overflow-y-auto">
+                                  {hairColors.map((option) => {
+                                    const isSelected = field.value.includes(option.value);
+                                    return (
+                                      <CommandItem
+                                        key={option.value}
+                                        value={option.label}
+                                        onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.value, !isSelected)}
+                                        className="flex items-center cursor-pointer"
+                                      >
+                                        <Checkbox
+                                          checked={isSelected}
+                                          onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.value, checked as boolean)}
+                                          className="mr-2"
+                                        />
+                                        {option.label}
+                                        <CheckIcon
+                                          className={cn(
+                                            "ml-auto h-4 w-4",
+                                            isSelected ? "opacity-100" : "opacity-0"
+                                          )}
+                                        />
+                                      </CommandItem>
+                                    );
+                                  })}
+                                </div>
+                              </CommandGroup>
+                              {field.value.length > 0 && (
+                                <>
+                                  <Separator className="my-2" />
+                                  <div className="p-2">
+                                    <Button
+                                      variant="ghost"
+                                      className="w-full justify-center text-red-500 hover:text-red-600"
+                                      onClick={() => field.onChange([])}
+                                    >
+                                      <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                    </Button>
+                                  </div>
+                                </>
+                              )}
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -517,14 +851,69 @@ const NewListing = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Corporatura (Opzionale)</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger><SelectValue placeholder="Seleziona la corporatura" /></SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {bodyTypes.map((b) => <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
+                        <Popover open={isBodyTypePopoverOpen} onOpenChange={setIsBodyTypePopoverOpen}>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={isBodyTypePopoverOpen}
+                                className="w-full justify-between"
+                              >
+                                {getSelectedLabel(field.value, bodyTypes)}
+                                <ChevronLeft className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                            <Command>
+                              <CommandInput placeholder="Cerca corporatura..." />
+                              <CommandEmpty>Nessuna corporatura trovata.</CommandEmpty>
+                              <CommandGroup>
+                                <div className="max-h-60 overflow-y-auto">
+                                  {bodyTypes.map((option) => {
+                                    const isSelected = field.value.includes(option.value);
+                                    return (
+                                      <CommandItem
+                                        key={option.value}
+                                        value={option.label}
+                                        onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.value, !isSelected)}
+                                        className="flex items-center cursor-pointer"
+                                      >
+                                        <Checkbox
+                                          checked={isSelected}
+                                          onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.value, checked as boolean)}
+                                          className="mr-2"
+                                        />
+                                        {option.label}
+                                        <CheckIcon
+                                          className={cn(
+                                            "ml-auto h-4 w-4",
+                                            isSelected ? "opacity-100" : "opacity-0"
+                                          )}
+                                        />
+                                      </CommandItem>
+                                    );
+                                  })}
+                                </div>
+                              </CommandGroup>
+                              {field.value.length > 0 && (
+                                <>
+                                  <Separator className="my-2" />
+                                  <div className="p-2">
+                                    <Button
+                                      variant="ghost"
+                                      className="w-full justify-center text-red-500 hover:text-red-600"
+                                      onClick={() => field.onChange([])}
+                                    >
+                                      <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                    </Button>
+                                  </div>
+                                </>
+                              )}
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -535,14 +924,69 @@ const NewListing = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Colore Occhi (Opzionale)</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger><SelectValue placeholder="Seleziona il colore degli occhi" /></SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {eyeColors.map((e) => <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
+                        <Popover open={isEyeColorPopoverOpen} onOpenChange={setIsEyeColorPopoverOpen}>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={isEyeColorPopoverOpen}
+                                className="w-full justify-between"
+                              >
+                                {getSelectedLabel(field.value, eyeColors)}
+                                <ChevronLeft className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                            <Command>
+                              <CommandInput placeholder="Cerca colore occhi..." />
+                              <CommandEmpty>Nessun colore occhi trovato.</CommandEmpty>
+                              <CommandGroup>
+                                <div className="max-h-60 overflow-y-auto">
+                                  {eyeColors.map((option) => {
+                                    const isSelected = field.value.includes(option.value);
+                                    return (
+                                      <CommandItem
+                                        key={option.value}
+                                        value={option.label}
+                                        onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.value, !isSelected)}
+                                        className="flex items-center cursor-pointer"
+                                      >
+                                        <Checkbox
+                                          checked={isSelected}
+                                          onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.value, checked as boolean)}
+                                          className="mr-2"
+                                        />
+                                        {option.label}
+                                        <CheckIcon
+                                          className={cn(
+                                            "ml-auto h-4 w-4",
+                                            isSelected ? "opacity-100" : "opacity-0"
+                                          )}
+                                        />
+                                      </CommandItem>
+                                    );
+                                  })}
+                                </div>
+                              </CommandGroup>
+                              {field.value.length > 0 && (
+                                <>
+                                  <Separator className="my-2" />
+                                  <div className="p-2">
+                                    <Button
+                                      variant="ghost"
+                                      className="w-full justify-center text-red-500 hover:text-red-600"
+                                      onClick={() => field.onChange([])}
+                                    >
+                                      <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                    </Button>
+                                  </div>
+                                </>
+                              )}
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -559,29 +1003,69 @@ const NewListing = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Tipologia di Incontro (Opzionale)</FormLabel>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        {meetingTypeOptions.map((item) => (
-                          <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value?.includes(item.id)}
-                                onCheckedChange={(checked) => {
-                                  return checked
-                                    ? field.onChange([...(field.value || []), item.id])
-                                    : field.onChange(
-                                        field.value?.filter(
-                                          (value) => value !== item.id
-                                        )
-                                      );
-                                }}
-                              />
-                            </FormControl>
-                            <FormLabel className="font-normal">
-                              {item.label}
-                            </FormLabel>
-                          </FormItem>
-                        ))}
-                      </div>
+                      <Popover open={isMeetingTypePopoverOpen} onOpenChange={setIsMeetingTypePopoverOpen}>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={isMeetingTypePopoverOpen}
+                              className="w-full justify-between"
+                            >
+                              {getSelectedLabel(field.value, meetingTypeOptions.map(o => ({ value: o.id, label: o.label })))}
+                              <ChevronLeft className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                          <Command>
+                            <CommandInput placeholder="Cerca tipologia..." />
+                            <CommandEmpty>Nessuna tipologia trovata.</CommandEmpty>
+                            <CommandGroup>
+                              <div className="max-h-60 overflow-y-auto">
+                                {meetingTypeOptions.map((option) => {
+                                  const isSelected = field.value.includes(option.id);
+                                  return (
+                                    <CommandItem
+                                      key={option.id}
+                                      value={option.label}
+                                      onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.id, !isSelected)}
+                                      className="flex items-center cursor-pointer"
+                                    >
+                                      <Checkbox
+                                        checked={isSelected}
+                                        onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.id, checked as boolean)}
+                                        className="mr-2"
+                                      />
+                                      {option.label}
+                                      <CheckIcon
+                                        className={cn(
+                                          "ml-auto h-4 w-4",
+                                          isSelected ? "opacity-100" : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  );
+                                })}
+                              </div>
+                            </CommandGroup>
+                            {field.value.length > 0 && (
+                              <>
+                                <Separator className="my-2" />
+                                <div className="p-2">
+                                  <Button
+                                    variant="ghost"
+                                    className="w-full justify-center text-red-500 hover:text-red-600"
+                                    onClick={() => field.onChange([])}
+                                  >
+                                    <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -593,29 +1077,69 @@ const NewListing = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Disponibilità per (Opzionale)</FormLabel>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        {availabilityForOptions.map((item) => (
-                          <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value?.includes(item.id)}
-                                onCheckedChange={(checked) => {
-                                  return checked
-                                    ? field.onChange([...(field.value || []), item.id])
-                                    : field.onChange(
-                                        field.value?.filter(
-                                          (value) => value !== item.id
-                                        )
-                                      );
-                                }}
-                              />
-                            </FormControl>
-                            <FormLabel className="font-normal">
-                              {item.label}
-                            </FormLabel>
-                          </FormItem>
-                        ))}
-                      </div>
+                      <Popover open={isAvailabilityForPopoverOpen} onOpenChange={setIsAvailabilityForPopoverOpen}>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={isAvailabilityForPopoverOpen}
+                              className="w-full justify-between"
+                            >
+                              {getSelectedLabel(field.value, availabilityForOptions.map(o => ({ value: o.id, label: o.label })))}
+                              <ChevronLeft className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                          <Command>
+                            <CommandInput placeholder="Cerca disponibilità..." />
+                            <CommandEmpty>Nessuna disponibilità trovata.</CommandEmpty>
+                            <CommandGroup>
+                              <div className="max-h-60 overflow-y-auto">
+                                {availabilityForOptions.map((option) => {
+                                  const isSelected = field.value.includes(option.id);
+                                  return (
+                                    <CommandItem
+                                      key={option.id}
+                                      value={option.label}
+                                      onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.id, !isSelected)}
+                                      className="flex items-center cursor-pointer"
+                                    >
+                                      <Checkbox
+                                        checked={isSelected}
+                                        onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.id, checked as boolean)}
+                                        className="mr-2"
+                                      />
+                                      {option.label}
+                                      <CheckIcon
+                                        className={cn(
+                                          "ml-auto h-4 w-4",
+                                          isSelected ? "opacity-100" : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  );
+                                })}
+                              </div>
+                            </CommandGroup>
+                            {field.value.length > 0 && (
+                              <>
+                                <Separator className="my-2" />
+                                <div className="p-2">
+                                  <Button
+                                    variant="ghost"
+                                    className="w-full justify-center text-red-500 hover:text-red-600"
+                                    onClick={() => field.onChange([])}
+                                  >
+                                    <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -627,29 +1151,69 @@ const NewListing = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Luogo Incontro (Opzionale)</FormLabel>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        {meetingLocationOptions.map((item) => (
-                          <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value?.includes(item.id)}
-                                onCheckedChange={(checked) => {
-                                  return checked
-                                    ? field.onChange([...(field.value || []), item.id])
-                                    : field.onChange(
-                                        field.value?.filter(
-                                          (value) => value !== item.id
-                                        )
-                                      );
-                                }}
-                              />
-                            </FormControl>
-                            <FormLabel className="font-normal">
-                              {item.label}
-                            </FormLabel>
-                          </FormItem>
-                        ))}
-                      </div>
+                      <Popover open={isMeetingLocationPopoverOpen} onOpenChange={setIsMeetingLocationPopoverOpen}>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={isMeetingLocationPopoverOpen}
+                              className="w-full justify-between"
+                            >
+                              {getSelectedLabel(field.value, meetingLocationOptions.map(o => ({ value: o.id, label: o.label })))}
+                              <ChevronLeft className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                          <Command>
+                            <CommandInput placeholder="Cerca luogo..." />
+                            <CommandEmpty>Nessun luogo trovato.</CommandEmpty>
+                            <CommandGroup>
+                              <div className="max-h-60 overflow-y-auto">
+                                {meetingLocationOptions.map((option) => {
+                                  const isSelected = field.value.includes(option.id);
+                                  return (
+                                    <CommandItem
+                                      key={option.id}
+                                      value={option.label}
+                                      onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.id, !isSelected)}
+                                      className="flex items-center cursor-pointer"
+                                    >
+                                      <Checkbox
+                                        checked={isSelected}
+                                        onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.id, checked as boolean)}
+                                        className="mr-2"
+                                      />
+                                      {option.label}
+                                      <CheckIcon
+                                        className={cn(
+                                          "ml-auto h-4 w-4",
+                                          isSelected ? "opacity-100" : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  );
+                                })}
+                              </div>
+                            </CommandGroup>
+                            {field.value.length > 0 && (
+                              <>
+                                <Separator className="my-2" />
+                                <div className="p-2">
+                                  <Button
+                                    variant="ghost"
+                                    className="w-full justify-center text-red-500 hover:text-red-600"
+                                    onClick={() => field.onChange([])}
+                                  >
+                                    <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -685,29 +1249,69 @@ const NewListing = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Quali servizi offri? (Opzionale)</FormLabel>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        {offeredServicesOptions.map((item) => (
-                          <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value?.includes(item.id)}
-                                onCheckedChange={(checked) => {
-                                  return checked
-                                    ? field.onChange([...(field.value || []), item.id])
-                                    : field.onChange(
-                                        field.value?.filter(
-                                          (value) => value !== item.id
-                                        )
-                                      );
-                                }}
-                              />
-                            </FormControl>
-                            <FormLabel className="font-normal">
-                              {item.label}
-                            </FormLabel>
-                          </FormItem>
-                        ))}
-                      </div>
+                      <Popover open={isOfferedServicesPopoverOpen} onOpenChange={setIsOfferedServicesPopoverOpen}>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={isOfferedServicesPopoverOpen}
+                              className="w-full justify-between"
+                            >
+                              {getSelectedLabel(field.value, offeredServicesOptions.map(o => ({ value: o.id, label: o.label })))}
+                              <ChevronLeft className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                          <Command>
+                            <CommandInput placeholder="Cerca servizio..." />
+                            <CommandEmpty>Nessun servizio trovato.</CommandEmpty>
+                            <CommandGroup>
+                              <div className="max-h-60 overflow-y-auto">
+                                {offeredServicesOptions.map((option) => {
+                                  const isSelected = field.value.includes(option.id);
+                                  return (
+                                    <CommandItem
+                                      key={option.id}
+                                      value={option.label}
+                                      onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.id, !isSelected)}
+                                      className="flex items-center cursor-pointer"
+                                    >
+                                      <Checkbox
+                                        checked={isSelected}
+                                        onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.id, checked as boolean)}
+                                        className="mr-2"
+                                      />
+                                      {option.label}
+                                      <CheckIcon
+                                        className={cn(
+                                          "ml-auto h-4 w-4",
+                                          isSelected ? "opacity-100" : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  );
+                                })}
+                              </div>
+                            </CommandGroup>
+                            {field.value.length > 0 && (
+                              <>
+                                <Separator className="my-2" />
+                                <div className="p-2">
+                                  <Button
+                                    variant="ghost"
+                                    className="w-full justify-center text-red-500 hover:text-red-600"
+                                    onClick={() => field.onChange([])}
+                                  >
+                                    <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                       <FormMessage />
                     </FormItem>
                   )}
