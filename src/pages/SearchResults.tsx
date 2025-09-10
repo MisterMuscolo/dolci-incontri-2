@@ -948,7 +948,7 @@ const SearchResults = () => {
                   <Collapsible
                     open={isOfferedServicesFiltersOpen}
                     onOpenChange={setIsOfferedServicesFiltersOpen}
-                    className="w-full"
+                    className="w-full mt-4" // Aggiunto mt-4 qui
                   >
                     <CollapsibleTrigger asChild>
                       <div className="flex items-center justify-between cursor-pointer py-2">
@@ -981,7 +981,7 @@ const SearchResults = () => {
                   </Collapsible>
                 </div>
 
-                <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600 text-lg py-6">
+                <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600 text-lg py-6 mt-4"> {/* Aggiunto mt-4 qui */}
                   Applica Filtri
                 </Button>
               </form>
