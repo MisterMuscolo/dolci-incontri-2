@@ -13,7 +13,7 @@ import { italianProvinces } from '@/data/provinces';
 import { ImageUploader, NewFilePair } from '@/components/ImageUploader';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
-import { ChevronLeft, CheckIcon, X, Globe, Palette, Ruler, Eye, Handshake, Clock, Home, Euro, Sparkles } from 'lucide-react'; // Aggiunte icone per i nuovi filtri
+import { ChevronLeft, CheckIcon, X, Globe, Palette, Ruler, Eye, Handshake, Clock, Home, Euro, Sparkles, ChevronDown } from 'lucide-react'; // Aggiunte icone per i nuovi filtri
 import { cn, formatPhoneNumber } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
@@ -558,7 +558,7 @@ const NewListing = () => {
                     name="ethnicity"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Origine (Opzionale)</FormLabel>
+                        <FormLabel className="flex items-center gap-2"><Globe className="h-4 w-4" /> Origine (Opzionale)</FormLabel>
                         <Popover open={isEthnicityPopoverOpen} onOpenChange={setIsEthnicityPopoverOpen}>
                           <PopoverTrigger asChild>
                             <FormControl>
@@ -566,10 +566,11 @@ const NewListing = () => {
                                 variant="outline"
                                 role="combobox"
                                 aria-expanded={isEthnicityPopoverOpen}
-                                className="w-full justify-between"
+                                className="w-full justify-between pl-10 relative"
                               >
+                                <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                                 {getSelectedLabel(field.value, ethnicities)}
-                                <ChevronLeft className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                               </Button>
                             </FormControl>
                           </PopoverTrigger>
@@ -631,7 +632,7 @@ const NewListing = () => {
                     name="nationality"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Nazionalità (Opzionale)</FormLabel>
+                        <FormLabel className="flex items-center gap-2"><Globe className="h-4 w-4" /> Nazionalità (Opzionale)</FormLabel>
                         <Popover open={isNationalityPopoverOpen} onOpenChange={setIsNationalityPopoverOpen}>
                           <PopoverTrigger asChild>
                             <FormControl>
@@ -639,10 +640,11 @@ const NewListing = () => {
                                 variant="outline"
                                 role="combobox"
                                 aria-expanded={isNationalityPopoverOpen}
-                                className="w-full justify-between"
+                                className="w-full justify-between pl-10 relative"
                               >
+                                <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                                 {getSelectedLabel(field.value, nationalities)}
-                                <ChevronLeft className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                               </Button>
                             </FormControl>
                           </PopoverTrigger>
@@ -704,7 +706,7 @@ const NewListing = () => {
                     name="breast_type"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Tipo di Seno (Opzionale)</FormLabel>
+                        <FormLabel className="flex items-center gap-2"><Ruler className="h-4 w-4" /> Tipo di Seno (Opzionale)</FormLabel>
                         <Popover open={isBreastTypePopoverOpen} onOpenChange={setIsBreastTypePopoverOpen}>
                           <PopoverTrigger asChild>
                             <FormControl>
@@ -712,10 +714,11 @@ const NewListing = () => {
                                 variant="outline"
                                 role="combobox"
                                 aria-expanded={isBreastTypePopoverOpen}
-                                className="w-full justify-between"
+                                className="w-full justify-between pl-10 relative"
                               >
+                                <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                                 {getSelectedLabel(field.value, breastTypes)}
-                                <ChevronLeft className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                               </Button>
                             </FormControl>
                           </PopoverTrigger>
@@ -777,7 +780,7 @@ const NewListing = () => {
                     name="hair_color"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Colore Capelli (Opzionale)</FormLabel>
+                        <FormLabel className="flex items-center gap-2"><Palette className="h-4 w-4" /> Colore Capelli (Opzionale)</FormLabel>
                         <Popover open={isHairColorPopoverOpen} onOpenChange={setIsHairColorPopoverOpen}>
                           <PopoverTrigger asChild>
                             <FormControl>
@@ -785,10 +788,11 @@ const NewListing = () => {
                                 variant="outline"
                                 role="combobox"
                                 aria-expanded={isHairColorPopoverOpen}
-                                className="w-full justify-between"
+                                className="w-full justify-between pl-10 relative"
                               >
+                                <Palette className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                                 {getSelectedLabel(field.value, hairColors)}
-                                <ChevronLeft className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                               </Button>
                             </FormControl>
                           </PopoverTrigger>
@@ -850,7 +854,7 @@ const NewListing = () => {
                     name="body_type"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Corporatura (Opzionale)</FormLabel>
+                        <FormLabel className="flex items-center gap-2"><Ruler className="h-4 w-4" /> Corporatura (Opzionale)</FormLabel>
                         <Popover open={isBodyTypePopoverOpen} onOpenChange={setIsBodyTypePopoverOpen}>
                           <PopoverTrigger asChild>
                             <FormControl>
@@ -858,10 +862,11 @@ const NewListing = () => {
                                 variant="outline"
                                 role="combobox"
                                 aria-expanded={isBodyTypePopoverOpen}
-                                className="w-full justify-between"
+                                className="w-full justify-between pl-10 relative"
                               >
+                                <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                                 {getSelectedLabel(field.value, bodyTypes)}
-                                <ChevronLeft className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                               </Button>
                             </FormControl>
                           </PopoverTrigger>
@@ -923,7 +928,7 @@ const NewListing = () => {
                     name="eye_color"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Colore Occhi (Opzionale)</FormLabel>
+                        <FormLabel className="flex items-center gap-2"><Eye className="h-4 w-4" /> Colore Occhi (Opzionale)</FormLabel>
                         <Popover open={isEyeColorPopoverOpen} onOpenChange={setIsEyeColorPopoverOpen}>
                           <PopoverTrigger asChild>
                             <FormControl>
@@ -931,10 +936,11 @@ const NewListing = () => {
                                 variant="outline"
                                 role="combobox"
                                 aria-expanded={isEyeColorPopoverOpen}
-                                className="w-full justify-between"
+                                className="w-full justify-between pl-10 relative"
                               >
+                                <Eye className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                                 {getSelectedLabel(field.value, eyeColors)}
-                                <ChevronLeft className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                               </Button>
                             </FormControl>
                           </PopoverTrigger>
@@ -997,248 +1003,257 @@ const NewListing = () => {
                 <h2 className="text-xl font-bold text-gray-800 pt-4">Dettagli Incontro</h2>
                 <p className="text-sm text-gray-500 -mt-4">Questi dettagli saranno visibili pubblicamente solo per gli annunci Premium.</p>
                 
-                <FormField
-                  control={form.control}
-                  name="meeting_type"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tipologia di Incontro (Opzionale)</FormLabel>
-                      <Popover open={isMeetingTypePopoverOpen} onOpenChange={setIsMeetingTypePopoverOpen}>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              aria-expanded={isMeetingTypePopoverOpen}
-                              className="w-full justify-between"
-                            >
-                              {getSelectedLabel(field.value, meetingTypeOptions.map(o => ({ value: o.id, label: o.label })))}
-                              <ChevronLeft className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                          <Command>
-                            <CommandInput placeholder="Cerca tipologia..." />
-                            <CommandEmpty>Nessuna tipologia trovata.</CommandEmpty>
-                            <CommandGroup>
-                              <div className="max-h-60 overflow-y-auto">
-                                {meetingTypeOptions.map((option) => {
-                                  const isSelected = field.value.includes(option.id);
-                                  return (
-                                    <CommandItem
-                                      key={option.id}
-                                      value={option.label}
-                                      onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.id, !isSelected)}
-                                      className="flex items-center cursor-pointer"
-                                    >
-                                      <Checkbox
-                                        checked={isSelected}
-                                        onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.id, checked as boolean)}
-                                        className="mr-2"
-                                      />
-                                      {option.label}
-                                      <CheckIcon
-                                        className={cn(
-                                          "ml-auto h-4 w-4",
-                                          isSelected ? "opacity-100" : "opacity-0"
-                                        )}
-                                      />
-                                    </CommandItem>
-                                  );
-                                })}
-                              </div>
-                            </CommandGroup>
-                            {field.value.length > 0 && (
-                              <>
-                                <Separator className="my-2" />
-                                <div className="p-2">
-                                  <Button
-                                    variant="ghost"
-                                    className="w-full justify-center text-red-500 hover:text-red-600"
-                                    onClick={() => field.onChange([])}
-                                  >
-                                    <X className="h-4 w-4 mr-2" /> Deseleziona tutto
-                                  </Button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <FormField
+                    control={form.control}
+                    name="meeting_type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2"><Handshake className="h-4 w-4" /> Tipologia di Incontro (Opzionale)</FormLabel>
+                        <Popover open={isMeetingTypePopoverOpen} onOpenChange={setIsMeetingTypePopoverOpen}>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={isMeetingTypePopoverOpen}
+                                className="w-full justify-between pl-10 relative"
+                              >
+                                <Handshake className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                {getSelectedLabel(field.value, meetingTypeOptions.map(o => ({ value: o.id, label: o.label })))}
+                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                            <Command>
+                              <CommandInput placeholder="Cerca tipologia..." />
+                              <CommandEmpty>Nessuna tipologia trovata.</CommandEmpty>
+                              <CommandGroup>
+                                <div className="max-h-60 overflow-y-auto">
+                                  {meetingTypeOptions.map((option) => {
+                                    const isSelected = field.value.includes(option.id);
+                                    return (
+                                      <CommandItem
+                                        key={option.id}
+                                        value={option.label}
+                                        onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.id, !isSelected)}
+                                        className="flex items-center cursor-pointer"
+                                      >
+                                        <Checkbox
+                                          checked={isSelected}
+                                          onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.id, checked as boolean)}
+                                          className="mr-2"
+                                        />
+                                        {option.label}
+                                        <CheckIcon
+                                          className={cn(
+                                            "ml-auto h-4 w-4",
+                                            isSelected ? "opacity-100" : "opacity-0"
+                                          )}
+                                        />
+                                      </CommandItem>
+                                    );
+                                  })}
                                 </div>
-                              </>
-                            )}
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="availability_for"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Disponibilità per (Opzionale)</FormLabel>
-                      <Popover open={isAvailabilityForPopoverOpen} onOpenChange={setIsAvailabilityForPopoverOpen}>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              aria-expanded={isAvailabilityForPopoverOpen}
-                              className="w-full justify-between"
-                            >
-                              {getSelectedLabel(field.value, availabilityForOptions.map(o => ({ value: o.id, label: o.label })))}
-                              <ChevronLeft className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                          <Command>
-                            <CommandInput placeholder="Cerca disponibilità..." />
-                            <CommandEmpty>Nessuna disponibilità trovata.</CommandEmpty>
-                            <CommandGroup>
-                              <div className="max-h-60 overflow-y-auto">
-                                {availabilityForOptions.map((option) => {
-                                  const isSelected = field.value.includes(option.id);
-                                  return (
-                                    <CommandItem
-                                      key={option.id}
-                                      value={option.label}
-                                      onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.id, !isSelected)}
-                                      className="flex items-center cursor-pointer"
+                              </CommandGroup>
+                              {field.value.length > 0 && (
+                                <>
+                                  <Separator className="my-2" />
+                                  <div className="p-2">
+                                    <Button
+                                      variant="ghost"
+                                      className="w-full justify-center text-red-500 hover:text-red-600"
+                                      onClick={() => field.onChange([])}
                                     >
-                                      <Checkbox
-                                        checked={isSelected}
-                                        onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.id, checked as boolean)}
-                                        className="mr-2"
-                                      />
-                                      {option.label}
-                                      <CheckIcon
-                                        className={cn(
-                                          "ml-auto h-4 w-4",
-                                          isSelected ? "opacity-100" : "opacity-0"
-                                        )}
-                                      />
-                                    </CommandItem>
-                                  );
-                                })}
-                              </div>
-                            </CommandGroup>
-                            {field.value.length > 0 && (
-                              <>
-                                <Separator className="my-2" />
-                                <div className="p-2">
-                                  <Button
-                                    variant="ghost"
-                                    className="w-full justify-center text-red-500 hover:text-red-600"
-                                    onClick={() => field.onChange([])}
-                                  >
-                                    <X className="h-4 w-4 mr-2" /> Deseleziona tutto
-                                  </Button>
-                                </div>
-                              </>
-                            )}
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                                      <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                    </Button>
+                                  </div>
+                                </>
+                              )}
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="meeting_location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Luogo Incontro (Opzionale)</FormLabel>
-                      <Popover open={isMeetingLocationPopoverOpen} onOpenChange={setIsMeetingLocationPopoverOpen}>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              aria-expanded={isMeetingLocationPopoverOpen}
-                              className="w-full justify-between"
-                            >
-                              {getSelectedLabel(field.value, meetingLocationOptions.map(o => ({ value: o.id, label: o.label })))}
-                              <ChevronLeft className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                          <Command>
-                            <CommandInput placeholder="Cerca luogo..." />
-                            <CommandEmpty>Nessun luogo trovato.</CommandEmpty>
-                            <CommandGroup>
-                              <div className="max-h-60 overflow-y-auto">
-                                {meetingLocationOptions.map((option) => {
-                                  const isSelected = field.value.includes(option.id);
-                                  return (
-                                    <CommandItem
-                                      key={option.id}
-                                      value={option.label}
-                                      onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.id, !isSelected)}
-                                      className="flex items-center cursor-pointer"
+                  <FormField
+                    control={form.control}
+                    name="availability_for"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2"><Clock className="h-4 w-4" /> Disponibilità per (Opzionale)</FormLabel>
+                        <Popover open={isAvailabilityForPopoverOpen} onOpenChange={setIsAvailabilityForPopoverOpen}>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={isAvailabilityForPopoverOpen}
+                                className="w-full justify-between pl-10 relative"
+                              >
+                                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                {getSelectedLabel(field.value, availabilityForOptions.map(o => ({ value: o.id, label: o.label })))}
+                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                            <Command>
+                              <CommandInput placeholder="Cerca disponibilità..." />
+                              <CommandEmpty>Nessuna disponibilità trovata.</CommandEmpty>
+                              <CommandGroup>
+                                <div className="max-h-60 overflow-y-auto">
+                                  {availabilityForOptions.map((option) => {
+                                    const isSelected = field.value.includes(option.id);
+                                    return (
+                                      <CommandItem
+                                        key={option.id}
+                                        value={option.label}
+                                        onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.id, !isSelected)}
+                                        className="flex items-center cursor-pointer"
+                                      >
+                                        <Checkbox
+                                          checked={isSelected}
+                                          onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.id, checked as boolean)}
+                                          className="mr-2"
+                                        />
+                                        {option.label}
+                                        <CheckIcon
+                                          className={cn(
+                                            "ml-auto h-4 w-4",
+                                            isSelected ? "opacity-100" : "opacity-0"
+                                          )}
+                                        />
+                                      </CommandItem>
+                                    );
+                                  })}
+                                </div>
+                              </CommandGroup>
+                              {field.value.length > 0 && (
+                                <>
+                                  <Separator className="my-2" />
+                                  <div className="p-2">
+                                    <Button
+                                      variant="ghost"
+                                      className="w-full justify-center text-red-500 hover:text-red-600"
+                                      onClick={() => field.onChange([])}
                                     >
-                                      <Checkbox
-                                        checked={isSelected}
-                                        onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.id, checked as boolean)}
-                                        className="mr-2"
-                                      />
-                                      {option.label}
-                                      <CheckIcon
-                                        className={cn(
-                                          "ml-auto h-4 w-4",
-                                          isSelected ? "opacity-100" : "opacity-0"
-                                        )}
-                                      />
-                                    </CommandItem>
-                                  );
-                                })}
-                              </div>
-                            </CommandGroup>
-                            {field.value.length > 0 && (
-                              <>
-                                <Separator className="my-2" />
-                                <div className="p-2">
-                                  <Button
-                                    variant="ghost"
-                                    className="w-full justify-center text-red-500 hover:text-red-600"
-                                    onClick={() => field.onChange([])}
-                                  >
-                                    <X className="h-4 w-4 mr-2" /> Deseleziona tutto
-                                  </Button>
-                                </div>
-                              </>
-                            )}
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                                      <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                    </Button>
+                                  </div>
+                                </>
+                              )}
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="hourly_rate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tariffa Oraria (Opzionale)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          placeholder="Es. 50" 
-                          {...field} 
-                          value={field.value === null ? '' : field.value}
-                          onChange={(e) => field.onChange(e.target.value === '' ? null : Number(e.target.value))}
-                        />
-                      </FormControl>
-                      <FormDescription>Inserisci la tua tariffa oraria in Euro.</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="meeting_location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2"><Home className="h-4 w-4" /> Luogo Incontro (Opzionale)</FormLabel>
+                        <Popover open={isMeetingLocationPopoverOpen} onOpenChange={setIsMeetingLocationPopoverOpen}>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={isMeetingLocationPopoverOpen}
+                                className="w-full justify-between pl-10 relative"
+                              >
+                                <Home className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                {getSelectedLabel(field.value, meetingLocationOptions.map(o => ({ value: o.id, label: o.label })))}
+                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                            <Command>
+                              <CommandInput placeholder="Cerca luogo..." />
+                              <CommandEmpty>Nessun luogo trovato.</CommandEmpty>
+                              <CommandGroup>
+                                <div className="max-h-60 overflow-y-auto">
+                                  {meetingLocationOptions.map((option) => {
+                                    const isSelected = field.value.includes(option.id);
+                                    return (
+                                      <CommandItem
+                                        key={option.id}
+                                        value={option.label}
+                                        onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.id, !isSelected)}
+                                        className="flex items-center cursor-pointer"
+                                      >
+                                        <Checkbox
+                                          checked={isSelected}
+                                          onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.id, checked as boolean)}
+                                          className="mr-2"
+                                        />
+                                        {option.label}
+                                        <CheckIcon
+                                          className={cn(
+                                            "ml-auto h-4 w-4",
+                                            isSelected ? "opacity-100" : "opacity-0"
+                                          )}
+                                        />
+                                      </CommandItem>
+                                    );
+                                  })}
+                                </div>
+                              </CommandGroup>
+                              {field.value.length > 0 && (
+                                <>
+                                  <Separator className="my-2" />
+                                  <div className="p-2">
+                                    <Button
+                                      variant="ghost"
+                                      className="w-full justify-center text-red-500 hover:text-red-600"
+                                      onClick={() => field.onChange([])}
+                                    >
+                                      <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                    </Button>
+                                  </div>
+                                </>
+                              )}
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="hourly_rate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2"><Euro className="h-4 w-4" /> Tariffa Oraria (Opzionale)</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Euro className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                            <Input 
+                              type="number" 
+                              placeholder="Es. 50" 
+                              {...field} 
+                              value={field.value === null ? '' : field.value}
+                              onChange={(e) => field.onChange(e.target.value === '' ? null : Number(e.target.value))}
+                              className="w-full pl-10"
+                            />
+                          </div>
+                        </FormControl>
+                        <FormDescription>Inserisci la tua tariffa oraria in Euro.</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 {/* Nuovo campo per i servizi offerti */}
                 <h2 className="text-xl font-bold text-gray-800 pt-4">Servizi Offerti</h2>
@@ -1248,7 +1263,7 @@ const NewListing = () => {
                   name="offered_services"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Quali servizi offri? (Opzionale)</FormLabel>
+                      <FormLabel className="flex items-center gap-2"><Sparkles className="h-4 w-4" /> Quali servizi offri? (Opzionale)</FormLabel>
                       <Popover open={isOfferedServicesPopoverOpen} onOpenChange={setIsOfferedServicesPopoverOpen}>
                         <PopoverTrigger asChild>
                           <FormControl>
@@ -1256,10 +1271,11 @@ const NewListing = () => {
                               variant="outline"
                               role="combobox"
                               aria-expanded={isOfferedServicesPopoverOpen}
-                              className="w-full justify-between"
+                              className="w-full justify-between pl-10 relative"
                             >
+                              <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                               {getSelectedLabel(field.value, offeredServicesOptions.map(o => ({ value: o.id, label: o.label })))}
-                              <ChevronLeft className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
