@@ -202,6 +202,25 @@ const ListingDetails = () => {
   const phoneButtonIcon = listing.contact_whatsapp ? <MessageCircle className="h-6 w-6" /> : <Phone className="h-6 w-6" />;
   const phoneButtonText = listing.contact_whatsapp ? 'WhatsApp' : 'Chiama';
 
+  // Determine if 'Dettagli Personali' card should be shown
+  const hasPersonalDetails = 
+    !!listing.ethnicity || 
+    !!listing.nationality || 
+    !!listing.breast_type || 
+    !!listing.hair_color || 
+    !!listing.body_type || 
+    !!listing.eye_color;
+
+  // Determine if 'Dettagli Incontro' card should be shown
+  const hasMeetingDetails = 
+    (listing.meeting_type && listing.meeting_type.length > 0) ||
+    (listing.availability_for && listing.availability_for.length > 0) ||
+    (listing.meeting_location && listing.meeting_location.length > 0) ||
+    (listing.hourly_rate !== null && listing.hourly_rate !== undefined);
+
+  // Determine if 'Servizi Offerti' card should be shown
+  const hasOfferedServices = listing.offered_services && listing.offered_services.length > 0;
+
   return (
     <div className="bg-gray-50">
       <Helmet>
@@ -338,10 +357,9 @@ const ListingDetails = () => {
             </CardContent>
           </Card>
 
-          {/* Nuova Card per Dettagli Personali (visibile solo per Premium attivi) */}
-          {isActivePremium && (
-            <>
-              <Card>
+          {/* Nuova Card per Dettagli Personali (visibile solo per Premium attivi E se ci sono dettagli) */}
+          {isActivePremium && hasPersonalDetails && (
+            <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-xl"><User className="h-5 w-5 text-rose-500" /> Dettagli Personali</CardTitle>
                 </CardHeader>
@@ -376,14 +394,13 @@ const ListingDetails = () => {
                       <Eye className="h-4 w-4" /> Colore Occhi: {listing.eye_color}
                     </Badge>
                   )}
-                  {(!listing.ethnicity && !listing.nationality && !listing.breast_type && !listing.hair_color && !listing.body_type && !listing.eye_color) && (
-                    <p className="text-gray-600">Nessun dettaglio personale aggiuntivo.</p>
-                  )}
                 </CardContent>
               </Card>
+          )}
 
-              {/* Nuova Card per Dettagli Incontro (visibile solo per Premium attivi) */}
-              <Card>
+          {/* Nuova Card per Dettagli Incontro (visibile solo per Premium attivi E se ci sono dettagli) */}
+          {isActivePremium && hasMeetingDetails && (
+            <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-xl"><Handshake className="h-5 w-5 text-rose-500" /> Dettagli Incontro</CardTitle>
                 </CardHeader>
@@ -423,31 +440,24 @@ const ListingDetails = () => {
                       <Euro className="h-4 w-4" /> Tariffa Oraria: {listing.hourly_rate}€
                     </Badge>
                   )}
-                  {(!listing.meeting_type || listing.meeting_type.length === 0) &&
-                   (!listing.availability_for || listing.availability_for.length === 0) &&
-                   (!listing.meeting_location || listing.meeting_location.length === 0) &&
-                   (listing.hourly_rate === null || listing.hourly_rate === undefined) && (
-                    <p className="text-gray-600">Nessun dettaglio incontro aggiuntivo.</p>
-                  )}
                 </CardContent>
               </Card>
+          )}
 
-              {/* Nuova Card per Servizi Offerti (visibile solo per Premium attivi) */}
-              <Card>
+          {/* Nuova Card per Servizi Offerti (visibile solo per Premium attivi E se ci sono servizi) */}
+          {isActivePremium && hasOfferedServices && (
+            <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-xl"><Sparkles className="h-5 w-5 text-rose-500" /> Servizi Offerti</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-2">
-                  {listing.offered_services && listing.offered_services.length > 0 ? (
+                  {listing.offered_services && listing.offered_services.length > 0 && (
                     listing.offered_services.map(service => (
                       <Badge key={service} variant="secondary" className="capitalize">{getOfferedServiceLabel(service)}</Badge>
                     ))
-                  ) : (
-                    <p className="text-gray-600">Nessun servizio offerto specificato.</p>
                   )}
                 </CardContent>
               </Card>
-            </>
           )}
 
           <div className="flex flex-col sm:flex-row justify-center py-4 gap-4">
