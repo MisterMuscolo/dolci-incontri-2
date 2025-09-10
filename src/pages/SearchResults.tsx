@@ -53,17 +53,26 @@ const meetingLocationOptions = [
 ];
 
 const offeredServicesOptions = [
-  { id: 'orale', label: 'Orale' },
-  { id: 'esperienza-fidanzata', label: 'Esperienza Fidanzata' },
-  { id: 'massaggio-erotico', label: 'Massaggio Erotico' },
-  { id: 'sesso-anale', label: 'Sesso Anale' },
-  { id: 'duo', label: 'Duo' },
-  { id: 'baci-profondi', label: 'Baci Profondi' },
-  { id: 'giochi-erotici', label: 'Giochi Erotici' },
-  { id: 'lingerie', label: 'Lingerie' },
-  { id: 'travestimento', label: 'Travestimento' },
-  { id: 'fetish', label: 'Fetish' },
-  { id: 'bdsm', label: 'BDSM' },
+  { id: '69', label: '69' },
+  { id: 'baci-profondi', label: 'Baci profondi (FK)' },
+  { id: 'bacio-leggero', label: 'Bacio leggero' },
+  { id: 'due-ragazze', label: 'Due ragazze' },
+  { id: 'girlfriend-experience', label: 'Girlfriend experience (GFE)' },
+  { id: 'massaggio-professionale', label: 'Massaggio Professionale' },
+  { id: 'massaggio-prostatico', label: 'Massaggio Prostatico' },
+  { id: 'massaggio-sensuale-con-corpo', label: 'Massaggio sensuale con corpo' },
+  { id: 'massaggio-tantrico', label: 'Massaggio Tantrico' },
+  { id: 'masturbazione-con-mano', label: 'Masturbazione con mano (HJ)' },
+  { id: 'orale-coperto-con-condom', label: 'Orale coperto con Condom' },
+  { id: 'orale-scoperto', label: 'Orale scoperto (BBJ)' },
+  { id: 'orgasmo-multiplo', label: 'Orgasmo multiplo' },
+  { id: 'porn-star-experience', label: 'Porn Star Experience (PSE)' },
+  { id: 'rapporto-anale', label: 'Rapporto anale' },
+  { id: 'rapporto-sessuale', label: 'Rapporto sessuale' },
+  { id: 'rimming', label: 'Rimming' },
+  { id: 'sesso-orale', label: 'Sesso orale (DATY)' },
+  { id: 'venuta-in-bocca', label: 'Venuta in bocca (CIM)' },
+  { id: 'venuta-su-seno', label: 'Venuta su seno (COB)' },
   { id: 'altro', label: 'Altro' },
 ];
 
@@ -263,6 +272,7 @@ const SearchResults = () => {
         remaining_expires_at_duration,
         remaining_promotion_duration,
         listing_photos ( url, original_url, is_primary ),
+        slug,
         ethnicity,
         nationality,
         breast_type,
@@ -350,9 +360,9 @@ const SearchResults = () => {
         setTotalPages(Math.ceil(count / LISTINGS_PER_PAGE));
       }
       if (data) {
-        const processedListings = data.map((listing: Listing) => ({
+        const processedListings = data.map((listing: any) => ({ // Modificato il tipo di 'listing' a 'any' per risolvere l'errore
           ...listing,
-          listing_photos: (listing.listing_photos || []).sort((a, b) => {
+          listing_photos: (listing.listing_photos || []).sort((a: { is_primary: boolean }, b: { is_primary: boolean }) => {
             if (a.is_primary && !b.is_primary) return -1;
             if (!a.is_primary && b.is_primary) return 1;
             return 0;

@@ -63,7 +63,18 @@ const UserListingsAdminView = () => {
         remaining_expires_at_duration,
         remaining_promotion_duration,
         listing_photos ( url, original_url, is_primary ),
-        slug
+        slug,
+        ethnicity,
+        nationality,
+        breast_type,
+        hair_color,
+        body_type,
+        eye_color,
+        meeting_type,
+        availability_for,
+        meeting_location,
+        hourly_rate,
+        offered_services
       `);
 
     query = query.eq('user_id', userId);
@@ -80,9 +91,9 @@ const UserListingsAdminView = () => {
       console.error("Error fetching user listings:", listingsError);
       setError("Impossibile caricare gli annunci dell'utente.");
     } else if (data) {
-      const processedListings = data.map((listing: Listing) => ({
+      const processedListings = data.map((listing: any) => ({ // Modificato il tipo di 'listing' a 'any' per risolvere l'errore
         ...listing,
-        listing_photos: (listing.listing_photos || []).sort((a, b) => {
+        listing_photos: (listing.listing_photos || []).sort((a: { is_primary: boolean }, b: { is_primary: boolean }) => {
           if (a.is_primary && !b.is_primary) return -1;
           if (!a.is_primary && b.is_primary) return 1;
           return 0;

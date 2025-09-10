@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForm, Controller } from 'react-hook-form'; // Importa Controller
+import { useForm } from 'react-hook-form'; // Rimosso Controller
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -45,17 +45,26 @@ const meetingLocationOptions = [
 ];
 
 const offeredServicesOptions = [
-  { id: 'orale', label: 'Orale' },
-  { id: 'esperienza-fidanzata', label: 'Esperienza Fidanzata' },
-  { id: 'massaggio-erotico', label: 'Massaggio Erotico' },
-  { id: 'sesso-anale', label: 'Sesso Anale' },
-  { id: 'duo', label: 'Duo' },
-  { id: 'baci-profondi', label: 'Baci Profondi' },
-  { id: 'giochi-erotici', label: 'Giochi Erotici' },
-  { id: 'lingerie', label: 'Lingerie' },
-  { id: 'travestimento', label: 'Travestimento' },
-  { id: 'fetish', label: 'Fetish' },
-  { id: 'bdsm', label: 'BDSM' },
+  { id: '69', label: '69' },
+  { id: 'baci-profondi', label: 'Baci profondi (FK)' },
+  { id: 'bacio-leggero', label: 'Bacio leggero' },
+  { id: 'due-ragazze', label: 'Due ragazze' },
+  { id: 'girlfriend-experience', label: 'Girlfriend experience (GFE)' },
+  { id: 'massaggio-professionale', label: 'Massaggio Professionale' },
+  { id: 'massaggio-prostatico', label: 'Massaggio Prostatico' },
+  { id: 'massaggio-sensuale-con-corpo', label: 'Massaggio sensuale con corpo' },
+  { id: 'massaggio-tantrico', label: 'Massaggio Tantrico' },
+  { id: 'masturbazione-con-mano', label: 'Masturbazione con mano (HJ)' },
+  { id: 'orale-coperto-con-condom', label: 'Orale coperto con Condom' },
+  { id: 'orale-scoperto', label: 'Orale scoperto (BBJ)' },
+  { id: 'orgasmo-multiplo', label: 'Orgasmo multiplo' },
+  { id: 'porn-star-experience', label: 'Porn Star Experience (PSE)' },
+  { id: 'rapporto-anale', label: 'Rapporto anale' },
+  { id: 'rapporto-sessuale', label: 'Rapporto sessuale' },
+  { id: 'rimming', label: 'Rimming' },
+  { id: 'sesso-orale', label: 'Sesso orale (DATY)' },
+  { id: 'venuta-in-bocca', label: 'Venuta in bocca (CIM)' },
+  { id: 'venuta-su-seno', label: 'Venuta su seno (COB)' },
   { id: 'altro', label: 'Altro' },
 ];
 
@@ -547,7 +556,7 @@ const NewListing = () => {
                 <FormField
                   control={form.control}
                   name="meeting_type"
-                  render={({ field }) => (
+                  render={({ field: innerField }) => ( // Rinominato 'field' in 'innerField'
                     <FormItem>
                       <FormLabel>Tipologia di Incontro (Opzionale)</FormLabel>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -556,17 +565,17 @@ const NewListing = () => {
                             key={item.id}
                             control={form.control}
                             name="meeting_type"
-                            render={({ field: innerField }) => {
+                            render={({ field }) => { // Usato 'field' qui
                               return (
                                 <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
                                   <FormControl>
                                     <Checkbox
-                                      checked={innerField.value?.includes(item.id)}
+                                      checked={field.value?.includes(item.id)}
                                       onCheckedChange={(checked) => {
                                         return checked
-                                          ? innerField.onChange([...(innerField.value || []), item.id])
-                                          : innerField.onChange(
-                                              innerField.value?.filter(
+                                          ? field.onChange([...(field.value || []), item.id])
+                                          : field.onChange(
+                                              field.value?.filter(
                                                 (value) => value !== item.id
                                               )
                                             );
@@ -590,7 +599,7 @@ const NewListing = () => {
                 <FormField
                   control={form.control}
                   name="availability_for"
-                  render={({ field }) => (
+                  render={({ field: innerField }) => ( // Rinominato 'field' in 'innerField'
                     <FormItem>
                       <FormLabel>Disponibilità per (Opzionale)</FormLabel>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -599,17 +608,17 @@ const NewListing = () => {
                             key={item.id}
                             control={form.control}
                             name="availability_for"
-                            render={({ field: innerField }) => {
+                            render={({ field }) => { // Usato 'field' qui
                               return (
                                 <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
                                   <FormControl>
                                     <Checkbox
-                                      checked={innerField.value?.includes(item.id)}
+                                      checked={field.value?.includes(item.id)}
                                       onCheckedChange={(checked) => {
                                         return checked
-                                          ? innerField.onChange([...(innerField.value || []), item.id])
-                                          : innerField.onChange(
-                                              innerField.value?.filter(
+                                          ? field.onChange([...(field.value || []), item.id])
+                                          : field.onChange(
+                                              field.value?.filter(
                                                 (value) => value !== item.id
                                               )
                                             );
@@ -633,7 +642,7 @@ const NewListing = () => {
                 <FormField
                   control={form.control}
                   name="meeting_location"
-                  render={({ field }) => (
+                  render={({ field: innerField }) => ( // Rinominato 'field' in 'innerField'
                     <FormItem>
                       <FormLabel>Luogo Incontro (Opzionale)</FormLabel>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -642,17 +651,17 @@ const NewListing = () => {
                             key={item.id}
                             control={form.control}
                             name="meeting_location"
-                            render={({ field: innerField }) => {
+                            render={({ field }) => { // Usato 'field' qui
                               return (
                                 <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
                                   <FormControl>
                                     <Checkbox
-                                      checked={innerField.value?.includes(item.id)}
+                                      checked={field.value?.includes(item.id)}
                                       onCheckedChange={(checked) => {
                                         return checked
-                                          ? innerField.onChange([...(innerField.value || []), item.id])
-                                          : innerField.onChange(
-                                              innerField.value?.filter(
+                                          ? field.onChange([...(field.value || []), item.id])
+                                          : field.onChange(
+                                              field.value?.filter(
                                                 (value) => value !== item.id
                                               )
                                             );
@@ -700,7 +709,7 @@ const NewListing = () => {
                 <FormField
                   control={form.control}
                   name="offered_services"
-                  render={({ field }) => (
+                  render={({ field: innerField }) => ( // Rinominato 'field' in 'innerField'
                     <FormItem>
                       <FormLabel>Quali servizi offri? (Opzionale)</FormLabel>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -709,17 +718,17 @@ const NewListing = () => {
                             key={item.id}
                             control={form.control}
                             name="offered_services"
-                            render={({ field: innerField }) => {
+                            render={({ field }) => { // Usato 'field' qui
                               return (
                                 <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
                                   <FormControl>
                                     <Checkbox
-                                      checked={innerField.value?.includes(item.id)}
+                                      checked={field.value?.includes(item.id)}
                                       onCheckedChange={(checked) => {
                                         return checked
-                                          ? innerField.onChange([...(innerField.value || []), item.id])
-                                          : innerField.onChange(
-                                              innerField.value?.filter(
+                                          ? field.onChange([...(field.value || []), item.id])
+                                          : field.onChange(
+                                              field.value?.filter(
                                                 (value) => value !== item.id
                                               )
                                             );
