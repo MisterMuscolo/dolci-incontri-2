@@ -1481,21 +1481,19 @@ const SearchResults = () => {
                       />
                     </div>
                   </div>
-                  <Separator className="my-4" />
                   {/* Multi-select per Filtri Servizi Offerti */}
-                  <h3 className="text-lg font-semibold text-gray-700 mb-4">Filtri Servizi Offerti</h3>
                   <Popover open={isOfferedServicesPopoverOpen} onOpenChange={setIsOfferedServicesPopoverOpen}>
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
                         role="combobox"
                         aria-expanded={isOfferedServicesPopoverOpen}
-                        className="w-full justify-between"
+                        className="w-full justify-between pl-10 relative"
                       >
-                        <Sparkles className="h-4 w-4 mr-2" />
+                        <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                         {currentOfferedServices.length > 0
                           ? `${currentOfferedServices.length} selezionati`
-                          : "Seleziona servizi..."}
+                          : "Servizi Offerti"}
                         <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </PopoverTrigger>
