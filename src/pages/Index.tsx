@@ -21,11 +21,10 @@ interface IndexProps {
 }
 
 const ageRanges = [
-  { value: 'tutte', label: 'Tutte le età' },
-  { value: '18-24', label: '18-24 anni' },
-  { value: '25-36', label: '25-36 anni' },
-  { value: '37-45', label: '37-45 anni' },
-  { value: 'over45', label: '+46 anni' }, // Modificato il value
+  { value: '18-24', label: '18-24 anni', min: 18, max: 24 },
+  { value: '25-36', label: '25-36 anni', min: 25, max: 36 },
+  { value: '37-45', label: '37-45 anni', min: 37, max: 45 },
+  { value: 'over45', label: '+46 anni', min: 46, max: null },
 ];
 
 // Definizioni delle opzioni per i nuovi campi (copiate da NewListing.tsx)
@@ -158,13 +157,13 @@ export default function Index({ session }: IndexProps) {
   const [category, setCategory] = useState('tutte');
   const [city, setCity] = useState('tutte');
   const [keyword, setKeyword] = useState('');
-  const [selectedAgeRange, setSelectedAgeRange] = useState('tutte'); // Stato per la fascia d'età
-  const [ethnicity, setEthnicity] = useState('tutte');
-  const [nationality, setNationality] = useState('tutte');
-  const [breastType, setBreastType] = useState('tutte');
-  const [hairColor, setHairColor] = useState('tutte');
-  const [bodyType, setBodyType] = useState('tutte');
-  const [eyeColor, setEyeColor] = useState('tutte');
+  const [selectedAgeRanges, setSelectedAgeRanges] = useState<string[]>([]); // Modificato a array
+  const [selectedEthnicities, setSelectedEthnicities] = useState<string[]>([]); // Modificato a array
+  const [selectedNationalities, setSelectedNationalities] = useState<string[]>([]); // Modificato a array
+  const [selectedBreastTypes, setSelectedBreastTypes] = useState<string[]>([]); // Modificato a array
+  const [selectedHairColors, setSelectedHairColors] = useState<string[]>([]); // Modificato a array
+  const [selectedBodyTypes, setSelectedBodyTypes] = useState<string[]>([]); // Modificato a array
+  const [selectedEyeColors, setSelectedEyeColors] = useState<string[]>([]); // Modificato a array
   // Nuovi stati per i filtri di incontro
   const [selectedMeetingTypes, setSelectedMeetingTypes] = useState<string[]>([]);
   const [selectedAvailabilityFor, setSelectedAvailabilityFor] = useState<string[]>([]);
@@ -182,6 +181,15 @@ export default function Index({ session }: IndexProps) {
   const [isAvailabilityForPopoverOpen, setIsAvailabilityForPopoverOpen] = useState(false);
   const [isMeetingLocationPopoverOpen, setIsMeetingLocationPopoverOpen] = useState(false);
 
+  // Nuovi stati per i popover dei filtri personali
+  const [isAgeRangePopoverOpen, setIsAgeRangePopoverOpen] = useState(false);
+  const [isEthnicityPopoverOpen, setIsEthnicityPopoverOpen] = useState(false);
+  const [isNationalityPopoverOpen, setIsNationalityPopoverOpen] = useState(false);
+  const [isBreastTypePopoverOpen, setIsBreastTypePopoverOpen] = useState(false);
+  const [isHairColorPopoverOpen, setIsHairColorPopoverOpen] = useState(false);
+  const [isBodyTypePopoverOpen, setIsBodyTypePopoverOpen] = useState(false);
+  const [isEyeColorPopoverOpen, setIsEyeColorPopoverOpen] = useState(false);
+
 
   useEffect(() => {
     const referrerCode = searchParams.get('ref');
@@ -193,32 +201,21 @@ export default function Index({ session }: IndexProps) {
       navigate({ search: newSearchParams.toString() }, { replace: true });
     }
 
-    // Sincronizza lo stato del filtro età con i parametri URL all'avvio o al cambio URL
-    const minAgeParam = searchParams.get('min_age');
-    const maxAgeParam = searchParams.get('max_age');
-    let initialAgeRange = 'tutte';
-    if (minAgeParam && maxAgeParam) {
-      initialAgeRange = `${minAgeParam}-${maxAgeParam}`;
-    } else if (minAgeParam === '46' && !maxAgeParam) { // Gestisce il caso '+46 anni'
-      initialAgeRange = 'over45';
-    } else if (minAgeParam && !maxAgeParam) { // Caso generico per altri min_age senza max_age
-      initialAgeRange = `${minAgeParam}+`;
-    }
-    
-    // Validate if the constructed age range is actually one of the predefined ones
-    const isValidAgeRange = ageRanges.some(range => range.value === initialAgeRange);
-    if (!isValidAgeRange) {
-      initialAgeRange = 'tutte'; // Fallback to 'tutte' if invalid
-    }
-    setSelectedAgeRange(initialAgeRange);
+    // Sincronizza lo stato dei filtri con i parametri URL all'avvio o al cambio URL
+    setSelectedAgeRanges(searchParams.getAll('age_range')); // Usa age_range per multi-select
+    setSelectedEthnicities(searchParams.getAll('ethnicity'));
+    setSelectedNationalities(searchParams.getAll('nationality'));
+    setSelectedBreastTypes(searchParams.getAll('breast_type'));
+    setSelectedHairColors(searchParams.getAll('hair_color'));
+    setSelectedBodyTypes(searchParams.getAll('body_type'));
+    setSelectedEyeColors(searchParams.getAll('eye_color'));
 
-    // Sincronizza i nuovi filtri con i parametri URL
     setSelectedMeetingTypes(searchParams.getAll('meeting_type'));
     setSelectedAvailabilityFor(searchParams.getAll('availability_for'));
     setSelectedMeetingLocations(searchParams.getAll('meeting_location'));
     setHourlyRateMin(searchParams.get('hourly_rate_min') || '');
     setHourlyRateMax(searchParams.get('hourly_rate_max') || '');
-    setSelectedOfferedServices(searchParams.getAll('offered_services')); // Sincronizza il nuovo campo
+    setSelectedOfferedServices(searchParams.getAll('offered_services'));
 
   }, [searchParams, navigate]);
 
@@ -229,25 +226,15 @@ export default function Index({ session }: IndexProps) {
     if (city && city !== 'tutte') searchParams.append('city', city);
     if (keyword) searchParams.append('keyword', keyword);
     
-    // Logica per la fascia d'età
-    if (selectedAgeRange && selectedAgeRange !== 'tutte') {
-      if (selectedAgeRange === 'over45') { // Gestisce il nuovo valore 'over45'
-        searchParams.append('min_age', '46');
-      } else {
-        const [min, max] = selectedAgeRange.split('-');
-        searchParams.append('min_age', min);
-        if (max && max !== '+') {
-          searchParams.append('max_age', max);
-        }
-      }
-    }
+    // Logica per la fascia d'età (multi-select)
+    selectedAgeRanges.forEach(range => searchParams.append('age_range', range));
 
-    if (ethnicity && ethnicity !== 'tutte') searchParams.append('ethnicity', ethnicity);
-    if (nationality && nationality !== 'tutte') searchParams.append('nationality', nationality);
-    if (breastType && breastType !== 'tutte') searchParams.append('breast_type', breastType);
-    if (hairColor && hairColor !== 'tutte') searchParams.append('hair_color', hairColor);
-    if (bodyType && bodyType !== 'tutte') searchParams.append('body_type', bodyType);
-    if (eyeColor && eyeColor !== 'tutte') searchParams.append('eye_color', eyeColor);
+    selectedEthnicities.forEach(eth => searchParams.append('ethnicity', eth));
+    selectedNationalities.forEach(nat => searchParams.append('nationality', nat));
+    selectedBreastTypes.forEach(bt => searchParams.append('breast_type', bt));
+    selectedHairColors.forEach(hc => searchParams.append('hair_color', hc));
+    selectedBodyTypes.forEach(bt => searchParams.append('body_type', bt));
+    selectedEyeColors.forEach(ec => searchParams.append('eye_color', ec));
     
     // Aggiungi i nuovi filtri
     selectedMeetingTypes.forEach(type => searchParams.append('meeting_type', type));
@@ -265,13 +252,13 @@ export default function Index({ session }: IndexProps) {
     setCategory('tutte');
     setCity('tutte');
     setKeyword('');
-    setSelectedAgeRange('tutte'); // Resetta la fascia d'età
-    setEthnicity('tutte');
-    setNationality('tutte');
-    setBreastType('tutte');
-    setHairColor('tutte');
-    setBodyType('tutte');
-    setEyeColor('tutte');
+    setSelectedAgeRanges([]); // Resetta la fascia d'età
+    setSelectedEthnicities([]);
+    setSelectedNationalities([]);
+    setSelectedBreastTypes([]);
+    setSelectedHairColors([]);
+    setSelectedBodyTypes([]);
+    setSelectedEyeColors([]);
     // Resetta i nuovi filtri
     setSelectedMeetingTypes([]);
     setSelectedAvailabilityFor([]);
@@ -285,6 +272,13 @@ export default function Index({ session }: IndexProps) {
     setIsMeetingTypePopoverOpen(false);
     setIsAvailabilityForPopoverOpen(false);
     setIsMeetingLocationPopoverOpen(false);
+    setIsAgeRangePopoverOpen(false); // Resetta i nuovi stati dei popover
+    setIsEthnicityPopoverOpen(false);
+    setIsNationalityPopoverOpen(false);
+    setIsBreastTypePopoverOpen(false);
+    setIsHairColorPopoverOpen(false);
+    setIsBodyTypePopoverOpen(false);
+    setIsEyeColorPopoverOpen(false);
     navigate('/'); // Naviga alla homepage senza parametri di ricerca
   };
 
@@ -370,19 +364,19 @@ export default function Index({ session }: IndexProps) {
   };
 
   const hasActivePersonalFilters = 
-    (selectedAgeRange && selectedAgeRange !== 'tutte') || // Includi età nei filtri attivi
-    (ethnicity && ethnicity !== 'tutte') ||
-    (nationality && nationality !== 'tutte') ||
-    (breastType && breastType !== 'tutte') ||
-    (hairColor && hairColor !== 'tutte') ||
-    (bodyType && bodyType !== 'tutte') ||
-    (eyeColor && eyeColor !== 'tutte') ||
+    selectedAgeRanges.length > 0 ||
+    selectedEthnicities.length > 0 ||
+    selectedNationalities.length > 0 ||
+    selectedBreastTypes.length > 0 ||
+    selectedHairColors.length > 0 ||
+    selectedBodyTypes.length > 0 ||
+    selectedEyeColors.length > 0 ||
     selectedMeetingTypes.length > 0 ||
     selectedAvailabilityFor.length > 0 ||
     selectedMeetingLocations.length > 0 ||
     hourlyRateMin !== '' ||
     hourlyRateMax !== '' ||
-    selectedOfferedServices.length > 0; // Includi il nuovo campo
+    selectedOfferedServices.length > 0;
 
   return (
     <>
@@ -463,39 +457,39 @@ export default function Index({ session }: IndexProps) {
                         Filtri
                       </h3>
                       <div className="flex flex-wrap gap-2 mt-1">
-                        {selectedAgeRange && selectedAgeRange !== 'tutte' && (
+                        {selectedAgeRanges.length > 0 && (
                           <Badge variant="secondary" className="capitalize">
-                            <User className="h-3 w-3 mr-1" /> {getAgeRangeLabel(selectedAgeRange)}
+                            <User className="h-3 w-3 mr-1" /> {selectedAgeRanges.map(getAgeRangeLabel).join(', ')}
                           </Badge>
                         )}
-                        {ethnicity && ethnicity !== 'tutte' && (
+                        {selectedEthnicities.length > 0 && (
                           <Badge variant="secondary" className="capitalize">
-                            <Globe className="h-3 w-3 mr-1" /> {getEthnicityLabel(ethnicity)}
+                            <Globe className="h-3 w-3 mr-1" /> {selectedEthnicities.map(getEthnicityLabel).join(', ')}
                           </Badge>
                         )}
-                        {nationality && nationality !== 'tutte' && (
+                        {selectedNationalities.length > 0 && (
                           <Badge variant="secondary" className="capitalize">
-                            <Globe className="h-3 w-3 mr-1" /> {getNationalityLabel(nationality)}
+                            <Globe className="h-3 w-3 mr-1" /> {selectedNationalities.map(getNationalityLabel).join(', ')}
                           </Badge>
                         )}
-                        {breastType && breastType !== 'tutte' && (
+                        {selectedBreastTypes.length > 0 && (
                           <Badge variant="secondary" className="capitalize">
-                            <Ruler className="h-3 w-3 mr-1" /> {getBreastTypeLabel(breastType)}
+                            <Ruler className="h-3 w-3 mr-1" /> {selectedBreastTypes.map(getBreastTypeLabel).join(', ')}
                           </Badge>
                         )}
-                        {hairColor && hairColor !== 'tutte' && (
+                        {selectedHairColors.length > 0 && (
                           <Badge variant="secondary" className="capitalize">
-                            <Palette className="h-3 w-3 mr-1" /> {getHairColorLabel(hairColor)}
+                            <Palette className="h-3 w-3 mr-1" /> {selectedHairColors.map(getHairColorLabel).join(', ')}
                           </Badge>
                         )}
-                        {bodyType && bodyType !== 'tutte' && (
+                        {selectedBodyTypes.length > 0 && (
                           <Badge variant="secondary" className="capitalize">
-                            <Ruler className="h-3 w-3 mr-1" /> {getBodyTypeLabel(bodyType)}
+                            <Ruler className="h-3 w-3 mr-1" /> {selectedBodyTypes.map(getBodyTypeLabel).join(', ')}
                           </Badge>
                         )}
-                        {eyeColor && eyeColor !== 'tutte' && (
+                        {selectedEyeColors.length > 0 && (
                           <Badge variant="secondary" className="capitalize">
-                            <Eye className="h-3 w-3 mr-1" /> {getEyeColorLabel(eyeColor)}
+                            <Eye className="h-3 w-3 mr-1" /> {selectedEyeColors.map(getEyeColorLabel).join(', ')}
                           </Badge>
                         )}
                         {selectedMeetingTypes.length > 0 && (
@@ -537,94 +531,481 @@ export default function Index({ session }: IndexProps) {
                 <CollapsibleContent>
                   <Separator className="my-4" />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Campo per la fascia d'età */}
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Select value={selectedAgeRange} onValueChange={setSelectedAgeRange}>
-                        <SelectTrigger className="w-full pl-10">
-                          <SelectValue placeholder="Fascia d'età" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {ageRanges.map((range) => (
-                            <SelectItem key={range.value} value={range.value}>
-                              {range.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="relative">
-                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Select value={ethnicity} onValueChange={setEthnicity}>
-                        <SelectTrigger className="w-full pl-10">
-                          <SelectValue placeholder="Origine" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="tutte">Tutte le origini</SelectItem>
-                          {ethnicities.map((e) => <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="relative">
-                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Select value={nationality} onValueChange={setNationality}>
-                        <SelectTrigger className="w-full pl-10">
-                          <SelectValue placeholder="Nazionalità" />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-60">
-                          <SelectItem value="tutte">Tutte le nazionalità</SelectItem>
-                          {nationalities.map((n) => <SelectItem key={n.value} value={n.value}>{n.label}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="relative">
-                      <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Select value={breastType} onValueChange={setBreastType}>
-                        <SelectTrigger className="w-full pl-10">
-                          <SelectValue placeholder="Tipo di Seno" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="tutte">Tutti i tipi di seno</SelectItem>
-                          {breastTypes.map((b) => <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="relative">
-                      <Palette className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Select value={hairColor} onValueChange={setHairColor}>
-                        <SelectTrigger className="w-full pl-10">
-                          <SelectValue placeholder="Colore Capelli" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="tutte">Tutti i colori di capelli</SelectItem>
-                          {hairColors.map((h) => <SelectItem key={h.value} value={h.value}>{h.label}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="relative">
-                      <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Select value={bodyType} onValueChange={setBodyType}>
-                        <SelectTrigger className="w-full pl-10">
-                          <SelectValue placeholder="Corporatura" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="tutte">Tutte le corporature</SelectItem>
-                          {bodyTypes.map((b) => <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="relative">
-                      <Eye className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Select value={eyeColor} onValueChange={setEyeColor}>
-                        <SelectTrigger className="w-full pl-10">
-                          <SelectValue placeholder="Colore Occhi" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="tutte">Tutti i colori di occhi</SelectItem>
-                          {eyeColors.map((e) => <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    {/* Multi-select per la fascia d'età */}
+                    <Popover open={isAgeRangePopoverOpen} onOpenChange={setIsAgeRangePopoverOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={isAgeRangePopoverOpen}
+                          className="w-full justify-between pl-10 relative"
+                        >
+                          <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                          {selectedAgeRanges.length > 0
+                            ? `${selectedAgeRanges.length} selezionati`
+                            : "Fascia d'età"}
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                        <Command>
+                          <CommandInput placeholder="Cerca fascia d'età..." />
+                          <CommandEmpty>Nessuna fascia d'età trovata.</CommandEmpty>
+                          <CommandGroup>
+                            <div className="max-h-60 overflow-y-auto">
+                              {ageRanges.map((range) => {
+                                const isSelected = selectedAgeRanges.includes(range.value);
+                                return (
+                                  <CommandItem
+                                    key={range.value}
+                                    value={range.label}
+                                    onSelect={() => {
+                                      handleMultiSelectChange(selectedAgeRanges, setSelectedAgeRanges, range.value, !isSelected);
+                                    }}
+                                    className="flex items-center cursor-pointer"
+                                  >
+                                    <Checkbox
+                                      checked={isSelected}
+                                      onCheckedChange={(checked) => handleMultiSelectChange(selectedAgeRanges, setSelectedAgeRanges, range.value, checked as boolean)}
+                                      className="mr-2"
+                                    />
+                                    {range.label}
+                                    <CheckIcon
+                                      className={cn(
+                                        "ml-auto h-4 w-4",
+                                        isSelected ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                  </CommandItem>
+                                );
+                              })}
+                            </div>
+                          </CommandGroup>
+                          {selectedAgeRanges.length > 0 && (
+                            <>
+                              <Separator className="my-2" />
+                              <div className="p-2">
+                                <Button
+                                  variant="ghost"
+                                  className="w-full justify-center text-red-500 hover:text-red-600"
+                                  onClick={() => setSelectedAgeRanges([])}
+                                >
+                                  <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                </Button>
+                              </div>
+                            </>
+                          )}
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+
+                    {/* Multi-select per Origine */}
+                    <Popover open={isEthnicityPopoverOpen} onOpenChange={setIsEthnicityPopoverOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={isEthnicityPopoverOpen}
+                          className="w-full justify-between pl-10 relative"
+                        >
+                          <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                          {selectedEthnicities.length > 0
+                            ? `${selectedEthnicities.length} selezionati`
+                            : "Origine"}
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                        <Command>
+                          <CommandInput placeholder="Cerca origine..." />
+                          <CommandEmpty>Nessuna origine trovata.</CommandEmpty>
+                          <CommandGroup>
+                            <div className="max-h-60 overflow-y-auto">
+                              {ethnicities.map((option) => {
+                                const isSelected = selectedEthnicities.includes(option.value);
+                                return (
+                                  <CommandItem
+                                    key={option.value}
+                                    value={option.label}
+                                    onSelect={() => {
+                                      handleMultiSelectChange(selectedEthnicities, setSelectedEthnicities, option.value, !isSelected);
+                                    }}
+                                    className="flex items-center cursor-pointer"
+                                  >
+                                    <Checkbox
+                                      checked={isSelected}
+                                      onCheckedChange={(checked) => handleMultiSelectChange(selectedEthnicities, setSelectedEthnicities, option.value, checked as boolean)}
+                                      className="mr-2"
+                                    />
+                                    {option.label}
+                                    <CheckIcon
+                                      className={cn(
+                                        "ml-auto h-4 w-4",
+                                        isSelected ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                  </CommandItem>
+                                );
+                              })}
+                            </div>
+                          </CommandGroup>
+                          {selectedEthnicities.length > 0 && (
+                            <>
+                              <Separator className="my-2" />
+                              <div className="p-2">
+                                <Button
+                                  variant="ghost"
+                                  className="w-full justify-center text-red-500 hover:text-red-600"
+                                  onClick={() => setSelectedEthnicities([])}
+                                >
+                                  <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                </Button>
+                              </div>
+                            </>
+                          )}
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+
+                    {/* Multi-select per Nazionalità */}
+                    <Popover open={isNationalityPopoverOpen} onOpenChange={setIsNationalityPopoverOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={isNationalityPopoverOpen}
+                          className="w-full justify-between pl-10 relative"
+                        >
+                          <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                          {selectedNationalities.length > 0
+                            ? `${selectedNationalities.length} selezionati`
+                            : "Nazionalità"}
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                        <Command>
+                          <CommandInput placeholder="Cerca nazionalità..." />
+                          <CommandEmpty>Nessuna nazionalità trovata.</CommandEmpty>
+                          <CommandGroup>
+                            <div className="max-h-60 overflow-y-auto">
+                              {nationalities.map((option) => {
+                                const isSelected = selectedNationalities.includes(option.value);
+                                return (
+                                  <CommandItem
+                                    key={option.value}
+                                    value={option.label}
+                                    onSelect={() => {
+                                      handleMultiSelectChange(selectedNationalities, setSelectedNationalities, option.value, !isSelected);
+                                    }}
+                                    className="flex items-center cursor-pointer"
+                                  >
+                                    <Checkbox
+                                      checked={isSelected}
+                                      onCheckedChange={(checked) => handleMultiSelectChange(selectedNationalities, setSelectedNationalities, option.value, checked as boolean)}
+                                      className="mr-2"
+                                    />
+                                    {option.label}
+                                    <CheckIcon
+                                      className={cn(
+                                        "ml-auto h-4 w-4",
+                                        isSelected ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                  </CommandItem>
+                                );
+                              })}
+                            </div>
+                          </CommandGroup>
+                          {selectedNationalities.length > 0 && (
+                            <>
+                              <Separator className="my-2" />
+                              <div className="p-2">
+                                <Button
+                                  variant="ghost"
+                                  className="w-full justify-center text-red-500 hover:text-red-600"
+                                  onClick={() => setSelectedNationalities([])}
+                                >
+                                  <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                </Button>
+                              </div>
+                            </>
+                          )}
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+
+                    {/* Multi-select per Tipo di Seno */}
+                    <Popover open={isBreastTypePopoverOpen} onOpenChange={setIsBreastTypePopoverOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={isBreastTypePopoverOpen}
+                          className="w-full justify-between pl-10 relative"
+                        >
+                          <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                          {selectedBreastTypes.length > 0
+                            ? `${selectedBreastTypes.length} selezionati`
+                            : "Tipo di Seno"}
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                        <Command>
+                          <CommandInput placeholder="Cerca tipo di seno..." />
+                          <CommandEmpty>Nessun tipo di seno trovato.</CommandEmpty>
+                          <CommandGroup>
+                            <div className="max-h-60 overflow-y-auto">
+                              {breastTypes.map((option) => {
+                                const isSelected = selectedBreastTypes.includes(option.value);
+                                return (
+                                  <CommandItem
+                                    key={option.value}
+                                    value={option.label}
+                                    onSelect={() => {
+                                      handleMultiSelectChange(selectedBreastTypes, setSelectedBreastTypes, option.value, !isSelected);
+                                    }}
+                                    className="flex items-center cursor-pointer"
+                                  >
+                                    <Checkbox
+                                      checked={isSelected}
+                                      onCheckedChange={(checked) => handleMultiSelectChange(selectedBreastTypes, setSelectedBreastTypes, option.value, checked as boolean)}
+                                      className="mr-2"
+                                    />
+                                    {option.label}
+                                    <CheckIcon
+                                      className={cn(
+                                        "ml-auto h-4 w-4",
+                                        isSelected ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                  </CommandItem>
+                                );
+                              })}
+                            </div>
+                          </CommandGroup>
+                          {selectedBreastTypes.length > 0 && (
+                            <>
+                              <Separator className="my-2" />
+                              <div className="p-2">
+                                <Button
+                                  variant="ghost"
+                                  className="w-full justify-center text-red-500 hover:text-red-600"
+                                  onClick={() => setSelectedBreastTypes([])}
+                                >
+                                  <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                </Button>
+                              </div>
+                            </>
+                          )}
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+
+                    {/* Multi-select per Colore Capelli */}
+                    <Popover open={isHairColorPopoverOpen} onOpenChange={setIsHairColorPopoverOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={isHairColorPopoverOpen}
+                          className="w-full justify-between pl-10 relative"
+                        >
+                          <Palette className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                          {selectedHairColors.length > 0
+                            ? `${selectedHairColors.length} selezionati`
+                            : "Colore Capelli"}
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                        <Command>
+                          <CommandInput placeholder="Cerca colore capelli..." />
+                          <CommandEmpty>Nessun colore capelli trovato.</CommandEmpty>
+                          <CommandGroup>
+                            <div className="max-h-60 overflow-y-auto">
+                              {hairColors.map((option) => {
+                                const isSelected = selectedHairColors.includes(option.value);
+                                return (
+                                  <CommandItem
+                                    key={option.value}
+                                    value={option.label}
+                                    onSelect={() => {
+                                      handleMultiSelectChange(selectedHairColors, setSelectedHairColors, option.value, !isSelected);
+                                    }}
+                                    className="flex items-center cursor-pointer"
+                                  >
+                                    <Checkbox
+                                      checked={isSelected}
+                                      onCheckedChange={(checked) => handleMultiSelectChange(selectedHairColors, setSelectedHairColors, option.value, checked as boolean)}
+                                      className="mr-2"
+                                    />
+                                    {option.label}
+                                    <CheckIcon
+                                      className={cn(
+                                        "ml-auto h-4 w-4",
+                                        isSelected ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                  </CommandItem>
+                                );
+                              })}
+                            </div>
+                          </CommandGroup>
+                          {selectedHairColors.length > 0 && (
+                            <>
+                              <Separator className="my-2" />
+                              <div className="p-2">
+                                <Button
+                                  variant="ghost"
+                                  className="w-full justify-center text-red-500 hover:text-red-600"
+                                  onClick={() => setSelectedHairColors([])}
+                                >
+                                  <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                </Button>
+                              </div>
+                            </>
+                          )}
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+
+                    {/* Multi-select per Corporatura */}
+                    <Popover open={isBodyTypePopoverOpen} onOpenChange={setIsBodyTypePopoverOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={isBodyTypePopoverOpen}
+                          className="w-full justify-between pl-10 relative"
+                        >
+                          <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                          {selectedBodyTypes.length > 0
+                            ? `${selectedBodyTypes.length} selezionati`
+                            : "Corporatura"}
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                        <Command>
+                          <CommandInput placeholder="Cerca corporatura..." />
+                          <CommandEmpty>Nessuna corporatura trovata.</CommandEmpty>
+                          <CommandGroup>
+                            <div className="max-h-60 overflow-y-auto">
+                              {bodyTypes.map((option) => {
+                                const isSelected = selectedBodyTypes.includes(option.value);
+                                return (
+                                  <CommandItem
+                                    key={option.value}
+                                    value={option.label}
+                                    onSelect={() => {
+                                      handleMultiSelectChange(selectedBodyTypes, setSelectedBodyTypes, option.value, !isSelected);
+                                    }}
+                                    className="flex items-center cursor-pointer"
+                                  >
+                                    <Checkbox
+                                      checked={isSelected}
+                                      onCheckedChange={(checked) => handleMultiSelectChange(selectedBodyTypes, setSelectedBodyTypes, option.value, checked as boolean)}
+                                      className="mr-2"
+                                    />
+                                    {option.label}
+                                    <CheckIcon
+                                      className={cn(
+                                        "ml-auto h-4 w-4",
+                                        isSelected ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                  </CommandItem>
+                                );
+                              })}
+                            </div>
+                          </CommandGroup>
+                          {selectedBodyTypes.length > 0 && (
+                            <>
+                              <Separator className="my-2" />
+                              <div className="p-2">
+                                <Button
+                                  variant="ghost"
+                                  className="w-full justify-center text-red-500 hover:text-red-600"
+                                  onClick={() => setSelectedBodyTypes([])}
+                                >
+                                  <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                </Button>
+                              </div>
+                            </>
+                          )}
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+
+                    {/* Multi-select per Colore Occhi */}
+                    <Popover open={isEyeColorPopoverOpen} onOpenChange={setIsEyeColorPopoverOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={isEyeColorPopoverOpen}
+                          className="w-full justify-between pl-10 relative"
+                        >
+                          <Eye className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                          {selectedEyeColors.length > 0
+                            ? `${selectedEyeColors.length} selezionati`
+                            : "Colore Occhi"}
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                        <Command>
+                          <CommandInput placeholder="Cerca colore occhi..." />
+                          <CommandEmpty>Nessun colore occhi trovato.</CommandEmpty>
+                          <CommandGroup>
+                            <div className="max-h-60 overflow-y-auto">
+                              {eyeColors.map((option) => {
+                                const isSelected = selectedEyeColors.includes(option.value);
+                                return (
+                                  <CommandItem
+                                    key={option.value}
+                                    value={option.label}
+                                    onSelect={() => {
+                                      handleMultiSelectChange(selectedEyeColors, setSelectedEyeColors, option.value, !isSelected);
+                                    }}
+                                    className="flex items-center cursor-pointer"
+                                  >
+                                    <Checkbox
+                                      checked={isSelected}
+                                      onCheckedChange={(checked) => handleMultiSelectChange(selectedEyeColors, setSelectedEyeColors, option.value, checked as boolean)}
+                                      className="mr-2"
+                                    />
+                                    {option.label}
+                                    <CheckIcon
+                                      className={cn(
+                                        "ml-auto h-4 w-4",
+                                        isSelected ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                  </CommandItem>
+                                );
+                              })}
+                            </div>
+                          </CommandGroup>
+                          {selectedEyeColors.length > 0 && (
+                            <>
+                              <Separator className="my-2" />
+                              <div className="p-2">
+                                <Button
+                                  variant="ghost"
+                                  className="w-full justify-center text-red-500 hover:text-red-600"
+                                  onClick={() => setSelectedEyeColors([])}
+                                >
+                                  <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                </Button>
+                              </div>
+                            </>
+                          )}
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                   </div>
                   <Separator className="my-4" />
                   <h3 className="text-lg font-semibold text-gray-700 mb-4">Filtri Incontro</h3>

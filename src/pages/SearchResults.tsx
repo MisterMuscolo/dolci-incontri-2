@@ -23,11 +23,10 @@ import { cn } from '@/lib/utils';
 const LISTINGS_PER_PAGE = 10;
 
 const ageRanges = [
-  { value: 'tutte', label: 'Tutte le età' },
-  { value: '18-24', label: '18-24 anni' },
-  { value: '25-36', label: '25-36 anni' },
-  { value: '37-45', label: '37-45 anni' },
-  { value: 'over45', label: '+46 anni' }, // Modificato il value
+  { value: '18-24', label: '18-24 anni', min: 18, max: 24 },
+  { value: '25-36', label: '25-36 anni', min: 25, max: 36 },
+  { value: '37-45', label: '37-45 anni', min: 37, max: 45 },
+  { value: 'over45', label: '+46 anni', min: 46, max: null },
 ];
 
 // Definizioni delle opzioni per i nuovi campi (copiate da NewListing.tsx)
@@ -170,13 +169,13 @@ const SearchResults = () => {
   const [currentCategory, setCurrentCategory] = useState(searchParams.get('category') || 'tutte');
   const [currentCity, setCurrentCity] = useState(searchParams.get('city') || 'tutte');
   const [currentKeyword, setCurrentKeyword] = useState(searchParams.get('keyword') || '');
-  const [currentSelectedAgeRange, setCurrentSelectedAgeRange] = useState('tutte'); // Stato per la fascia d'età
-  const [currentEthnicity, setCurrentEthnicity] = useState(searchParams.get('ethnicity') || 'tutte');
-  const [currentNationality, setCurrentNationality] = useState(searchParams.get('nationality') || 'tutte');
-  const [currentBreastType, setCurrentBreastType] = useState(searchParams.get('breast_type') || 'tutte');
-  const [currentHairColor, setCurrentHairColor] = useState(searchParams.get('hair_color') || 'tutte');
-  const [currentBodyType, setCurrentBodyType] = useState(searchParams.get('body_type') || 'tutte');
-  const [currentEyeColor, setCurrentEyeColor] = useState(searchParams.get('eye_color') || 'tutte');
+  const [currentSelectedAgeRanges, setCurrentSelectedAgeRanges] = useState<string[]>([]); // Modificato a array
+  const [currentEthnicities, setCurrentEthnicities] = useState<string[]>([]); // Modificato a array
+  const [currentNationalities, setCurrentNationalities] = useState<string[]>([]); // Modificato a array
+  const [currentBreastTypes, setCurrentBreastTypes] = useState<string[]>([]); // Modificato a array
+  const [currentHairColors, setCurrentHairColors] = useState<string[]>([]); // Modificato a array
+  const [currentBodyTypes, setCurrentBodyTypes] = useState<string[]>([]); // Modificato a array
+  const [currentEyeColors, setCurrentEyeColors] = useState<string[]>([]); // Modificato a array
   // Nuovi stati per i filtri di incontro
   const [currentMeetingTypes, setCurrentMeetingTypes] = useState<string[]>(searchParams.getAll('meeting_type'));
   const [currentAvailabilityFor, setCurrentAvailabilityFor] = useState<string[]>(searchParams.getAll('availability_for'));
@@ -192,44 +191,36 @@ const SearchResults = () => {
   const [isAvailabilityForPopoverOpen, setIsAvailabilityForPopoverOpen] = useState(false);
   const [isMeetingLocationPopoverOpen, setIsMeetingLocationPopoverOpen] = useState(false);
 
+  // Nuovi stati per i popover dei filtri personali
+  const [isAgeRangePopoverOpen, setIsAgeRangePopoverOpen] = useState(false);
+  const [isEthnicityPopoverOpen, setIsEthnicityPopoverOpen] = useState(false);
+  const [isNationalityPopoverOpen, setIsNationalityPopoverOpen] = useState(false);
+  const [isBreastTypePopoverOpen, setIsBreastTypePopoverOpen] = useState(false);
+  const [isHairColorPopoverOpen, setIsHairColorPopoverOpen] = useState(false);
+  const [isBodyTypePopoverOpen, setIsBodyTypePopoverOpen] = useState(false);
+  const [isEyeColorPopoverOpen, setIsEyeColorPopoverOpen] = useState(false);
+
   // Update local states when URL search params change (e.g., direct URL access or browser back/forward)
   useEffect(() => {
     setCurrentCategory(searchParams.get('category') || 'tutte');
     setCurrentCity(searchParams.get('city') || 'tutte');
     setCurrentKeyword(searchParams.get('keyword') || '');
     
-    // Ricostruisci currentSelectedAgeRange dai parametri min_age e max_age
-    const minAgeParam = searchParams.get('min_age');
-    const maxAgeParam = searchParams.get('max_age');
-    let ageRangeValue = 'tutte';
-    if (minAgeParam && maxAgeParam) {
-      ageRangeValue = `${minAgeParam}-${maxAgeParam}`;
-    } else if (minAgeParam === '46' && !maxAgeParam) { // Gestisce il caso '+46 anni'
-      ageRangeValue = 'over45';
-    } else if (minAgeParam && !maxAgeParam) { // Caso generico per altri min_age senza max_age
-      ageRangeValue = `${minAgeParam}+`;
-    }
+    // Sincronizza lo stato dei filtri con i parametri URL all'avvio o al cambio URL
+    setCurrentSelectedAgeRanges(searchParams.getAll('age_range')); // Usa age_range per multi-select
+    setCurrentEthnicities(searchParams.getAll('ethnicity'));
+    setCurrentNationalities(searchParams.getAll('nationality'));
+    setCurrentBreastTypes(searchParams.getAll('breast_type'));
+    setCurrentHairColors(searchParams.getAll('hair_color'));
+    setCurrentBodyTypes(searchParams.getAll('body_type'));
+    setCurrentEyeColors(searchParams.getAll('eye_color'));
 
-    // Validate if the constructed age range is actually one of the predefined ones
-    const isValidAgeRange = ageRanges.some(range => range.value === ageRangeValue);
-    if (!isValidAgeRange) {
-      ageRangeValue = 'tutte'; // Fallback to 'tutte' if invalid
-    }
-    setCurrentSelectedAgeRange(ageRangeValue);
-
-    setCurrentEthnicity(searchParams.get('ethnicity') || 'tutte');
-    setCurrentNationality(searchParams.get('nationality') || 'tutte');
-    setCurrentBreastType(searchParams.get('breast_type') || 'tutte');
-    setCurrentHairColor(searchParams.get('hair_color') || 'tutte');
-    setCurrentBodyType(searchParams.get('body_type') || 'tutte');
-    setCurrentEyeColor(searchParams.get('eye_color') || 'tutte');
-    // Sincronizza i nuovi filtri con i parametri URL
     setCurrentMeetingTypes(searchParams.getAll('meeting_type'));
     setCurrentAvailabilityFor(searchParams.getAll('availability_for'));
     setCurrentMeetingLocations(searchParams.getAll('meeting_location'));
     setCurrentHourlyRateMin(searchParams.get('hourly_rate_min') || '');
     setCurrentHourlyRateMax(searchParams.get('hourly_rate_max') || '');
-    setCurrentOfferedServices(searchParams.getAll('offered_services')); // Sincronizza il nuovo campo
+    setCurrentOfferedServices(searchParams.getAll('offered_services'));
 
     setCurrentPage(parseInt(searchParams.get('page') || '1', 10));
   }, [searchParams]);
@@ -241,14 +232,13 @@ const SearchResults = () => {
     const categoryParam = searchParams.get('category');
     const cityParam = searchParams.get('city');
     const keywordParam = searchParams.get('keyword');
-    const minAgeParam = searchParams.get('min_age');
-    const maxAgeParam = searchParams.get('max_age');
-    const ethnicityParam = searchParams.get('ethnicity');
-    const nationalityParam = searchParams.get('nationality');
-    const breastTypeParam = searchParams.get('breast_type');
-    const hairColorParam = searchParams.get('hair_color');
-    const bodyTypeParam = searchParams.get('body_type');
-    const eyeColorParam = searchParams.get('eye_color');
+    const ageRangeParams = searchParams.getAll('age_range'); // Usa age_range per multi-select
+    const ethnicityParams = searchParams.getAll('ethnicity');
+    const nationalityParams = searchParams.getAll('nationality');
+    const breastTypeParams = searchParams.getAll('breast_type');
+    const hairColorParams = searchParams.getAll('hair_color');
+    const bodyTypeParams = searchParams.getAll('body_type');
+    const eyeColorParams = searchParams.getAll('eye_color');
     const meetingTypeParams = searchParams.getAll('meeting_type');
     const availabilityForParams = searchParams.getAll('availability_for');
     const meetingLocationParams = searchParams.getAll('meeting_location');
@@ -305,29 +295,43 @@ const SearchResults = () => {
     if (keywordParam) {
       query = query.or(`title.ilike.%${keywordParam}%,description.ilike.%${keywordParam}%`);
     }
-    if (minAgeParam) {
-      query = query.gte('age', parseInt(minAgeParam, 10));
+    
+    // Logica per la fascia d'età (multi-select)
+    if (ageRangeParams.length > 0) {
+      const ageConditions = ageRangeParams.map(rangeValue => {
+        const range = ageRanges.find(r => r.value === rangeValue);
+        if (range) {
+          if (range.max === null) { // +46 anni
+            return `(age.gte.${range.min})`;
+          } else {
+            return `(age.gte.${range.min},age.lte.${range.max})`;
+          }
+        }
+        return ''; // Should not happen if ageRanges are valid
+      }).filter(Boolean); // Remove empty strings
+
+      if (ageConditions.length > 0) {
+        query = query.or(ageConditions.join(','));
+      }
     }
-    if (maxAgeParam) {
-      query = query.lte('age', parseInt(maxAgeParam, 10));
+
+    if (ethnicityParams.length > 0) {
+      query = query.in('ethnicity', ethnicityParams);
     }
-    if (ethnicityParam && ethnicityParam !== 'tutte') {
-      query = query.eq('ethnicity', ethnicityParam);
+    if (nationalityParams.length > 0) {
+      query = query.in('nationality', nationalityParams);
     }
-    if (nationalityParam && nationalityParam !== 'tutte') {
-      query = query.eq('nationality', nationalityParam);
+    if (breastTypeParams.length > 0) {
+      query = query.in('breast_type', breastTypeParams);
     }
-    if (breastTypeParam && breastTypeParam !== 'tutte') {
-      query = query.eq('breast_type', breastTypeParam);
+    if (hairColorParams.length > 0) {
+      query = query.in('hair_color', hairColorParams);
     }
-    if (hairColorParam && hairColorParam !== 'tutte') {
-      query = query.eq('hair_color', hairColorParam);
+    if (bodyTypeParams.length > 0) {
+      query = query.in('body_type', bodyTypeParams);
     }
-    if (bodyTypeParam && bodyTypeParam !== 'tutte') {
-      query = query.eq('body_type', bodyTypeParam);
-    }
-    if (eyeColorParam && eyeColorParam !== 'tutte') {
-      query = query.eq('eye_color', eyeColorParam);
+    if (eyeColorParams.length > 0) {
+      query = query.in('eye_color', eyeColorParams);
     }
     // Nuovi filtri per array (usiamo `cs` per "contains string" o `ov` per "overlaps")
     if (meetingTypeParams.length > 0) {
@@ -392,25 +396,15 @@ const SearchResults = () => {
     if (currentCity && currentCity !== 'tutte') newSearchParams.append('city', currentCity);
     if (currentKeyword) newSearchParams.append('keyword', currentKeyword);
     
-    // Logica per la fascia d'età
-    if (currentSelectedAgeRange && currentSelectedAgeRange !== 'tutte') {
-      if (currentSelectedAgeRange === 'over45') { // Gestisce il nuovo valore 'over45'
-        newSearchParams.append('min_age', '46');
-      } else {
-        const [min, max] = currentSelectedAgeRange.split('-');
-        newSearchParams.append('min_age', min);
-        if (max && max !== '+') {
-          newSearchParams.append('max_age', max);
-        }
-      }
-    }
+    // Logica per la fascia d'età (multi-select)
+    currentSelectedAgeRanges.forEach(range => newSearchParams.append('age_range', range));
 
-    if (currentEthnicity && currentEthnicity !== 'tutte') newSearchParams.append('ethnicity', currentEthnicity);
-    if (currentNationality && currentNationality !== 'tutte') newSearchParams.append('nationality', currentNationality);
-    if (currentBreastType && currentBreastType !== 'tutte') newSearchParams.append('breast_type', currentBreastType);
-    if (currentHairColor && currentHairColor !== 'tutte') newSearchParams.append('hair_color', currentHairColor);
-    if (currentBodyType && currentBodyType !== 'tutte') newSearchParams.append('body_type', currentBodyType);
-    if (currentEyeColor && currentEyeColor !== 'tutte') newSearchParams.append('eye_color', currentEyeColor);
+    currentEthnicities.forEach(eth => newSearchParams.append('ethnicity', eth));
+    currentNationalities.forEach(nat => newSearchParams.append('nationality', nat));
+    currentBreastTypes.forEach(bt => newSearchParams.append('breast_type', bt));
+    currentHairColors.forEach(hc => newSearchParams.append('hair_color', hc));
+    currentBodyTypes.forEach(bt => newSearchParams.append('body_type', bt));
+    currentEyeColors.forEach(ec => newSearchParams.append('eye_color', ec));
     // Aggiungi i nuovi filtri
     currentMeetingTypes.forEach(type => newSearchParams.append('meeting_type', type));
     currentAvailabilityFor.forEach(avail => newSearchParams.append('availability_for', avail));
@@ -454,37 +448,37 @@ const SearchResults = () => {
 
   const getEthnicityLabel = (value: string) => {
     const eth = ethnicities.find(e => e.value === value);
-    return eth ? eth.label : 'Tutte le origini';
+    return eth ? eth.label : null;
   };
 
   const getNationalityLabel = (value: string) => {
     const nat = nationalities.find(n => n.value === value);
-    return nat ? nat.label : 'Tutte le nazionalità';
+    return nat ? nat.label : null;
   };
 
   const getBreastTypeLabel = (value: string) => {
     const bt = breastTypes.find(b => b.value === value);
-    return bt ? bt.label : 'Tutti i tipi di seno';
+    return bt ? bt.label : null;
   };
 
   const getHairColorLabel = (value: string) => {
     const hc = hairColors.find(h => h.value === value);
-    return hc ? hc.label : 'Tutti i colori di capelli';
+    return hc ? hc.label : null;
   };
 
   const getBodyTypeLabel = (value: string) => {
     const bt = bodyTypes.find(b => b.value === value);
-    return bt ? bt.label : 'Tutte le corporature';
+    return bt ? bt.label : null;
   };
 
   const getEyeColorLabel = (value: string) => {
     const ec = eyeColors.find(e => e.value === value);
-    return ec ? ec.label : 'Tutti i colori di occhi';
+    return ec ? ec.label : null;
   };
 
   const getAgeRangeLabel = (value: string) => {
     const range = ageRanges.find(r => r.value === value);
-    return range ? range.label : 'Tutte le età';
+    return range ? range.label : null;
   };
 
   const getMeetingTypeLabel = (value: string) => {
@@ -523,7 +517,7 @@ const SearchResults = () => {
     if (currentCategory && currentCategory !== 'tutte') titleParts.push(getCategoryLabel(currentCategory));
     if (currentCity && currentCity !== 'tutte') titleParts.push(`a ${currentCity}`);
     if (currentKeyword) titleParts.push(`"${currentKeyword}"`);
-    if (currentSelectedAgeRange && currentSelectedAgeRange !== 'tutte') titleParts.push(getAgeRangeLabel(currentSelectedAgeRange));
+    if (currentSelectedAgeRanges.length > 0) titleParts.push(currentSelectedAgeRanges.map(getAgeRangeLabel).join(', '));
     return `${titleParts.join(' ')} | IncontriDolci`;
   };
 
@@ -532,7 +526,7 @@ const SearchResults = () => {
     if (currentCategory && currentCategory !== 'tutte') description += ` nella categoria "${getCategoryLabel(currentCategory)}"`;
     if (currentCity && currentCity !== 'tutte') description += ` nella città di ${currentCity}`;
     if (currentKeyword) description += ` per la parola chiave "${currentKeyword}"`;
-    if (currentSelectedAgeRange && currentSelectedAgeRange !== 'tutte') description += ` con età ${getAgeRangeLabel(currentSelectedAgeRange)}`;
+    if (currentSelectedAgeRanges.length > 0) description += ` con età ${currentSelectedAgeRanges.map(getAgeRangeLabel).join(', ')}`;
     description += ". Trova la tua prossima relazione su IncontriDolci.";
     return description;
   };
@@ -640,39 +634,39 @@ const SearchResults = () => {
                         <Search className="h-3 w-3 mr-1" /> "{currentKeyword}"
                       </Badge>
                     )}
-                    {currentSelectedAgeRange && currentSelectedAgeRange !== 'tutte' && (
+                    {currentSelectedAgeRanges.length > 0 && (
                       <Badge variant="secondary" className="capitalize">
-                        <User className="h-3 w-3 mr-1" /> {getAgeRangeLabel(currentSelectedAgeRange)}
+                        <User className="h-3 w-3 mr-1" /> {currentSelectedAgeRanges.map(getAgeRangeLabel).join(', ')}
                       </Badge>
                     )}
-                    {currentEthnicity && currentEthnicity !== 'tutte' && (
+                    {currentEthnicities.length > 0 && (
                       <Badge variant="secondary" className="capitalize">
-                        <Globe className="h-3 w-3 mr-1" /> {getEthnicityLabel(currentEthnicity)}
+                        <Globe className="h-3 w-3 mr-1" /> {currentEthnicities.map(getEthnicityLabel).join(', ')}
                       </Badge>
                     )}
-                    {currentNationality && currentNationality !== 'tutte' && (
+                    {currentNationalities.length > 0 && (
                       <Badge variant="secondary" className="capitalize">
-                        <Globe className="h-3 w-3 mr-1" /> {getNationalityLabel(currentNationality)}
+                        <Globe className="h-3 w-3 mr-1" /> {currentNationalities.map(getNationalityLabel).join(', ')}
                       </Badge>
                     )}
-                    {currentBreastType && currentBreastType !== 'tutte' && (
+                    {currentBreastTypes.length > 0 && (
                       <Badge variant="secondary" className="capitalize">
-                        <Ruler className="h-3 w-3 mr-1" /> {getBreastTypeLabel(currentBreastType)}
+                        <Ruler className="h-3 w-3 mr-1" /> {currentBreastTypes.map(getBreastTypeLabel).join(', ')}
                       </Badge>
                     )}
-                    {currentHairColor && currentHairColor !== 'tutte' && (
+                    {currentHairColors.length > 0 && (
                       <Badge variant="secondary" className="capitalize">
-                        <Palette className="h-3 w-3 mr-1" /> {getHairColorLabel(currentHairColor)}
+                        <Palette className="h-3 w-3 mr-1" /> {currentHairColors.map(getHairColorLabel).join(', ')}
                       </Badge>
                     )}
-                    {currentBodyType && currentBodyType !== 'tutte' && (
+                    {currentBodyTypes.length > 0 && (
                       <Badge variant="secondary" className="capitalize">
-                        <Ruler className="h-3 w-3 mr-1" /> {getBodyTypeLabel(currentBodyType)}
+                        <Ruler className="h-3 w-3 mr-1" /> {currentBodyTypes.map(getBodyTypeLabel).join(', ')}
                       </Badge>
                     )}
-                    {currentEyeColor && currentEyeColor !== 'tutte' && (
+                    {currentEyeColors.length > 0 && (
                       <Badge variant="secondary" className="capitalize">
-                        <Eye className="h-3 w-3 mr-1" /> {getEyeColorLabel(currentEyeColor)}
+                        <Eye className="h-3 w-3 mr-1" /> {currentEyeColors.map(getEyeColorLabel).join(', ')}
                       </Badge>
                     )}
                     {currentMeetingTypes.length > 0 && (
@@ -703,13 +697,13 @@ const SearchResults = () => {
                     {(!currentCategory || currentCategory === 'tutte') && 
                      (!currentCity || currentCity === 'tutte') && 
                      !currentKeyword &&
-                     (!currentSelectedAgeRange || currentSelectedAgeRange === 'tutte') &&
-                     (!currentEthnicity || currentEthnicity === 'tutte') &&
-                     (!currentNationality || currentNationality === 'tutte') &&
-                     (!currentBreastType || currentBreastType === 'tutte') &&
-                     (!currentHairColor || currentHairColor === 'tutte') &&
-                     (!currentBodyType || currentBodyType === 'tutte') &&
-                     (!currentEyeColor || currentEyeColor === 'tutte') &&
+                     currentSelectedAgeRanges.length === 0 &&
+                     currentEthnicities.length === 0 &&
+                     currentNationalities.length === 0 &&
+                     currentBreastTypes.length === 0 &&
+                     currentHairColors.length === 0 &&
+                     currentBodyTypes.length === 0 &&
+                     currentEyeColors.length === 0 &&
                      currentMeetingTypes.length === 0 &&
                      currentAvailabilityFor.length === 0 &&
                      currentMeetingLocations.length === 0 &&
@@ -777,99 +771,485 @@ const SearchResults = () => {
                   </div>
                 </div>
 
-                {/* Filtro per la fascia d'età */}
+                {/* Multi-select per la fascia d'età */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    <Select value={currentSelectedAgeRange} onValueChange={setCurrentSelectedAgeRange}>
-                      <SelectTrigger className="w-full pl-10">
-                        <SelectValue placeholder="Fascia d'età" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {ageRanges.map((range) => (
-                          <SelectItem key={range.value} value={range.value}>
-                            {range.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <Popover open={isAgeRangePopoverOpen} onOpenChange={setIsAgeRangePopoverOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={isAgeRangePopoverOpen}
+                        className="w-full justify-between pl-10 relative"
+                      >
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        {currentSelectedAgeRanges.length > 0
+                          ? `${currentSelectedAgeRanges.length} selezionati`
+                          : "Fascia d'età"}
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                      <Command>
+                        <CommandInput placeholder="Cerca fascia d'età..." />
+                        <CommandEmpty>Nessuna fascia d'età trovata.</CommandEmpty>
+                        <CommandGroup>
+                          <div className="max-h-60 overflow-y-auto">
+                            {ageRanges.map((range) => {
+                              const isSelected = currentSelectedAgeRanges.includes(range.value);
+                              return (
+                                <CommandItem
+                                  key={range.value}
+                                  value={range.label}
+                                  onSelect={() => {
+                                    handleMultiSelectChange(currentSelectedAgeRanges, setCurrentSelectedAgeRanges, range.value, !isSelected);
+                                  }}
+                                  className="flex items-center cursor-pointer"
+                                >
+                                  <Checkbox
+                                    checked={isSelected}
+                                    onCheckedChange={(checked) => handleMultiSelectChange(currentSelectedAgeRanges, setCurrentSelectedAgeRanges, range.value, checked as boolean)}
+                                    className="mr-2"
+                                  />
+                                  {range.label}
+                                  <CheckIcon
+                                    className={cn(
+                                      "ml-auto h-4 w-4",
+                                      isSelected ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                </CommandItem>
+                              );
+                            })}
+                          </div>
+                        </CommandGroup>
+                        {currentSelectedAgeRanges.length > 0 && (
+                          <>
+                            <Separator className="my-2" />
+                            <div className="p-2">
+                              <Button
+                                variant="ghost"
+                                className="w-full justify-center text-red-500 hover:text-red-600"
+                                onClick={() => setCurrentSelectedAgeRanges([])}
+                              >
+                                <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                              </Button>
+                            </div>
+                          </>
+                        )}
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
                 {/* Nuovi filtri per Dettagli Personali */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="relative">
-                    <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    <Select value={currentEthnicity} onValueChange={setCurrentEthnicity}>
-                      <SelectTrigger className="w-full pl-10">
-                        <SelectValue placeholder="Origine" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="tutte">Tutte le origini</SelectItem>
-                        {ethnicities.map((e) => <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="relative">
-                    <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    <Select value={currentNationality} onValueChange={setCurrentNationality}>
-                      <SelectTrigger className="w-full pl-10">
-                        <SelectValue placeholder="Nazionalità" />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-60">
-                        <SelectItem value="tutte">Tutte le nazionalità</SelectItem>
-                        {nationalities.map((n) => <SelectItem key={n.value} value={n.value}>{n.label}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="relative">
-                    <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    <Select value={currentBreastType} onValueChange={setCurrentBreastType}>
-                      <SelectTrigger className="w-full pl-10">
-                        <SelectValue placeholder="Tipo di Seno" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="tutte">Tutti i tipi di seno</SelectItem>
-                        {breastTypes.map((b) => <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="relative">
-                    <Palette className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    <Select value={currentHairColor} onValueChange={setCurrentHairColor}>
-                      <SelectTrigger className="w-full pl-10">
-                        <SelectValue placeholder="Colore Capelli" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="tutte">Tutti i colori di capelli</SelectItem>
-                        {hairColors.map((h) => <SelectItem key={h.value} value={h.value}>{h.label}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="relative">
-                    <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    <Select value={currentBodyType} onValueChange={setCurrentBodyType}>
-                      <SelectTrigger className="w-full pl-10">
-                        <SelectValue placeholder="Corporatura" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="tutte">Tutte le corporature</SelectItem>
-                        {bodyTypes.map((b) => <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="relative">
-                    <Eye className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    <Select value={currentEyeColor} onValueChange={setCurrentEyeColor}>
-                      <SelectTrigger className="w-full pl-10">
-                        <SelectValue placeholder="Colore Occhi" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="tutte">Tutti i colori di occhi</SelectItem>
-                        {eyeColors.map((e) => <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  {/* Multi-select per Origine */}
+                  <Popover open={isEthnicityPopoverOpen} onOpenChange={setIsEthnicityPopoverOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={isEthnicityPopoverOpen}
+                        className="w-full justify-between pl-10 relative"
+                      >
+                        <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        {currentEthnicities.length > 0
+                          ? `${currentEthnicities.length} selezionati`
+                          : "Origine"}
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                      <Command>
+                        <CommandInput placeholder="Cerca origine..." />
+                        <CommandEmpty>Nessuna origine trovata.</CommandEmpty>
+                        <CommandGroup>
+                          <div className="max-h-60 overflow-y-auto">
+                            {ethnicities.map((option) => {
+                              const isSelected = currentEthnicities.includes(option.value);
+                              return (
+                                <CommandItem
+                                  key={option.value}
+                                  value={option.label}
+                                  onSelect={() => {
+                                    handleMultiSelectChange(currentEthnicities, setCurrentEthnicities, option.value, !isSelected);
+                                  }}
+                                  className="flex items-center cursor-pointer"
+                                >
+                                  <Checkbox
+                                    checked={isSelected}
+                                    onCheckedChange={(checked) => handleMultiSelectChange(currentEthnicities, setCurrentEthnicities, option.value, checked as boolean)}
+                                    className="mr-2"
+                                  />
+                                  {option.label}
+                                  <CheckIcon
+                                    className={cn(
+                                      "ml-auto h-4 w-4",
+                                      isSelected ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                </CommandItem>
+                              );
+                            })}
+                          </div>
+                        </CommandGroup>
+                        {currentEthnicities.length > 0 && (
+                          <>
+                            <Separator className="my-2" />
+                            <div className="p-2">
+                              <Button
+                                variant="ghost"
+                                className="w-full justify-center text-red-500 hover:text-red-600"
+                                onClick={() => setCurrentEthnicities([])}
+                              >
+                                <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                              </Button>
+                            </div>
+                          </>
+                        )}
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+
+                  {/* Multi-select per Nazionalità */}
+                  <Popover open={isNationalityPopoverOpen} onOpenChange={setIsNationalityPopoverOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={isNationalityPopoverOpen}
+                        className="w-full justify-between pl-10 relative"
+                      >
+                        <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        {currentNationalities.length > 0
+                          ? `${currentNationalities.length} selezionati`
+                          : "Nazionalità"}
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                      <Command>
+                        <CommandInput placeholder="Cerca nazionalità..." />
+                        <CommandEmpty>Nessuna nazionalità trovata.</CommandEmpty>
+                        <CommandGroup>
+                          <div className="max-h-60 overflow-y-auto">
+                            {nationalities.map((option) => {
+                              const isSelected = currentNationalities.includes(option.value);
+                              return (
+                                <CommandItem
+                                  key={option.value}
+                                  value={option.label}
+                                  onSelect={() => {
+                                    handleMultiSelectChange(currentNationalities, setCurrentNationalities, option.value, !isSelected);
+                                  }}
+                                  className="flex items-center cursor-pointer"
+                                >
+                                  <Checkbox
+                                    checked={isSelected}
+                                    onCheckedChange={(checked) => handleMultiSelectChange(currentNationalities, setCurrentNationalities, option.value, checked as boolean)}
+                                    className="mr-2"
+                                  />
+                                  {option.label}
+                                  <CheckIcon
+                                    className={cn(
+                                      "ml-auto h-4 w-4",
+                                      isSelected ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                </CommandItem>
+                              );
+                            })}
+                          </div>
+                        </CommandGroup>
+                        {currentNationalities.length > 0 && (
+                          <>
+                            <Separator className="my-2" />
+                            <div className="p-2">
+                              <Button
+                                variant="ghost"
+                                className="w-full justify-center text-red-500 hover:text-red-600"
+                                onClick={() => setCurrentNationalities([])}
+                              >
+                                <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                              </Button>
+                            </div>
+                          </>
+                        )}
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+
+                  {/* Multi-select per Tipo di Seno */}
+                  <Popover open={isBreastTypePopoverOpen} onOpenChange={setIsBreastTypePopoverOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={isBreastTypePopoverOpen}
+                        className="w-full justify-between pl-10 relative"
+                      >
+                        <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        {currentBreastTypes.length > 0
+                          ? `${currentBreastTypes.length} selezionati`
+                          : "Tipo di Seno"}
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                      <Command>
+                        <CommandInput placeholder="Cerca tipo di seno..." />
+                        <CommandEmpty>Nessun tipo di seno trovato.</CommandEmpty>
+                        <CommandGroup>
+                          <div className="max-h-60 overflow-y-auto">
+                            {breastTypes.map((option) => {
+                              const isSelected = currentBreastTypes.includes(option.value);
+                              return (
+                                <CommandItem
+                                  key={option.value}
+                                  value={option.label}
+                                  onSelect={() => {
+                                    handleMultiSelectChange(currentBreastTypes, setCurrentBreastTypes, option.value, !isSelected);
+                                  }}
+                                  className="flex items-center cursor-pointer"
+                                >
+                                  <Checkbox
+                                    checked={isSelected}
+                                    onCheckedChange={(checked) => handleMultiSelectChange(currentBreastTypes, setCurrentBreastTypes, option.value, checked as boolean)}
+                                    className="mr-2"
+                                  />
+                                  {option.label}
+                                  <CheckIcon
+                                    className={cn(
+                                      "ml-auto h-4 w-4",
+                                      isSelected ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                </CommandItem>
+                              );
+                            })}
+                          </div>
+                        </CommandGroup>
+                        {currentBreastTypes.length > 0 && (
+                          <>
+                            <Separator className="my-2" />
+                            <div className="p-2">
+                              <Button
+                                variant="ghost"
+                                className="w-full justify-center text-red-500 hover:text-red-600"
+                                onClick={() => setCurrentBreastTypes([])}
+                              >
+                                <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                              </Button>
+                            </div>
+                          </>
+                        )}
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+
+                  {/* Multi-select per Colore Capelli */}
+                  <Popover open={isHairColorPopoverOpen} onOpenChange={setIsHairColorPopoverOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={isHairColorPopoverOpen}
+                        className="w-full justify-between pl-10 relative"
+                      >
+                        <Palette className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        {currentHairColors.length > 0
+                          ? `${currentHairColors.length} selezionati`
+                          : "Colore Capelli"}
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                      <Command>
+                        <CommandInput placeholder="Cerca colore capelli..." />
+                        <CommandEmpty>Nessun colore capelli trovato.</CommandEmpty>
+                        <CommandGroup>
+                          <div className="max-h-60 overflow-y-auto">
+                            {hairColors.map((option) => {
+                              const isSelected = currentHairColors.includes(option.value);
+                              return (
+                                <CommandItem
+                                  key={option.value}
+                                  value={option.label}
+                                  onSelect={() => {
+                                    handleMultiSelectChange(currentHairColors, setCurrentHairColors, option.value, !isSelected);
+                                  }}
+                                  className="flex items-center cursor-pointer"
+                                >
+                                  <Checkbox
+                                    checked={isSelected}
+                                    onCheckedChange={(checked) => handleMultiSelectChange(currentHairColors, setCurrentHairColors, option.value, checked as boolean)}
+                                    className="mr-2"
+                                  />
+                                  {option.label}
+                                  <CheckIcon
+                                    className={cn(
+                                      "ml-auto h-4 w-4",
+                                      isSelected ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                </CommandItem>
+                              );
+                            })}
+                          </div>
+                        </CommandGroup>
+                        {currentHairColors.length > 0 && (
+                          <>
+                            <Separator className="my-2" />
+                            <div className="p-2">
+                              <Button
+                                variant="ghost"
+                                className="w-full justify-center text-red-500 hover:text-red-600"
+                                onClick={() => setCurrentHairColors([])}
+                              >
+                                <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                              </Button>
+                            </div>
+                          </>
+                        )}
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+
+                  {/* Multi-select per Corporatura */}
+                  <Popover open={isBodyTypePopoverOpen} onOpenChange={setIsBodyTypePopoverOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={isBodyTypePopoverOpen}
+                        className="w-full justify-between pl-10 relative"
+                      >
+                        <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        {currentBodyTypes.length > 0
+                          ? `${currentBodyTypes.length} selezionati`
+                          : "Corporatura"}
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                      <Command>
+                        <CommandInput placeholder="Cerca corporatura..." />
+                        <CommandEmpty>Nessuna corporatura trovata.</CommandEmpty>
+                        <CommandGroup>
+                          <div className="max-h-60 overflow-y-auto">
+                            {bodyTypes.map((option) => {
+                              const isSelected = currentBodyTypes.includes(option.value);
+                              return (
+                                <CommandItem
+                                  key={option.value}
+                                  value={option.label}
+                                  onSelect={() => {
+                                    handleMultiSelectChange(currentBodyTypes, setCurrentBodyTypes, option.value, !isSelected);
+                                  }}
+                                  className="flex items-center cursor-pointer"
+                                >
+                                  <Checkbox
+                                    checked={isSelected}
+                                    onCheckedChange={(checked) => handleMultiSelectChange(currentBodyTypes, setCurrentBodyTypes, option.value, checked as boolean)}
+                                    className="mr-2"
+                                  />
+                                  {option.label}
+                                  <CheckIcon
+                                    className={cn(
+                                      "ml-auto h-4 w-4",
+                                      isSelected ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                </CommandItem>
+                              );
+                            })}
+                          </div>
+                        </CommandGroup>
+                        {currentBodyTypes.length > 0 && (
+                          <>
+                            <Separator className="my-2" />
+                            <div className="p-2">
+                              <Button
+                                variant="ghost"
+                                className="w-full justify-center text-red-500 hover:text-red-600"
+                                onClick={() => setCurrentBodyTypes([])}
+                              >
+                                <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                              </Button>
+                            </div>
+                          </>
+                        )}
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+
+                  {/* Multi-select per Colore Occhi */}
+                  <Popover open={isEyeColorPopoverOpen} onOpenChange={setIsEyeColorPopoverOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={isEyeColorPopoverOpen}
+                        className="w-full justify-between pl-10 relative"
+                      >
+                        <Eye className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        {currentEyeColors.length > 0
+                          ? `${currentEyeColors.length} selezionati`
+                          : "Colore Occhi"}
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                      <Command>
+                        <CommandInput placeholder="Cerca colore occhi..." />
+                        <CommandEmpty>Nessun colore occhi trovato.</CommandEmpty>
+                        <CommandGroup>
+                          <div className="max-h-60 overflow-y-auto">
+                            {eyeColors.map((option) => {
+                              const isSelected = currentEyeColors.includes(option.value);
+                              return (
+                                <CommandItem
+                                  key={option.value}
+                                  value={option.label}
+                                  onSelect={() => {
+                                    handleMultiSelectChange(currentEyeColors, setCurrentEyeColors, option.value, !isSelected);
+                                  }}
+                                  className="flex items-center cursor-pointer"
+                                >
+                                  <Checkbox
+                                    checked={isSelected}
+                                    onCheckedChange={(checked) => handleMultiSelectChange(currentEyeColors, setCurrentEyeColors, option.value, checked as boolean)}
+                                    className="mr-2"
+                                  />
+                                  {option.label}
+                                  <CheckIcon
+                                    className={cn(
+                                      "ml-auto h-4 w-4",
+                                      isSelected ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                </CommandItem>
+                              );
+                            })}
+                          </div>
+                        </CommandGroup>
+                        {currentEyeColors.length > 0 && (
+                          <>
+                            <Separator className="my-2" />
+                            <div className="p-2">
+                              <Button
+                                variant="ghost"
+                                className="w-full justify-center text-red-500 hover:text-red-600"
+                                onClick={() => setCurrentEyeColors([])}
+                              >
+                                <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                              </Button>
+                            </div>
+                          </>
+                        )}
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
                 <Separator className="my-4" />
