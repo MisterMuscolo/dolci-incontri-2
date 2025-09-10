@@ -11,6 +11,7 @@ import { Helmet } from 'react-helmet-async';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox'; // Importa Checkbox
 
 interface IndexProps {
   session: any;
@@ -31,7 +32,7 @@ const meetingTypeOptions = [
   { id: 'relax', label: 'Relax' },
   { id: 'massaggio', label: 'Massaggio' },
   { id: 'viaggio', label: 'Viaggio' },
-  { id: 'altro', label: 'Altro' },
+  { id: 'altro', 'label': 'Altro' },
 ];
 
 const availabilityForOptions = [
@@ -343,6 +344,12 @@ export default function Index({ session }: IndexProps) {
   const getOfferedServiceLabel = (value: string) => {
     const service = offeredServicesOptions.find(o => o.id === value);
     return service ? service.label : value;
+  };
+
+  const handleOfferedServiceChange = (serviceId: string, checked: boolean) => {
+    setSelectedOfferedServices(prev =>
+      checked ? [...prev, serviceId] : prev.filter(id => id !== serviceId)
+    );
   };
 
   const hasActivePersonalFilters = 
@@ -687,26 +694,22 @@ export default function Index({ session }: IndexProps) {
                   </div>
                   <Separator className="my-4" />
                   <h3 className="text-lg font-semibold text-gray-700 mb-4">Filtri Servizi Offerti</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="relative">
-                      <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Select
-                        value={selectedOfferedServices.length > 0 ? selectedOfferedServices[0] : 'tutte'}
-                        onValueChange={(value) => setSelectedOfferedServices(value === 'tutte' ? [] : [value])}
-                      >
-                        <SelectTrigger className="w-full pl-10">
-                          <SelectValue placeholder="Servizi Offerti" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="tutte">Tutti i servizi</SelectItem>
-                          {offeredServicesOptions.map((option) => (
-                            <SelectItem key={option.id} value={option.id}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"> {/* Modificato a grid di checkbox */}
+                    {offeredServicesOptions.map((option) => (
+                      <div key={option.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`service-${option.id}`}
+                          checked={selectedOfferedServices.includes(option.id)}
+                          onCheckedChange={(checked) => handleOfferedServiceChange(option.id, checked as boolean)}
+                        />
+                        <label
+                          htmlFor={`service-${option.id}`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {option.label}
+                        </label>
+                      </div>
+                    ))}
                   </div>
                   <Button type="button" variant="outline" onClick={handleResetFilters} className="w-full border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-800 text-lg py-6 mt-2">
                     <RotateCcw className="h-5 w-5 mr-2" /> Reset Filtri

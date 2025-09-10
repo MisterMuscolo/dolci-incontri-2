@@ -15,6 +15,7 @@ import { Card } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox'; // Importa Checkbox
 
 const LISTINGS_PER_PAGE = 10;
 
@@ -499,6 +500,12 @@ const SearchResults = () => {
     return service ? service.label : value;
   };
 
+  const handleOfferedServiceChange = (serviceId: string, checked: boolean) => {
+    setCurrentOfferedServices(prev =>
+      checked ? [...prev, serviceId] : prev.filter(id => id !== serviceId)
+    );
+  };
+
   const generateTitle = () => {
     let titleParts = ["Annunci Incontri"];
     if (currentCategory && currentCategory !== 'tutte') titleParts.push(getCategoryLabel(currentCategory));
@@ -937,26 +944,22 @@ const SearchResults = () => {
                   </div>
                   <Separator className="my-4" />
                   <h3 className="text-lg font-semibold text-gray-700 mb-4">Filtri Servizi Offerti</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="relative">
-                      <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Select
-                        value={currentOfferedServices.length > 0 ? currentOfferedServices[0] : 'tutte'}
-                        onValueChange={(value) => setCurrentOfferedServices(value === 'tutte' ? [] : [value])}
-                      >
-                        <SelectTrigger className="w-full pl-10">
-                          <SelectValue placeholder="Servizi Offerti" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="tutte">Tutti i servizi</SelectItem>
-                          {offeredServicesOptions.map((option) => (
-                            <SelectItem key={option.id} value={option.id}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"> {/* Modificato a grid di checkbox */}
+                    {offeredServicesOptions.map((option) => (
+                      <div key={option.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`service-search-${option.id}`}
+                          checked={currentOfferedServices.includes(option.id)}
+                          onCheckedChange={(checked) => handleOfferedServiceChange(option.id, checked as boolean)}
+                        />
+                        <label
+                          htmlFor={`service-search-${option.id}`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {option.label}
+                        </label>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
