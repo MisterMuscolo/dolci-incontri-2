@@ -1237,76 +1237,74 @@ export default function Index({ session }: IndexProps) {
                         />
                       </div>
                     </div>
-                  </div>
-                  <Separator className="my-4" />
-                  {/* Multi-select per Filtri Servizi Offerti */}
-                  <h3 className="text-lg font-semibold text-gray-700 mb-4">Filtri Servizi Offerti</h3>
-                  <Popover open={isOfferedServicesPopoverOpen} onOpenChange={setIsOfferedServicesPopoverOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={isOfferedServicesPopoverOpen}
-                        className="w-full justify-between"
-                      >
-                        <Sparkles className="h-4 w-4 mr-2" />
-                        {selectedOfferedServices.length > 0
-                          ? `${selectedOfferedServices.length} selezionati`
-                          : "Seleziona servizi..."}
-                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
-                      <Command>
-                        <CommandInput placeholder="Cerca servizio..." />
-                        <CommandEmpty>Nessun servizio trovato.</CommandEmpty>
-                        <CommandGroup>
-                          <div className="max-h-60 overflow-y-auto">
-                            {offeredServicesOptions.map((option) => {
-                              const isSelected = selectedOfferedServices.includes(option.id);
-                              return (
-                                <CommandItem
-                                  key={option.id}
-                                  value={option.label}
-                                  onSelect={() => {
-                                    handleMultiSelectChange(selectedOfferedServices, setSelectedOfferedServices, option.id, !isSelected);
-                                  }}
-                                  className="flex items-center cursor-pointer"
-                                >
-                                  <Checkbox
-                                    checked={isSelected}
-                                    onCheckedChange={(checked) => handleMultiSelectChange(selectedOfferedServices, setSelectedOfferedServices, option.id, checked as boolean)}
-                                    className="mr-2"
-                                  />
-                                  {option.label}
-                                  <CheckIcon
-                                    className={cn(
-                                      "ml-auto h-4 w-4",
-                                      isSelected ? "opacity-100" : "opacity-0"
-                                    )}
-                                  />
-                                </CommandItem>
-                              );
-                            })}
-                          </div>
-                        </CommandGroup>
-                        {selectedOfferedServices.length > 0 && (
-                          <>
-                            <Separator className="my-2" />
-                            <div className="p-2">
-                              <Button
-                                variant="ghost"
-                                className="w-full justify-center text-red-500 hover:text-red-600"
-                                onClick={() => setSelectedOfferedServices([])}
-                              >
-                                <X className="h-4 w-4 mr-2" /> Deseleziona tutto
-                              </Button>
+                    {/* Multi-select per Filtri Servizi Offerti */}
+                    <Popover open={isOfferedServicesPopoverOpen} onOpenChange={setIsOfferedServicesPopoverOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={isOfferedServicesPopoverOpen}
+                          className="w-full justify-between pl-10 relative"
+                        >
+                          <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                          {selectedOfferedServices.length > 0
+                            ? `${selectedOfferedServices.length} selezionati`
+                            : "Servizi Offerti"}
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                        <Command>
+                          <CommandInput placeholder="Cerca servizio..." />
+                          <CommandEmpty>Nessun servizio trovato.</CommandEmpty>
+                          <CommandGroup>
+                            <div className="max-h-60 overflow-y-auto">
+                              {offeredServicesOptions.map((option) => {
+                                const isSelected = selectedOfferedServices.includes(option.id);
+                                return (
+                                  <CommandItem
+                                    key={option.id}
+                                    value={option.label}
+                                    onSelect={() => {
+                                      handleMultiSelectChange(selectedOfferedServices, setSelectedOfferedServices, option.id, !isSelected);
+                                    }}
+                                    className="flex items-center cursor-pointer"
+                                  >
+                                    <Checkbox
+                                      checked={isSelected}
+                                      onCheckedChange={(checked) => handleMultiSelectChange(selectedOfferedServices, setSelectedOfferedServices, option.id, checked as boolean)}
+                                      className="mr-2"
+                                    />
+                                    {option.label}
+                                    <CheckIcon
+                                      className={cn(
+                                        "ml-auto h-4 w-4",
+                                        isSelected ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                  </CommandItem>
+                                );
+                              })}
                             </div>
-                          </>
-                        )}
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
+                          </CommandGroup>
+                          {selectedOfferedServices.length > 0 && (
+                            <>
+                              <Separator className="my-2" />
+                              <div className="p-2">
+                                <Button
+                                  variant="ghost"
+                                  className="w-full justify-center text-red-500 hover:text-red-600"
+                                  onClick={() => setSelectedOfferedServices([])}
+                                >
+                                  <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                </Button>
+                              </div>
+                            </>
+                          )}
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                   <Button type="button" variant="outline" onClick={handleResetFilters} className="w-full border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-800 text-lg py-6 mt-4">
                     <RotateCcw className="h-5 w-5 mr-2" /> Reset Filtri
                   </Button>
