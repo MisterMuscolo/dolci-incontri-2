@@ -470,10 +470,10 @@ const NewListing = () => {
                           </FormControl>
                           <SelectContent>
                             <SelectItem value="donna-cerca-uomo">👩‍❤️‍👨 Donna cerca Uomo</SelectItem>
-                            <SelectItem value="uomo-cerca-donna">👨‍❤️‍👩 Uomo cerca Donna</SelectItem>
-                            <SelectItem value="coppie">👩‍❤️‍💋‍👨 Coppie</SelectItem>
-                            <SelectItem value="uomo-cerca-uomo">👨‍❤️‍👨 Uomo cerca Uomo</SelectItem>
                             <SelectItem value="donna-cerca-donna">👩‍❤️‍👩 Donna cerca Donna</SelectItem>
+                            <SelectItem value="uomo-cerca-donna">👨‍❤️‍👩 Uomo cerca Donna</SelectItem>
+                            <SelectItem value="uomo-cerca-uomo">👨‍❤️‍👨 Uomo cerca Uomo</SelectItem>
+                            <SelectItem value="coppie">👩‍❤️‍💋‍👨 Coppie</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -1253,60 +1253,57 @@ const NewListing = () => {
                       </FormItem>
                     )}
                   />
-                </div>
-
-                {/* Nuovo campo per i servizi offerti */}
-                <h2 className="text-xl font-bold text-gray-800 pt-4">Servizi Offerti</h2>
-                <p className="text-sm text-gray-500 -mt-4">Questi dettagli saranno visibili pubblicamente solo per gli annunci Premium.</p>
-                <FormField
-                  control={form.control}
-                  name="offered_services"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2"><Sparkles className="h-4 w-4" /> Quali servizi offri? (Opzionale)</FormLabel>
-                      <Popover open={isOfferedServicesPopoverOpen} onOpenChange={setIsOfferedServicesPopoverOpen}>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              aria-expanded={isOfferedServicesPopoverOpen}
-                              className="w-full justify-between pl-10 relative"
-                            >
-                              <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                              {getSelectedLabel(field.value, offeredServicesOptions.map(o => ({ value: o.id, label: o.label })))}
-                              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                          <Command>
-                            <CommandInput placeholder="Cerca servizio..." />
-                            <CommandEmpty>Nessun servizio trovato.</CommandEmpty>
-                            <CommandGroup>
-                              <div className="max-h-60 overflow-y-auto">
-                                {offeredServicesOptions.map((option) => {
-                                  const isSelected = field.value.includes(option.id);
-                                  return (
-                                    <CommandItem
-                                      key={option.id}
-                                      value={option.label}
-                                      onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.id, !isSelected)}
-                                      className="flex items-center cursor-pointer"
-                                    >
-                                      <Checkbox
-                                        checked={isSelected}
-                                        onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.id, checked as boolean)}
-                                        className="mr-2"
-                                      />
-                                      {option.label}
-                                      <CheckIcon
-                                        className={cn(
-                                          "ml-auto h-4 w-4",
-                                          isSelected ? "opacity-100" : "opacity-0"
-                                        )}
-                                      />
-                                    </CommandItem>
+                  {/* Nuovo campo per i servizi offerti */}
+                  <FormField
+                    control={form.control}
+                    name="offered_services"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2"><Sparkles className="h-4 w-4" /> Quali servizi offri? (Opzionale)</FormLabel>
+                        <Popover open={isOfferedServicesPopoverOpen} onOpenChange={setIsOfferedServicesPopoverOpen}>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={isOfferedServicesPopoverOpen}
+                                className="w-full justify-between pl-10 relative"
+                              >
+                                <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                {getSelectedLabel(field.value, offeredServicesOptions.map(o => ({ value: o.id, label: o.label })))}
+                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                            <Command>
+                              <CommandInput placeholder="Cerca servizio..." />
+                              <CommandEmpty>Nessun servizio trovato.</CommandEmpty>
+                              <CommandGroup>
+                                <div className="max-h-60 overflow-y-auto">
+                                  {offeredServicesOptions.map((option) => {
+                                    const isSelected = field.value.includes(option.id);
+                                    return (
+                                      <CommandItem
+                                        key={option.id}
+                                        value={option.label}
+                                        onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.id, !isSelected)}
+                                        className="flex items-center cursor-pointer"
+                                      >
+                                        <Checkbox
+                                          checked={isSelected}
+                                          onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.id, checked as boolean)}
+                                          className="mr-2"
+                                        />
+                                        {option.label}
+                                        <CheckIcon
+                                          className={cn(
+                                            "ml-auto h-4 w-4",
+                                            isSelected ? "opacity-100" : "opacity-0"
+                                          )}
+                                        />
+                                      </CommandItem>
+                                    );
                                   })}
                                 </div>
                               </CommandGroup>
@@ -1331,6 +1328,7 @@ const NewListing = () => {
                       </FormItem>
                     )}
                   />
+                </div>
 
                 <FormField
                   control={form.control}
