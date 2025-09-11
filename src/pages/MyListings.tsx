@@ -29,7 +29,7 @@ const MyListings = () => {
     const { count, error: countError } = await supabase
       .from('listings')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id); // Rimosso il filtro expires_at per mostrare anche gli annunci scaduti/in pausa
+      .eq('user_id', user.id);
 
     if (countError) {
       console.error("MyListings: Errore nel conteggio degli annunci:", countError.message, countError.details);
@@ -82,11 +82,13 @@ const MyListings = () => {
       `)
       .eq('user_id', user.id);
 
+    // Updated sorting logic
     query = query
-      // Rimosso l'ordinamento per 'is_paused' per mantenere la posizione originale
-      .order('last_bumped_at', { ascending: false, nullsFirst: false })
-      .order('promotion_end_at', { ascending: false, nullsFirst: true })
-      .order('created_at', { ascending: false });
+      .order('is_paused', { ascending: true }) // Non-paused first
+      .order('is_premium', { ascending: false }) // Premium first
+      .order('promotion_end_at', { ascending: false, nullsLast: true }) // More active promotions first
+      .order('last_bumped_at', { ascending: false, nullsLast: true }) // Recently bumped/created first
+      .order('created_at', { ascending: false }); // Newest first as tie-breaker
 
     const { data, error } = await query.range(from, to);
 

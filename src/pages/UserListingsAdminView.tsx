@@ -79,11 +79,13 @@ const UserListingsAdminView = () => {
 
     query = query.eq('user_id', userId);
 
+    // Updated sorting logic
     query = query
-      .order('is_paused', { ascending: true })
-      .order('last_bumped_at', { ascending: false, nullsFirst: false })
-      .order('promotion_end_at', { ascending: false, nullsFirst: true })
-      .order('created_at', { ascending: false });
+      .order('is_paused', { ascending: true }) // Non-paused first
+      .order('is_premium', { ascending: false }) // Premium first
+      .order('promotion_end_at', { ascending: false, nullsLast: true }) // More active promotions first
+      .order('last_bumped_at', { ascending: false, nullsLast: true }) // Recently bumped/created first
+      .order('created_at', { ascending: false }); // Newest first as tie-breaker
 
     const { data, error: listingsError } = await query;
 

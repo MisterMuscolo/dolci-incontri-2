@@ -283,8 +283,8 @@ const SearchResults = () => {
         hourly_rate,
         offered_services
       `, { count: 'exact' })
-      .gt('expires_at', new Date().toISOString());
-      // .eq('is_paused', false); // Rimosso il filtro is_paused per mostrare tutti gli annunci attivi, inclusi quelli riattivati
+      .gt('expires_at', new Date().toISOString())
+      .eq('is_paused', false); // Only show non-paused listings
 
     if (categoryParam && categoryParam !== 'tutte') {
       query = query.eq('category', categoryParam);
@@ -353,10 +353,13 @@ const SearchResults = () => {
       query = query.overlaps('offered_services', offeredServicesParams);
     }
 
+    // Updated sorting logic
     query = query
-      .order('last_bumped_at', { ascending: false, nullsFirst: false })
-      .order('promotion_end_at', { ascending: false, nullsFirst: true })
-      .order('created_at', { ascending: false });
+      .order('is_paused', { ascending: true }) // Non-paused first
+      .order('is_premium', { ascending: false }) // Premium first
+      .order('promotion_end_at', { ascending: false, nullsLast: true }) // More active promotions first
+      .order('last_bumped_at', { ascending: false, nullsLast: true }) // Recently bumped/created first
+      .order('created_at', { ascending: false }); // Newest first as tie-breaker
 
     const from = (pageParam - 1) * LISTINGS_PER_PAGE;
     const to = from + LISTINGS_PER_PAGE - 1;
