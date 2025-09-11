@@ -71,7 +71,6 @@ const offeredServicesOptions = [
   { id: 'altro', label: 'Altro' },
 ];
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ethnicities = [
   { value: 'africana', label: 'Africana' },
   { value: 'indiana', label: 'Indiana' },
@@ -84,7 +83,6 @@ const ethnicities = [
   { value: 'altro', label: 'Altro' },
 ];
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const nationalities = [
   { value: 'italiana', label: 'Italiana' },
   { value: 'rumena', label: 'Rumena' },
@@ -115,7 +113,6 @@ const nationalities = [
     { value: 'altro', label: 'Altro' },
   ];
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const breastTypes = [
     { value: 'naturale', label: 'Naturale' },
     { value: 'rifatto', label: 'Rifatto' },
@@ -124,7 +121,6 @@ const breastTypes = [
     { value: 'grande', label: 'Grande' },
   ];
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const hairColors = [
     { value: 'biondi', label: 'Biondi' },
     { value: 'castani', label: 'Castani' },
@@ -134,7 +130,6 @@ const hairColors = [
     { value: 'colorati', label: 'Colorati' },
   ];
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const bodyTypes = [
     { value: 'snella', label: 'Snella' },
     { value: 'atletica', label: 'Atletica' },
@@ -143,7 +138,6 @@ const bodyTypes = [
     { value: 'media', label: 'Media' },
   ];
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const eyeColors = [
     { value: 'azzurri', label: 'Azzurri' },
     { value: 'marroni', label: 'Marroni' },

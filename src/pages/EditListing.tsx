@@ -308,7 +308,7 @@ const EditListing = () => {
       availability_for: listing.availability_for || [],
       meeting_location: listing.meeting_location || [],
       hourly_rate: listing.hourly_rate,
-      offered_services: listing.offered_services, // Pre-compila il nuovo campo
+      offered_services: listing.offered_services || [], // Pre-compila il nuovo campo
     });
 
     setExistingPhotos(listing.listing_photos || []);

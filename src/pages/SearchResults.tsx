@@ -5,7 +5,7 @@ import { ListingListItem, Listing } from '@/components/ListingListItem';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { ChevronLeft, MapPin, Search, Heart, ChevronDown, ChevronUp, RotateCcw, User, Handshake, Clock, Home, Euro, Sparkles, CheckIcon, X } from 'lucide-react'; // Aggiunte icone per i nuovi filtri
+import { ChevronLeft, MapPin, Search, Heart, ChevronDown, ChevronUp, User, Handshake, Clock, Home, Euro, Sparkles, CheckIcon, X, Globe, Palette, Ruler, Eye } from 'lucide-react'; // Aggiunte icone per i nuovi filtri
 import { Helmet } from 'react-helmet-async';
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
