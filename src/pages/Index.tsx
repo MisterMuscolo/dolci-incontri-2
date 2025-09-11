@@ -354,14 +354,15 @@ export default function Index({ session }: IndexProps) {
   };
 
   const handleMultiSelectChange = (
-    currentSelection: string[],
-    setSelection: React.Dispatch<React.SetStateAction<string[]>>,
+    _currentSelection: string[], // Renamed to _currentSelection to suppress TS6133
+    onChange: (...event: any[]) => void,
     itemId: string,
     checked: boolean
   ) => {
-    setSelection(prev =>
-      checked ? [...prev, itemId] : prev.filter(id => id !== itemId)
-    );
+    const newSelection = checked
+      ? [..._currentSelection, itemId]
+      : _currentSelection.filter(id => id !== itemId);
+    onChange(newSelection);
   };
 
   const hasActivePersonalFilters = 

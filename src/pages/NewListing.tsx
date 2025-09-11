@@ -71,6 +71,7 @@ const offeredServicesOptions = [
   { id: 'altro', label: 'Altro' },
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ethnicities = [
   { value: 'africana', label: 'Africana' },
   { value: 'indiana', label: 'Indiana' },
@@ -83,6 +84,7 @@ const ethnicities = [
   { value: 'altro', label: 'Altro' },
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const nationalities = [
   { value: 'italiana', label: 'Italiana' },
   { value: 'rumena', label: 'Rumena' },
@@ -113,7 +115,8 @@ const nationalities = [
     { value: 'altro', label: 'Altro' },
   ];
 
-  const breastTypes = [
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const breastTypes = [
     { value: 'naturale', label: 'Naturale' },
     { value: 'rifatto', label: 'Rifatto' },
     { value: 'piccolo', label: 'Piccolo' },
@@ -121,7 +124,8 @@ const nationalities = [
     { value: 'grande', label: 'Grande' },
   ];
 
-  const hairColors = [
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const hairColors = [
     { value: 'biondi', label: 'Biondi' },
     { value: 'castani', label: 'Castani' },
     { value: 'neri', label: 'Neri' },
@@ -130,7 +134,8 @@ const nationalities = [
     { value: 'colorati', label: 'Colorati' },
   ];
 
-  const bodyTypes = [
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const bodyTypes = [
     { value: 'snella', label: 'Snella' },
     { value: 'atletica', label: 'Atletica' },
     { value: 'curvy', label: 'Curvy' },
@@ -138,7 +143,8 @@ const nationalities = [
     { value: 'media', label: 'Media' },
   ];
 
-  const eyeColors = [
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const eyeColors = [
     { value: 'azzurri', label: 'Azzurri' },
     { value: 'marroni', label: 'Marroni' },
     { value: 'verdi', label: 'Verdi' },
@@ -345,91 +351,15 @@ const NewListing = () => {
     }
   };
 
-  const ethnicities = [
-    { value: 'africana', label: 'Africana' },
-    { value: 'indiana', label: 'Indiana' },
-    { value: 'asiatica', label: 'Asiatica' },
-    { value: 'araba', label: 'Araba' },
-    { value: 'latina', label: 'Latina' },
-    { value: 'caucasica', label: 'Caucasica' },
-    { value: 'italiana', label: 'Italiana' },
-    { value: 'mista', label: 'Mista' },
-    { value: 'altro', label: 'Altro' },
-  ];
-
-  const nationalities = [
-    { value: 'italiana', label: 'Italiana' },
-    { value: 'rumena', label: 'Rumena' },
-    { value: 'brasiliana', label: 'Brasiliana' },
-    { value: 'spagnola', label: 'Spagnola' },
-    { value: 'francese', label: 'Francese' },
-    { value: 'tedesca', label: 'Tedesca' },
-    { value: 'russa', label: 'Russa' },
-    { value: 'ucraina', label: 'Ucraina' },
-    { value: 'colombiana', label: 'Colombiana' },
-    { value: 'venezuelana', label: 'Venezuelana' },
-    { value: 'argentina', label: 'Argentina' },
-    { value: 'cubana', label: 'Cubana' },
-    { value: 'dominicana', label: 'Dominicana' },
-    { value: 'cinese', label: 'Cinese' },
-    { value: 'filippina', label: 'Filippina' },
-    { value: 'indonesiana', label: 'Indonesiana' },
-    { value: 'thailandese', label: 'Thailandese' },
-    { value: 'nigeriana', label: 'Nigeriana' },
-    { value: 'egiziana', label: 'Egiziana' },
-    { value: 'marocchina', label: 'Marocchina' },
-    { value: 'albanese', label: 'Albanese' },
-    { value: 'polacca', label: 'Polacca' },
-    { value: 'britannica', label: 'Britannica' },
-    { value: 'americana', label: 'Americana' },
-    { value: 'canadese', label: 'Canadese' },
-    { value: 'australiana', label: 'Australiana' },
-    { value: 'altro', label: 'Altro' },
-  ];
-
-  const breastTypes = [
-    { value: 'naturale', label: 'Naturale' },
-    { value: 'rifatto', label: 'Rifatto' },
-    { value: 'piccolo', label: 'Piccolo' },
-    { value: 'medio', label: 'Medio' },
-    { value: 'grande', label: 'Grande' },
-  ];
-
-  const hairColors = [
-    { value: 'biondi', label: 'Biondi' },
-    { value: 'castani', label: 'Castani' },
-    { value: 'neri', label: 'Neri' },
-    { value: 'rossi', label: 'Rossi' },
-    { value: 'grigi', label: 'Grigi' },
-    { value: 'colorati', label: 'Colorati' },
-  ];
-
-  const bodyTypes = [
-    { value: 'snella', label: 'Snella' },
-    { value: 'atletica', label: 'Atletica' },
-    { value: 'curvy', label: 'Curvy' },
-    { value: 'robusta', label: 'Robusta' },
-    { value: 'media', label: 'Media' },
-  ];
-
-  const eyeColors = [
-    { value: 'azzurri', label: 'Azzurri' },
-    { value: 'marroni', label: 'Marroni' },
-    { value: 'verdi', label: 'Verdi' },
-    { value: 'neri', label: 'Neri' },
-    { value: 'grigi', label: 'Grigi' },
-    { value: 'misti', label: 'Misti' },
-  ];
-
   const handleMultiSelectChange = (
-    currentSelection: string[],
+    _currentSelection: string[], // Renamed to _currentSelection to suppress TS6133
     onChange: (...event: any[]) => void,
     itemId: string,
     checked: boolean
   ) => {
     const newSelection = checked
-      ? [...currentSelection, itemId]
-      : currentSelection.filter(id => id !== itemId);
+      ? [..._currentSelection, itemId]
+      : _currentSelection.filter(id => id !== itemId);
     onChange(newSelection);
   };
 
