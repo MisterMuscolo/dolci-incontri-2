@@ -1407,8 +1407,8 @@ const EditListing = () => {
                                         )}
                                       />
                                     </CommandItem>
-                                  );
-                                })}
+                                  )}
+                                )}
                               </div>
                             </CommandGroup>
                             {field.value.length > 0 && (

@@ -1307,31 +1307,30 @@ const NewListing = () => {
                                         )}
                                       />
                                     </CommandItem>
-                                  );
-                                })}
-                              </div>
-                            </CommandGroup>
-                            {field.value.length > 0 && (
-                              <>
-                                <Separator className="my-2" />
-                                <div className="p-2">
-                                  <Button
-                                    variant="ghost"
-                                    className="w-full justify-center text-red-500 hover:text-red-600"
-                                    onClick={() => field.onChange([])}
-                                  >
-                                    <X className="h-4 w-4 mr-2" /> Deseleziona tutto
-                                  </Button>
+                                  })}
                                 </div>
-                              </>
-                            )}
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                              </CommandGroup>
+                              {field.value.length > 0 && (
+                                <>
+                                  <Separator className="my-2" />
+                                  <div className="p-2">
+                                    <Button
+                                      variant="ghost"
+                                      className="w-full justify-center text-red-500 hover:text-red-600"
+                                      onClick={() => field.onChange([])}
+                                    >
+                                      <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                    </Button>
+                                  </div>
+                                </>
+                              )}
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                 <FormField
                   control={form.control}
