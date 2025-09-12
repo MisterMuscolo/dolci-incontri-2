@@ -204,12 +204,12 @@ const ListingDetails = () => {
 
   // Determine if 'Dettagli Personali' card should be shown
   const hasPersonalDetails = 
-    !!listing.ethnicity || 
-    !!listing.nationality || 
-    !!listing.breast_type || 
-    !!listing.hair_color || 
-    !!listing.body_type || 
-    !!listing.eye_color;
+    (!!listing.ethnicity && listing.ethnicity.length > 0) || 
+    (!!listing.nationality && listing.nationality.length > 0) || 
+    (!!listing.breast_type && listing.breast_type.length > 0) || 
+    (!!listing.hair_color && listing.hair_color.length > 0) || 
+    (!!listing.body_type && listing.body_type.length > 0) || 
+    (!!listing.eye_color && listing.eye_color.length > 0);
 
   // Determine if 'Dettagli Incontro' card should be shown
   const hasMeetingDetails = 
@@ -364,32 +364,32 @@ const ListingDetails = () => {
                   <CardTitle className="flex items-center gap-2 text-xl"><User className="h-5 w-5 text-rose-500" /> Dettagli Personali</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-2">
-                  {listing.ethnicity && (
+                  {listing.ethnicity && listing.ethnicity.length > 0 && (
                     <Badge variant="secondary" className="capitalize flex items-center gap-1">
                       <Globe className="h-4 w-4" /> Origine: {listing.ethnicity}
                     </Badge>
                   )}
-                  {listing.nationality && (
+                  {listing.nationality && listing.nationality.length > 0 && (
                     <Badge variant="secondary" className="capitalize flex items-center gap-1">
                       <Globe className="h-4 w-4" /> Nazionalità: {listing.nationality}
                     </Badge>
                   )}
-                  {listing.breast_type && (
+                  {listing.breast_type && listing.breast_type.length > 0 && (
                     <Badge variant="secondary" className="capitalize flex items-center gap-1">
                       <Palette className="h-4 w-4" /> Tipo di Seno: {listing.breast_type}
                     </Badge>
                   )}
-                  {listing.hair_color && (
+                  {listing.hair_color && listing.hair_color.length > 0 && (
                     <Badge variant="secondary" className="capitalize flex items-center gap-1">
                       <Palette className="h-4 w-4" /> Colore Capelli: {listing.hair_color}
                     </Badge>
                   )}
-                  {listing.body_type && (
+                  {listing.body_type && listing.body_type.length > 0 && (
                     <Badge variant="secondary" className="capitalize flex items-center gap-1">
                       <Ruler className="h-4 w-4" /> Corporatura: {listing.body_type}
                     </Badge>
                   )}
-                  {listing.eye_color && (
+                  {listing.eye_color && listing.eye_color.length > 0 && (
                     <Badge variant="secondary" className="capitalize flex items-center gap-1">
                       <Eye className="h-4 w-4" /> Colore Occhi: {listing.eye_color}
                     </Badge>
