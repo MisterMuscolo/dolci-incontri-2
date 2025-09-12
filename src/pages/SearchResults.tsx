@@ -186,6 +186,7 @@ const SearchResults = () => {
   const [currentOfferedServices, setCurrentOfferedServices] = useState<string[]>(searchParams.getAll('offered_services'));
 
   const [isFilterFormOpen, setIsFilterFormOpen] = useState(false); // State for collapsible filter form
+  const [isOtherFiltersOpen, setIsOtherFiltersOpen] = useState(false); // NEW: State for the "Altri Filtri" collapsible
   const [isOfferedServicesPopoverOpen, setIsOfferedServicesPopoverOpen] = useState(false); // Nuovo stato per il popover dei servizi offerti
   const [isMeetingTypePopoverOpen, setIsMeetingTypePopoverOpen] = useState(false);
   const [isAvailabilityForPopoverOpen, setIsAvailabilityForPopoverOpen] = useState(false);
@@ -725,7 +726,7 @@ const SearchResults = () => {
             </CollapsibleTrigger>
             <CollapsibleContent>
               <Separator className="my-4" />
-              <h3 className="text-lg font-semibold mb-4 text-gray-700">Modifica la tua ricerca</h3>
+              {/* Rimosso: <h3 className="text-lg font-semibold mb-4 text-gray-700">Modifica la tua ricerca</h3> */}
               <form onSubmit={(e) => { e.preventDefault(); handleApplyFilters(); }} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="relative">
@@ -774,784 +775,801 @@ const SearchResults = () => {
                   </div>
                 </div>
 
-                {/* Multi-select per la fascia d'età */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Popover open={isAgeRangePopoverOpen} onOpenChange={setIsAgeRangePopoverOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={isAgeRangePopoverOpen}
-                        className="w-full justify-between pl-10 relative"
-                      >
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        {currentSelectedAgeRanges.length > 0
-                          ? `${currentSelectedAgeRanges.length} selezionati`
-                          : "Fascia d'età"}
-                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                {/* NEW: Altri Filtri Collapsible */}
+                <Collapsible
+                  open={isOtherFiltersOpen}
+                  onOpenChange={setIsOtherFiltersOpen}
+                  className="w-full mt-4"
+                >
+                  <CollapsibleTrigger asChild>
+                    <div className="flex items-center justify-between cursor-pointer py-2">
+                      <h3 className="text-lg font-semibold text-gray-700">Altri Filtri</h3>
+                      <Button variant="ghost" size="sm" className="w-9 p-0">
+                        {isOtherFiltersOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        <span className="sr-only">Toggle other filters</span>
                       </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
-                      <Command>
-                        <CommandInput placeholder="Cerca fascia d'età..." />
-                        <CommandEmpty>Nessuna fascia d'età trovata.</CommandEmpty>
-                        <CommandGroup>
-                          <div className="max-h-60 overflow-y-auto">
-                            {ageRanges.map((range) => {
-                              const isSelected = currentSelectedAgeRanges.includes(range.value);
-                              return (
-                                <CommandItem
-                                  key={range.value}
-                                  value={range.label}
-                                  onSelect={() => {
-                                    handleMultiSelectChange(currentSelectedAgeRanges, setCurrentSelectedAgeRanges, range.value, !isSelected);
-                                  }}
-                                  className="flex items-center cursor-pointer"
-                                >
-                                  <Checkbox
-                                    checked={isSelected}
-                                    onCheckedChange={(checked) => handleMultiSelectChange(currentSelectedAgeRanges, setCurrentSelectedAgeRanges, range.value, checked as boolean)}
-                                    className="mr-2"
-                                  />
-                                  {range.label}
-                                  <CheckIcon
-                                    className={cn(
-                                      "ml-auto h-4 w-4",
-                                      isSelected ? "opacity-100" : "opacity-0"
-                                    )}
-                                  />
-                                </CommandItem>
-                              );
-                            })}
-                          </div>
-                        </CommandGroup>
-                        {currentSelectedAgeRanges.length > 0 && (
-                          <>
-                            <Separator className="my-2" />
-                            <div className="p-2">
-                              <Button
-                                variant="ghost"
-                                className="w-full justify-center text-red-500 hover:text-red-600"
-                                onClick={() => setCurrentSelectedAgeRanges([])}
-                              >
-                                <X className="h-4 w-4 mr-2" /> Deseleziona tutto
-                              </Button>
-                            </div>
-                          </>
-                        )}
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-
-                {/* Nuovi filtri per Dettagli Personali */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Multi-select per Origine */}
-                  <Popover open={isEthnicityPopoverOpen} onOpenChange={setIsEthnicityPopoverOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={isEthnicityPopoverOpen}
-                        className="w-full justify-between pl-10 relative"
-                      >
-                        <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        {currentEthnicities.length > 0
-                          ? `${currentEthnicities.length} selezionati`
-                          : "Origine"}
-                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
-                      <Command>
-                        <CommandInput placeholder="Cerca origine..." />
-                        <CommandEmpty>Nessuna origine trovata.</CommandEmpty>
-                        <CommandGroup>
-                          <div className="max-h-60 overflow-y-auto">
-                            {ethnicities.map((option) => {
-                              const isSelected = currentEthnicities.includes(option.value);
-                              return (
-                                <CommandItem
-                                  key={option.value}
-                                  value={option.label}
-                                  onSelect={() => {
-                                    handleMultiSelectChange(currentEthnicities, setCurrentEthnicities, option.value, !isSelected);
-                                  }}
-                                  className="flex items-center cursor-pointer"
-                                >
-                                  <Checkbox
-                                    checked={isSelected}
-                                    onCheckedChange={(checked) => handleMultiSelectChange(currentEthnicities, setCurrentEthnicities, option.value, checked as boolean)}
-                                    className="mr-2"
-                                  />
-                                  {option.label}
-                                  <CheckIcon
-                                    className={cn(
-                                      "ml-auto h-4 w-4",
-                                      isSelected ? "opacity-100" : "opacity-0"
-                                    )}
-                                  />
-                                </CommandItem>
-                              );
-                            })}
-                          </div>
-                        </CommandGroup>
-                        {currentEthnicities.length > 0 && (
-                          <>
-                            <Separator className="my-2" />
-                            <div className="p-2">
-                              <Button
-                                variant="ghost"
-                                className="w-full justify-center text-red-500 hover:text-red-600"
-                                onClick={() => setCurrentEthnicities([])}
-                              >
-                                <X className="h-4 w-4 mr-2" /> Deseleziona tutto
-                              </Button>
-                            </div>
-                          </>
-                        )}
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-
-                  {/* Multi-select per Nazionalità */}
-                  <Popover open={isNationalityPopoverOpen} onOpenChange={setIsNationalityPopoverOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={isNationalityPopoverOpen}
-                        className="w-full justify-between pl-10 relative"
-                      >
-                        <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        {currentNationalities.length > 0
-                          ? `${currentNationalities.length} selezionati`
-                          : "Nazionalità"}
-                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
-                      <Command>
-                        <CommandInput placeholder="Cerca nazionalità..." />
-                        <CommandEmpty>Nessuna nazionalità trovata.</CommandEmpty>
-                        <CommandGroup>
-                          <div className="max-h-60 overflow-y-auto">
-                            {nationalities.map((option) => {
-                              const isSelected = currentNationalities.includes(option.value);
-                              return (
-                                <CommandItem
-                                  key={option.value}
-                                  value={option.label}
-                                  onSelect={() => {
-                                    handleMultiSelectChange(currentNationalities, setCurrentNationalities, option.value, !isSelected);
-                                  }}
-                                  className="flex items-center cursor-pointer"
-                                >
-                                  <Checkbox
-                                    checked={isSelected}
-                                    onCheckedChange={(checked) => handleMultiSelectChange(currentNationalities, setCurrentNationalities, option.value, checked as boolean)}
-                                    className="mr-2"
-                                  />
-                                  {option.label}
-                                  <CheckIcon
-                                    className={cn(
-                                      "ml-auto h-4 w-4",
-                                      isSelected ? "opacity-100" : "opacity-0"
-                                    )}
-                                  />
-                                </CommandItem>
-                              );
-                            })}
-                          </div>
-                        </CommandGroup>
-                        {currentNationalities.length > 0 && (
-                          <>
-                            <Separator className="my-2" />
-                            <div className="p-2">
-                              <Button
-                                variant="ghost"
-                                className="w-full justify-center text-red-500 hover:text-red-600"
-                                onClick={() => setCurrentNationalities([])}
-                              >
-                                <X className="h-4 w-4 mr-2" /> Deseleziona tutto
-                              </Button>
-                            </div>
-                          </>
-                        )}
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-
-                  {/* Multi-select per Tipo di Seno */}
-                  <Popover open={isBreastTypePopoverOpen} onOpenChange={setIsBreastTypePopoverOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={isBreastTypePopoverOpen}
-                        className="w-full justify-between pl-10 relative"
-                      >
-                        <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        {currentBreastTypes.length > 0
-                          ? `${currentBreastTypes.length} selezionati`
-                          : "Tipo di Seno"}
-                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
-                      <Command>
-                        <CommandInput placeholder="Cerca tipo di seno..." />
-                        <CommandEmpty>Nessun tipo di seno trovato.</CommandEmpty>
-                        <CommandGroup>
-                          <div className="max-h-60 overflow-y-auto">
-                            {breastTypes.map((option) => {
-                              const isSelected = currentBreastTypes.includes(option.value);
-                              return (
-                                <CommandItem
-                                  key={option.value}
-                                  value={option.label}
-                                  onSelect={() => {
-                                    handleMultiSelectChange(currentBreastTypes, setCurrentBreastTypes, option.value, !isSelected);
-                                  }}
-                                  className="flex items-center cursor-pointer"
-                                >
-                                  <Checkbox
-                                    checked={isSelected}
-                                    onCheckedChange={(checked) => handleMultiSelectChange(currentBreastTypes, setCurrentBreastTypes, option.value, checked as boolean)}
-                                    className="mr-2"
-                                  />
-                                  {option.label}
-                                  <CheckIcon
-                                    className={cn(
-                                      "ml-auto h-4 w-4",
-                                      isSelected ? "opacity-100" : "opacity-0"
-                                    )}
-                                  />
-                                </CommandItem>
-                              );
-                            })}
-                          </div>
-                        </CommandGroup>
-                        {currentBreastTypes.length > 0 && (
-                          <>
-                            <Separator className="my-2" />
-                            <div className="p-2">
-                              <Button
-                                variant="ghost"
-                                className="w-full justify-center text-red-500 hover:text-red-600"
-                                onClick={() => setCurrentBreastTypes([])}
-                              >
-                                <X className="h-4 w-4 mr-2" /> Deseleziona tutto
-                              </Button>
-                            </div>
-                          </>
-                        )}
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-
-                  {/* Multi-select per Colore Capelli */}
-                  <Popover open={isHairColorPopoverOpen} onOpenChange={setIsHairColorPopoverOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={isHairColorPopoverOpen}
-                        className="w-full justify-between pl-10 relative"
-                      >
-                        <Palette className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        {currentHairColors.length > 0
-                          ? `${currentHairColors.length} selezionati`
-                          : "Colore Capelli"}
-                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
-                      <Command>
-                        <CommandInput placeholder="Cerca colore capelli..." />
-                        <CommandEmpty>Nessun colore capelli trovato.</CommandEmpty>
-                        <CommandGroup>
-                          <div className="max-h-60 overflow-y-auto">
-                            {hairColors.map((option) => {
-                              const isSelected = currentHairColors.includes(option.value);
-                              return (
-                                <CommandItem
-                                  key={option.value}
-                                  value={option.label}
-                                  onSelect={() => {
-                                    handleMultiSelectChange(currentHairColors, setCurrentHairColors, option.value, !isSelected);
-                                  }}
-                                  className="flex items-center cursor-pointer"
-                                >
-                                  <Checkbox
-                                    checked={isSelected}
-                                    onCheckedChange={(checked) => handleMultiSelectChange(currentHairColors, setCurrentHairColors, option.value, checked as boolean)}
-                                    className="mr-2"
-                                  />
-                                  {option.label}
-                                  <CheckIcon
-                                    className={cn(
-                                      "ml-auto h-4 w-4",
-                                      isSelected ? "opacity-100" : "opacity-0"
-                                    )}
-                                  />
-                                </CommandItem>
-                              );
-                            })}
-                          </div>
-                        </CommandGroup>
-                        {currentHairColors.length > 0 && (
-                          <>
-                            <Separator className="my-2" />
-                            <div className="p-2">
-                              <Button
-                                variant="ghost"
-                                className="w-full justify-center text-red-500 hover:text-red-600"
-                                onClick={() => setCurrentHairColors([])}
-                              >
-                                <X className="h-4 w-4 mr-2" /> Deseleziona tutto
-                              </Button>
-                            </div>
-                          </>
-                        )}
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-
-                  {/* Multi-select per Corporatura */}
-                  <Popover open={isBodyTypePopoverOpen} onOpenChange={setIsBodyTypePopoverOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={isBodyTypePopoverOpen}
-                        className="w-full justify-between pl-10 relative"
-                      >
-                        <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        {currentBodyTypes.length > 0
-                          ? `${currentBodyTypes.length} selezionati`
-                          : "Corporatura"}
-                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
-                      <Command>
-                        <CommandInput placeholder="Cerca corporatura..." />
-                        <CommandEmpty>Nessuna corporatura trovata.</CommandEmpty>
-                        <CommandGroup>
-                          <div className="max-h-60 overflow-y-auto">
-                            {bodyTypes.map((option) => {
-                              const isSelected = currentBodyTypes.includes(option.value);
-                              return (
-                                <CommandItem
-                                  key={option.value}
-                                  value={option.label}
-                                  onSelect={() => {
-                                    handleMultiSelectChange(currentBodyTypes, setCurrentBodyTypes, option.value, !isSelected);
-                                  }}
-                                  className="flex items-center cursor-pointer"
-                                >
-                                  <Checkbox
-                                    checked={isSelected}
-                                    onCheckedChange={(checked) => handleMultiSelectChange(currentBodyTypes, setCurrentBodyTypes, option.value, checked as boolean)}
-                                    className="mr-2"
-                                  />
-                                  {option.label}
-                                  <CheckIcon
-                                    className={cn(
-                                      "ml-auto h-4 w-4",
-                                      isSelected ? "opacity-100" : "opacity-0"
-                                    )}
-                                  />
-                                </CommandItem>
-                              );
-                            })}
-                          </div>
-                        </CommandGroup>
-                        {currentBodyTypes.length > 0 && (
-                          <>
-                            <Separator className="my-2" />
-                            <div className="p-2">
-                              <Button
-                                variant="ghost"
-                                className="w-full justify-center text-red-500 hover:text-red-600"
-                                onClick={() => setCurrentBodyTypes([])}
-                              >
-                                <X className="h-4 w-4 mr-2" /> Deseleziona tutto
-                              </Button>
-                            </div>
-                          </>
-                        )}
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-
-                  {/* Multi-select per Colore Occhi */}
-                  <Popover open={isEyeColorPopoverOpen} onOpenChange={setIsEyeColorPopoverOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={isEyeColorPopoverOpen}
-                        className="w-full justify-between pl-10 relative"
-                      >
-                        <Eye className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        {currentEyeColors.length > 0
-                          ? `${currentEyeColors.length} selezionati`
-                          : "Colore Occhi"}
-                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
-                      <Command>
-                        <CommandInput placeholder="Cerca colore occhi..." />
-                        <CommandEmpty>Nessun colore occhi trovato.</CommandEmpty>
-                        <CommandGroup>
-                          <div className="max-h-60 overflow-y-auto">
-                            {eyeColors.map((option) => {
-                              const isSelected = currentEyeColors.includes(option.value);
-                              return (
-                                <CommandItem
-                                  key={option.value}
-                                  value={option.label}
-                                  onSelect={() => {
-                                    handleMultiSelectChange(currentEyeColors, setCurrentEyeColors, option.value, !isSelected);
-                                  }}
-                                  className="flex items-center cursor-pointer"
-                                >
-                                  <Checkbox
-                                    checked={isSelected}
-                                    onCheckedChange={(checked) => handleMultiSelectChange(currentEyeColors, setCurrentEyeColors, option.value, checked as boolean)}
-                                    className="mr-2"
-                                  />
-                                  {option.label}
-                                  <CheckIcon
-                                    className={cn(
-                                      "ml-auto h-4 w-4",
-                                      isSelected ? "opacity-100" : "opacity-0"
-                                    )}
-                                  />
-                                </CommandItem>
-                              );
-                            })}
-                          </div>
-                        </CommandGroup>
-                        {currentEyeColors.length > 0 && (
-                          <>
-                            <Separator className="my-2" />
-                            <div className="p-2">
-                              <Button
-                                variant="ghost"
-                                className="w-full justify-center text-red-500 hover:text-red-600"
-                                onClick={() => setCurrentEyeColors([])}
-                              >
-                                <X className="h-4 w-4 mr-2" /> Deseleziona tutto
-                              </Button>
-                            </div>
-                          </>
-                        )}
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-
-                <Separator className="my-4" />
-                <h3 className="text-lg font-semibold text-gray-700 mb-4">Filtri Incontro</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Multi-select per Tipologia di Incontro */}
-                  <Popover open={isMeetingTypePopoverOpen} onOpenChange={setIsMeetingTypePopoverOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={isMeetingTypePopoverOpen}
-                        className="w-full justify-between pl-10 relative"
-                      >
-                        <Handshake className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        {currentMeetingTypes.length > 0
-                          ? `${currentMeetingTypes.length} selezionati`
-                          : "Tipologia di Incontro"}
-                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
-                      <Command>
-                        <CommandInput placeholder="Cerca tipologia..." />
-                        <CommandEmpty>Nessuna tipologia trovata.</CommandEmpty>
-                        <CommandGroup>
-                          <div className="max-h-60 overflow-y-auto">
-                            {meetingTypeOptions.map((option) => {
-                              const isSelected = currentMeetingTypes.includes(option.id);
-                              return (
-                                <CommandItem
-                                  key={option.id}
-                                  value={option.label}
-                                  onSelect={() => {
-                                    handleMultiSelectChange(currentMeetingTypes, setCurrentMeetingTypes, option.id, !isSelected);
-                                  }}
-                                  className="flex items-center cursor-pointer"
-                                >
-                                  <Checkbox
-                                    checked={isSelected}
-                                    onCheckedChange={(checked) => handleMultiSelectChange(currentMeetingTypes, setCurrentMeetingTypes, option.id, checked as boolean)}
-                                    className="mr-2"
-                                  />
-                                  {option.label}
-                                  <CheckIcon
-                                    className={cn(
-                                      "ml-auto h-4 w-4",
-                                      isSelected ? "opacity-100" : "opacity-0"
-                                    )}
-                                  />
-                                </CommandItem>
-                              );
-                            })}
-                          </div>
-                        </CommandGroup>
-                        {currentMeetingTypes.length > 0 && (
-                          <>
-                            <Separator className="my-2" />
-                            <div className="p-2">
-                              <Button
-                                variant="ghost"
-                                className="w-full justify-center text-red-500 hover:text-red-600"
-                                onClick={() => setCurrentMeetingTypes([])}
-                              >
-                                <X className="h-4 w-4 mr-2" /> Deseleziona tutto
-                              </Button>
-                            </div>
-                          </>
-                        )}
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-
-                  {/* Multi-select per Disponibilità per */}
-                  <Popover open={isAvailabilityForPopoverOpen} onOpenChange={setIsAvailabilityForPopoverOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={isAvailabilityForPopoverOpen}
-                        className="w-full justify-between pl-10 relative"
-                      >
-                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        {currentAvailabilityFor.length > 0
-                          ? `${currentAvailabilityFor.length} selezionati`
-                          : "Disponibilità per"}
-                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
-                      <Command>
-                        <CommandInput placeholder="Cerca disponibilità..." />
-                        <CommandEmpty>Nessuna disponibilità trovata.</CommandEmpty>
-                        <CommandGroup>
-                          <div className="max-h-60 overflow-y-auto">
-                            {availabilityForOptions.map((option) => {
-                              const isSelected = currentAvailabilityFor.includes(option.id);
-                              return (
-                                <CommandItem
-                                  key={option.id}
-                                  value={option.label}
-                                  onSelect={() => {
-                                    handleMultiSelectChange(currentAvailabilityFor, setCurrentAvailabilityFor, option.id, !isSelected);
-                                  }}
-                                  className="flex items-center cursor-pointer"
-                                >
-                                  <Checkbox
-                                    checked={isSelected}
-                                    onCheckedChange={(checked) => handleMultiSelectChange(currentAvailabilityFor, setCurrentAvailabilityFor, option.id, checked as boolean)}
-                                    className="mr-2"
-                                  />
-                                  {option.label}
-                                  <CheckIcon
-                                    className={cn(
-                                      "ml-auto h-4 w-4",
-                                      isSelected ? "opacity-100" : "opacity-0"
-                                    )}
-                                  />
-                                </CommandItem>
-                              );
-                            })}
-                          </div>
-                        </CommandGroup>
-                        {currentAvailabilityFor.length > 0 && (
-                          <>
-                            <Separator className="my-2" />
-                            <div className="p-2">
-                              <Button
-                                variant="ghost"
-                                className="w-full justify-center text-red-500 hover:text-red-600"
-                                onClick={() => setCurrentAvailabilityFor([])}
-                              >
-                                <X className="h-4 w-4 mr-2" /> Deseleziona tutto
-                              </Button>
-                            </div>
-                          </>
-                        )}
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-
-                  {/* Multi-select per Luogo Incontro */}
-                  <Popover open={isMeetingLocationPopoverOpen} onOpenChange={setIsMeetingLocationPopoverOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={isMeetingLocationPopoverOpen}
-                        className="w-full justify-between pl-10 relative"
-                      >
-                        <Home className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        {currentMeetingLocations.length > 0
-                          ? `${currentMeetingLocations.length} selezionati`
-                          : "Luogo Incontro"}
-                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
-                      <Command>
-                        <CommandInput placeholder="Cerca luogo..." />
-                        <CommandEmpty>Nessun luogo trovato.</CommandEmpty>
-                        <CommandGroup>
-                          <div className="max-h-60 overflow-y-auto">
-                            {meetingLocationOptions.map((option) => {
-                              const isSelected = currentMeetingLocations.includes(option.id);
-                              return (
-                                <CommandItem
-                                  key={option.id}
-                                  value={option.label}
-                                  onSelect={() => {
-                                    handleMultiSelectChange(currentMeetingLocations, setCurrentMeetingLocations, option.id, !isSelected);
-                                  }}
-                                  className="flex items-center cursor-pointer"
-                                >
-                                  <Checkbox
-                                    checked={isSelected}
-                                    onCheckedChange={(checked) => handleMultiSelectChange(currentMeetingLocations, setCurrentMeetingLocations, option.id, checked as boolean)}
-                                    className="mr-2"
-                                  />
-                                  {option.label}
-                                  <CheckIcon
-                                    className={cn(
-                                      "ml-auto h-4 w-4",
-                                      isSelected ? "opacity-100" : "opacity-0"
-                                    )}
-                                  />
-                                </CommandItem>
-                              );
-                            })}
-                          </div>
-                        </CommandGroup>
-                        {currentMeetingLocations.length > 0 && (
-                          <>
-                            <Separator className="my-2" />
-                            <div className="p-2">
-                              <Button
-                                variant="ghost"
-                                className="w-full justify-center text-red-500 hover:text-red-600"
-                                onClick={() => setCurrentMeetingLocations([])}
-                              >
-                                <X className="h-4 w-4 mr-2" /> Deseleziona tutto
-                              </Button>
-                            </div>
-                          </>
-                        )}
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="relative">
-                      <Euro className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Input
-                        type="number"
-                        placeholder="Tariffa Min"
-                        className="w-full pl-10"
-                        value={currentHourlyRateMin}
-                        onChange={(e) => setCurrentHourlyRateMin(e.target.value)}
-                      />
                     </div>
-                    <div className="relative">
-                      <Euro className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Input
-                        type="number"
-                        placeholder="Tariffa Max"
-                        className="w-full pl-10"
-                        value={currentHourlyRateMax}
-                        onChange={(e) => setCurrentHourlyRateMax(e.target.value)}
-                      />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <Separator className="my-4" />
+                    {/* Multi-select per la fascia d'età */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Popover open={isAgeRangePopoverOpen} onOpenChange={setIsAgeRangePopoverOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={isAgeRangePopoverOpen}
+                            className="w-full justify-between pl-10 relative"
+                          >
+                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                            {currentSelectedAgeRanges.length > 0
+                              ? `${currentSelectedAgeRanges.length} selezionati`
+                              : "Fascia d'età"}
+                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                          <Command>
+                            <CommandInput placeholder="Cerca fascia d'età..." />
+                            <CommandEmpty>Nessuna fascia d'età trovata.</CommandEmpty>
+                            <CommandGroup>
+                              <div className="max-h-60 overflow-y-auto">
+                                {ageRanges.map((range) => {
+                                  const isSelected = currentSelectedAgeRanges.includes(range.value);
+                                  return (
+                                    <CommandItem
+                                      key={range.value}
+                                      value={range.label}
+                                      onSelect={() => {
+                                        handleMultiSelectChange(currentSelectedAgeRanges, setCurrentSelectedAgeRanges, range.value, !isSelected);
+                                      }}
+                                      className="flex items-center cursor-pointer"
+                                    >
+                                      <Checkbox
+                                        checked={isSelected}
+                                        onCheckedChange={(checked) => handleMultiSelectChange(currentSelectedAgeRanges, setCurrentSelectedAgeRanges, range.value, checked as boolean)}
+                                        className="mr-2"
+                                      />
+                                      {range.label}
+                                      <CheckIcon
+                                        className={cn(
+                                          "ml-auto h-4 w-4",
+                                          isSelected ? "opacity-100" : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  );
+                                })}
+                              </div>
+                            </CommandGroup>
+                            {currentSelectedAgeRanges.length > 0 && (
+                              <>
+                                <Separator className="my-2" />
+                                <div className="p-2">
+                                  <Button
+                                    variant="ghost"
+                                    className="w-full justify-center text-red-500 hover:text-red-600"
+                                    onClick={() => setCurrentSelectedAgeRanges([])}
+                                  >
+                                    <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+
+                      {/* Multi-select per Origine */}
+                      <Popover open={isEthnicityPopoverOpen} onOpenChange={setIsEthnicityPopoverOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={isEthnicityPopoverOpen}
+                            className="w-full justify-between pl-10 relative"
+                          >
+                            <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                            {currentEthnicities.length > 0
+                              ? `${currentEthnicities.length} selezionati`
+                              : "Origine"}
+                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                          <Command>
+                            <CommandInput placeholder="Cerca origine..." />
+                            <CommandEmpty>Nessuna origine trovata.</CommandEmpty>
+                            <CommandGroup>
+                              <div className="max-h-60 overflow-y-auto">
+                                {ethnicities.map((option) => {
+                                  const isSelected = currentEthnicities.includes(option.value);
+                                  return (
+                                    <CommandItem
+                                      key={option.value}
+                                      value={option.label}
+                                      onSelect={() => {
+                                        handleMultiSelectChange(currentEthnicities, setCurrentEthnicities, option.value, !isSelected);
+                                      }}
+                                      className="flex items-center cursor-pointer"
+                                    >
+                                      <Checkbox
+                                        checked={isSelected}
+                                        onCheckedChange={(checked) => handleMultiSelectChange(currentEthnicities, setCurrentEthnicities, option.value, checked as boolean)}
+                                        className="mr-2"
+                                      />
+                                      {option.label}
+                                      <CheckIcon
+                                        className={cn(
+                                          "ml-auto h-4 w-4",
+                                          isSelected ? "opacity-100" : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  );
+                                })}
+                              </div>
+                            </CommandGroup>
+                            {currentEthnicities.length > 0 && (
+                              <>
+                                <Separator className="my-2" />
+                                <div className="p-2">
+                                  <Button
+                                    variant="ghost"
+                                    className="w-full justify-center text-red-500 hover:text-red-600"
+                                    onClick={() => setCurrentEthnicities([])}
+                                  >
+                                    <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+
+                      {/* Multi-select per Nazionalità */}
+                      <Popover open={isNationalityPopoverOpen} onOpenChange={setIsNationalityPopoverOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={isNationalityPopoverOpen}
+                            className="w-full justify-between pl-10 relative"
+                          >
+                            <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                            {currentNationalities.length > 0
+                              ? `${currentNationalities.length} selezionati`
+                              : "Nazionalità"}
+                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                          <Command>
+                            <CommandInput placeholder="Cerca nazionalità..." />
+                            <CommandEmpty>Nessuna nazionalità trovata.</CommandEmpty>
+                            <CommandGroup>
+                              <div className="max-h-60 overflow-y-auto">
+                                {nationalities.map((option) => {
+                                  const isSelected = currentNationalities.includes(option.value);
+                                  return (
+                                    <CommandItem
+                                      key={option.value}
+                                      value={option.label}
+                                      onSelect={() => {
+                                        handleMultiSelectChange(currentNationalities, setCurrentNationalities, option.value, !isSelected);
+                                      }}
+                                      className="flex items-center cursor-pointer"
+                                    >
+                                      <Checkbox
+                                        checked={isSelected}
+                                        onCheckedChange={(checked) => handleMultiSelectChange(currentNationalities, setCurrentNationalities, option.value, checked as boolean)}
+                                        className="mr-2"
+                                      />
+                                      {option.label}
+                                      <CheckIcon
+                                        className={cn(
+                                          "ml-auto h-4 w-4",
+                                          isSelected ? "opacity-100" : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  );
+                                })}
+                              </div>
+                            </CommandGroup>
+                            {currentNationalities.length > 0 && (
+                              <>
+                                <Separator className="my-2" />
+                                <div className="p-2">
+                                  <Button
+                                    variant="ghost"
+                                    className="w-full justify-center text-red-500 hover:text-red-600"
+                                    onClick={() => setCurrentNationalities([])}
+                                  >
+                                    <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+
+                      {/* Multi-select per Tipo di Seno */}
+                      <Popover open={isBreastTypePopoverOpen} onOpenChange={setIsBreastTypePopoverOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={isBreastTypePopoverOpen}
+                            className="w-full justify-between pl-10 relative"
+                          >
+                            <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                            {currentBreastTypes.length > 0
+                              ? `${currentBreastTypes.length} selezionati`
+                              : "Tipo di Seno"}
+                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                          <Command>
+                            <CommandInput placeholder="Cerca tipo di seno..." />
+                            <CommandEmpty>Nessun tipo di seno trovato.</CommandEmpty>
+                            <CommandGroup>
+                              <div className="max-h-60 overflow-y-auto">
+                                {breastTypes.map((option) => {
+                                  const isSelected = currentBreastTypes.includes(option.value);
+                                  return (
+                                    <CommandItem
+                                      key={option.value}
+                                      value={option.label}
+                                      onSelect={() => {
+                                        handleMultiSelectChange(currentBreastTypes, setCurrentBreastTypes, option.value, !isSelected);
+                                      }}
+                                      className="flex items-center cursor-pointer"
+                                    >
+                                      <Checkbox
+                                        checked={isSelected}
+                                        onCheckedChange={(checked) => handleMultiSelectChange(currentBreastTypes, setCurrentBreastTypes, option.value, checked as boolean)}
+                                        className="mr-2"
+                                      />
+                                      {option.label}
+                                      <CheckIcon
+                                        className={cn(
+                                          "ml-auto h-4 w-4",
+                                          isSelected ? "opacity-100" : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  );
+                                })}
+                              </div>
+                            </CommandGroup>
+                            {currentBreastTypes.length > 0 && (
+                              <>
+                                <Separator className="my-2" />
+                                <div className="p-2">
+                                  <Button
+                                    variant="ghost"
+                                    className="w-full justify-center text-red-500 hover:text-red-600"
+                                    onClick={() => setCurrentBreastTypes([])}
+                                  >
+                                    <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+
+                      {/* Multi-select per Colore Capelli */}
+                      <Popover open={isHairColorPopoverOpen} onOpenChange={setIsHairColorPopoverOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={isHairColorPopoverOpen}
+                            className="w-full justify-between pl-10 relative"
+                          >
+                            <Palette className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                            {currentHairColors.length > 0
+                              ? `${currentHairColors.length} selezionati`
+                              : "Colore Capelli"}
+                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                          <Command>
+                            <CommandInput placeholder="Cerca colore capelli..." />
+                            <CommandEmpty>Nessun colore capelli trovato.</CommandEmpty>
+                            <CommandGroup>
+                              <div className="max-h-60 overflow-y-auto">
+                                {hairColors.map((option) => {
+                                  const isSelected = currentHairColors.includes(option.value);
+                                  return (
+                                    <CommandItem
+                                      key={option.value}
+                                      value={option.label}
+                                      onSelect={() => {
+                                        handleMultiSelectChange(currentHairColors, setCurrentHairColors, option.value, !isSelected);
+                                      }}
+                                      className="flex items-center cursor-pointer"
+                                    >
+                                      <Checkbox
+                                        checked={isSelected}
+                                        onCheckedChange={(checked) => handleMultiSelectChange(currentHairColors, setCurrentHairColors, option.value, checked as boolean)}
+                                        className="mr-2"
+                                      />
+                                      {option.label}
+                                      <CheckIcon
+                                        className={cn(
+                                          "ml-auto h-4 w-4",
+                                          isSelected ? "opacity-100" : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  );
+                                })}
+                              </div>
+                            </CommandGroup>
+                            {currentHairColors.length > 0 && (
+                              <>
+                                <Separator className="my-2" />
+                                <div className="p-2">
+                                  <Button
+                                    variant="ghost"
+                                    className="w-full justify-center text-red-500 hover:text-red-600"
+                                    onClick={() => setCurrentHairColors([])}
+                                  >
+                                    <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+
+                      {/* Multi-select per Corporatura */}
+                      <Popover open={isBodyTypePopoverOpen} onOpenChange={setIsBodyTypePopoverOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={isBodyTypePopoverOpen}
+                            className="w-full justify-between pl-10 relative"
+                          >
+                            <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                            {currentBodyTypes.length > 0
+                              ? `${currentBodyTypes.length} selezionati`
+                              : "Corporatura"}
+                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                          <Command>
+                            <CommandInput placeholder="Cerca corporatura..." />
+                            <CommandEmpty>Nessuna corporatura trovata.</CommandEmpty>
+                            <CommandGroup>
+                              <div className="max-h-60 overflow-y-auto">
+                                {bodyTypes.map((option) => {
+                                  const isSelected = currentBodyTypes.includes(option.value);
+                                  return (
+                                    <CommandItem
+                                      key={option.value}
+                                      value={option.label}
+                                      onSelect={() => {
+                                        handleMultiSelectChange(currentBodyTypes, setCurrentBodyTypes, option.value, !isSelected);
+                                      }}
+                                      className="flex items-center cursor-pointer"
+                                    >
+                                      <Checkbox
+                                        checked={isSelected}
+                                        onCheckedChange={(checked) => handleMultiSelectChange(currentBodyTypes, setCurrentBodyTypes, option.value, checked as boolean)}
+                                        className="mr-2"
+                                      />
+                                      {option.label}
+                                      <CheckIcon
+                                        className={cn(
+                                          "ml-auto h-4 w-4",
+                                          isSelected ? "opacity-100" : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  );
+                                })}
+                              </div>
+                            </CommandGroup>
+                            {currentBodyTypes.length > 0 && (
+                              <>
+                                <Separator className="my-2" />
+                                <div className="p-2">
+                                  <Button
+                                    variant="ghost"
+                                    className="w-full justify-center text-red-500 hover:text-red-600"
+                                    onClick={() => setCurrentBodyTypes([])}
+                                  >
+                                    <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+
+                      {/* Multi-select per Colore Occhi */}
+                      <Popover open={isEyeColorPopoverOpen} onOpenChange={setIsEyeColorPopoverOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={isEyeColorPopoverOpen}
+                            className="w-full justify-between pl-10 relative"
+                          >
+                            <Eye className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                            {currentEyeColors.length > 0
+                              ? `${currentEyeColors.length} selezionati`
+                              : "Colore Occhi"}
+                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                          <Command>
+                            <CommandInput placeholder="Cerca colore occhi..." />
+                            <CommandEmpty>Nessun colore occhi trovato.</CommandEmpty>
+                            <CommandGroup>
+                              <div className="max-h-60 overflow-y-auto">
+                                {eyeColors.map((option) => {
+                                  const isSelected = currentEyeColors.includes(option.value);
+                                  return (
+                                    <CommandItem
+                                      key={option.value}
+                                      value={option.label}
+                                      onSelect={() => {
+                                        handleMultiSelectChange(currentEyeColors, setCurrentEyeColors, option.value, !isSelected);
+                                      }}
+                                      className="flex items-center cursor-pointer"
+                                    >
+                                      <Checkbox
+                                        checked={isSelected}
+                                        onCheckedChange={(checked) => handleMultiSelectChange(currentEyeColors, setCurrentEyeColors, option.value, checked as boolean)}
+                                        className="mr-2"
+                                      />
+                                      {option.label}
+                                      <CheckIcon
+                                        className={cn(
+                                          "ml-auto h-4 w-4",
+                                          isSelected ? "opacity-100" : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  );
+                                })}
+                              </div>
+                            </CommandGroup>
+                            {currentEyeColors.length > 0 && (
+                              <>
+                                <Separator className="my-2" />
+                                <div className="p-2">
+                                  <Button
+                                    variant="ghost"
+                                    className="w-full justify-center text-red-500 hover:text-red-600"
+                                    onClick={() => setCurrentEyeColors([])}
+                                  >
+                                    <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                     </div>
-                  </div>
-                  {/* Multi-select per Filtri Servizi Offerti */}
-                  <Popover open={isOfferedServicesPopoverOpen} onOpenChange={setIsOfferedServicesPopoverOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={isOfferedServicesPopoverOpen}
-                        className="w-full justify-between pl-10 relative"
-                      >
-                        <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        {currentOfferedServices.length > 0
-                          ? `${currentOfferedServices.length} selezionati`
-                          : "Servizi Offerti"}
-                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
-                      <Command>
-                        <CommandInput placeholder="Cerca servizio..." />
-                        <CommandEmpty>Nessun servizio trovato.</CommandEmpty>
-                        <CommandGroup>
-                          <div className="max-h-60 overflow-y-auto">
-                            {offeredServicesOptions.map((option) => {
-                              const isSelected = currentOfferedServices.includes(option.id);
-                              return (
-                                <CommandItem
-                                  key={option.id}
-                                  value={option.label}
-                                  onSelect={() => {
-                                    handleMultiSelectChange(currentOfferedServices, setCurrentOfferedServices, option.id, !isSelected);
-                                  }}
-                                  className="flex items-center cursor-pointer"
-                                >
-                                  <Checkbox
-                                    checked={isSelected}
-                                    onCheckedChange={(checked) => handleMultiSelectChange(currentOfferedServices, setCurrentOfferedServices, option.id, checked as boolean)}
-                                    className="mr-2"
-                                  />
-                                  {option.label}
-                                  <CheckIcon
-                                    className={cn(
-                                      "ml-auto h-4 w-4",
-                                      isSelected ? "opacity-100" : "opacity-0"
-                                    )}
-                                  />
-                                </CommandItem>
-                              );
-                            })}
-                          </div>
-                        </CommandGroup>
-                        {currentOfferedServices.length > 0 && (
-                          <>
-                            <Separator className="my-2" />
-                            <div className="p-2">
-                              <Button
-                                variant="ghost"
-                                className="w-full justify-center text-red-500 hover:text-red-600"
-                                onClick={() => setCurrentOfferedServices([])}
-                              >
-                                <X className="h-4 w-4 mr-2" /> Deseleziona tutto
-                              </Button>
-                            </div>
-                          </>
-                        )}
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
+
+                    <Separator className="my-4" />
+                    <h3 className="text-lg font-semibold text-gray-700 mb-4">Filtri Incontro</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Multi-select per Tipologia di Incontro */}
+                      <Popover open={isMeetingTypePopoverOpen} onOpenChange={setIsMeetingTypePopoverOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={isMeetingTypePopoverOpen}
+                            className="w-full justify-between pl-10 relative"
+                          >
+                            <Handshake className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                            {currentMeetingTypes.length > 0
+                              ? `${currentMeetingTypes.length} selezionati`
+                              : "Tipologia di Incontro"}
+                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                          <Command>
+                            <CommandInput placeholder="Cerca tipologia..." />
+                            <CommandEmpty>Nessuna tipologia trovata.</CommandEmpty>
+                            <CommandGroup>
+                              <div className="max-h-60 overflow-y-auto">
+                                {meetingTypeOptions.map((option) => {
+                                  const isSelected = currentMeetingTypes.includes(option.id);
+                                  return (
+                                    <CommandItem
+                                      key={option.id}
+                                      value={option.label}
+                                      onSelect={() => {
+                                        handleMultiSelectChange(currentMeetingTypes, setCurrentMeetingTypes, option.id, !isSelected);
+                                      }}
+                                      className="flex items-center cursor-pointer"
+                                    >
+                                      <Checkbox
+                                        checked={isSelected}
+                                        onCheckedChange={(checked) => handleMultiSelectChange(currentMeetingTypes, setCurrentMeetingTypes, option.id, checked as boolean)}
+                                        className="mr-2"
+                                      />
+                                      {option.label}
+                                      <CheckIcon
+                                        className={cn(
+                                          "ml-auto h-4 w-4",
+                                          isSelected ? "opacity-100" : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  );
+                                })}
+                              </div>
+                            </CommandGroup>
+                            {currentMeetingTypes.length > 0 && (
+                              <>
+                                <Separator className="my-2" />
+                                <div className="p-2">
+                                  <Button
+                                    variant="ghost"
+                                    className="w-full justify-center text-red-500 hover:text-red-600"
+                                    onClick={() => setCurrentMeetingTypes([])}
+                                  >
+                                    <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+
+                      {/* Multi-select per Disponibilità per */}
+                      <Popover open={isAvailabilityForPopoverOpen} onOpenChange={setIsAvailabilityForPopoverOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={isAvailabilityForPopoverOpen}
+                            className="w-full justify-between pl-10 relative"
+                          >
+                            <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                            {currentAvailabilityFor.length > 0
+                              ? `${currentAvailabilityFor.length} selezionati`
+                              : "Disponibilità per"}
+                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                          <Command>
+                            <CommandInput placeholder="Cerca disponibilità..." />
+                            <CommandEmpty>Nessuna disponibilità trovata.</CommandEmpty>
+                            <CommandGroup>
+                              <div className="max-h-60 overflow-y-auto">
+                                {availabilityForOptions.map((option) => {
+                                  const isSelected = currentAvailabilityFor.includes(option.id);
+                                  return (
+                                    <CommandItem
+                                      key={option.id}
+                                      value={option.label}
+                                      onSelect={() => {
+                                        handleMultiSelectChange(currentAvailabilityFor, setCurrentAvailabilityFor, option.id, !isSelected);
+                                      }}
+                                      className="flex items-center cursor-pointer"
+                                    >
+                                      <Checkbox
+                                        checked={isSelected}
+                                        onCheckedChange={(checked) => handleMultiSelectChange(currentAvailabilityFor, setCurrentAvailabilityFor, option.id, checked as boolean)}
+                                        className="mr-2"
+                                      />
+                                      {option.label}
+                                      <CheckIcon
+                                        className={cn(
+                                          "ml-auto h-4 w-4",
+                                          isSelected ? "opacity-100" : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  );
+                                })}
+                              </div>
+                            </CommandGroup>
+                            {currentAvailabilityFor.length > 0 && (
+                              <>
+                                <Separator className="my-2" />
+                                <div className="p-2">
+                                  <Button
+                                    variant="ghost"
+                                    className="w-full justify-center text-red-500 hover:text-red-600"
+                                    onClick={() => setCurrentAvailabilityFor([])}
+                                  >
+                                    <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+
+                      {/* Multi-select per Luogo Incontro */}
+                      <Popover open={isMeetingLocationPopoverOpen} onOpenChange={setIsMeetingLocationPopoverOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={isMeetingLocationPopoverOpen}
+                            className="w-full justify-between pl-10 relative"
+                          >
+                            <Home className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                            {currentMeetingLocations.length > 0
+                              ? `${currentMeetingLocations.length} selezionati`
+                              : "Luogo Incontro"}
+                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                          <Command>
+                            <CommandInput placeholder="Cerca luogo..." />
+                            <CommandEmpty>Nessun luogo trovato.</CommandEmpty>
+                            <CommandGroup>
+                              <div className="max-h-60 overflow-y-auto">
+                                {meetingLocationOptions.map((option) => {
+                                  const isSelected = currentMeetingLocations.includes(option.id);
+                                  return (
+                                    <CommandItem
+                                      key={option.id}
+                                      value={option.label}
+                                      onSelect={() => {
+                                        handleMultiSelectChange(currentMeetingLocations, setCurrentMeetingLocations, option.id, !isSelected);
+                                      }}
+                                      className="flex items-center cursor-pointer"
+                                    >
+                                      <Checkbox
+                                        checked={isSelected}
+                                        onCheckedChange={(checked) => handleMultiSelectChange(currentMeetingLocations, setCurrentMeetingLocations, option.id, checked as boolean)}
+                                        className="mr-2"
+                                      />
+                                      {option.label}
+                                      <CheckIcon
+                                        className={cn(
+                                          "ml-auto h-4 w-4",
+                                          isSelected ? "opacity-100" : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  );
+                                })}
+                              </div>
+                            </CommandGroup>
+                            {currentMeetingLocations.length > 0 && (
+                              <>
+                                <Separator className="my-2" />
+                                <div className="p-2">
+                                  <Button
+                                    variant="ghost"
+                                    className="w-full justify-center text-red-500 hover:text-red-600"
+                                    onClick={() => setCurrentMeetingLocations([])}
+                                  >
+                                    <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="relative">
+                          <Euro className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                          <Input
+                            type="number"
+                            placeholder="Tariffa Min"
+                            className="w-full pl-10"
+                            value={currentHourlyRateMin}
+                            onChange={(e) => setCurrentHourlyRateMin(e.target.value)}
+                          />
+                        </div>
+                        <div className="relative">
+                          <Euro className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                          <Input
+                            type="number"
+                            placeholder="Tariffa Max"
+                            className="w-full pl-10"
+                            value={currentHourlyRateMax}
+                            onChange={(e) => setCurrentHourlyRateMax(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                      {/* Multi-select per Filtri Servizi Offerti */}
+                      <Popover open={isOfferedServicesPopoverOpen} onOpenChange={setIsOfferedServicesPopoverOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={isOfferedServicesPopoverOpen}
+                            className="w-full justify-between pl-10 relative"
+                          >
+                            <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                            {currentOfferedServices.length > 0
+                              ? `${currentOfferedServices.length} selezionati`
+                              : "Servizi Offerti"}
+                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0">
+                          <Command>
+                            <CommandInput placeholder="Cerca servizio..." />
+                            <CommandEmpty>Nessun servizio trovato.</CommandEmpty>
+                            <CommandGroup>
+                              <div className="max-h-60 overflow-y-auto">
+                                {offeredServicesOptions.map((option) => {
+                                  const isSelected = currentOfferedServices.includes(option.id);
+                                  return (
+                                    <CommandItem
+                                      key={option.id}
+                                      value={option.label}
+                                      onSelect={() => {
+                                        handleMultiSelectChange(currentOfferedServices, setCurrentOfferedServices, option.id, !isSelected);
+                                      }}
+                                      className="flex items-center cursor-pointer"
+                                    >
+                                      <Checkbox
+                                        checked={isSelected}
+                                        onCheckedChange={(checked) => handleMultiSelectChange(currentOfferedServices, setCurrentOfferedServices, option.id, checked as boolean)}
+                                        className="mr-2"
+                                      />
+                                      {option.label}
+                                      <CheckIcon
+                                        className={cn(
+                                          "ml-auto h-4 w-4",
+                                          isSelected ? "opacity-100" : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  );
+                                })}
+                              </div>
+                            </CommandGroup>
+                            {currentOfferedServices.length > 0 && (
+                              <>
+                                <Separator className="my-2" />
+                                <div className="p-2">
+                                  <Button
+                                    variant="ghost"
+                                    className="w-full justify-center text-red-500 hover:text-red-600"
+                                    onClick={() => setCurrentOfferedServices([])}
+                                  >
+                                    <X className="h-4 w-4 mr-2" /> Deseleziona tutto
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+                {/* END NEW: Altri Filtri Collapsible */}
 
                 <Button type="submit" className="w-full bg-rose-500 hover:bg-rose-600 text-lg py-6 mt-4">
                   Applica Filtri
