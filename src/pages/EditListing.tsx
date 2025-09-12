@@ -452,14 +452,17 @@ const EditListing = () => {
     checked: boolean
   ) => {
     const newSelection = checked
-      ? [...currentSelection, itemId]
-      : currentSelection.filter(id => id !== itemId);
+      ? [...currentSelection, itemId.toLowerCase()] // Normalize to lowercase on add
+      : currentSelection.filter(id => id.toLowerCase() !== itemId.toLowerCase()); // Normalize for comparison on remove
     onChange(newSelection);
   };
 
   const getSelectedLabel = (selectedItems: string[], options: { value: string; label: string }[]) => {
     if (selectedItems.length === 0) return "Seleziona...";
-    if (selectedItems.length === 1) return options.find(o => o.value === selectedItems[0])?.label || "Seleziona...";
+    if (selectedItems.length === 1) {
+      const normalizedSelectedItem = selectedItems[0].toLowerCase();
+      return options.find(o => o.value.toLowerCase() === normalizedSelectedItem)?.label || "Seleziona...";
+    }
     return `${selectedItems.length} selezionati`;
   };
 
@@ -605,7 +608,7 @@ const EditListing = () => {
                               <CommandGroup>
                                 <div className="max-h-60 overflow-y-auto">
                                   {ethnicities.map((option) => {
-                                    const isSelected = field.value.includes(option.value);
+                                    const isSelected = field.value.map(v => v.toLowerCase()).includes(option.value.toLowerCase());
                                     return (
                                       <CommandItem
                                         key={option.value}
@@ -679,7 +682,7 @@ const EditListing = () => {
                               <CommandGroup>
                                 <div className="max-h-60 overflow-y-auto">
                                   {nationalities.map((option) => {
-                                    const isSelected = field.value.includes(option.value);
+                                    const isSelected = field.value.map(v => v.toLowerCase()).includes(option.value.toLowerCase());
                                     return (
                                       <CommandItem
                                         key={option.value}
@@ -753,7 +756,7 @@ const EditListing = () => {
                               <CommandGroup>
                                 <div className="max-h-60 overflow-y-auto">
                                   {breastTypes.map((option) => {
-                                    const isSelected = field.value.includes(option.value);
+                                    const isSelected = field.value.map(v => v.toLowerCase()).includes(option.value.toLowerCase());
                                     return (
                                       <CommandItem
                                         key={option.value}
@@ -827,7 +830,7 @@ const EditListing = () => {
                               <CommandGroup>
                                 <div className="max-h-60 overflow-y-auto">
                                   {hairColors.map((option) => {
-                                    const isSelected = field.value.includes(option.value);
+                                    const isSelected = field.value.map(v => v.toLowerCase()).includes(option.value.toLowerCase());
                                     return (
                                       <CommandItem
                                         key={option.value}
@@ -901,7 +904,7 @@ const EditListing = () => {
                               <CommandGroup>
                                 <div className="max-h-60 overflow-y-auto">
                                   {bodyTypes.map((option) => {
-                                    const isSelected = field.value.includes(option.value);
+                                    const isSelected = field.value.map(v => v.toLowerCase()).includes(option.value.toLowerCase());
                                     return (
                                       <CommandItem
                                         key={option.value}
@@ -975,7 +978,7 @@ const EditListing = () => {
                               <CommandGroup>
                                 <div className="max-h-60 overflow-y-auto">
                                   {eyeColors.map((option) => {
-                                    const isSelected = field.value.includes(option.value);
+                                    const isSelected = field.value.map(v => v.toLowerCase()).includes(option.value.toLowerCase());
                                     return (
                                       <CommandItem
                                         key={option.value}
@@ -1056,7 +1059,7 @@ const EditListing = () => {
                               <CommandGroup>
                                 <div className="max-h-60 overflow-y-auto">
                                   {meetingTypeOptions.map((option) => {
-                                    const isSelected = field.value.includes(option.id);
+                                    const isSelected = field.value.map(v => v.toLowerCase()).includes(option.id.toLowerCase());
                                     return (
                                       <CommandItem
                                         key={option.id}
@@ -1131,7 +1134,7 @@ const EditListing = () => {
                               <CommandGroup>
                                 <div className="max-h-60 overflow-y-auto">
                                   {availabilityForOptions.map((option) => {
-                                    const isSelected = field.value.includes(option.id);
+                                    const isSelected = field.value.map(v => v.toLowerCase()).includes(option.id.toLowerCase());
                                     return (
                                       <CommandItem
                                         key={option.id}
@@ -1206,7 +1209,7 @@ const EditListing = () => {
                               <CommandGroup>
                                 <div className="max-h-60 overflow-y-auto">
                                   {meetingLocationOptions.map((option) => {
-                                    const isSelected = field.value.includes(option.id);
+                                    const isSelected = field.value.map(v => v.toLowerCase()).includes(option.id.toLowerCase());
                                     return (
                                       <CommandItem
                                         key={option.id}
@@ -1306,7 +1309,7 @@ const EditListing = () => {
                               <CommandGroup>
                                 <div className="max-h-60 overflow-y-auto">
                                   {offeredServicesOptions.map((option) => {
-                                    const isSelected = field.value.includes(option.id);
+                                    const isSelected = field.value.map(v => v.toLowerCase()).includes(option.id.toLowerCase());
                                     return (
                                       <CommandItem
                                         key={option.id}

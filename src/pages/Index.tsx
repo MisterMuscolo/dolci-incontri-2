@@ -355,13 +355,13 @@ export default function Index({ session }: IndexProps) {
 
   const handleMultiSelectChange = (
     _currentSelection: string[], // Renamed to _currentSelection to suppress TS6133
-    onChange: (...event: any[]) => void,
+    onChange: React.Dispatch<React.SetStateAction<string[]>>,
     itemId: string,
     checked: boolean
   ) => {
     const newSelection = checked
-      ? [..._currentSelection, itemId]
-      : _currentSelection.filter(id => id !== itemId);
+      ? [..._currentSelection, itemId.toLowerCase()] // Normalize to lowercase on add
+      : _currentSelection.filter(id => id.toLowerCase() !== itemId.toLowerCase()); // Normalize for comparison on remove
     onChange(newSelection);
   };
 
@@ -556,7 +556,7 @@ export default function Index({ session }: IndexProps) {
                           <CommandGroup>
                             <div className="max-h-60 overflow-y-auto">
                               {ageRanges.map((range) => {
-                                const isSelected = selectedAgeRanges.includes(range.value);
+                                const isSelected = selectedAgeRanges.map(v => v.toLowerCase()).includes(range.value.toLowerCase());
                                 return (
                                   <CommandItem
                                     key={range.value}
@@ -624,7 +624,7 @@ export default function Index({ session }: IndexProps) {
                           <CommandGroup>
                             <div className="max-h-60 overflow-y-auto">
                               {ethnicities.map((option) => {
-                                const isSelected = selectedEthnicities.includes(option.value);
+                                const isSelected = selectedEthnicities.map(v => v.toLowerCase()).includes(option.value.toLowerCase());
                                 return (
                                   <CommandItem
                                     key={option.value}
@@ -692,7 +692,7 @@ export default function Index({ session }: IndexProps) {
                           <CommandGroup>
                             <div className="max-h-60 overflow-y-auto">
                               {nationalities.map((option) => {
-                                const isSelected = selectedNationalities.includes(option.value);
+                                const isSelected = selectedNationalities.map(v => v.toLowerCase()).includes(option.value.toLowerCase());
                                 return (
                                   <CommandItem
                                     key={option.value}
@@ -760,14 +760,12 @@ export default function Index({ session }: IndexProps) {
                           <CommandGroup>
                             <div className="max-h-60 overflow-y-auto">
                               {breastTypes.map((option) => {
-                                const isSelected = selectedBreastTypes.includes(option.value);
+                                const isSelected = selectedBreastTypes.map(v => v.toLowerCase()).includes(option.value.toLowerCase());
                                 return (
                                   <CommandItem
                                     key={option.value}
                                     value={option.label}
-                                    onSelect={() => {
-                                      handleMultiSelectChange(selectedBreastTypes, setSelectedBreastTypes, option.value, !isSelected);
-                                    }}
+                                    onSelect={() => handleMultiSelectChange(selectedBreastTypes, setSelectedBreastTypes, option.value, !isSelected)}
                                     className="flex items-center cursor-pointer"
                                   >
                                     <Checkbox
@@ -828,14 +826,12 @@ export default function Index({ session }: IndexProps) {
                           <CommandGroup>
                             <div className="max-h-60 overflow-y-auto">
                               {hairColors.map((option) => {
-                                const isSelected = selectedHairColors.includes(option.value);
+                                const isSelected = selectedHairColors.map(v => v.toLowerCase()).includes(option.value.toLowerCase());
                                 return (
                                   <CommandItem
                                     key={option.value}
                                     value={option.label}
-                                    onSelect={() => {
-                                      handleMultiSelectChange(selectedHairColors, setSelectedHairColors, option.value, !isSelected);
-                                    }}
+                                    onSelect={() => handleMultiSelectChange(selectedHairColors, setSelectedHairColors, option.value, !isSelected)}
                                     className="flex items-center cursor-pointer"
                                   >
                                     <Checkbox
@@ -896,14 +892,12 @@ export default function Index({ session }: IndexProps) {
                           <CommandGroup>
                             <div className="max-h-60 overflow-y-auto">
                               {bodyTypes.map((option) => {
-                                const isSelected = selectedBodyTypes.includes(option.value);
+                                const isSelected = selectedBodyTypes.map(v => v.toLowerCase()).includes(option.value.toLowerCase());
                                 return (
                                   <CommandItem
                                     key={option.value}
                                     value={option.label}
-                                    onSelect={() => {
-                                      handleMultiSelectChange(selectedBodyTypes, setSelectedBodyTypes, option.value, !isSelected);
-                                    }}
+                                    onSelect={() => handleMultiSelectChange(selectedBodyTypes, setSelectedBodyTypes, option.value, !isSelected)}
                                     className="flex items-center cursor-pointer"
                                   >
                                     <Checkbox
@@ -964,14 +958,12 @@ export default function Index({ session }: IndexProps) {
                           <CommandGroup>
                             <div className="max-h-60 overflow-y-auto">
                               {eyeColors.map((option) => {
-                                const isSelected = selectedEyeColors.includes(option.value);
+                                const isSelected = selectedEyeColors.map(v => v.toLowerCase()).includes(option.value.toLowerCase());
                                 return (
                                   <CommandItem
                                     key={option.value}
                                     value={option.label}
-                                    onSelect={() => {
-                                      handleMultiSelectChange(selectedEyeColors, setSelectedEyeColors, option.value, !isSelected);
-                                    }}
+                                    onSelect={() => handleMultiSelectChange(selectedEyeColors, setSelectedEyeColors, option.value, !isSelected)}
                                     className="flex items-center cursor-pointer"
                                   >
                                     <Checkbox
@@ -1035,14 +1027,12 @@ export default function Index({ session }: IndexProps) {
                           <CommandGroup>
                             <div className="max-h-60 overflow-y-auto">
                               {meetingTypeOptions.map((option) => {
-                                const isSelected = selectedMeetingTypes.includes(option.id);
+                                const isSelected = selectedMeetingTypes.map(v => v.toLowerCase()).includes(option.id.toLowerCase());
                                 return (
                                   <CommandItem
                                     key={option.id}
                                     value={option.label}
-                                    onSelect={() => {
-                                      handleMultiSelectChange(selectedMeetingTypes, setSelectedMeetingTypes, option.id, !isSelected);
-                                    }}
+                                    onSelect={() => handleMultiSelectChange(selectedMeetingTypes, setSelectedMeetingTypes, option.id, !isSelected)}
                                     className="flex items-center cursor-pointer"
                                   >
                                     <Checkbox
@@ -1103,14 +1093,12 @@ export default function Index({ session }: IndexProps) {
                           <CommandGroup>
                             <div className="max-h-60 overflow-y-auto">
                               {availabilityForOptions.map((option) => {
-                                const isSelected = selectedAvailabilityFor.includes(option.id);
+                                const isSelected = selectedAvailabilityFor.map(v => v.toLowerCase()).includes(option.id.toLowerCase());
                                 return (
                                   <CommandItem
                                     key={option.id}
                                     value={option.label}
-                                    onSelect={() => {
-                                      handleMultiSelectChange(selectedAvailabilityFor, setSelectedAvailabilityFor, option.id, !isSelected);
-                                    }}
+                                    onSelect={() => handleMultiSelectChange(selectedAvailabilityFor, setSelectedAvailabilityFor, option.id, !isSelected)}
                                     className="flex items-center cursor-pointer"
                                   >
                                     <Checkbox
@@ -1171,14 +1159,12 @@ export default function Index({ session }: IndexProps) {
                           <CommandGroup>
                             <div className="max-h-60 overflow-y-auto">
                               {meetingLocationOptions.map((option) => {
-                                const isSelected = selectedMeetingLocations.includes(option.id);
+                                const isSelected = selectedMeetingLocations.map(v => v.toLowerCase()).includes(option.id.toLowerCase());
                                 return (
                                   <CommandItem
                                     key={option.id}
                                     value={option.label}
-                                    onSelect={() => {
-                                      handleMultiSelectChange(selectedMeetingLocations, setSelectedMeetingLocations, option.id, !isSelected);
-                                    }}
+                                    onSelect={() => handleMultiSelectChange(selectedMeetingLocations, setSelectedMeetingLocations, option.id, !isSelected)}
                                     className="flex items-center cursor-pointer"
                                   >
                                     <Checkbox
@@ -1261,7 +1247,7 @@ export default function Index({ session }: IndexProps) {
                           <CommandGroup>
                             <div className="max-h-60 overflow-y-auto">
                               {offeredServicesOptions.map((option) => {
-                                const isSelected = selectedOfferedServices.includes(option.id);
+                                const isSelected = selectedOfferedServices.map(v => v.toLowerCase()).includes(option.id.toLowerCase());
                                 return (
                                   <CommandItem
                                     key={option.id}
