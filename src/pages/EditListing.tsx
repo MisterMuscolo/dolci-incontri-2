@@ -297,18 +297,18 @@ const EditListing = () => {
       phone: listing.phone || '',
       contact_preference: listing.contact_preference || 'both',
       contact_whatsapp: listing.contact_whatsapp || false,
-      // Nuovi campi
-      ethnicity: listing.ethnicity || [],
-      nationality: listing.nationality || [],
-      breast_type: listing.breast_type || [],
-      hair_color: listing.hair_color || [],
-      body_type: listing.body_type || [],
-      eye_color: listing.eye_color || [],
-      meeting_type: listing.meeting_type || [],
-      availability_for: listing.availability_for || [],
-      meeting_location: listing.meeting_location || [],
+      // Nuovi campi - Normalizzazione a lowercase e trim
+      ethnicity: listing.ethnicity?.map(e => e.toLowerCase().trim()) || [],
+      nationality: listing.nationality?.map(n => n.toLowerCase().trim()) || [],
+      breast_type: listing.breast_type?.map(b => b.toLowerCase().trim()) || [],
+      hair_color: listing.hair_color?.map(h => h.toLowerCase().trim()) || [],
+      body_type: listing.body_type?.map(b => b.toLowerCase().trim()) || [],
+      eye_color: listing.eye_color?.map(e => e.toLowerCase().trim()) || [],
+      meeting_type: listing.meeting_type?.map(m => m.toLowerCase().trim()) || [],
+      availability_for: listing.availability_for?.map(a => a.toLowerCase().trim()) || [],
+      meeting_location: listing.meeting_location?.map(l => l.toLowerCase().trim()) || [],
       hourly_rate: listing.hourly_rate,
-      offered_services: listing.offered_services || [], // Pre-compila il nuovo campo
+      offered_services: listing.offered_services?.map(s => s.toLowerCase().trim()) || [], // Pre-compila il nuovo campo
     });
 
     setExistingPhotos(listing.listing_photos || []);
@@ -337,18 +337,18 @@ const EditListing = () => {
         contact_preference: values.contact_preference,
         contact_whatsapp: values.contact_whatsapp,
         zone: values.zone,
-        // Nuovi campi
-        ethnicity: values.ethnicity,
-        nationality: values.nationality,
-        breast_type: values.breast_type,
-        hair_color: values.hair_color,
-        body_type: values.body_type,
-        eye_color: values.eye_color,
-        meeting_type: values.meeting_type,
-        availability_for: values.availability_for,
-        meeting_location: values.meeting_location,
+        // Nuovi campi - Normalizzazione a lowercase e trim prima del salvataggio
+        ethnicity: values.ethnicity.map(e => e.toLowerCase().trim()),
+        nationality: values.nationality.map(n => n.toLowerCase().trim()),
+        breast_type: values.breast_type.map(b => b.toLowerCase().trim()),
+        hair_color: values.hair_color.map(h => h.toLowerCase().trim()),
+        body_type: values.body_type.map(b => b.toLowerCase().trim()),
+        eye_color: values.eye_color.map(e => e.toLowerCase().trim()),
+        meeting_type: values.meeting_type.map(m => m.toLowerCase().trim()),
+        availability_for: values.availability_for.map(a => a.toLowerCase().trim()),
+        meeting_location: values.meeting_location.map(l => l.toLowerCase().trim()),
         hourly_rate: values.hourly_rate,
-        offered_services: values.offered_services, // Aggiorna il nuovo campo
+        offered_services: values.offered_services.map(s => s.toLowerCase().trim()), // Aggiorna il nuovo campo
       };
 
       const { error: updateError } = await supabase
@@ -403,6 +403,7 @@ const EditListing = () => {
         const { error: photosError } = await supabase.from('listing_photos').insert(photoPayloads);
 
         if (photosError) {
+          await supabase.from('listings').delete().eq('id', listingId);
           throw new Error(photosError.message || 'Errore nel salvataggio delle nuove foto.');
         }
       }

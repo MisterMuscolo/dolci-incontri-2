@@ -264,18 +264,18 @@ const NewListing = () => {
           contact_preference: restOfValues.contact_preference,
           contact_whatsapp: restOfValues.contact_whatsapp,
           last_bumped_at: new Date().toISOString(),
-          // Nuovi campi
-          ethnicity: restOfValues.ethnicity,
-          nationality: restOfValues.nationality,
-          breast_type: restOfValues.breast_type,
-          hair_color: restOfValues.hair_color,
-          body_type: restOfValues.body_type,
-          eye_color: restOfValues.eye_color,
-          meeting_type: restOfValues.meeting_type,
-          availability_for: restOfValues.availability_for,
-          meeting_location: restOfValues.meeting_location,
+          // Nuovi campi - Normalizzazione a lowercase e trim prima del salvataggio
+          ethnicity: restOfValues.ethnicity.map(e => e.toLowerCase().trim()),
+          nationality: restOfValues.nationality.map(n => n.toLowerCase().trim()),
+          breast_type: restOfValues.breast_type.map(b => b.toLowerCase().trim()),
+          hair_color: restOfValues.hair_color.map(h => h.toLowerCase().trim()),
+          body_type: restOfValues.body_type.map(b => b.toLowerCase().trim()),
+          eye_color: restOfValues.eye_color.map(e => e.toLowerCase().trim()),
+          meeting_type: restOfValues.meeting_type.map(m => m.toLowerCase().trim()),
+          availability_for: restOfValues.availability_for.map(a => a.toLowerCase().trim()),
+          meeting_location: restOfValues.meeting_location.map(l => l.toLowerCase().trim()),
           hourly_rate: restOfValues.hourly_rate,
-          offered_services: restOfValues.offered_services, // Inserisci il nuovo campo
+          offered_services: restOfValues.offered_services.map(s => s.toLowerCase().trim()), // Inserisci il nuovo campo
         })
         .select('id')
         .single();
