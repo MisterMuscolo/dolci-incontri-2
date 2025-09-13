@@ -298,17 +298,17 @@ const EditListing = () => {
       contact_preference: listing.contact_preference || 'both',
       contact_whatsapp: listing.contact_whatsapp || false,
       // Nuovi campi - Normalizzazione a lowercase e trim
-      ethnicity: listing.ethnicity?.map(e => e.toLowerCase().trim()) || [],
-      nationality: listing.nationality?.map(n => n.toLowerCase().trim()) || [],
-      breast_type: listing.breast_type?.map(b => b.toLowerCase().trim()) || [],
-      hair_color: listing.hair_color?.map(h => h.toLowerCase().trim()) || [],
-      body_type: listing.body_type?.map(b => b.toLowerCase().trim()) || [],
-      eye_color: listing.eye_color?.map(e => e.toLowerCase().trim()) || [],
-      meeting_type: listing.meeting_type?.map(m => m.toLowerCase().trim()) || [],
-      availability_for: listing.availability_for?.map(a => a.toLowerCase().trim()) || [],
-      meeting_location: listing.meeting_location?.map(l => l.toLowerCase().trim()) || [],
+      ethnicity: (Array.isArray(listing.ethnicity) ? listing.ethnicity : []).map(e => e.toLowerCase().trim()),
+      nationality: (Array.isArray(listing.nationality) ? listing.nationality : []).map(n => n.toLowerCase().trim()),
+      breast_type: (Array.isArray(listing.breast_type) ? listing.breast_type : []).map(b => b.toLowerCase().trim()),
+      hair_color: (Array.isArray(listing.hair_color) ? listing.hair_color : []).map(h => h.toLowerCase().trim()),
+      body_type: (Array.isArray(listing.body_type) ? listing.body_type : []).map(b => b.toLowerCase().trim()),
+      eye_color: (Array.isArray(listing.eye_color) ? listing.eye_color : []).map(e => e.toLowerCase().trim()),
+      meeting_type: (Array.isArray(listing.meeting_type) ? listing.meeting_type : []).map(m => m.toLowerCase().trim()),
+      availability_for: (Array.isArray(listing.availability_for) ? listing.availability_for : []).map(a => a.toLowerCase().trim()),
+      meeting_location: (Array.isArray(listing.meeting_location) ? listing.meeting_location : []).map(l => l.toLowerCase().trim()),
       hourly_rate: listing.hourly_rate,
-      offered_services: listing.offered_services?.map(s => s.toLowerCase().trim()) || [], // Pre-compila il nuovo campo
+      offered_services: (Array.isArray(listing.offered_services) ? listing.offered_services : []).map(s => s.toLowerCase().trim()), // Pre-compila il nuovo campo
     });
 
     setExistingPhotos(listing.listing_photos || []);
@@ -403,7 +403,7 @@ const EditListing = () => {
         const { error: photosError } = await supabase.from('listing_photos').insert(photoPayloads);
 
         if (photosError) {
-          await supabase.from('listings').delete().eq('id', listingId);
+          await supabase.from('listings').delete().eq('id', id);
           throw new Error(photosError.message || 'Errore nel salvataggio delle nuove foto.');
         }
       }
@@ -447,8 +447,8 @@ const EditListing = () => {
   const isPremiumOrPending = !!(currentListing.is_premium && promoStart && promoEnd && (promoStart <= now || promoEnd >= now));
 
   const handleMultiSelectChange = (
-    currentSelection: string[],
     onChange: (...event: any[]) => void,
+    currentSelection: string[],
     itemId: string,
     checked: boolean
   ) => {
@@ -458,13 +458,14 @@ const EditListing = () => {
     onChange(newSelection);
   };
 
-  const getSelectedLabel = (selectedItems: string[], options: { value: string; label: string }[]) => {
-    if (selectedItems.length === 0) return "Seleziona...";
-    if (selectedItems.length === 1) {
-      const normalizedSelectedItem = selectedItems[0].toLowerCase();
+  const getSelectedLabel = (selectedItems: string[] | null | undefined, options: { value: string; label: string }[]) => {
+    const items = Array.isArray(selectedItems) ? selectedItems : [];
+    if (items.length === 0) return "Seleziona...";
+    if (items.length === 1) {
+      const normalizedSelectedItem = items[0].toLowerCase();
       return options.find(o => o.value.toLowerCase() === normalizedSelectedItem)?.label || "Seleziona...";
     }
-    return `${selectedItems.length} selezionati`;
+    return `${items.length} selezionati`;
   };
 
   return (
@@ -614,12 +615,12 @@ const EditListing = () => {
                                       <CommandItem
                                         key={option.value}
                                         value={option.label}
-                                        onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.value, !isSelected)}
+                                        onSelect={() => handleMultiSelectChange(field.onChange, field.value, option.value, !isSelected)}
                                         className="flex items-center cursor-pointer"
                                       >
                                         <Checkbox
                                           checked={isSelected}
-                                          onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.value, checked as boolean)}
+                                          onCheckedChange={(checked) => handleMultiSelectChange(field.onChange, field.value, option.value, checked as boolean)}
                                           className="mr-2"
                                         />
                                         {option.label}
@@ -688,12 +689,12 @@ const EditListing = () => {
                                       <CommandItem
                                         key={option.value}
                                         value={option.label}
-                                        onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.value, !isSelected)}
+                                        onSelect={() => handleMultiSelectChange(field.onChange, field.value, option.value, !isSelected)}
                                         className="flex items-center cursor-pointer"
                                       >
                                         <Checkbox
                                           checked={isSelected}
-                                          onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.value, checked as boolean)}
+                                          onCheckedChange={(checked) => handleMultiSelectChange(field.onChange, field.value, option.value, checked as boolean)}
                                           className="mr-2"
                                         />
                                         {option.label}
@@ -762,12 +763,12 @@ const EditListing = () => {
                                       <CommandItem
                                         key={option.value}
                                         value={option.label}
-                                        onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.value, !isSelected)}
+                                        onSelect={() => handleMultiSelectChange(field.onChange, field.value, option.value, !isSelected)}
                                         className="flex items-center cursor-pointer"
                                       >
                                         <Checkbox
                                           checked={isSelected}
-                                          onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.value, checked as boolean)}
+                                          onCheckedChange={(checked) => handleMultiSelectChange(field.onChange, field.value, option.value, checked as boolean)}
                                           className="mr-2"
                                         />
                                         {option.label}
@@ -836,12 +837,12 @@ const EditListing = () => {
                                       <CommandItem
                                         key={option.value}
                                         value={option.label}
-                                        onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.value, !isSelected)}
+                                        onSelect={() => handleMultiSelectChange(field.onChange, field.value, option.value, !isSelected)}
                                         className="flex items-center cursor-pointer"
                                       >
                                         <Checkbox
                                           checked={isSelected}
-                                          onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.value, checked as boolean)}
+                                          onCheckedChange={(checked) => handleMultiSelectChange(field.onChange, field.value, option.value, checked as boolean)}
                                           className="mr-2"
                                         />
                                         {option.label}
@@ -910,12 +911,12 @@ const EditListing = () => {
                                       <CommandItem
                                         key={option.value}
                                         value={option.label}
-                                        onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.value, !isSelected)}
+                                        onSelect={() => handleMultiSelectChange(field.onChange, field.value, option.value, !isSelected)}
                                         className="flex items-center cursor-pointer"
                                       >
                                         <Checkbox
                                           checked={isSelected}
-                                          onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.value, checked as boolean)}
+                                          onCheckedChange={(checked) => handleMultiSelectChange(field.onChange, field.value, option.value, checked as boolean)}
                                           className="mr-2"
                                         />
                                         {option.label}
@@ -984,12 +985,12 @@ const EditListing = () => {
                                       <CommandItem
                                         key={option.value}
                                         value={option.label}
-                                        onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.value, !isSelected)}
+                                        onSelect={() => handleMultiSelectChange(field.onChange, field.value, option.value, !isSelected)}
                                         className="flex items-center cursor-pointer"
                                       >
                                         <Checkbox
                                           checked={isSelected}
-                                          onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.value, checked as boolean)}
+                                          onCheckedChange={(checked) => handleMultiSelectChange(field.onChange, field.value, option.value, checked as boolean)}
                                           className="mr-2"
                                         />
                                         {option.label}
@@ -1065,12 +1066,12 @@ const EditListing = () => {
                                       <CommandItem
                                         key={option.id}
                                         value={option.label}
-                                        onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.id, !isSelected)}
+                                        onSelect={() => handleMultiSelectChange(field.onChange, field.value, option.id, !isSelected)}
                                         className="flex items-center cursor-pointer"
                                       >
                                         <Checkbox
                                           checked={isSelected}
-                                          onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.id, checked as boolean)}
+                                          onCheckedChange={(checked) => handleMultiSelectChange(field.onChange, field.value, option.id, checked as boolean)}
                                           className="mr-2"
                                         />
                                         {option.label}
@@ -1140,12 +1141,12 @@ const EditListing = () => {
                                       <CommandItem
                                         key={option.id}
                                         value={option.label}
-                                        onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.id, !isSelected)}
+                                        onSelect={() => handleMultiSelectChange(field.onChange, field.value, option.id, !isSelected)}
                                         className="flex items-center cursor-pointer"
                                       >
                                         <Checkbox
                                           checked={isSelected}
-                                          onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.id, checked as boolean)}
+                                          onCheckedChange={(checked) => handleMultiSelectChange(field.onChange, field.value, option.id, checked as boolean)}
                                           className="mr-2"
                                         />
                                         {option.label}
@@ -1215,12 +1216,12 @@ const EditListing = () => {
                                       <CommandItem
                                         key={option.id}
                                         value={option.label}
-                                        onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.id, !isSelected)}
+                                        onSelect={() => handleMultiSelectChange(field.onChange, field.value, option.id, !isSelected)}
                                         className="flex items-center cursor-pointer"
                                       >
                                         <Checkbox
                                           checked={isSelected}
-                                          onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.id, checked as boolean)}
+                                          onCheckedChange={(checked) => handleMultiSelectChange(field.onChange, field.value, option.id, checked as boolean)}
                                           className="mr-2"
                                         />
                                         {option.label}
@@ -1315,12 +1316,12 @@ const EditListing = () => {
                                       <CommandItem
                                         key={option.id}
                                         value={option.label}
-                                        onSelect={() => handleMultiSelectChange(field.value, field.onChange, option.id, !isSelected)}
+                                        onSelect={() => handleMultiSelectChange(field.onChange, field.value, option.id, !isSelected)}
                                         className="flex items-center cursor-pointer"
                                       >
                                         <Checkbox
                                           checked={isSelected}
-                                          onCheckedChange={(checked) => handleMultiSelectChange(field.value, field.onChange, option.id, checked as boolean)}
+                                          onCheckedChange={(checked) => handleMultiSelectChange(field.onChange, field.value, option.id, checked as boolean)}
                                           className="mr-2"
                                         />
                                         {option.label}

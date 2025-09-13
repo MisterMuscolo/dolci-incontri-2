@@ -354,14 +354,14 @@ export default function Index({ session }: IndexProps) {
   };
 
   const handleMultiSelectChange = (
-    _currentSelection: string[], // Renamed to _currentSelection to suppress TS6133
     onChange: React.Dispatch<React.SetStateAction<string[]>>,
+    currentSelection: string[],
     itemId: string,
     checked: boolean
   ) => {
     const newSelection = checked
-      ? [..._currentSelection, itemId.toLowerCase()] // Normalize to lowercase on add
-      : _currentSelection.filter(id => id.toLowerCase() !== itemId.toLowerCase()); // Normalize for comparison on remove
+      ? [...currentSelection, itemId.toLowerCase()] // Normalize to lowercase on add
+      : currentSelection.filter(id => id.toLowerCase() !== itemId.toLowerCase()); // Normalize for comparison on remove
     onChange(newSelection);
   };
 
@@ -562,13 +562,13 @@ export default function Index({ session }: IndexProps) {
                                     key={range.value}
                                     value={range.label}
                                     onSelect={() => {
-                                      handleMultiSelectChange(selectedAgeRanges, setSelectedAgeRanges, range.value, !isSelected);
+                                      handleMultiSelectChange(setSelectedAgeRanges, selectedAgeRanges, range.value, !isSelected);
                                     }}
                                     className="flex items-center cursor-pointer"
                                   >
                                     <Checkbox
                                       checked={isSelected}
-                                      onCheckedChange={(checked) => handleMultiSelectChange(selectedAgeRanges, setSelectedAgeRanges, range.value, checked as boolean)}
+                                      onCheckedChange={(checked) => handleMultiSelectChange(setSelectedAgeRanges, selectedAgeRanges, range.value, checked as boolean)}
                                       className="mr-2"
                                     />
                                     {range.label}
@@ -630,13 +630,13 @@ export default function Index({ session }: IndexProps) {
                                     key={option.value}
                                     value={option.label}
                                     onSelect={() => {
-                                      handleMultiSelectChange(selectedEthnicities, setSelectedEthnicities, option.value, !isSelected);
+                                      handleMultiSelectChange(setSelectedEthnicities, selectedEthnicities, option.value, !isSelected);
                                     }}
                                     className="flex items-center cursor-pointer"
                                   >
                                     <Checkbox
                                       checked={isSelected}
-                                      onCheckedChange={(checked) => handleMultiSelectChange(selectedEthnicities, setSelectedEthnicities, option.value, checked as boolean)}
+                                      onCheckedChange={(checked) => handleMultiSelectChange(setSelectedEthnicities, selectedEthnicities, option.value, checked as boolean)}
                                       className="mr-2"
                                     />
                                     {option.label}
@@ -698,13 +698,13 @@ export default function Index({ session }: IndexProps) {
                                     key={option.value}
                                     value={option.label}
                                     onSelect={() => {
-                                      handleMultiSelectChange(selectedNationalities, setSelectedNationalities, option.value, !isSelected);
+                                      handleMultiSelectChange(setSelectedNationalities, selectedNationalities, option.value, !isSelected);
                                     }}
                                     className="flex items-center cursor-pointer"
                                   >
                                     <Checkbox
                                       checked={isSelected}
-                                      onCheckedChange={(checked) => handleMultiSelectChange(selectedNationalities, setSelectedNationalities, option.value, checked as boolean)}
+                                      onCheckedChange={(checked) => handleMultiSelectChange(setSelectedNationalities, selectedNationalities, option.value, checked as boolean)}
                                       className="mr-2"
                                     />
                                     {option.label}
@@ -765,12 +765,12 @@ export default function Index({ session }: IndexProps) {
                                   <CommandItem
                                     key={option.value}
                                     value={option.label}
-                                    onSelect={() => handleMultiSelectChange(selectedBreastTypes, setSelectedBreastTypes, option.value, !isSelected)}
+                                    onSelect={() => handleMultiSelectChange(setSelectedBreastTypes, selectedBreastTypes, option.value, !isSelected)}
                                     className="flex items-center cursor-pointer"
                                   >
                                     <Checkbox
                                       checked={isSelected}
-                                      onCheckedChange={(checked) => handleMultiSelectChange(selectedBreastTypes, setSelectedBreastTypes, option.value, checked as boolean)}
+                                      onCheckedChange={(checked) => handleMultiSelectChange(setSelectedBreastTypes, selectedBreastTypes, option.value, checked as boolean)}
                                       className="mr-2"
                                     />
                                     {option.label}
@@ -831,12 +831,12 @@ export default function Index({ session }: IndexProps) {
                                   <CommandItem
                                     key={option.value}
                                     value={option.label}
-                                    onSelect={() => handleMultiSelectChange(selectedHairColors, setSelectedHairColors, option.value, !isSelected)}
+                                    onSelect={() => handleMultiSelectChange(setSelectedHairColors, selectedHairColors, option.value, !isSelected)}
                                     className="flex items-center cursor-pointer"
                                   >
                                     <Checkbox
                                       checked={isSelected}
-                                      onCheckedChange={(checked) => handleMultiSelectChange(selectedHairColors, setSelectedHairColors, option.value, checked as boolean)}
+                                      onCheckedChange={(checked) => handleMultiSelectChange(setSelectedHairColors, selectedHairColors, option.value, checked as boolean)}
                                       className="mr-2"
                                     />
                                     {option.label}
@@ -897,12 +897,12 @@ export default function Index({ session }: IndexProps) {
                                   <CommandItem
                                     key={option.value}
                                     value={option.label}
-                                    onSelect={() => handleMultiSelectChange(selectedBodyTypes, setSelectedBodyTypes, option.value, !isSelected)}
+                                    onSelect={() => handleMultiSelectChange(setSelectedBodyTypes, selectedBodyTypes, option.value, !isSelected)}
                                     className="flex items-center cursor-pointer"
                                   >
                                     <Checkbox
                                       checked={isSelected}
-                                      onCheckedChange={(checked) => handleMultiSelectChange(selectedBodyTypes, setSelectedBodyTypes, option.value, checked as boolean)}
+                                      onCheckedChange={(checked) => handleMultiSelectChange(setSelectedBodyTypes, selectedBodyTypes, option.value, checked as boolean)}
                                       className="mr-2"
                                     />
                                     {option.label}
@@ -963,12 +963,12 @@ export default function Index({ session }: IndexProps) {
                                   <CommandItem
                                     key={option.value}
                                     value={option.label}
-                                    onSelect={() => handleMultiSelectChange(selectedEyeColors, setSelectedEyeColors, option.value, !isSelected)}
+                                    onSelect={() => handleMultiSelectChange(setSelectedEyeColors, selectedEyeColors, option.value, !isSelected)}
                                     className="flex items-center cursor-pointer"
                                   >
                                     <Checkbox
                                       checked={isSelected}
-                                      onCheckedChange={(checked) => handleMultiSelectChange(selectedEyeColors, setSelectedEyeColors, option.value, checked as boolean)}
+                                      onCheckedChange={(checked) => handleMultiSelectChange(setSelectedEyeColors, selectedEyeColors, option.value, checked as boolean)}
                                       className="mr-2"
                                     />
                                     {option.label}
@@ -1032,12 +1032,12 @@ export default function Index({ session }: IndexProps) {
                                   <CommandItem
                                     key={option.id}
                                     value={option.label}
-                                    onSelect={() => handleMultiSelectChange(selectedMeetingTypes, setSelectedMeetingTypes, option.id, !isSelected)}
+                                    onSelect={() => handleMultiSelectChange(setSelectedMeetingTypes, selectedMeetingTypes, option.id, !isSelected)}
                                     className="flex items-center cursor-pointer"
                                   >
                                     <Checkbox
                                       checked={isSelected}
-                                      onCheckedChange={(checked) => handleMultiSelectChange(selectedMeetingTypes, setSelectedMeetingTypes, option.id, checked as boolean)}
+                                      onCheckedChange={(checked) => handleMultiSelectChange(setSelectedMeetingTypes, selectedMeetingTypes, option.id, checked as boolean)}
                                       className="mr-2"
                                     />
                                     {option.label}
@@ -1098,12 +1098,12 @@ export default function Index({ session }: IndexProps) {
                                   <CommandItem
                                     key={option.id}
                                     value={option.label}
-                                    onSelect={() => handleMultiSelectChange(selectedAvailabilityFor, setSelectedAvailabilityFor, option.id, !isSelected)}
+                                    onSelect={() => handleMultiSelectChange(setSelectedAvailabilityFor, selectedAvailabilityFor, option.id, !isSelected)}
                                     className="flex items-center cursor-pointer"
                                   >
                                     <Checkbox
                                       checked={isSelected}
-                                      onCheckedChange={(checked) => handleMultiSelectChange(selectedAvailabilityFor, setSelectedAvailabilityFor, option.id, checked as boolean)}
+                                      onCheckedChange={(checked) => handleMultiSelectChange(setSelectedAvailabilityFor, selectedAvailabilityFor, option.id, checked as boolean)}
                                       className="mr-2"
                                     />
                                     {option.label}
@@ -1164,12 +1164,12 @@ export default function Index({ session }: IndexProps) {
                                   <CommandItem
                                     key={option.id}
                                     value={option.label}
-                                    onSelect={() => handleMultiSelectChange(selectedMeetingLocations, setSelectedMeetingLocations, option.id, !isSelected)}
+                                    onSelect={() => handleMultiSelectChange(setSelectedMeetingLocations, selectedMeetingLocations, option.id, !isSelected)}
                                     className="flex items-center cursor-pointer"
                                   >
                                     <Checkbox
                                       checked={isSelected}
-                                      onCheckedChange={(checked) => handleMultiSelectChange(selectedMeetingLocations, setSelectedMeetingLocations, option.id, checked as boolean)}
+                                      onCheckedChange={(checked) => handleMultiSelectChange(setSelectedMeetingLocations, selectedMeetingLocations, option.id, checked as boolean)}
                                       className="mr-2"
                                     />
                                     {option.label}
@@ -1253,13 +1253,13 @@ export default function Index({ session }: IndexProps) {
                                     key={option.id}
                                     value={option.label}
                                     onSelect={() => {
-                                      handleMultiSelectChange(selectedOfferedServices, setSelectedOfferedServices, option.id, !isSelected);
+                                      handleMultiSelectChange(setSelectedOfferedServices, selectedOfferedServices, option.id, !isSelected);
                                     }}
                                     className="flex items-center cursor-pointer"
                                   >
                                     <Checkbox
                                       checked={isSelected}
-                                      onCheckedChange={(checked) => handleMultiSelectChange(selectedOfferedServices, setSelectedOfferedServices, option.id, checked as boolean)}
+                                      onCheckedChange={(checked) => handleMultiSelectChange(setSelectedOfferedServices, selectedOfferedServices, option.id, checked as boolean)}
                                       className="mr-2"
                                     />
                                     {option.label}
