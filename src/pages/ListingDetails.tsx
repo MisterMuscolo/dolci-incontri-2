@@ -41,12 +41,12 @@ type FullListing = {
   remaining_expires_at_duration: string | null; // Nuovo campo
   remaining_promotion_duration: string | null; // Nuovo campo
   // Nuovi campi
-  ethnicity: string | null;
-  nationality: string | null;
-  breast_type: string | null;
-  hair_color: string | null;
-  body_type: string | null;
-  eye_color: string | null;
+  ethnicity: string[] | null;
+  nationality: string[] | null;
+  breast_type: string[] | null;
+  hair_color: string[] | null;
+  body_type: string[] | null;
+  eye_color: string[] | null;
   meeting_type: string[] | null;
   availability_for: string[] | null;
   meeting_location: string[] | null;
@@ -99,17 +99,26 @@ const ListingDetails = () => {
 
   const getOfferedServiceLabel = (value: string) => {
     switch (value) {
-      case 'orale': return 'Orale';
-      case 'esperienza-fidanzata': return 'Esperienza Fidanzata';
-      case 'massaggio-erotico': return 'Massaggio Erotico';
-      case 'sesso-anale': return 'Sesso Anale';
-      case 'duo': return 'Duo';
+      case '69': return '69';
       case 'baci-profondi': return 'Baci Profondi';
-      case 'giochi-erotici': return 'Giochi Erotici';
-      case 'lingerie': return 'Lingerie';
-      case 'travestimento': return 'Travestimento';
-      case 'fetish': return 'Fetish';
-      case 'bdsm': return 'BDSM';
+      case 'bacio-leggero': return 'Bacio Leggero';
+      case 'due-ragazze': return 'Due Ragazze';
+      case 'girlfriend-experience': return 'Girlfriend Experience';
+      case 'massaggio-professionale': return 'Massaggio Professionale';
+      case 'massaggio-prostatico': return 'Massaggio Prostatico';
+      case 'massaggio-sensuale-con-corpo': return 'Massaggio Sensuale con Corpo';
+      case 'massaggio-tantrico': return 'Massaggio Tantrico';
+      case 'masturbazione-con-mano': return 'Masturbazione con Mano';
+      case 'orale-coperto-con-condom': return 'Orale Coperto con Condom';
+      case 'orale-scoperto': return 'Orale Scoperto';
+      case 'orgasmo-multiplo': return 'Orgasmo Multiplo';
+      case 'porn-star-experience': return 'Porn Star Experience';
+      case 'rapporto-anale': return 'Rapporto Anale';
+      case 'rapporto-sessuale': return 'Rapporto Sessuale';
+      case 'rimming': return 'Rimming';
+      case 'sesso-orale': return 'Sesso Orale';
+      case 'venuta-in-bocca': return 'Venuta in Bocca';
+      case 'venuta-su-seno': return 'Venuta su Seno';
       case 'altro': return 'Altro';
       default: return value;
     }
@@ -204,12 +213,12 @@ const ListingDetails = () => {
 
   // Determine if 'Dettagli Personali' card should be shown
   const hasPersonalDetails = 
-    (!!listing.ethnicity && listing.ethnicity.length > 0) || 
-    (!!listing.nationality && listing.nationality.length > 0) || 
-    (!!listing.breast_type && listing.breast_type.length > 0) || 
-    (!!listing.hair_color && listing.hair_color.length > 0) || 
-    (!!listing.body_type && listing.body_type.length > 0) || 
-    (!!listing.eye_color && listing.eye_color.length > 0);
+    (listing.ethnicity && listing.ethnicity.length > 0) || 
+    (listing.nationality && listing.nationality.length > 0) || 
+    (listing.breast_type && listing.breast_type.length > 0) || 
+    (listing.hair_color && listing.hair_color.length > 0) || 
+    (listing.body_type && listing.body_type.length > 0) || 
+    (listing.eye_color && listing.eye_color.length > 0);
 
   // Determine if 'Dettagli Incontro' card should be shown
   const hasMeetingDetails = 
@@ -220,6 +229,34 @@ const ListingDetails = () => {
 
   // Determine if 'Servizi Offerti' card should be shown
   const hasOfferedServices = listing.offered_services && listing.offered_services.length > 0;
+
+  // --- DEBUG LOGS START ---
+  console.log("--- Listing Details Debug ---");
+  console.log("Listing ID:", id);
+  console.log("Is Active Premium:", isActivePremium);
+  console.log("Is Paused:", listing.is_paused);
+
+  console.log("--- Personal Details Check ---");
+  console.log("  ethnicity:", listing.ethnicity, "length:", listing.ethnicity?.length);
+  console.log("  nationality:", listing.nationality, "length:", listing.nationality?.length);
+  console.log("  breast_type:", listing.breast_type, "length:", listing.breast_type?.length);
+  console.log("  hair_color:", listing.hair_color, "length:", listing.hair_color?.length);
+  console.log("  body_type:", listing.body_type, "length:", listing.body_type?.length);
+  console.log("  eye_color:", listing.eye_color, "length:", listing.eye_color?.length);
+  console.log("  hasPersonalDetails (calculated):", hasPersonalDetails);
+
+  console.log("--- Meeting Details Check ---");
+  console.log("  meeting_type:", listing.meeting_type, "length:", listing.meeting_type?.length);
+  console.log("  availability_for:", listing.availability_for, "length:", listing.availability_for?.length);
+  console.log("  meeting_location:", listing.meeting_location, "length:", listing.meeting_location?.length);
+  console.log("  hourly_rate:", listing.hourly_rate);
+  console.log("  hasMeetingDetails (calculated):", hasMeetingDetails);
+
+  console.log("--- Offered Services Check ---");
+  console.log("  offered_services:", listing.offered_services, "length:", listing.offered_services?.length);
+  console.log("  hasOfferedServices (calculated):", hasOfferedServices);
+  console.log("-----------------------------");
+  // --- DEBUG LOGS END ---
 
   return (
     <div className="bg-gray-50">
