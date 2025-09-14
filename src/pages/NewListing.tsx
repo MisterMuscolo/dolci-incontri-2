@@ -56,7 +56,7 @@ const offeredServicesOptions = [
   { id: 'massaggio-professionale', label: 'Massaggio Professionale' },
   { id: 'massaggio-prostatico', label: 'Massaggio Prostatico' },
   { id: 'massaggio-sensuale-con-corpo', label: 'Massaggio sensuale con corpo' },
-  { id: 'massaggio-tantrico', label: 'Massaggio Tantrico' },
+  { id: 'massaggio-tantrico', 'label': 'Massaggio Tantrico' },
   { id: 'masturbazione-con-mano', label: 'Masturbazione con mano (HJ)' },
   { id: 'orale-coperto-con-condom', label: 'Orale coperto con Condom' },
   { id: 'orale-scoperto', label: 'Orale scoperto (BBJ)' },
@@ -1170,7 +1170,7 @@ const NewListing = () => {
                               type="number" 
                               placeholder="Es. 50" 
                               {...field} 
-                              value={field.value === null ? '' : field.value}
+                              value={field.value ?? ''} {/* Correzione qui */}
                               onChange={(e) => field.onChange(e.target.value === '' ? null : Number(e.target.value))}
                               className="w-full pl-10"
                             />
