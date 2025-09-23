@@ -1169,8 +1169,8 @@ const NewListing = () => {
                             <Input 
                               type="number" 
                               placeholder="Es. 50" 
-                              {...field} 
-                              value={field.value ?? ''} {/* Correzione qui */}
+                              {...field}
+                              value={field.value ?? ''} 
                               onChange={(e) => field.onChange(e.target.value === '' ? null : Number(e.target.value))}
                               className="w-full pl-10"
                             />
