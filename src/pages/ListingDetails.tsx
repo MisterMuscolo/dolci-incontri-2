@@ -213,22 +213,22 @@ const ListingDetails = () => {
 
   // Determine if 'Dettagli Personali' card should be shown
   const hasPersonalDetails = 
-    (listing.ethnicity && listing.ethnicity.length > 0) || 
-    (listing.nationality && listing.nationality.length > 0) || 
-    (listing.breast_type && listing.breast_type.length > 0) || 
-    (listing.hair_color && listing.hair_color.length > 0) || 
-    (listing.body_type && listing.body_type.length > 0) || 
-    (listing.eye_color && listing.eye_color.length > 0);
+    (Array.isArray(listing.ethnicity) && listing.ethnicity.length > 0) || 
+    (Array.isArray(listing.nationality) && listing.nationality.length > 0) || 
+    (Array.isArray(listing.breast_type) && listing.breast_type.length > 0) || 
+    (Array.isArray(listing.hair_color) && listing.hair_color.length > 0) || 
+    (Array.isArray(listing.body_type) && listing.body_type.length > 0) || 
+    (Array.isArray(listing.eye_color) && listing.eye_color.length > 0);
 
   // Determine if 'Dettagli Incontro' card should be shown
   const hasMeetingDetails = 
-    (listing.meeting_type && listing.meeting_type.length > 0) ||
-    (listing.availability_for && listing.availability_for.length > 0) ||
-    (listing.meeting_location && listing.meeting_location.length > 0) ||
+    (Array.isArray(listing.meeting_type) && listing.meeting_type.length > 0) ||
+    (Array.isArray(listing.availability_for) && listing.availability_for.length > 0) ||
+    (Array.isArray(listing.meeting_location) && listing.meeting_location.length > 0) ||
     (listing.hourly_rate !== null && listing.hourly_rate !== undefined);
 
   // Determine if 'Servizi Offerti' card should be shown
-  const hasOfferedServices = listing.offered_services && listing.offered_services.length > 0;
+  const hasOfferedServices = Array.isArray(listing.offered_services) && listing.offered_services.length > 0;
 
   // --- DEBUG LOGS START ---
   console.log("--- Listing Details Debug ---");
@@ -401,34 +401,34 @@ const ListingDetails = () => {
                   <CardTitle className="flex items-center gap-2 text-xl"><User className="h-5 w-5 text-rose-500" /> Dettagli Personali</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-2">
-                  {listing.ethnicity && listing.ethnicity.length > 0 && (
+                  {Array.isArray(listing.ethnicity) && listing.ethnicity.length > 0 && (
                     <Badge variant="secondary" className="capitalize flex items-center gap-1">
-                      <Globe className="h-4 w-4" /> Origine: {listing.ethnicity}
+                      <Globe className="h-4 w-4" /> Origine: {listing.ethnicity.join(', ')}
                     </Badge>
                   )}
-                  {listing.nationality && listing.nationality.length > 0 && (
+                  {Array.isArray(listing.nationality) && listing.nationality.length > 0 && (
                     <Badge variant="secondary" className="capitalize flex items-center gap-1">
-                      <Globe className="h-4 w-4" /> Nazionalità: {listing.nationality}
+                      <Globe className="h-4 w-4" /> Nazionalità: {listing.nationality.join(', ')}
                     </Badge>
                   )}
-                  {listing.breast_type && listing.breast_type.length > 0 && (
+                  {Array.isArray(listing.breast_type) && listing.breast_type.length > 0 && (
                     <Badge variant="secondary" className="capitalize flex items-center gap-1">
-                      <Palette className="h-4 w-4" /> Tipo di Seno: {listing.breast_type}
+                      <Palette className="h-4 w-4" /> Tipo di Seno: {listing.breast_type.join(', ')}
                     </Badge>
                   )}
-                  {listing.hair_color && listing.hair_color.length > 0 && (
+                  {Array.isArray(listing.hair_color) && listing.hair_color.length > 0 && (
                     <Badge variant="secondary" className="capitalize flex items-center gap-1">
-                      <Palette className="h-4 w-4" /> Colore Capelli: {listing.hair_color}
+                      <Palette className="h-4 w-4" /> Colore Capelli: {listing.hair_color.join(', ')}
                     </Badge>
                   )}
-                  {listing.body_type && listing.body_type.length > 0 && (
+                  {Array.isArray(listing.body_type) && listing.body_type.length > 0 && (
                     <Badge variant="secondary" className="capitalize flex items-center gap-1">
-                      <Ruler className="h-4 w-4" /> Corporatura: {listing.body_type}
+                      <Ruler className="h-4 w-4" /> Corporatura: {listing.body_type.join(', ')}
                     </Badge>
                   )}
-                  {listing.eye_color && listing.eye_color.length > 0 && (
+                  {Array.isArray(listing.eye_color) && listing.eye_color.length > 0 && (
                     <Badge variant="secondary" className="capitalize flex items-center gap-1">
-                      <Eye className="h-4 w-4" /> Colore Occhi: {listing.eye_color}
+                      <Eye className="h-4 w-4" /> Colore Occhi: {listing.eye_color.join(', ')}
                     </Badge>
                   )}
                 </CardContent>
@@ -442,7 +442,7 @@ const ListingDetails = () => {
                   <CardTitle className="flex items-center gap-2 text-xl"><Handshake className="h-5 w-5 text-rose-500" /> Dettagli Incontro</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-2">
-                  {listing.meeting_type && listing.meeting_type.length > 0 && (
+                  {Array.isArray(listing.meeting_type) && listing.meeting_type.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       <Badge variant="secondary" className="flex items-center gap-1">
                         <Handshake className="h-4 w-4" /> Tipologia:
@@ -452,7 +452,7 @@ const ListingDetails = () => {
                       ))}
                     </div>
                   )}
-                  {listing.availability_for && listing.availability_for.length > 0 && (
+                  {Array.isArray(listing.availability_for) && listing.availability_for.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       <Badge variant="secondary" className="flex items-center gap-1">
                         <Clock className="h-4 w-4" /> Disponibilità:
@@ -462,7 +462,7 @@ const ListingDetails = () => {
                       ))}
                     </div>
                   )}
-                  {listing.meeting_location && listing.meeting_location.length > 0 && (
+                  {Array.isArray(listing.meeting_location) && listing.meeting_location.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       <Badge variant="secondary" className="flex items-center gap-1">
                         <Home className="h-4 w-4" /> Luogo:
@@ -488,7 +488,7 @@ const ListingDetails = () => {
                   <CardTitle className="flex items-center gap-2 text-xl"><Sparkles className="h-5 w-5 text-rose-500" /> Servizi Offerti</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-2">
-                  {listing.offered_services && listing.offered_services.length > 0 && (
+                  {Array.isArray(listing.offered_services) && listing.offered_services.length > 0 && (
                     listing.offered_services.map(service => (
                       <Badge key={service} variant="secondary" className="capitalize">{getOfferedServiceLabel(service)}</Badge>
                     ))

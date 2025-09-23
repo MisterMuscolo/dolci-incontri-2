@@ -5,7 +5,7 @@ import { ListingListItem, Listing } from '@/components/ListingListItem';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { ChevronLeft, MapPin, Search, Heart, ChevronDown, ChevronUp, User, Handshake, Clock, Home, Euro, Sparkles, CheckIcon, X, Globe, Palette, Ruler, Eye } from 'lucide-react'; // Aggiunte icone per i nuovi filtri
+import { ChevronLeft, MapPin, Search, Heart, ChevronDown, ChevronUp, RotateCcw, User, Handshake, Clock, Home, Euro, Sparkles, CheckIcon, X, Globe, Palette, Ruler, Eye } from 'lucide-react'; // Aggiunte icone per i nuovi filtri
 import { Helmet } from 'react-helmet-async';
 import { useDynamicBackLink } from '@/hooks/useDynamicBackLink';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -316,23 +316,24 @@ const SearchResults = () => {
       }
     }
 
+    // Modificato per usare `overlaps` per i campi array
     if (ethnicityParams.length > 0) {
-      query = query.in('ethnicity', ethnicityParams);
+      query = query.overlaps('ethnicity', ethnicityParams);
     }
     if (nationalityParams.length > 0) {
-      query = query.in('nationality', nationalityParams);
+      query = query.overlaps('nationality', nationalityParams);
     }
     if (breastTypeParams.length > 0) {
-      query = query.in('breast_type', breastTypeParams);
+      query = query.overlaps('breast_type', breastTypeParams);
     }
     if (hairColorParams.length > 0) {
-      query = query.in('hair_color', hairColorParams);
+      query = query.overlaps('hair_color', hairColorParams);
     }
     if (bodyTypeParams.length > 0) {
-      query = query.in('body_type', bodyTypeParams);
+      query = query.overlaps('body_type', bodyTypeParams);
     }
     if (eyeColorParams.length > 0) {
-      query = query.in('eye_color', eyeColorParams);
+      query = query.overlaps('eye_color', eyeColorParams);
     }
     // Nuovi filtri per array (usiamo `cs` per "contains string" o `ov` per "overlaps")
     if (meetingTypeParams.length > 0) {
@@ -521,7 +522,7 @@ const SearchResults = () => {
     if (currentCategory && currentCategory !== 'tutte') titleParts.push(getCategoryLabel(currentCategory));
     if (currentCity && currentCity !== 'tutte') titleParts.push(`a ${currentCity}`);
     if (currentKeyword) titleParts.push(`"${currentKeyword}"`);
-    if (currentSelectedAgeRanges.length > 0) titleParts.push(currentSelectedAgeRanges.map(getAgeRangeLabel).join(', '));
+    if (currentSelectedAgeRanges.length > 0) titleParts.push(currentSelectedAgeRanges.map(getAgeRangeLabel).filter(Boolean).join(', ')); // Filter Boolean
     return `${titleParts.join(' ')} | IncontriDolci`;
   };
 
@@ -530,7 +531,7 @@ const SearchResults = () => {
     if (currentCategory && currentCategory !== 'tutte') description += ` nella categoria "${getCategoryLabel(currentCategory)}"`;
     if (currentCity && currentCity !== 'tutte') description += ` nella città di ${currentCity}`;
     if (currentKeyword) description += ` per la parola chiave "${currentKeyword}"`;
-    if (currentSelectedAgeRanges.length > 0) description += ` con età ${currentSelectedAgeRanges.map(getAgeRangeLabel).join(', ')}`;
+    if (currentSelectedAgeRanges.length > 0) description += ` con età ${currentSelectedAgeRanges.map(getAgeRangeLabel).filter(Boolean).join(', ')}`; // Filter Boolean
     description += ". Trova la tua prossima relazione su IncontriDolci.";
     return description;
   };
@@ -640,52 +641,52 @@ const SearchResults = () => {
                     )}
                     {currentSelectedAgeRanges.length > 0 && (
                       <Badge variant="secondary" className="capitalize">
-                        <User className="h-3 w-3 mr-1" /> {currentSelectedAgeRanges.map(getAgeRangeLabel).join(', ')}
+                        <User className="h-3 w-3 mr-1" /> {currentSelectedAgeRanges.map(getAgeRangeLabel).filter(Boolean).join(', ')}
                       </Badge>
                     )}
                     {currentEthnicities.length > 0 && (
                       <Badge variant="secondary" className="capitalize">
-                        <Globe className="h-3 w-3 mr-1" /> {currentEthnicities.map(getEthnicityLabel).join(', ')}
+                        <Globe className="h-3 w-3 mr-1" /> {currentEthnicities.map(getEthnicityLabel).filter(Boolean).join(', ')}
                       </Badge>
                     )}
                     {currentNationalities.length > 0 && (
                       <Badge variant="secondary" className="capitalize">
-                        <Globe className="h-3 w-3 mr-1" /> {currentNationalities.map(getNationalityLabel).join(', ')}
+                        <Globe className="h-3 w-3 mr-1" /> {currentNationalities.map(getNationalityLabel).filter(Boolean).join(', ')}
                       </Badge>
                     )}
                     {currentBreastTypes.length > 0 && (
                       <Badge variant="secondary" className="capitalize">
-                        <Ruler className="h-3 w-3 mr-1" /> {currentBreastTypes.map(getBreastTypeLabel).join(', ')}
+                        <Ruler className="h-3 w-3 mr-1" /> {currentBreastTypes.map(getBreastTypeLabel).filter(Boolean).join(', ')}
                       </Badge>
                     )}
                     {currentHairColors.length > 0 && (
                       <Badge variant="secondary" className="capitalize">
-                        <Palette className="h-3 w-3 mr-1" /> {currentHairColors.map(getHairColorLabel).join(', ')}
+                        <Palette className="h-3 w-3 mr-1" /> {currentHairColors.map(getHairColorLabel).filter(Boolean).join(', ')}
                       </Badge>
                     )}
                     {currentBodyTypes.length > 0 && (
                       <Badge variant="secondary" className="capitalize">
-                        <Ruler className="h-3 w-3 mr-1" /> {currentBodyTypes.map(getBodyTypeLabel).join(', ')}
+                        <Ruler className="h-3 w-3 mr-1" /> {currentBodyTypes.map(getBodyTypeLabel).filter(Boolean).join(', ')}
                       </Badge>
                     )}
                     {currentEyeColors.length > 0 && (
                       <Badge variant="secondary" className="capitalize">
-                        <Eye className="h-3 w-3 mr-1" /> {currentEyeColors.map(getEyeColorLabel).join(', ')}
+                        <Eye className="h-3 w-3 mr-1" /> {currentEyeColors.map(getEyeColorLabel).filter(Boolean).join(', ')}
                       </Badge>
                     )}
                     {currentMeetingTypes.length > 0 && (
                       <Badge variant="secondary" className="capitalize">
-                        <Handshake className="h-3 w-3 mr-1" /> {currentMeetingTypes.map(getMeetingTypeLabel).join(', ')}
+                        <Handshake className="h-3 w-3 mr-1" /> {currentMeetingTypes.map(getMeetingTypeLabel).filter(Boolean).join(', ')}
                       </Badge>
                     )}
                     {currentAvailabilityFor.length > 0 && (
                       <Badge variant="secondary" className="capitalize">
-                        <Clock className="h-3 w-3 mr-1" /> {currentAvailabilityFor.map(getAvailabilityForLabel).join(', ')}
+                        <Clock className="h-3 w-3 mr-1" /> {currentAvailabilityFor.map(getAvailabilityForLabel).filter(Boolean).join(', ')}
                       </Badge>
                     )}
                     {currentMeetingLocations.length > 0 && (
                       <Badge variant="secondary" className="capitalize">
-                        <Home className="h-3 w-3 mr-1" /> {currentMeetingLocations.map(getMeetingLocationLabel).join(', ')}
+                        <Home className="h-3 w-3 mr-1" /> {currentMeetingLocations.map(getMeetingLocationLabel).filter(Boolean).join(', ')}
                       </Badge>
                     )}
                     {(currentHourlyRateMin || currentHourlyRateMax) && (
@@ -695,7 +696,7 @@ const SearchResults = () => {
                     )}
                     {currentOfferedServices.length > 0 && (
                       <Badge variant="secondary" className="capitalize">
-                        <Sparkles className="h-3 w-3 mr-1" /> {currentOfferedServices.map(getOfferedServiceLabel).join(', ')}
+                        <Sparkles className="h-3 w-3 mr-1" /> {currentOfferedServices.map(getOfferedServiceLabel).filter(Boolean).join(', ')}
                       </Badge>
                     )}
                     {(!currentCategory || currentCategory === 'tutte') && 

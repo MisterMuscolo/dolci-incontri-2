@@ -46,12 +46,12 @@ export interface Listing {
   remaining_expires_at_duration: string | null; // Nuovo campo
   remaining_promotion_duration: string | null; // Nuovo campo
   // Nuovi campi
-  ethnicity: string | null;
-  nationality: string | null;
-  breast_type: string | null;
-  hair_color: string | null;
-  body_type: string | null;
-  eye_color: string | null;
+  ethnicity: string[] | null; // Modificato a array di stringhe
+  nationality: string[] | null; // Modificato a array di stringhe
+  breast_type: string[] | null; // Modificato a array di stringhe
+  hair_color: string[] | null; // Modificato a array di stringhe
+  body_type: string[] | null; // Modificato a array di stringhe
+  eye_color: string[] | null; // Modificato a array di stringhe
   meeting_type: string[] | null;
   availability_for: string[] | null;
   meeting_location: string[] | null;
@@ -368,50 +368,50 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
           {isActivePremium && (
             <>
               <div className="flex flex-wrap gap-1 mt-1">
-                {listing.ethnicity && (
+                {Array.isArray(listing.ethnicity) && listing.ethnicity.length > 0 && (
                   <Badge variant="secondary" className="capitalize text-xs">
-                    <Globe className="h-3 w-3 mr-1" /> {listing.ethnicity}
+                    <Globe className="h-3 w-3 mr-1" /> {listing.ethnicity.join(', ')}
                   </Badge>
                 )}
-                {listing.nationality && (
+                {Array.isArray(listing.nationality) && listing.nationality.length > 0 && (
                   <Badge variant="secondary" className="capitalize text-xs">
-                    <Globe className="h-3 w-3 mr-1" /> {listing.nationality}
+                    <Globe className="h-3 w-3 mr-1" /> {listing.nationality.join(', ')}
                   </Badge>
                 )}
-                {listing.breast_type && (
+                {Array.isArray(listing.breast_type) && listing.breast_type.length > 0 && (
                   <Badge variant="secondary" className="capitalize text-xs">
-                    <Palette className="h-3 w-3 mr-1" /> {listing.breast_type}
+                    <Palette className="h-3 w-3 mr-1" /> {listing.breast_type.join(', ')}
                   </Badge>
                 )}
-                {listing.hair_color && (
+                {Array.isArray(listing.hair_color) && listing.hair_color.length > 0 && (
                   <Badge variant="secondary" className="capitalize text-xs">
-                    <Palette className="h-3 w-3 mr-1" /> {listing.hair_color}
+                    <Palette className="h-3 w-3 mr-1" /> {listing.hair_color.join(', ')}
                   </Badge>
                 )}
-                {listing.body_type && (
+                {Array.isArray(listing.body_type) && listing.body_type.length > 0 && (
                   <Badge variant="secondary" className="capitalize text-xs">
-                    <Ruler className="h-3 w-3 mr-1" /> {listing.body_type}
+                    <Ruler className="h-3 w-3 mr-1" /> {listing.body_type.join(', ')}
                   </Badge>
                 )}
-                {listing.eye_color && (
+                {Array.isArray(listing.eye_color) && listing.eye_color.length > 0 && (
                   <Badge variant="secondary" className="capitalize text-xs">
-                    <Eye className="h-3 w-3 mr-1" /> {listing.eye_color}
+                    <Eye className="h-3 w-3 mr-1" /> {listing.eye_color.join(', ')}
                   </Badge>
                 )}
               </div>
               {/* Nuovi badge per i dettagli incontro, visibili solo se Premium attivo */}
               <div className="flex flex-wrap gap-1 mt-1">
-                {listing.meeting_type && listing.meeting_type.length > 0 && (
+                {Array.isArray(listing.meeting_type) && listing.meeting_type.length > 0 && (
                   <Badge variant="secondary" className="flex items-center gap-1 text-xs">
                     <Handshake className="h-3 w-3" /> {listing.meeting_type.map(type => getMeetingTypeLabel(type)).join(', ')}
                   </Badge>
                 )}
-                {listing.availability_for && listing.availability_for.length > 0 && (
+                {Array.isArray(listing.availability_for) && listing.availability_for.length > 0 && (
                   <Badge variant="secondary" className="flex items-center gap-1 text-xs">
                     <Clock className="h-3 w-3" /> {listing.availability_for.map(avail => getAvailabilityForLabel(avail)).join(', ')}
                   </Badge>
                 )}
-                {listing.meeting_location && listing.meeting_location.length > 0 && (
+                {Array.isArray(listing.meeting_location) && listing.meeting_location.length > 0 && (
                   <Badge variant="secondary" className="flex items-center gap-1 text-xs">
                     <Home className="h-3 w-3" /> {listing.meeting_location.map(loc => getMeetingLocationLabel(loc)).join(', ')}
                   </Badge>
@@ -421,7 +421,7 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
                     <Euro className="h-3 w-3" /> {listing.hourly_rate}€/h
                   </Badge>
                 )}
-                {listing.offered_services && listing.offered_services.length > 0 && (
+                {Array.isArray(listing.offered_services) && listing.offered_services.length > 0 && (
                   <Badge variant="secondary" className="flex items-center gap-1 text-xs">
                     <Sparkles className="h-3 w-3" /> {listing.offered_services.map(service => getOfferedServiceLabel(service)).join(', ')}
                   </Badge>
