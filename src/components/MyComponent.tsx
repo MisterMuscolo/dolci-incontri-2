@@ -1,12 +1,7 @@
-import React from 'react';
+'use client';
 
 const MyComponent = () => {
-  return (
-    <div>
-      <h1>Ciao, mondo!</h1>
-      <p>Questo è un nuovo paragrafo aggiunto al componente.</p>
-    </div>
-  );
+  return <div>Hello World</div>;
 };
 
 export default MyComponent;
