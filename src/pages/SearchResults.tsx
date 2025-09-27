@@ -536,6 +536,51 @@ const SearchResults = () => {
     return description;
   };
 
+  const handleResetFilters = useCallback(() => {
+    setCurrentCategory('tutte');
+    setCurrentCity('tutte');
+    setCurrentKeyword('');
+    setCurrentSelectedAgeRanges([]); // Resetta la fascia d'età
+    setCurrentEthnicities([]);
+    setCurrentNationalities([]);
+    setCurrentBreastTypes([]);
+    setCurrentHairColors([]);
+    setCurrentBodyTypes([]);
+    setCurrentEyeColors([]);
+    // Resetta i nuovi filtri
+    setCurrentMeetingTypes([]);
+    setCurrentAvailabilityFor([]);
+    setCurrentMeetingLocations([]);
+    setCurrentHourlyRateMin('');
+    setCurrentHourlyRateMax('');
+    setCurrentOfferedServices([]); // Resetta il nuovo campo
+
+    setIsFilterFormOpen(false); // Chiudi la sezione filtri personali
+    // Chiudi tutti i popover individuali
+    setIsOfferedServicesPopoverOpen(false); 
+    setIsMeetingTypePopoverOpen(false);
+    setIsAvailabilityForPopoverOpen(false);
+    setIsMeetingLocationPopoverOpen(false);
+    setIsAgeRangePopoverOpen(false);
+    setIsEthnicityPopoverOpen(false);
+    setIsNationalityPopoverOpen(false); 
+    setIsBreastTypePopoverOpen(false);
+    setIsHairColorPopoverOpen(false);
+    setIsBodyTypePopoverOpen(false);
+    setIsEyeColorPopoverOpen(false);
+    navigate('/'); // Naviga alla homepage senza parametri di ricerca
+  }, [
+    setCurrentCategory, setCurrentCity, setCurrentKeyword, setCurrentSelectedAgeRanges,
+    setCurrentEthnicities, setCurrentNationalities, setCurrentBreastTypes, setCurrentHairColors,
+    setCurrentBodyTypes, setCurrentEyeColors, setCurrentMeetingTypes, setCurrentAvailabilityFor,
+    setCurrentMeetingLocations, setCurrentHourlyRateMin, setCurrentHourlyRateMax, setCurrentOfferedServices,
+    setIsFilterFormOpen, setIsOfferedServicesPopoverOpen, setIsMeetingTypePopoverOpen,
+    setIsAvailabilityForPopoverOpen, setIsMeetingLocationPopoverOpen, setIsAgeRangePopoverOpen,
+    setIsEthnicityPopoverOpen, setIsNationalityPopoverOpen, setIsBreastTypePopoverOpen,
+    setIsHairColorPopoverOpen, setIsBodyTypePopoverOpen, setIsEyeColorPopoverOpen,
+    navigate
+  ]);
+
   const renderContent = () => {
     if (loading) {
       return (
