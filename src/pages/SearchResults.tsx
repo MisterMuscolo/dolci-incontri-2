@@ -1576,6 +1576,9 @@ const SearchResults = () => {
                   Applica Filtri
                 </Button>
               </form>
+              <Button type="button" variant="outline" onClick={handleResetFilters} className="w-full border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-800 text-lg py-6 mt-4">
+                <RotateCcw className="h-5 w-5 mr-2" /> Reset Filtri
+              </Button>
             </CollapsibleContent>
           </Collapsible>
         </Card>
