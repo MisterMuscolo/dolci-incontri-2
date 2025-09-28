@@ -209,19 +209,19 @@ const SearchResults = () => {
     
     // Sincronizza lo stato dei filtri con i parametri URL all'avvio o al cambio URL
     setCurrentSelectedAgeRanges(searchParams.getAll('age_range')); // Usa age_range per multi-select
-    setCurrentEthnicities(searchParams.getAll('ethnicity'));
-    setCurrentNationalities(searchParams.getAll('nationality'));
-    setCurrentBreastTypes(searchParams.getAll('breast_type'));
-    setCurrentHairColors(searchParams.getAll('hair_color'));
-    setCurrentBodyTypes(searchParams.getAll('body_type'));
-    setCurrentEyeColors(searchParams.getAll('eye_color'));
+    setCurrentEthnicities(searchParams.getAll('ethnicity').map(e => e.toLowerCase())); // Normalizza a lowercase
+    setCurrentNationalities(searchParams.getAll('nationality').map(n => n.toLowerCase())); // Normalizza a lowercase
+    setCurrentBreastTypes(searchParams.getAll('breast_type').map(b => b.toLowerCase())); // Normalizza a lowercase
+    setCurrentHairColors(searchParams.getAll('hair_color').map(h => h.toLowerCase())); // Normalizza a lowercase
+    setCurrentBodyTypes(searchParams.getAll('body_type').map(b => b.toLowerCase())); // Normalizza a lowercase
+    setCurrentEyeColors(searchParams.getAll('eye_color').map(e => e.toLowerCase())); // Normalizza a lowercase
 
-    setCurrentMeetingTypes(searchParams.getAll('meeting_type'));
-    setCurrentAvailabilityFor(searchParams.getAll('availability_for'));
-    setCurrentMeetingLocations(searchParams.getAll('meeting_location'));
+    setCurrentMeetingTypes(searchParams.getAll('meeting_type').map(m => m.toLowerCase()));
+    setCurrentAvailabilityFor(searchParams.getAll('availability_for').map(a => a.toLowerCase()));
+    setCurrentMeetingLocations(searchParams.getAll('meeting_location').map(l => l.toLowerCase()));
     setCurrentHourlyRateMin(searchParams.get('hourly_rate_min') || '');
     setCurrentHourlyRateMax(searchParams.get('hourly_rate_max') || '');
-    setCurrentOfferedServices(searchParams.getAll('offered_services'));
+    setCurrentOfferedServices(searchParams.getAll('offered_services').map(s => s.toLowerCase())); // Normalizza a lowercase
 
     setCurrentPage(parseInt(searchParams.get('page') || '1', 10));
   }, [searchParams]);
@@ -318,32 +318,32 @@ const SearchResults = () => {
 
     // Modificato per usare `overlaps` per i campi array
     if (ethnicityParams.length > 0) {
-      query = query.overlaps('ethnicity', ethnicityParams);
+      query = query.overlaps('ethnicity', ethnicityParams.map(e => e.toLowerCase())); // Normalizza qui
     }
     if (nationalityParams.length > 0) {
-      query = query.overlaps('nationality', nationalityParams);
+      query = query.overlaps('nationality', nationalityParams.map(n => n.toLowerCase())); // Normalizza qui
     }
     if (breastTypeParams.length > 0) {
-      query = query.overlaps('breast_type', breastTypeParams);
+      query = query.overlaps('breast_type', breastTypeParams.map(b => b.toLowerCase())); // Normalizza qui
     }
     if (hairColorParams.length > 0) {
-      query = query.overlaps('hair_color', hairColorParams);
+      query = query.overlaps('hair_color', hairColorParams.map(h => h.toLowerCase())); // Normalizza qui
     }
     if (bodyTypeParams.length > 0) {
-      query = query.overlaps('body_type', bodyTypeParams);
+      query = query.overlaps('body_type', bodyTypeParams.map(b => b.toLowerCase())); // Normalizza qui
     }
     if (eyeColorParams.length > 0) {
-      query = query.overlaps('eye_color', eyeColorParams);
+      query = query.overlaps('eye_color', eyeColorParams.map(e => e.toLowerCase())); // Normalizza qui
     }
     // Nuovi filtri per array (usiamo `cs` per "contains string" o `ov` per "overlaps")
     if (meetingTypeParams.length > 0) {
-      query = query.overlaps('meeting_type', meetingTypeParams);
+      query = query.overlaps('meeting_type', meetingTypeParams.map(m => m.toLowerCase()));
     }
     if (availabilityForParams.length > 0) {
-      query = query.overlaps('availability_for', availabilityForParams);
+      query = query.overlaps('availability_for', availabilityForParams.map(a => a.toLowerCase()));
     }
     if (meetingLocationParams.length > 0) {
-      query = query.overlaps('meeting_location', meetingLocationParams);
+      query = query.overlaps('meeting_location', meetingLocationParams.map(l => l.toLowerCase()));
     }
     if (hourlyRateMinParam) {
       query = query.gte('hourly_rate', parseFloat(hourlyRateMinParam));
@@ -352,7 +352,7 @@ const SearchResults = () => {
       query = query.lte('hourly_rate', parseFloat(hourlyRateMaxParam));
     }
     if (offeredServicesParams.length > 0) { // Applica il nuovo filtro
-      query = query.overlaps('offered_services', offeredServicesParams);
+      query = query.overlaps('offered_services', offeredServicesParams.map(s => s.toLowerCase())); // Normalizza qui
     }
 
     // Updated sorting logic
@@ -507,13 +507,16 @@ const SearchResults = () => {
   };
 
   const handleMultiSelectChange = (
-    _currentSelection: string[], // Renamed to _currentSelection to suppress TS6133
+    currentSelection: string[], 
     setSelection: React.Dispatch<React.SetStateAction<string[]>>,
     itemId: string,
     checked: boolean
   ) => {
+    const normalizedItemId = itemId.toLowerCase(); // Normalizza itemId
     setSelection(prev =>
-      checked ? [...prev, itemId] : prev.filter(id => id !== itemId)
+      checked 
+        ? [...prev, normalizedItemId] 
+        : prev.filter(id => id !== normalizedItemId) // Compara con normalizedItemId
     );
   };
 
