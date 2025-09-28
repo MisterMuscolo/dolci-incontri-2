@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, CalendarDays, User, Camera, MapPin, Tag, Flame, PauseCircle, PlayCircle, Globe, Palette, Ruler, Eye, Handshake, Clock, Home, Euro, Sparkles } from "lucide-react"; // Aggiunte icone per i nuovi campi
+import { Pencil, Trash2, CalendarDays, User, Camera, MapPin, Tag, Flame, PauseCircle, PlayCircle, Globe, Palette, Ruler, Eye, Handshake, Clock, Home, Euro, Sparkles } from "lucide-react";
 import { format, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Link } from "react-router-dom";
@@ -302,17 +302,26 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
 
   const getOfferedServiceLabel = (value: string) => {
     switch (value) {
-      case 'orale': return 'Orale';
-      case 'esperienza-fidanzata': return 'Esperienza Fidanzata';
-      case 'massaggio-erotico': return 'Massaggio Erotico';
-      case 'sesso-anale': return 'Sesso Anale';
-      case 'duo': return 'Duo';
+      case '69': return '69';
       case 'baci-profondi': return 'Baci Profondi';
-      case 'giochi-erotici': return 'Giochi Erotici';
-      case 'lingerie': return 'Lingerie';
-      case 'travestimento': return 'Travestimento';
-      case 'fetish': return 'Fetish';
-      case 'bdsm': return 'BDSM';
+      case 'bacio-leggero': return 'Bacio Leggero';
+      case 'due-ragazze': return 'Due Ragazze';
+      case 'girlfriend-experience': return 'Girlfriend Experience';
+      case 'massaggio-professionale': return 'Massaggio Professionale';
+      case 'massaggio-prostatico': return 'Massaggio Prostatico';
+      case 'massaggio-sensuale-con-corpo': return 'Massaggio Sensuale con Corpo';
+      case 'massaggio-tantrico': return 'Massaggio Tantrico';
+      case 'masturbazione-con-mano': return 'Masturbazione con Mano';
+      case 'orale-coperto-con-condom': return 'Orale Coperto con Condom';
+      case 'orale-scoperto': return 'Orale Scoperto';
+      case 'orgasmo-multiplo': return 'Orgasmo Multiplo';
+      case 'porn-star-experience': return 'Porn Star Experience';
+      case 'rapporto-anale': return 'Rapporto Anale';
+      case 'rapporto-sessuale': return 'Rapporto Sessuale';
+      case 'rimming': return 'Rimming';
+      case 'sesso-orale': return 'Sesso Orale';
+      case 'venuta-in-bocca': return 'Venuta in Bocca';
+      case 'venuta-su-seno': return 'Venuta su Seno';
       case 'altro': return 'Altro';
       default: return value;
     }
@@ -364,71 +373,67 @@ export const ListingListItem = ({ listing, canEdit = false, canManagePhotos = fa
               </Badge>
             </div>
           )}
-          {/* Nuovi badge per i dettagli personali, visibili solo se Premium attivo */}
-          {isActivePremium && (
-            <>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {Array.isArray(listing.ethnicity) && listing.ethnicity.length > 0 && (
-                  <Badge variant="secondary" className="capitalize text-xs">
-                    <Globe className="h-3 w-3 mr-1" /> {listing.ethnicity.join(', ')}
-                  </Badge>
-                )}
-                {Array.isArray(listing.nationality) && listing.nationality.length > 0 && (
-                  <Badge variant="secondary" className="capitalize text-xs">
-                    <Globe className="h-3 w-3 mr-1" /> {listing.nationality.join(', ')}
-                  </Badge>
-                )}
-                {Array.isArray(listing.breast_type) && listing.breast_type.length > 0 && (
-                  <Badge variant="secondary" className="capitalize text-xs">
-                    <Palette className="h-3 w-3 mr-1" /> {listing.breast_type.join(', ')}
-                  </Badge>
-                )}
-                {Array.isArray(listing.hair_color) && listing.hair_color.length > 0 && (
-                  <Badge variant="secondary" className="capitalize text-xs">
-                    <Palette className="h-3 w-3 mr-1" /> {listing.hair_color.join(', ')}
-                  </Badge>
-                )}
-                {Array.isArray(listing.body_type) && listing.body_type.length > 0 && (
-                  <Badge variant="secondary" className="capitalize text-xs">
-                    <Ruler className="h-3 w-3 mr-1" /> {listing.body_type.join(', ')}
-                  </Badge>
-                )}
-                {Array.isArray(listing.eye_color) && listing.eye_color.length > 0 && (
-                  <Badge variant="secondary" className="capitalize text-xs">
-                    <Eye className="h-3 w-3 mr-1" /> {listing.eye_color.join(', ')}
-                  </Badge>
-                )}
-              </div>
-              {/* Nuovi badge per i dettagli incontro, visibili solo se Premium attivo */}
-              <div className="flex flex-wrap gap-1 mt-1">
-                {Array.isArray(listing.meeting_type) && listing.meeting_type.length > 0 && (
-                  <Badge variant="secondary" className="flex items-center gap-1 text-xs">
-                    <Handshake className="h-3 w-3" /> {listing.meeting_type.map(type => getMeetingTypeLabel(type)).join(', ')}
-                  </Badge>
-                )}
-                {Array.isArray(listing.availability_for) && listing.availability_for.length > 0 && (
-                  <Badge variant="secondary" className="flex items-center gap-1 text-xs">
-                    <Clock className="h-3 w-3" /> {listing.availability_for.map(avail => getAvailabilityForLabel(avail)).join(', ')}
-                  </Badge>
-                )}
-                {Array.isArray(listing.meeting_location) && listing.meeting_location.length > 0 && (
-                  <Badge variant="secondary" className="flex items-center gap-1 text-xs">
-                    <Home className="h-3 w-3" /> {listing.meeting_location.map(loc => getMeetingLocationLabel(loc)).join(', ')}
-                  </Badge>
-                )}
-                {listing.hourly_rate !== null && listing.hourly_rate !== undefined && (
-                  <Badge variant="secondary" className="capitalize flex items-center gap-1 text-xs">
-                    <Euro className="h-3 w-3" /> {listing.hourly_rate}€/h
-                  </Badge>
-                )}
-                {Array.isArray(listing.offered_services) && listing.offered_services.length > 0 && (
-                  <Badge variant="secondary" className="flex items-center gap-1 text-xs">
-                    <Sparkles className="h-3 w-3" /> {listing.offered_services.map(service => getOfferedServiceLabel(service)).join(', ')}
-                  </Badge>
-                )}
-              </div>
-            </>
-          )}
+          {/* Nuovi badge per i dettagli personali, visibili per tutti gli annunci */}
+          <div className="flex flex-wrap gap-1 mt-1">
+            {Array.isArray(listing.ethnicity) && listing.ethnicity.length > 0 && (
+              <Badge variant="secondary" className="capitalize text-xs">
+                <Globe className="h-3 w-3 mr-1" /> {listing.ethnicity.join(', ')}
+              </Badge>
+            )}
+            {Array.isArray(listing.nationality) && listing.nationality.length > 0 && (
+              <Badge variant="secondary" className="capitalize text-xs">
+                <Globe className="h-3 w-3 mr-1" /> {listing.nationality.join(', ')}
+              </Badge>
+            )}
+            {Array.isArray(listing.breast_type) && listing.breast_type.length > 0 && (
+              <Badge variant="secondary" className="capitalize text-xs">
+                <Palette className="h-3 w-3 mr-1" /> {listing.breast_type.join(', ')}
+              </Badge>
+            )}
+            {Array.isArray(listing.hair_color) && listing.hair_color.length > 0 && (
+              <Badge variant="secondary" className="capitalize text-xs">
+                <Palette className="h-3 w-3 mr-1" /> {listing.hair_color.join(', ')}
+              </Badge>
+            )}
+            {Array.isArray(listing.body_type) && listing.body_type.length > 0 && (
+              <Badge variant="secondary" className="capitalize text-xs">
+                <Ruler className="h-3 w-3 mr-1" /> {listing.body_type.join(', ')}
+              </Badge>
+            )}
+            {Array.isArray(listing.eye_color) && listing.eye_color.length > 0 && (
+              <Badge variant="secondary" className="capitalize text-xs">
+                <Eye className="h-3 w-3 mr-1" /> {listing.eye_color.join(', ')}
+              </Badge>
+            )}
+          </div>
+          {/* Nuovi badge per i dettagli incontro, visibili per tutti gli annunci */}
+          <div className="flex flex-wrap gap-1 mt-1">
+            {Array.isArray(listing.meeting_type) && listing.meeting_type.length > 0 && (
+              <Badge variant="secondary" className="flex items-center gap-1 text-xs">
+                <Handshake className="h-3 w-3" /> {listing.meeting_type.map(type => getMeetingTypeLabel(type)).join(', ')}
+              </Badge>
+            )}
+            {Array.isArray(listing.availability_for) && listing.availability_for.length > 0 && (
+              <Badge variant="secondary" className="flex items-center gap-1 text-xs">
+                <Clock className="h-3 w-3" /> {listing.availability_for.map(avail => getAvailabilityForLabel(avail)).join(', ')}
+              </Badge>
+            )}
+            {Array.isArray(listing.meeting_location) && listing.meeting_location.length > 0 && (
+              <Badge variant="secondary" className="flex items-center gap-1 text-xs">
+                <Home className="h-3 w-3" /> {listing.meeting_location.map(loc => getMeetingLocationLabel(loc)).join(', ')}
+              </Badge>
+            )}
+            {listing.hourly_rate !== null && listing.hourly_rate !== undefined && (
+              <Badge variant="secondary" className="capitalize flex items-center gap-1 text-xs">
+                <Euro className="h-3 w-3" /> {listing.hourly_rate}€/h
+              </Badge>
+            )}
+            {Array.isArray(listing.offered_services) && listing.offered_services.length > 0 && (
+              <Badge variant="secondary" className="flex items-center gap-1 text-xs">
+                <Sparkles className="h-3 w-3" /> {listing.offered_services.map(service => getOfferedServiceLabel(service)).join(', ')}
+              </Badge>
+            )}
+          </div>
         </div>
       </Link>
       {(canEdit || canManagePhotos || canDelete || canPauseResume) && (
